@@ -236,7 +236,7 @@ for m in get_models_list():
   applyTheme(localStorage.getItem(THEME_KEY)||'dark');
 
   mermaid.initialize({startOnLoad:false,theme:'default'});
-  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(e=>{console.warn('mermaid render:',e)})})}
   renderMermaid();
 
   const toc=document.querySelector('#toc ul');document.querySelectorAll('section[id]').forEach(s=>{const h=s.querySelector('h2');if(h){const li=document.createElement('li');const a=document.createElement('a');a.href='#'+s.id;a.textContent=h.textContent.replace(/^[\u{1F300}-\u{1FAFF}]/u,'').trim();li.appendChild(a);toc.appendChild(li)}});
@@ -244,7 +244,7 @@ for m in get_models_list():
   document.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.mermaid'))return;const btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',()=>{navigator.clipboard.writeText(pre.textContent.replace('Copy','').trim());btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});pre.appendChild(btn)});
   const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
   document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
-  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+  overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.classList.remove('active')});
   const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
   const sections=[...document.querySelectorAll('section[id]')];document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;let idx=-1;const y=window.scrollY+80;sections.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});if(e.key==='j'&&idx<sections.length-1)sections[idx+1].scrollIntoView({behavior:'smooth'});if(e.key==='k'&&idx>0)sections[idx-1].scrollIntoView({behavior:'smooth'})});
   hljs.highlightAll();

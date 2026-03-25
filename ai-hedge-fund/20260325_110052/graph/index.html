@@ -255,7 +255,7 @@ agent = workflow.compile()
 
   /* Mermaid */
   mermaid.initialize({startOnLoad:false,theme:'default'});
-  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(e=>{console.warn('mermaid render:',e)})})}
   renderMermaid();
 
   /* TOC */
@@ -270,7 +270,7 @@ agent = workflow.compile()
   /* Diagram zoom */
   const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
   document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
-  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+  overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.classList.remove('active')});
 
   /* Back to top */
   const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
