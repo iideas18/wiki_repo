@@ -80,10 +80,6 @@ footer a{color:var(--accent)}
   .stat-card{border-color:#ccc}
   .intro-box{border-left-color:#1a7f37}
 }
-.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
-.diagram-overlay.active{display:flex}
-.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
-#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
 </style>
 </head>
 <body>
@@ -487,6 +483,5 @@ window.addEventListener('scroll',()=>{
   btn.classList.toggle('visible',window.scrollY>400);
 });
 </script>
-<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
 </body>
 </html>
