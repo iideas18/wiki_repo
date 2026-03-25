@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiki Repository &mdash; Project Documentation Hub</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h3{margin-top:0;color:var(--accent)}
+.card p{font-size:.9rem;color:var(--text-muted)}
+.card .meta{font-size:.8rem;color:var(--text-muted);margin-top:.8rem;border-top:1px solid var(--border);padding-top:.6rem}
+.card .meta span{margin-right:1rem}
+.card .tag-list{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>Wiki Repository</h1>
+<div class="hero">
+  <p class="subtitle">Project Documentation Hub</p>
+  <p>A central hub for auto-generated wiki documentation covering AI-powered investment systems, GPU architecture simulation, and OpenCL debugging tools.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">3</div><div class="label">Projects</div></div>
+  <div class="stat-box"><div class="num">41</div><div class="label">Wiki Pages</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">Languages</div></div>
+</div>
+
+<h2 id="projects">Projects</h2>
+
+<div class="card-grid">
+  <a class="card" href="ai-hedge-fund/20260325_110052/index.html">
+    <h3>&#128200; AI Hedge Fund</h3>
+    <p>An AI-powered hedge fund employing 18+ specialized analyst agents &mdash; each modeled after legendary investors &mdash; to collaboratively analyze stocks, manage risk, and produce trading decisions.</p>
+    <div class="tag-list">
+      <span class="badge green">Python</span>
+      <span class="badge blue">LangGraph</span>
+      <span class="badge yellow">FastAPI</span>
+      <span class="badge blue">React</span>
+    </div>
+    <div class="meta">
+      <span>&#128196; 11 pages</span>
+      <span>&#128197; 2026-03-25</span>
+    </div>
+  </a>
+
+  <a class="card" href="gpgpu-sim_distribution/20260325_095947/index.html">
+    <h3>&#128421; GPGPU-Sim</h3>
+    <p>Cycle-level GPU simulator for CUDA and OpenCL workloads, featuring detailed hardware abstraction, memory coalescing, SIMT execution, and interconnect network modeling.</p>
+    <div class="tag-list">
+      <span class="badge green">C++</span>
+      <span class="badge yellow">CUDA</span>
+      <span class="badge blue">OpenCL</span>
+    </div>
+    <div class="meta">
+      <span>&#128196; 14 pages</span>
+      <span>&#128197; 2026-03-25</span>
+    </div>
+  </a>
+
+  <a class="card" href="oclgrind/20260325_102535/index.html">
+    <h3>&#128270; Oclgrind</h3>
+    <p>A virtual OpenCL device simulator for debugging and analysis, providing an SPIR-V/LLVM IR interpreter, memory model, race detection, and an interactive plugin-based debugging system.</p>
+    <div class="tag-list">
+      <span class="badge green">C++</span>
+      <span class="badge blue">OpenCL</span>
+      <span class="badge yellow">LLVM</span>
+    </div>
+    <div class="meta">
+      <span>&#128196; 17 pages</span>
+      <span>&#128197; 2026-03-25</span>
+    </div>
+  </a>
+</div>
+
+<h2 id="about">About</h2>
+<p>This repository contains auto-generated wiki documentation for three open-source projects. Each wiki is a self-contained collection of HTML pages with embedded diagrams, syntax-highlighted code, and full-text search.</p>
+
+<h3>Features</h3>
+<ul style="padding-left:1.4rem;margin:.6rem 0">
+  <li>Dark and light theme support (toggle in the top-right corner)</li>
+  <li>Mermaid.js architecture diagrams</li>
+  <li>Syntax-highlighted code blocks with copy-to-clipboard</li>
+  <li>Full-text search within each project</li>
+  <li>Responsive design for mobile and desktop</li>
+</ul>
+
+</main>
+
+<div class="footer">
+  Wiki Repository &mdash; auto-generated documentation hub
+</div>
+
+<script>
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+</body>
+</html>
