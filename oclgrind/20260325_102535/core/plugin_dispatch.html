@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Plugin Dispatch System Deep-Dive — Oclgrind Core</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--border);border:none;color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+main{max-width:920px;margin:0 auto;padding:32px 24px}
+.hero{margin-bottom:2rem}
+.hero h1{font-size:1.8rem;color:var(--heading);margin-bottom:.5rem}
+.hero p{color:var(--text-muted);font-size:1rem}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+h2{font-size:1.35rem;color:var(--heading);margin:2rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.1rem;color:var(--heading);margin:1.4rem 0 .5rem}
+p,ul,ol{margin-bottom:1rem}
+ul,ol{padding-left:1.5rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:1rem 0;position:relative}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88em;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.7rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{text-align:left;padding:10px 14px;border:1px solid var(--border)}
+th{background:var(--surface);color:var(--heading);font-size:.85rem;text-transform:uppercase;letter-spacing:.03em}
+td{font-size:.9rem}
+.callout{background:var(--surface);border-left:4px solid var(--accent3);padding:14px 18px;border-radius:0 8px 8px 0;margin:1.2rem 0}
+.callout strong{color:var(--accent3)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:1.2rem 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-wrap::after{content:"⛶";position:absolute;top:8px;right:12px;font-size:.8rem;color:var(--text-muted)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:2rem;cursor:zoom-out}
+.overlay.active{display:flex}
+.overlay .mermaid-wrap{max-width:95vw;max-height:95vh;overflow:auto;cursor:default;margin:0}
+footer{max-width:920px;margin:3rem auto 0;padding:24px;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:100}
+@media print{header,.theme-toggle,.copy-btn,.back-to-top,.skip-link,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.mermaid-wrap{break-inside:avoid}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">core</a> &rsaquo; Plugin Dispatch</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" aria-label="Toggle theme">🌓 Theme</button>
+</header>
+
+<main id="main">
+<section class="hero">
+  <h1>Plugin Dispatch System Deep-Dive <span class="focus-label" style="display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle">Focus Deep-Dive</span></h1>
+  <p>How <code>Context</code> loads, registers, and dispatches events to analysis plugins — the observer-pattern backbone of Oclgrind's instrumentation framework.</p>
+</section>
+
+<!-- ======== Architecture Overview ======== -->
+<h2 id="architecture">Architecture Overview</h2>
+<p>The plugin system follows the <strong>observer pattern</strong>. The <code>Context</code> object owns a list of <code>Plugin*</code> instances and broadcasts execution events to every registered plugin through <code>notify*</code> methods. Plugins override only the callbacks they care about.</p>
+
+<div class="mermaid-wrap" data-source="flowchart TD
+  CTX[Context] -->|owns| PL[PluginList — std::list of pairs]
+  PL --> P1[Logger — core]
+  PL --> P2[MemCheck — core]
+  PL --> P3[RaceDetector — optional]
+  PL --> P4[InteractiveDebugger — optional]
+  PL --> P5[DynamicPlugin — from env var]
+
+  MEM[Memory::store] -->|notifyMemoryStore| CTX
+  WI[WorkItem::execute] -->|notifyInstructionExecuted| CTX
+  CTX -->|iterates list| P1
+  CTX -->|iterates list| P2
+  CTX -->|iterates list| P3">
+<pre class="mermaid">flowchart TD
+  CTX[Context] -->|owns| PL[PluginList — std::list of pairs]
+  PL --> P1[Logger — core]
+  PL --> P2[MemCheck — core]
+  PL --> P3[RaceDetector — optional]
+  PL --> P4[InteractiveDebugger — optional]
+  PL --> P5[DynamicPlugin — from env var]
+
+  MEM[Memory::store] -->|notifyMemoryStore| CTX
+  WI[WorkItem::execute] -->|notifyInstructionExecuted| CTX
+  CTX -->|iterates list| P1
+  CTX -->|iterates list| P2
+  CTX -->|iterates list| P3</pre>
+</div>
+
+<!-- ======== Data Structures ======== -->
+<h2 id="data-structures">Core Data Structures</h2>
+<pre><code class="language-cpp">// Context.h
+typedef std::pair&lt;Plugin*, bool&gt;  PluginEntry;   // (plugin, owned?)
+typedef std::list&lt;PluginEntry&gt;    PluginList;
+
+class Context {
+private:
+    PluginList              m_plugins;         // all registered plugins
+    std::list&lt;void*&gt;        m_pluginLibraries; // dlopen handles for cleanup
+    Memory*                 m_globalMemory;
+    llvm::LLVMContext*      m_llvmContext;
+    mutable const KernelInvocation* m_kernelInvocation;
+};</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<p>The <code>bool</code> in each <code>PluginEntry</code> indicates <strong>ownership</strong>. Core plugins are created by <code>Context</code> itself (<code>true</code>) and deleted during teardown. Externally registered plugins (<code>false</code>) are only unlinked, not destroyed.</p>
+
+<!-- ======== Plugin Loading ======== -->
+<h2 id="loading">Plugin Loading</h2>
+<h3>Core plugins (always loaded)</h3>
+<p>The <code>Context</code> constructor calls <code>loadPlugins()</code>, which unconditionally instantiates the mandatory plugins and conditionally loads optional ones based on environment variables:</p>
+
+<table>
+<thead><tr><th>Plugin</th><th>Env Variable</th><th>When loaded</th></tr></thead>
+<tbody>
+<tr><td><code>Logger</code></td><td>—</td><td>Always</td></tr>
+<tr><td><code>MemCheck</code></td><td>—</td><td>Always</td></tr>
+<tr><td><code>InstructionCounter</code></td><td><code>OCLGRIND_INST_COUNTS</code></td><td>If env var set</td></tr>
+<tr><td><code>RaceDetector</code></td><td><code>OCLGRIND_DATA_RACES</code></td><td>If env var set</td></tr>
+<tr><td><code>Uninitialized</code></td><td><code>OCLGRIND_UNINITIALIZED</code></td><td>If env var set</td></tr>
+<tr><td><code>InteractiveDebugger</code></td><td><code>OCLGRIND_INTERACTIVE</code></td><td>If env var set</td></tr>
+</tbody>
+</table>
+
+<h3>Dynamic plugins via <code>OCLGRIND_PLUGINS</code></h3>
+<pre><code class="language-cpp">// Context.cpp — loadPlugins(), dynamic section
+const char* dynamicPlugins = getenv("OCLGRIND_PLUGINS");
+if (dynamicPlugins) {
+    std::istringstream ss(dynamicPlugins);
+    std::string libpath;
+    while (std::getline(ss, libpath, ':')) {    // colon-delimited
+        // Unix: dlopen + dlsym
+        void* library = dlopen(libpath.c_str(), RTLD_NOW);
+        void* init    = dlsym(library, "initializePlugins");
+        // Windows: LoadLibraryA + GetProcAddress (analogous)
+
+        // Call the plugin's initializer — it registers via Context*
+        ((void (*)(Context*))init)(this);
+        m_pluginLibraries.push_back(library);
+    }
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ Plugin ABI contract:</strong> Every dynamic plugin shared library must export two C functions: <code>void initializePlugins(Context*)</code> and <code>void releasePlugins(Context*)</code>. The initializer typically calls <code>context-&gt;registerPlugin(new MyPlugin(context))</code>.</div>
+
+<h3>Registration &amp; unregistration</h3>
+<pre><code class="language-cpp">void Context::registerPlugin(Plugin* plugin) {
+    m_plugins.push_back({plugin, false});  // external ownership
+}
+
+void Context::unregisterPlugin(Plugin* plugin) {
+    m_plugins.remove_if([&amp;](const PluginEntry&amp; e){ return e.first == plugin; });
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== NOTIFY Macro ======== -->
+<h2 id="notify-dispatch">The NOTIFY Dispatch Macro</h2>
+<p>All <code>notify*</code> methods share the same broadcast pattern, factored into a preprocessor macro:</p>
+
+<pre><code class="language-cpp">#define NOTIFY(function, ...)                       \
+{                                                   \
+    PluginList::const_iterator itr;                 \
+    for (itr = m_plugins.begin();                   \
+         itr != m_plugins.end(); itr++)             \
+    {                                               \
+        itr-&gt;first-&gt;function(__VA_ARGS__);          \
+    }                                               \
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="mermaid-wrap" data-source="sequenceDiagram
+  participant Mem as Memory::store
+  participant Ctx as Context
+  participant Log as Logger
+  participant MC as MemCheck
+  participant RD as RaceDetector
+
+  Mem->>Ctx: notifyMemoryStore(mem, addr, sz, data)
+  Note over Ctx: check m_kernelInvocation
+
+  alt has current WorkItem
+    Ctx->>Log: memoryStore(mem, workItem, addr, sz, data)
+    Ctx->>MC: memoryStore(mem, workItem, addr, sz, data)
+    Ctx->>RD: memoryStore(mem, workItem, addr, sz, data)
+  else has current WorkGroup only
+    Ctx->>Log: memoryStore(mem, workGroup, addr, sz, data)
+    Ctx->>MC: memoryStore(mem, workGroup, addr, sz, data)
+  else host context
+    Ctx->>Log: hostMemoryStore(mem, addr, sz, data)
+    Ctx->>MC: hostMemoryStore(mem, addr, sz, data)
+  end">
+<pre class="mermaid">sequenceDiagram
+  participant Mem as Memory::store
+  participant Ctx as Context
+  participant Log as Logger
+  participant MC as MemCheck
+  participant RD as RaceDetector
+
+  Mem->>Ctx: notifyMemoryStore(mem, addr, sz, data)
+  Note over Ctx: check m_kernelInvocation
+
+  alt has current WorkItem
+    Ctx->>Log: memoryStore(mem, workItem, addr, sz, data)
+    Ctx->>MC: memoryStore(mem, workItem, addr, sz, data)
+    Ctx->>RD: memoryStore(mem, workItem, addr, sz, data)
+  else has current WorkGroup only
+    Ctx->>Log: memoryStore(mem, workGroup, addr, sz, data)
+    Ctx->>MC: memoryStore(mem, workGroup, addr, sz, data)
+  else host context
+    Ctx->>Log: hostMemoryStore(mem, addr, sz, data)
+    Ctx->>MC: hostMemoryStore(mem, addr, sz, data)
+  end</pre>
+</div>
+
+<h3>Context-aware dispatch</h3>
+<p>Several notify methods inspect <code>m_kernelInvocation</code> to determine which overload to call on plugins. Memory callbacks have three tiers:</p>
+<ol>
+  <li><strong>WorkItem-level</strong> — when a specific work-item is active (e.g., during instruction execution)</li>
+  <li><strong>WorkGroup-level</strong> — when only a work-group context exists (e.g., during async copies)</li>
+  <li><strong>Host-level</strong> — when no kernel is running (e.g., host <code>clEnqueueReadBuffer</code>)</li>
+</ol>
+
+<pre><code class="language-cpp">void Context::notifyMemoryStore(const Memory* memory, size_t address,
+                                size_t size, const uint8_t* storeData) const {
+    if (m_kernelInvocation) {
+        if (m_kernelInvocation-&gt;getCurrentWorkItem()) {
+            NOTIFY(memoryStore, memory,
+                   m_kernelInvocation-&gt;getCurrentWorkItem(),
+                   address, size, storeData);
+        } else if (m_kernelInvocation-&gt;getCurrentWorkGroup()) {
+            NOTIFY(memoryStore, memory,
+                   m_kernelInvocation-&gt;getCurrentWorkGroup(),
+                   address, size, storeData);
+        }
+    } else {
+        NOTIFY(hostMemoryStore, memory, address, size, storeData);
+    }
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== Plugin Base Class ======== -->
+<h2 id="plugin-base">Plugin Base Class</h2>
+<p>All plugins inherit from <code>Plugin</code> (defined in <code>Plugin.h</code>) and override the virtual callbacks they need. Every method has an empty default body, so plugins are opt-in:</p>
+
+<pre><code class="language-cpp">class Plugin {
+public:
+    Plugin(const Context* context) : m_context(context) {}
+    virtual ~Plugin() {}
+
+    // Override to return true if thread-safe
+    virtual bool isThreadSafe() const;
+
+    // Kernel lifecycle
+    virtual void kernelBegin(const KernelInvocation*) {}
+    virtual void kernelEnd(const KernelInvocation*) {}
+
+    // Work-group lifecycle
+    virtual void workGroupBegin(const WorkGroup*) {}
+    virtual void workGroupComplete(const WorkGroup*) {}
+    virtual void workGroupBarrier(const WorkGroup*, uint32_t flags) {}
+
+    // Work-item lifecycle
+    virtual void workItemBegin(const WorkItem*) {}
+    virtual void workItemComplete(const WorkItem*) {}
+
+    // Instruction observation
+    virtual void instructionExecuted(const WorkItem*,
+                  const llvm::Instruction*, const TypedValue&amp;) {}
+
+    // Memory callbacks (multiple overloads)
+    virtual void memoryLoad(const Memory*, const WorkItem*,
+                            size_t addr, size_t sz) {}
+    virtual void memoryStore(const Memory*, const WorkItem*,
+                             size_t addr, size_t sz, const uint8_t*) {}
+    virtual void memoryAtomicLoad(const Memory*, const WorkItem*,
+                                  AtomicOp, size_t, size_t) {}
+    virtual void memoryAtomicStore(const Memory*, const WorkItem*,
+                                   AtomicOp, size_t, size_t) {}
+    virtual void hostMemoryLoad(const Memory*, size_t, size_t) {}
+    virtual void hostMemoryStore(const Memory*, size_t, size_t, const uint8_t*) {}
+    // ... memoryAllocated, memoryDeallocated, memoryMap, memoryUnmap
+
+    virtual void log(MessageType type, const char* message) {}
+
+protected:
+    const Context* m_context;
+};</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== Callback Catalogue ======== -->
+<h2 id="callbacks">Complete Callback Catalogue</h2>
+<table>
+<thead><tr><th>Callback</th><th>Fired by</th><th>Granularity</th></tr></thead>
+<tbody>
+<tr><td><code>kernelBegin</code> / <code>kernelEnd</code></td><td><code>KernelInvocation</code></td><td>Per kernel launch</td></tr>
+<tr><td><code>workGroupBegin</code> / <code>workGroupComplete</code></td><td><code>WorkGroup</code></td><td>Per work-group</td></tr>
+<tr><td><code>workGroupBarrier</code></td><td><code>barrier()</code> builtin</td><td>Per barrier hit</td></tr>
+<tr><td><code>workItemBegin</code> / <code>workItemComplete</code></td><td><code>WorkItem::step</code></td><td>Per work-item</td></tr>
+<tr><td><code>instructionExecuted</code></td><td><code>WorkItem::execute</code></td><td>Per instruction</td></tr>
+<tr><td><code>memoryLoad</code> / <code>memoryStore</code></td><td><code>Memory::load/store</code></td><td>Per access</td></tr>
+<tr><td><code>memoryAtomicLoad</code> / <code>memoryAtomicStore</code></td><td><code>Memory::atomic*</code></td><td>Per atomic op</td></tr>
+<tr><td><code>memoryAllocated</code> / <code>memoryDeallocated</code></td><td><code>Memory::allocate/deallocate</code></td><td>Per buffer</td></tr>
+<tr><td><code>hostMemoryLoad</code> / <code>hostMemoryStore</code></td><td>Host API calls</td><td>Per host access</td></tr>
+<tr><td><code>log</code></td><td><code>Context::logError</code></td><td>Per message</td></tr>
+</tbody>
+</table>
+
+<!-- ======== Thread Safety ======== -->
+<h2 id="thread-safety">Thread Safety Considerations</h2>
+<p>Work-groups may execute in parallel on separate host threads. The <code>Context</code> queries every registered plugin before enabling parallelism:</p>
+
+<pre><code class="language-cpp">bool Context::isThreadSafe() const {
+    for (const PluginEntry&amp; p : m_plugins) {
+        if (!p.first-&gt;isThreadSafe())
+            return false;   // one unsafe plugin forces serial execution
+    }
+    return true;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ Serial fallback:</strong> If <em>any</em> plugin returns <code>false</code> from <code>isThreadSafe()</code>, the entire simulation falls back to single-threaded work-group execution. Plugins like <code>InteractiveDebugger</code> are inherently interactive and not thread-safe, which forces this mode.</div>
+
+<p>Additional synchronization points:</p>
+<ul>
+  <li><strong>LLVM instruction printing</strong> — a <code>static std::mutex</code> in <code>Context.cpp</code> protects LLVM's non-thread-safe <code>Instruction::print()</code>.</li>
+  <li><strong>Atomic memory operations</strong> — the <code>Memory</code> class uses its own 64-mutex array for global address space atomics (see <a href="memory_model.html#atomics">Memory Model</a>).</li>
+  <li><strong>Plugin list is immutable during execution</strong> — plugins are registered only during initialization; no locking is needed for the dispatch loop.</li>
+</ul>
+
+<!-- ======== Writing a Plugin ======== -->
+<h2 id="writing-plugin">Writing a Custom Plugin</h2>
+<p>A minimal plugin as a dynamic shared library:</p>
+
+<pre><code class="language-cpp">// MyPlugin.cpp
+#include "core/Plugin.h"
+#include "core/Context.h"
+
+class MyPlugin : public oclgrind::Plugin {
+public:
+    MyPlugin(const oclgrind::Context* ctx) : Plugin(ctx) {}
+
+    void instructionExecuted(const oclgrind::WorkItem* wi,
+                             const llvm::Instruction* inst,
+                             const oclgrind::TypedValue&amp; res) override {
+        m_count++;
+    }
+    void kernelEnd(const oclgrind::KernelInvocation*) override {
+        std::cout &lt;&lt; "Instructions executed: " &lt;&lt; m_count &lt;&lt; "\n";
+    }
+    bool isThreadSafe() const override { return false; }
+private:
+    size_t m_count = 0;
+};
+
+static MyPlugin* instance = nullptr;
+
+extern "C" void initializePlugins(oclgrind::Context* ctx) {
+    instance = new MyPlugin(ctx);
+    ctx-&gt;registerPlugin(instance);
+}
+extern "C" void releasePlugins(oclgrind::Context* ctx) {
+    ctx-&gt;unregisterPlugin(instance);
+    delete instance;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<p>Load with: <code>OCLGRIND_PLUGINS=/path/to/libMyPlugin.so oclgrind ./my_app</code></p>
+
+<!-- ======== Lifecycle Diagram ======== -->
+<h2 id="lifecycle">Plugin Lifecycle</h2>
+<div class="mermaid-wrap" data-source="stateDiagram-v2
+  [*] --> Constructed : Context constructor
+  Constructed --> CoreLoaded : loadPlugins — core plugins
+  CoreLoaded --> DynamicLoaded : loadPlugins — OCLGRIND_PLUGINS dlopen
+  DynamicLoaded --> Ready : initializePlugins callback
+
+  state Ready {
+    [*] --> Idle
+    Idle --> Dispatching : notify* called
+    Dispatching --> Idle : iteration complete
+  }
+
+  Ready --> Teardown : Context destructor
+  Teardown --> Unloaded : delete owned plugins
+  Unloaded --> LibsClosed : dlclose libraries
+  LibsClosed --> [*]">
+<pre class="mermaid">stateDiagram-v2
+  [*] --> Constructed : Context constructor
+  Constructed --> CoreLoaded : loadPlugins — core plugins
+  CoreLoaded --> DynamicLoaded : loadPlugins — OCLGRIND_PLUGINS dlopen
+  DynamicLoaded --> Ready : initializePlugins callback
+
+  state Ready {
+    [*] --> Idle
+    Idle --> Dispatching : notify* called
+    Dispatching --> Idle : iteration complete
+  }
+
+  Ready --> Teardown : Context destructor
+  Teardown --> Unloaded : delete owned plugins
+  Unloaded --> LibsClosed : dlclose libraries
+  LibsClosed --> [*]</pre>
+</div>
+
+</main>
+
+<footer>
+  <span><a href="index.html">← Core Overview</a></span>
+  <span><a href="../search.html">Search Wiki</a></span>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="overlay" id="overlay"><div class="overlay-inner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:document.documentElement.getAttribute('data-theme')==='dark'?'dark':'default'});
+function renderMermaid(){document.querySelectorAll('.mermaid').forEach(function(el,i){el.removeAttribute('data-processed');el.id='mm-'+i});mermaid.run()}
+
+(function(){
+  const key='neutra-ip-theme';
+  const saved=localStorage.getItem(key);
+  if(saved)document.documentElement.setAttribute('data-theme',saved);
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    localStorage.setItem(key,t);
+    mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});
+    renderMermaid();
+  });
+  renderMermaid();
+})();
+
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var code=btn.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},1500)});
+  });
+});
+
+var btt=document.getElementById('backToTop');
+window.addEventListener('scroll',function(){btt.style.display=window.scrollY>300?'flex':'none'});
+btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+
+var overlay=document.getElementById('overlay');
+document.querySelectorAll('.mermaid-wrap').forEach(function(w){
+  w.addEventListener('click',function(){
+    overlay.querySelector('.overlay-inner').innerHTML=w.outerHTML;
+    overlay.classList.add('active');
+  });
+});
+overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('active')});
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

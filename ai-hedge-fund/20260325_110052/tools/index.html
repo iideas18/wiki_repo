@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Financial Data API Client — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip-wiki 2026-03-25 359cce7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px;z-index:100}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+.hero{margin-bottom:32px}.hero h1{font-size:2rem;color:var(--heading);margin-bottom:4px}.hero .subtitle{color:var(--text-muted);font-size:1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;flex:1;min-width:120px;text-align:center}.stat-card .val{font-size:1.4rem;font-weight:700;color:var(--accent)}.stat-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:6px;padding:16px 20px;margin:24px 0}.intro-box h2{font-size:1.1rem;color:var(--accent2);margin-bottom:6px}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:24px 0}#toc h2{font-size:1rem;margin-bottom:8px;color:var(--heading)}#toc ul{list-style:none;padding-left:0}#toc li{padding:2px 0}#toc a{font-size:.9rem}
+section{margin:32px 0}section h2{font-size:1.4rem;color:var(--heading);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:16px}section h3{font-size:1.1rem;color:var(--heading);margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.88rem}th,td{border:1px solid var(--border);padding:8px 10px;text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;overflow-x:auto;margin:12px 0;position:relative}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{color:inherit;background:var(--code-bg);padding:2px 5px;border-radius:3px;font-size:.88em}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.75rem}.copy-btn:hover{color:var(--accent)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:"🔍 Click to zoom";position:absolute;top:6px;right:10px;font-size:.7rem;color:var(--text-muted)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.diagram-overlay.active{display:flex}.diagram-overlay .inner{background:var(--bg);border-radius:8px;padding:24px;max-width:95vw;max-height:95vh;overflow:auto}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:monospace;font-size:.85rem;white-space:pre}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:48px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;z-index:60}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn,.mermaid-wrap::after{display:none!important}body{background:#fff;color:#000}pre{border-color:#ccc}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; tools</nav>
+  <button id="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
+</header>
+
+<main id="main-content">
+<div class="hero">
+  <h1>🌐 Financial Data API Client</h1>
+  <p class="subtitle">ai-hedge-fund/src/tools &mdash; Rate-limited API client with caching &amp; pagination</p>
+</div>
+<div class="stat-row">
+  <div class="stat-card"><span class="val">7</span><span class="lbl">Endpoints</span></div>
+  <div class="stat-card"><span class="val">367</span><span class="lbl">Lines</span></div>
+  <div class="stat-card"><span class="val">429</span><span class="lbl">Rate-Limit Handling</span></div>
+  <div class="stat-card"><span class="val">3</span><span class="lbl">Max Retries</span></div>
+</div>
+
+<div class="intro-box">
+  <h2>💡 What is this?</h2>
+  <p>Think of this module as the <strong>research assistant</strong> who goes to the library (Financial Datasets API) to fetch specific reports. Before each trip, the assistant checks a local desk cache — if the report is already there, great. If not, they walk to the library, but if the librarian says "too many requests" (HTTP 429), the assistant waits patiently with increasing delays (60 s → 90 s → 120 s) before trying again. Some reports (insider trades, news) may span multiple pages, so the assistant keeps fetching until all pages are collected.</p>
+</div>
+
+<nav id="toc"><h2>📑 Table of Contents</h2><ul></ul></nav>
+<p id="reading-time" style="color:var(--text-muted);font-size:.82rem"></p>
+
+<!-- Request Flow -->
+<section id="request-flow">
+<h2>Request Flow Architecture</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="sequenceDiagram
+  participant Agent
+  participant API as tools/api.py
+  participant Cache as data/cache.py
+  participant Remote as financialdatasets.ai
+
+  Agent->>API: get_prices(AAPL, start, end)
+  API->>Cache: get_prices(cache_key)
+  alt HIT
+    Cache-->>API: cached list[dict]
+    API-->>Agent: list[Price]
+  else MISS
+    API->>Remote: GET /prices/?ticker=AAPL...
+    alt 200 OK
+      Remote-->>API: JSON
+      API->>Cache: set_prices(key, data)
+      API-->>Agent: list[Price]
+    else 429 Rate Limited
+      loop up to 3 retries
+        API->>API: sleep(60 + 30*attempt)
+        API->>Remote: retry GET
+      end
+    end
+  end
+">sequenceDiagram
+  participant Agent
+  participant API as tools/api.py
+  participant Cache as data/cache.py
+  participant Remote as financialdatasets.ai
+
+  Agent->>API: get_prices(AAPL, start, end)
+  API->>Cache: get_prices(cache_key)
+  alt HIT
+    Cache-->>API: cached list[dict]
+    API-->>Agent: list[Price]
+  else MISS
+    API->>Remote: GET /prices/?ticker=AAPL...
+    alt 200 OK
+      Remote-->>API: JSON
+      API->>Cache: set_prices(key, data)
+      API-->>Agent: list[Price]
+    else 429 Rate Limited
+      loop up to 3 retries
+        API->>API: sleep(60 + 30*attempt)
+        API->>Remote: retry GET
+      end
+    end
+  end</pre></div>
+</section>
+
+<!-- Pagination -->
+<section id="pagination">
+<h2>Pagination Strategy</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="flowchart TD
+  START[Call get_insider_trades / get_company_news] --> FETCH[Fetch page with filing_date_lte]
+  FETCH --> CHECK{Got full page?}
+  CHECK -->|No or no start_date| DONE[Return all_trades]
+  CHECK -->|Yes + has start_date| UPDATE[Set current_end_date = min filing_date]
+  UPDATE --> PAST{Reached start_date?}
+  PAST -->|Yes| DONE
+  PAST -->|No| FETCH
+">flowchart TD
+  START[Call get_insider_trades / get_company_news] --> FETCH[Fetch page with filing_date_lte]
+  FETCH --> CHECK{Got full page?}
+  CHECK -->|No or no start_date| DONE[Return all_trades]
+  CHECK -->|Yes + has start_date| UPDATE[Set current_end_date = min filing_date]
+  UPDATE --> PAST{Reached start_date?}
+  PAST -->|Yes| DONE
+  PAST -->|No| FETCH</pre></div>
+<p>Functions <code>get_insider_trades()</code> and <code>get_company_news()</code> use cursor-style pagination: they shift <code>current_end_date</code> to the oldest item's date in each batch, continuing until the batch is incomplete or <code>start_date</code> is reached.</p>
+</section>
+
+<!-- Key Functions -->
+<section id="key-symbols">
+<h2>Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Symbol</th><th>File</th><th>Kind</th><th>Description</th></tr>
+  <tr><td><code>_make_api_request()</code></td><td>api.py</td><td>function</td><td>Core HTTP helper with 429 retry logic (linear backoff: 60+30*n seconds)</td></tr>
+  <tr><td><code>get_prices()</code></td><td>api.py</td><td>function</td><td>Fetches OHLCV bars for ticker+date range; cache key = ticker_start_end</td></tr>
+  <tr><td><code>get_financial_metrics()</code></td><td>api.py</td><td>function</td><td>Fetches financial ratios; supports period (ttm/quarterly) and limit</td></tr>
+  <tr><td><code>search_line_items()</code></td><td>api.py</td><td>function</td><td>POST-based search for arbitrary financial statement line items</td></tr>
+  <tr><td><code>get_insider_trades()</code></td><td>api.py</td><td>function</td><td>Paginated insider trade fetcher with cursor-based date iteration</td></tr>
+  <tr><td><code>get_company_news()</code></td><td>api.py</td><td>function</td><td>Paginated news fetcher with same cursor pattern as insider trades</td></tr>
+  <tr><td><code>get_market_cap()</code></td><td>api.py</td><td>function</td><td>Fetches market cap — today via CompanyFacts, historical via FinancialMetrics</td></tr>
+  <tr><td><code>prices_to_df()</code></td><td>api.py</td><td>function</td><td>Converts list[Price] to pandas DataFrame indexed by Date</td></tr>
+  <tr><td><code>get_price_data()</code></td><td>api.py</td><td>function</td><td>Convenience wrapper: get_prices() → prices_to_df()</td></tr>
+  <tr><td><code>_cache</code></td><td>api.py</td><td>module var</td><td>Global Cache instance obtained via <code>get_cache()</code></td></tr>
+  <tr><td><code>logger</code></td><td>api.py</td><td>module var</td><td>Python logging.Logger for parse warnings</td></tr>
+</table>
+</section>
+
+<!-- Interactions -->
+<section id="interactions">
+<h2>Module Interactions</h2>
+<table>
+  <tr><th>From</th><th>To</th><th>Interaction</th></tr>
+  <tr><td>tools/api.py</td><td>data/cache.py</td><td>Calls <code>get_cache()</code> at module load; uses get/set methods for each domain</td></tr>
+  <tr><td>tools/api.py</td><td>data/models.py</td><td>Imports 8 Pydantic models + Response wrappers for parsing</td></tr>
+  <tr><td>tools/api.py</td><td>financialdatasets.ai</td><td>REST API calls via <code>requests</code> library through <code>_make_api_request()</code></td></tr>
+  <tr><td>All analyst agents</td><td>tools/api.py</td><td>Agents call get_prices, get_financial_metrics, etc. for analysis data</td></tr>
+  <tr><td>tools/api.py</td><td>Environment</td><td>Reads <code>FINANCIAL_DATASETS_API_KEY</code> from os.environ</td></tr>
+  <tr><td>tools/api.py</td><td>pandas</td><td><code>prices_to_df()</code> builds DataFrame with Date index and numeric columns</td></tr>
+</table>
+</section>
+
+<!-- Directory Map -->
+<section id="directory">
+<h2>Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/tools/
+├── __init__.py       # (empty — package marker)
+└── api.py            # _make_api_request, get_prices, get_financial_metrics,
+                      # search_line_items, get_insider_trades, get_company_news,
+                      # get_market_cap, prices_to_df, get_price_data</div>
+</section>
+
+<!-- Configuration -->
+<section id="configuration">
+<h2>Configuration — API Endpoints</h2>
+<table>
+  <tr><th>Function</th><th>Method</th><th>Endpoint</th><th>Key Params</th></tr>
+  <tr><td><code>get_prices()</code></td><td>GET</td><td><code>/prices/</code></td><td>ticker, interval=day, start_date, end_date</td></tr>
+  <tr><td><code>get_financial_metrics()</code></td><td>GET</td><td><code>/financial-metrics/</code></td><td>ticker, report_period_lte, limit, period</td></tr>
+  <tr><td><code>search_line_items()</code></td><td>POST</td><td><code>/financials/search/line-items</code></td><td>tickers[], line_items[], end_date, period, limit</td></tr>
+  <tr><td><code>get_insider_trades()</code></td><td>GET</td><td><code>/insider-trades/</code></td><td>ticker, filing_date_lte/gte, limit</td></tr>
+  <tr><td><code>get_company_news()</code></td><td>GET</td><td><code>/news/</code></td><td>ticker, start_date, end_date, limit</td></tr>
+  <tr><td><code>get_market_cap()</code></td><td>GET</td><td><code>/company/facts/</code></td><td>ticker (today only)</td></tr>
+  <tr><td><code>_make_api_request()</code></td><td>GET/POST</td><td>any</td><td>max_retries=3, backoff=60+30*n</td></tr>
+</table>
+</section>
+
+<!-- Code Examples -->
+<section id="examples">
+<h2>Code Examples</h2>
+<h3>Example 1 — Fetching Prices with Caching</h3>
+<pre><code class="language-python">from src.tools.api import get_prices
+
+# First call → API request, cached
+prices = get_prices("AAPL", "2025-01-01", "2025-06-01")
+print(f"Got {len(prices)} daily bars")
+print(f"Latest close: ${prices[-1].close}")
+
+# Second call → cache hit, no network
+prices_again = get_prices("AAPL", "2025-01-01", "2025-06-01")
+assert len(prices_again) == len(prices)  # Same data from cache</code></pre>
+
+<h3>Example 2 — Searching Arbitrary Line Items</h3>
+<pre><code class="language-python">from src.tools.api import search_line_items
+
+# POST-based search for specific financial statement fields
+items = search_line_items(
+    ticker="MSFT",
+    line_items=["revenue", "net_income", "free_cash_flow"],
+    end_date="2025-03-31",
+    period="ttm",
+    limit=4,
+)
+for item in items:
+    # LineItem uses extra="allow" — dynamic fields
+    print(f"{item.report_period}: revenue={getattr(item, 'revenue', 'N/A')}")</code></pre>
+
+<h3>Example 3 — Paginated Insider Trades</h3>
+<pre><code class="language-python">from src.tools.api import get_insider_trades
+
+# Fetches ALL insider trades between dates via pagination
+trades = get_insider_trades(
+    ticker="NVDA",
+    end_date="2025-06-01",
+    start_date="2024-01-01",
+    limit=100,  # per-page limit
+)
+print(f"Total trades: {len(trades)}")
+for t in trades[:3]:
+    print(f"  {t.filing_date}: {t.name} {'bought' if (t.transaction_shares or 0) > 0 else 'sold'}"
+          f" ${abs(t.transaction_value or 0):,.0f}")</code></pre>
+</section>
+</main>
+
+<button id="back-to-top" aria-label="Back to top">↑</button>
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<footer>AI Hedge Fund Wiki &middot; Generated 2026-03-25 &middot; <code>359cce7</code> &middot; tools module</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const THEME_KEY='neutra-ip-theme';
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t);document.getElementById('theme-toggle').textContent=t==='dark'?'🌙 Theme':'☀️ Theme';renderMermaid()}
+  document.getElementById('theme-toggle').addEventListener('click',()=>{applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')});
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+
+  mermaid.initialize({startOnLoad:false,theme:'default'});
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  renderMermaid();
+
+  const toc=document.querySelector('#toc ul');document.querySelectorAll('section[id]').forEach(s=>{const h=s.querySelector('h2');if(h){const li=document.createElement('li');const a=document.createElement('a');a.href='#'+s.id;a.textContent=h.textContent.replace(/^[\u{1F300}-\u{1FAFF}]/u,'').trim();li.appendChild(a);toc.appendChild(li)}});
+  const words=document.querySelector('main').textContent.trim().split(/\s+/).length;document.getElementById('reading-time').textContent='⏱ '+Math.max(1,Math.round(words/200))+' min read';
+  document.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.mermaid'))return;const btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',()=>{navigator.clipboard.writeText(pre.textContent.replace('Copy','').trim());btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});pre.appendChild(btn)});
+  const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
+  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+  const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  const sections=[...document.querySelectorAll('section[id]')];document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;let idx=-1;const y=window.scrollY+80;sections.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});if(e.key==='j'&&idx<sections.length-1)sections[idx+1].scrollIntoView({behavior:'smooth'});if(e.key==='k'&&idx>0)sections[idx-1].scrollIntoView({behavior:'smooth'})});
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

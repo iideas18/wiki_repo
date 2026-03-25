@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Multi-Provider LLM Management — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip-wiki 2026-03-25 359cce7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px;z-index:100}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+.hero{margin-bottom:32px}.hero h1{font-size:2rem;color:var(--heading);margin-bottom:4px}.hero .subtitle{color:var(--text-muted);font-size:1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;flex:1;min-width:120px;text-align:center}.stat-card .val{font-size:1.4rem;font-weight:700;color:var(--accent)}.stat-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:6px;padding:16px 20px;margin:24px 0}.intro-box h2{font-size:1.1rem;color:var(--accent2);margin-bottom:6px}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:24px 0}#toc h2{font-size:1rem;margin-bottom:8px;color:var(--heading)}#toc ul{list-style:none;padding-left:0}#toc li{padding:2px 0}#toc a{font-size:.9rem}
+section{margin:32px 0}section h2{font-size:1.4rem;color:var(--heading);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:16px}section h3{font-size:1.1rem;color:var(--heading);margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.88rem}th,td{border:1px solid var(--border);padding:8px 10px;text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;overflow-x:auto;margin:12px 0;position:relative}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{color:inherit;background:var(--code-bg);padding:2px 5px;border-radius:3px;font-size:.88em}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.75rem}.copy-btn:hover{color:var(--accent)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:"🔍 Click to zoom";position:absolute;top:6px;right:10px;font-size:.7rem;color:var(--text-muted)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.diagram-overlay.active{display:flex}.diagram-overlay .inner{background:var(--bg);border-radius:8px;padding:24px;max-width:95vw;max-height:95vh;overflow:auto}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:monospace;font-size:.85rem;white-space:pre}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:48px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;z-index:60}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn,.mermaid-wrap::after{display:none!important}body{background:#fff;color:#000}pre{border-color:#ccc}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; llm</nav>
+  <button id="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
+</header>
+
+<main id="main-content">
+<div class="hero">
+  <h1>🤖 Multi-Provider LLM Management</h1>
+  <p class="subtitle">ai-hedge-fund/src/llm &mdash; Model registry, provider abstraction &amp; factory</p>
+</div>
+<div class="stat-row">
+  <div class="stat-card"><span class="val">13</span><span class="lbl">Providers</span></div>
+  <div class="stat-card"><span class="val">243</span><span class="lbl">Lines</span></div>
+  <div class="stat-card"><span class="val">JSON</span><span class="lbl">Model Registry</span></div>
+  <div class="stat-card"><span class="val">1</span><span class="lbl">Factory fn</span></div>
+</div>
+
+<div class="intro-box">
+  <h2>💡 What is this?</h2>
+  <p>Imagine a <strong>universal remote control</strong> that can operate 13 different TV brands. You pick the brand (provider) and model number, and the remote handles the protocol differences behind the scenes. This module is exactly that: <code>get_model()</code> takes a model name and provider, resolves the correct API key from the environment or an explicit dict, and returns a ready-to-use LangChain chat model — whether it's OpenAI, Anthropic, Google, Ollama, or any of 9 more.</p>
+</div>
+
+<nav id="toc"><h2>📑 Table of Contents</h2><ul></ul></nav>
+<p id="reading-time" style="color:var(--text-muted);font-size:.82rem"></p>
+
+<!-- Provider Architecture -->
+<section id="provider-arch">
+<h2>Provider Architecture</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="graph TD
+  USER[Caller] -->|model_name, provider| FACTORY[get_model]
+  FACTORY --> OAI[ChatOpenAI]
+  FACTORY --> ANTH[ChatAnthropic]
+  FACTORY --> GOOG[ChatGoogleGenerativeAI]
+  FACTORY --> DS[ChatDeepSeek]
+  FACTORY --> GROQ[ChatGroq]
+  FACTORY --> OLL[ChatOllama]
+  FACTORY --> OR[OpenRouter via ChatOpenAI]
+  FACTORY --> XAI_[ChatXAI]
+  FACTORY --> GC[GigaChat]
+  FACTORY --> AZ[AzureChatOpenAI]
+  FACTORY -->|env / api_keys dict| KEYS[(API Key Resolution)]
+">graph TD
+  USER[Caller] -->|model_name, provider| FACTORY[get_model]
+  FACTORY --> OAI[ChatOpenAI]
+  FACTORY --> ANTH[ChatAnthropic]
+  FACTORY --> GOOG[ChatGoogleGenerativeAI]
+  FACTORY --> DS[ChatDeepSeek]
+  FACTORY --> GROQ[ChatGroq]
+  FACTORY --> OLL[ChatOllama]
+  FACTORY --> OR[OpenRouter via ChatOpenAI]
+  FACTORY --> XAI_[ChatXAI]
+  FACTORY --> GC[GigaChat]
+  FACTORY --> AZ[AzureChatOpenAI]
+  FACTORY -->|env / api_keys dict| KEYS[(API Key Resolution)]</pre></div>
+</section>
+
+<!-- JSON Mode -->
+<section id="json-mode">
+<h2>JSON Mode Support Flow</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="flowchart LR
+  CHECK{has_json_mode?} -->|DeepSeek/Gemini| NO[False]
+  CHECK -->|Ollama| OLL_CHK{llama3 or neural-chat?}
+  OLL_CHK -->|yes| YES1[True]
+  OLL_CHK -->|no| NO
+  CHECK -->|OpenRouter| YES2[True]
+  CHECK -->|Others| YES3[True]
+">flowchart LR
+  CHECK{has_json_mode?} -->|DeepSeek/Gemini| NO[False]
+  CHECK -->|Ollama| OLL_CHK{llama3 or neural-chat?}
+  OLL_CHK -->|yes| YES1[True]
+  OLL_CHK -->|no| NO
+  CHECK -->|OpenRouter| YES2[True]
+  CHECK -->|Others| YES3[True]</pre></div>
+</section>
+
+<!-- Key Classes -->
+<section id="key-symbols">
+<h2>Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Symbol</th><th>File</th><th>Kind</th><th>Description</th></tr>
+  <tr><td><code>ModelProvider</code></td><td>models.py</td><td>Enum(str)</td><td>13-member enum: Alibaba, Anthropic, DeepSeek, Google, Groq, Meta, Mistral, OpenAI, Ollama, OpenRouter, GigaChat, Azure OpenAI, xAI</td></tr>
+  <tr><td><code>LLMModel</code></td><td>models.py</td><td>BaseModel</td><td>Pydantic config: display_name, model_name, provider</td></tr>
+  <tr><td><code>LLMModel.has_json_mode()</code></td><td>models.py</td><td>method</td><td>Returns whether the model supports structured JSON output</td></tr>
+  <tr><td><code>LLMModel.to_choice_tuple()</code></td><td>models.py</td><td>method</td><td>Serializes to (display_name, model_name, provider) for questionary UI</td></tr>
+  <tr><td><code>LLMModel.is_deepseek()</code></td><td>models.py</td><td>method</td><td>True if model_name starts with "deepseek"</td></tr>
+  <tr><td><code>LLMModel.is_gemini()</code></td><td>models.py</td><td>method</td><td>True if model_name starts with "gemini"</td></tr>
+  <tr><td><code>LLMModel.is_ollama()</code></td><td>models.py</td><td>method</td><td>True if provider is ModelProvider.OLLAMA</td></tr>
+  <tr><td><code>load_models_from_json()</code></td><td>models.py</td><td>function</td><td>Parses api_models.json / ollama_models.json into List[LLMModel]</td></tr>
+  <tr><td><code>get_model()</code></td><td>models.py</td><td>function</td><td>Factory: returns provider-specific LangChain chat model instance</td></tr>
+  <tr><td><code>get_model_info()</code></td><td>models.py</td><td>function</td><td>Lookup by model_name + provider across all registries</td></tr>
+  <tr><td><code>find_model_by_name()</code></td><td>models.py</td><td>function</td><td>Lookup by model_name only (first match)</td></tr>
+  <tr><td><code>get_models_list()</code></td><td>models.py</td><td>function</td><td>Returns serializable list of all models for API responses</td></tr>
+  <tr><td><code>AVAILABLE_MODELS</code></td><td>models.py</td><td>list</td><td>Loaded from api_models.json at module init</td></tr>
+  <tr><td><code>OLLAMA_MODELS</code></td><td>models.py</td><td>list</td><td>Loaded from ollama_models.json at module init</td></tr>
+  <tr><td><code>LLM_ORDER</code></td><td>models.py</td><td>list</td><td>Choice tuples for questionary UI selection</td></tr>
+</table>
+</section>
+
+<!-- Interactions -->
+<section id="interactions">
+<h2>Module Interactions</h2>
+<table>
+  <tr><th>From</th><th>To</th><th>Interaction</th></tr>
+  <tr><td>Every agent</td><td><code>get_model()</code></td><td>Agents call factory to get an LLM instance based on metadata</td></tr>
+  <tr><td><code>get_model()</code></td><td>Environment / .env</td><td>Reads API keys via <code>os.getenv()</code> or explicit <code>api_keys</code> dict</td></tr>
+  <tr><td><code>load_models_from_json()</code></td><td>api_models.json</td><td>Parses model registry at import time</td></tr>
+  <tr><td>cli/input.py</td><td><code>LLM_ORDER</code></td><td>Populates interactive model selection menu</td></tr>
+  <tr><td>OpenRouter branch</td><td>ChatOpenAI</td><td>Reuses ChatOpenAI with custom base_url &amp; extra_headers</td></tr>
+  <tr><td>Azure branch</td><td>AzureChatOpenAI</td><td>Requires endpoint, deployment name, and API key env vars</td></tr>
+  <tr><td>Ollama branch</td><td>ChatOllama</td><td>Uses OLLAMA_HOST / OLLAMA_BASE_URL for local inference</td></tr>
+</table>
+</section>
+
+<!-- Directory Map -->
+<section id="directory">
+<h2>Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/llm/
+├── __init__.py             # (empty — package marker)
+├── models.py               # ModelProvider, LLMModel, get_model(), loaders
+├── api_models.json         # Cloud provider model definitions
+└── ollama_models.json      # Local Ollama model definitions</div>
+</section>
+
+<!-- Configuration -->
+<section id="configuration">
+<h2>Configuration — API Keys</h2>
+<table>
+  <tr><th>Provider</th><th>Env Variable</th><th>Alt Source</th><th>Notes</th></tr>
+  <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td>api_keys dict</td><td>Also supports <code>OPENAI_API_BASE</code> for proxy</td></tr>
+  <tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td>api_keys dict</td><td></td></tr>
+  <tr><td>Google</td><td><code>GOOGLE_API_KEY</code></td><td>api_keys dict</td><td>Gemini models</td></tr>
+  <tr><td>DeepSeek</td><td><code>DEEPSEEK_API_KEY</code></td><td>api_keys dict</td><td>No JSON mode</td></tr>
+  <tr><td>Groq</td><td><code>GROQ_API_KEY</code></td><td>api_keys dict</td><td>Fast inference</td></tr>
+  <tr><td>xAI</td><td><code>XAI_API_KEY</code></td><td>api_keys dict</td><td>Grok models</td></tr>
+  <tr><td>OpenRouter</td><td><code>OPENROUTER_API_KEY</code></td><td>api_keys dict</td><td>Uses ChatOpenAI with custom base</td></tr>
+  <tr><td>GigaChat</td><td><code>GIGACHAT_API_KEY</code></td><td>GIGACHAT_USER/PASSWORD</td><td>Sber ecosystem</td></tr>
+  <tr><td>Azure OpenAI</td><td><code>AZURE_OPENAI_API_KEY</code></td><td>—</td><td>Also needs ENDPOINT + DEPLOYMENT_NAME</td></tr>
+  <tr><td>Ollama</td><td><code>OLLAMA_BASE_URL</code></td><td>OLLAMA_HOST</td><td>Defaults to localhost:11434</td></tr>
+</table>
+</section>
+
+<!-- Code Examples -->
+<section id="examples">
+<h2>Code Examples</h2>
+<h3>Example 1 — Using get_model() Factory</h3>
+<pre><code class="language-python">from src.llm.models import get_model, ModelProvider
+
+# Get an OpenAI model instance
+llm = get_model("gpt-4.1", ModelProvider.OPENAI)
+
+# Or pass explicit API keys (useful in web API mode)
+llm = get_model(
+    "claude-sonnet-4-20250514",
+    ModelProvider.ANTHROPIC,
+    api_keys={"ANTHROPIC_API_KEY": "sk-ant-..."}
+)
+
+# Invoke
+response = llm.invoke("Analyze AAPL fundamentals")
+print(response.content)</code></pre>
+
+<h3>Example 2 — Checking JSON Mode Support</h3>
+<pre><code class="language-python">from src.llm.models import find_model_by_name
+
+model = find_model_by_name("deepseek-chat")
+if model and not model.has_json_mode():
+    # DeepSeek doesn't support JSON mode;
+    # fall back to text parsing with regex
+    print("Using text output mode for", model.display_name)
+else:
+    # Safe to request structured JSON
+    print("JSON mode available")</code></pre>
+
+<h3>Example 3 — Listing All Available Models</h3>
+<pre><code class="language-python">from src.llm.models import get_models_list
+
+for m in get_models_list():
+    print(f"{m['provider']:&lt;15} {m['model_name']:&lt;30} {m['display_name']}")
+# OpenAI          gpt-4.1                        GPT 4.1
+# Anthropic       claude-sonnet-4-20250514       Claude Sonnet 4
+# ...</code></pre>
+</section>
+</main>
+
+<button id="back-to-top" aria-label="Back to top">↑</button>
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<footer>AI Hedge Fund Wiki &middot; Generated 2026-03-25 &middot; <code>359cce7</code> &middot; llm module</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const THEME_KEY='neutra-ip-theme';
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t);document.getElementById('theme-toggle').textContent=t==='dark'?'🌙 Theme':'☀️ Theme';renderMermaid()}
+  document.getElementById('theme-toggle').addEventListener('click',()=>{applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')});
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+
+  mermaid.initialize({startOnLoad:false,theme:'default'});
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  renderMermaid();
+
+  const toc=document.querySelector('#toc ul');document.querySelectorAll('section[id]').forEach(s=>{const h=s.querySelector('h2');if(h){const li=document.createElement('li');const a=document.createElement('a');a.href='#'+s.id;a.textContent=h.textContent.replace(/^[\u{1F300}-\u{1FAFF}]/u,'').trim();li.appendChild(a);toc.appendChild(li)}});
+  const words=document.querySelector('main').textContent.trim().split(/\s+/).length;document.getElementById('reading-time').textContent='⏱ '+Math.max(1,Math.round(words/200))+' min read';
+  document.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.mermaid'))return;const btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',()=>{navigator.clipboard.writeText(pre.textContent.replace('Copy','').trim());btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});pre.appendChild(btn)});
+  const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
+  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+  const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  const sections=[...document.querySelectorAll('section[id]')];document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;let idx=-1;const y=window.scrollY+80;sections.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});if(e.key==='j'&&idx<sections.length-1)sections[idx+1].scrollIntoView({behavior:'smooth'});if(e.key==='k'&&idx>0)sections[idx-1].scrollIntoView({behavior:'smooth'})});
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

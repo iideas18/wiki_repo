@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Memory Model Deep-Dive — Oclgrind Core</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}
+.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--border);border:none;color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+main{max-width:920px;margin:0 auto;padding:32px 24px}
+.hero{margin-bottom:2rem}
+.hero h1{font-size:1.8rem;color:var(--heading);margin-bottom:.5rem}
+.hero p{color:var(--text-muted);font-size:1rem}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+h2{font-size:1.35rem;color:var(--heading);margin:2rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.1rem;color:var(--heading);margin:1.4rem 0 .5rem}
+p,ul,ol{margin-bottom:1rem}
+ul,ol{padding-left:1.5rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:1rem 0;position:relative}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88em;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.7rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{text-align:left;padding:10px 14px;border:1px solid var(--border)}
+th{background:var(--surface);color:var(--heading);font-size:.85rem;text-transform:uppercase;letter-spacing:.03em}
+td{font-size:.9rem}
+.callout{background:var(--surface);border-left:4px solid var(--accent3);padding:14px 18px;border-radius:0 8px 8px 0;margin:1.2rem 0}
+.callout strong{color:var(--accent3)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:1.2rem 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-wrap::after{content:"⛶";position:absolute;top:8px;right:12px;font-size:.8rem;color:var(--text-muted)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:2rem;cursor:zoom-out}
+.overlay.active{display:flex}
+.overlay .mermaid-wrap{max-width:95vw;max-height:95vh;overflow:auto;cursor:default;margin:0}
+footer{max-width:920px;margin:3rem auto 0;padding:24px;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:100}
+@media print{header,.theme-toggle,.copy-btn,.back-to-top,.skip-link,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.mermaid-wrap{break-inside:avoid}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">core</a> &rsaquo; Memory Model</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" aria-label="Toggle theme">🌓 Theme</button>
+</header>
+
+<main id="main">
+<section class="hero">
+  <h1>Memory Model Deep-Dive <span class="focus-label" style="display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle">Focus Deep-Dive</span></h1>
+  <p>How Oclgrind's <code>Memory</code> class simulates OpenCL address spaces — buffer allocation, address encoding, load/store, and atomic operations.</p>
+</section>
+
+<!-- ======== Address Encoding ======== -->
+<h2 id="address-encoding">Address Encoding Scheme</h2>
+<p>Every simulated pointer is a single <code>size_t</code> whose bits are split into two fields:</p>
+
+<div class="mermaid-wrap" data-source="graph LR
+  A[size_t address] --> B[buffer index<br/>high m_numBitsBuffer bits]
+  A --> C[byte offset<br/>low m_numBitsAddress bits]
+  B -->|shift right| D[extractBuffer]
+  C -->|mask| E[extractOffset]">
+<pre class="mermaid">graph LR
+  A[size_t address] --> B[buffer index<br/>high m_numBitsBuffer bits]
+  A --> C[byte offset<br/>low m_numBitsAddress bits]
+  B -->|shift right| D[extractBuffer]
+  C -->|mask| E[extractOffset]</pre>
+</div>
+
+<p>The constructor receives <code>bufferBits</code> (the number of bits reserved for the buffer index). The remaining bits hold the offset within each buffer:</p>
+
+<pre><code class="language-cpp">// Memory.cpp – constructor
+Memory::Memory(unsigned addrSpace, unsigned bufferBits, const Context* context)
+    : m_context(context), m_addressSpace(addrSpace), m_totalAllocated(0),
+      m_numBitsBuffer(bufferBits)
+{
+    m_numBitsAddress = (sizeof(size_t) * 8) - m_numBitsBuffer;
+    m_maxNumBuffers  = ((size_t)1 &lt;&lt; m_numBitsBuffer) - 1; // index 0 = NULL
+    m_maxBufferSize  = ((size_t)1 &lt;&lt; m_numBitsAddress);
+    m_memory.push_back(NULL); // slot 0 reserved for NULL
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<p>Encoding and decoding are trivial bit operations:</p>
+
+<pre><code class="language-cpp">// Encode – allocateBuffer returns this
+size_t address = ((size_t)b) &lt;&lt; m_numBitsAddress;
+
+// Decode
+size_t Memory::extractBuffer(size_t address) const {
+    return (address &gt;&gt; m_numBitsAddress);
+}
+size_t Memory::extractOffset(size_t address) const {
+    return (address &amp; (((size_t)-1) &gt;&gt; m_numBitsBuffer));
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ Design note:</strong> Buffer index 0 is permanently reserved as the <em>NULL pointer</em>. Any address whose high bits decode to 0 is considered invalid, mirroring the host convention that address 0 is never a valid allocation.</div>
+
+<!-- ======== Address Spaces ======== -->
+<h2 id="address-spaces">OpenCL Address Spaces</h2>
+<p>Each <code>Memory</code> instance is bound to exactly one address space. The enum is defined in the common header:</p>
+
+<table>
+<thead><tr><th>Constant</th><th>Value</th><th>Scope</th><th>Typical <code>bufferBits</code></th></tr></thead>
+<tbody>
+<tr><td><code>AddrSpacePrivate</code></td><td>0</td><td>Per work-item scratch</td><td>8 (32-bit) / 16 (64-bit)</td></tr>
+<tr><td><code>AddrSpaceGlobal</code></td><td>1</td><td>Visible to all work-items</td><td>16</td></tr>
+<tr><td><code>AddrSpaceConstant</code></td><td>2</td><td>Read-only global</td><td>16</td></tr>
+<tr><td><code>AddrSpaceLocal</code></td><td>3</td><td>Shared within work-group</td><td>8 / 16</td></tr>
+</tbody>
+</table>
+
+<p>The <code>Context</code> owns the global memory (<code>AddrSpaceGlobal</code>). Each <code>WorkItem</code> owns a private memory instance, and each <code>WorkGroup</code> owns a local memory instance.</p>
+
+<!-- ======== Buffer Management ======== -->
+<h2 id="buffer-management">Buffer Management</h2>
+
+<div class="mermaid-wrap" data-source="flowchart TD
+  A[allocateBuffer called] --> B{size <= maxBufferSize?}
+  B -- No --> Z[return 0 — failure]
+  B -- Yes --> C[getNextBuffer]
+  C --> D{m_freeBuffers empty?}
+  D -- Yes --> E[index = m_memory.size — extend vector]
+  D -- No --> F[index = m_freeBuffers.front — pop]
+  E --> G[Create Buffer struct]
+  F --> G
+  G --> H[new unsigned char size]
+  H --> I[Insert into m_memory at index]
+  I --> J[memcpy initData or memset 0]
+  J --> K[m_totalAllocated += size]
+  K --> L[notifyMemoryAllocated]
+  L --> M[return index shifted left m_numBitsAddress]">
+<pre class="mermaid">flowchart TD
+  A[allocateBuffer called] --> B{size <= maxBufferSize?}
+  B -- No --> Z[return 0 — failure]
+  B -- Yes --> C[getNextBuffer]
+  C --> D{m_freeBuffers empty?}
+  D -- Yes --> E[index = m_memory.size — extend vector]
+  D -- No --> F[index = m_freeBuffers.front — pop]
+  E --> G[Create Buffer struct]
+  F --> G
+  G --> H[new unsigned char size]
+  H --> I[Insert into m_memory at index]
+  I --> J[memcpy initData or memset 0]
+  J --> K[m_totalAllocated += size]
+  K --> L[notifyMemoryAllocated]
+  L --> M[return index shifted left m_numBitsAddress]</pre>
+</div>
+
+<h3>The Buffer struct</h3>
+<pre><code class="language-cpp">struct Buffer {
+    size_t          size;   // allocated byte count
+    cl_mem_flags    flags;  // CL_MEM_READ_ONLY, CL_MEM_USE_HOST_PTR, …
+    unsigned char*  data;   // raw storage
+};</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<h3>Key data members</h3>
+<table>
+<thead><tr><th>Member</th><th>Type</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>m_memory</code></td><td><code>vector&lt;Buffer*&gt;</code></td><td>Indexed by buffer number; slot 0 always <code>NULL</code></td></tr>
+<tr><td><code>m_freeBuffers</code></td><td><code>queue&lt;unsigned&gt;</code></td><td>Recycled indices from <code>deallocateBuffer</code></td></tr>
+<tr><td><code>m_totalAllocated</code></td><td><code>size_t</code></td><td>Running byte total for diagnostics</td></tr>
+<tr><td><code>m_numBitsBuffer</code></td><td><code>unsigned</code></td><td>Bit-width of the buffer-index field</td></tr>
+<tr><td><code>m_numBitsAddress</code></td><td><code>unsigned</code></td><td>Bit-width of the offset field</td></tr>
+</tbody>
+</table>
+
+<p>Deallocation pushes the freed index onto <code>m_freeBuffers</code> and sets the vector slot to <code>NULL</code>. If the buffer was <em>not</em> created with <code>CL_MEM_USE_HOST_PTR</code>, <code>delete[]</code> is called on <code>data</code>.</p>
+
+<!-- ======== Load / Store ======== -->
+<h2 id="load-store">Load &amp; Store</h2>
+<p>Both operations follow the same pattern: <strong>notify → validate → memcpy</strong>.</p>
+
+<pre><code class="language-cpp">bool Memory::load(unsigned char* dest, size_t address, size_t size) const {
+    m_context-&gt;notifyMemoryLoad(this, address, size);  // plugins observe
+    if (!isAddressValid(address, size)) return false;
+
+    size_t offset = extractOffset(address);
+    Buffer* buffer = m_memory[extractBuffer(address)];
+    memcpy(dest, buffer-&gt;data + offset, size);
+    return true;
+}
+
+bool Memory::store(const unsigned char* src, size_t address, size_t size) {
+    m_context-&gt;notifyMemoryStore(this, address, size, src);
+    if (!isAddressValid(address, size)) return false;
+
+    size_t offset = extractOffset(address);
+    Buffer* buffer = m_memory[extractBuffer(address)];
+    memcpy(buffer-&gt;data + offset, src, size);
+    return true;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ Notification before validation:</strong> The notify calls are made <em>before</em> the bounds check. This lets analysis plugins (e.g., <code>MemCheck</code>) detect and report out-of-bounds accesses even when the access is invalid.</div>
+
+<!-- ======== Validation ======== -->
+<h2 id="validation">Address Validation</h2>
+<pre><code class="language-cpp">bool Memory::isAddressValid(size_t address, size_t size) const {
+    size_t buffer = extractBuffer(address);
+    size_t offset = extractOffset(address);
+    if (buffer == 0 ||                        // NULL pointer
+        buffer &gt;= m_memory.size() ||          // out-of-range index
+        !m_memory[buffer] ||                   // freed slot
+        offset + size &gt; m_memory[buffer]-&gt;size) // bounds overflow
+        return false;
+    return true;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== Atomic Operations ======== -->
+<h2 id="atomics">Atomic Operations</h2>
+<p>Atomic ops use a pool of 64 mutexes (for global memory only). The mutex index is selected by <code>(offset&nbsp;&gt;&gt;&nbsp;2)&nbsp;&amp;&nbsp;63</code>, providing 4-byte-granularity striping:</p>
+
+<pre><code class="language-cpp">#define NUM_ATOMIC_MUTEXES 64
+mutex atomicMutex[NUM_ATOMIC_MUTEXES];
+#define ATOMIC_MUTEX(offset) atomicMutex[((offset) &gt;&gt; 2) &amp; (NUM_ATOMIC_MUTEXES - 1)]
+
+template &lt;typename T&gt;
+T Memory::atomic(AtomicOp op, size_t address, T value) {
+    m_context-&gt;notifyMemoryAtomicLoad(this, op, address, sizeof(T));
+    m_context-&gt;notifyMemoryAtomicStore(this, op, address, sizeof(T));
+    if (!isAddressValid(address, sizeof(T))) return 0;
+
+    size_t offset = extractOffset(address);
+    T* ptr = (T*)(m_memory[extractBuffer(address)]-&gt;data + offset);
+
+    if (m_addressSpace == AddrSpaceGlobal)
+        ATOMIC_MUTEX(offset).lock();
+
+    T old = *ptr;
+    switch (op) {
+        case AtomicAdd:  *ptr = old + value;  break;
+        case AtomicAnd:  *ptr = old &amp; value;  break;
+        case AtomicOr:   *ptr = old | value;  break;
+        case AtomicXor:  *ptr = old ^ value;  break;
+        case AtomicXchg: *ptr = value;         break;
+        case AtomicInc:  *ptr = old + 1;       break;
+        case AtomicDec:  *ptr = old - 1;       break;
+        case AtomicMax:  *ptr = old &gt; value ? old : value; break;
+        case AtomicMin:  *ptr = old &lt; value ? old : value; break;
+        case AtomicSub:  *ptr = old - value;  break;
+        default: break;
+    }
+
+    if (m_addressSpace == AddrSpaceGlobal)
+        ATOMIC_MUTEX(offset).unlock();
+    return old;  // always returns the PREVIOUS value
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<h3>Compare-and-Swap</h3>
+<p><code>atomicCmpxchg</code> only notifies the store if the comparison succeeds:</p>
+<pre><code class="language-cpp">template &lt;typename T&gt;
+T Memory::atomicCmpxchg(size_t address, T cmp, T value) {
+    m_context-&gt;notifyMemoryAtomicLoad(this, AtomicCmpXchg, address, sizeof(T));
+    if (!isAddressValid(address, sizeof(T))) return 0;
+
+    T* ptr = (T*)(m_memory[extractBuffer(address)]-&gt;data
+                  + extractOffset(address));
+    if (m_addressSpace == AddrSpaceGlobal) ATOMIC_MUTEX(extractOffset(address)).lock();
+
+    T old = *ptr;
+    if (old == cmp) {
+        *ptr = value;
+        m_context-&gt;notifyMemoryAtomicStore(this, AtomicCmpXchg, address, sizeof(T));
+    }
+
+    if (m_addressSpace == AddrSpaceGlobal) ATOMIC_MUTEX(extractOffset(address)).unlock();
+    return old;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ Mutex granularity:</strong> With only 64 mutexes, two unrelated addresses that alias on the same <code>(offset&gt;&gt;2)&amp;63</code> bucket will serialize. This is safe (no data corruption) but can over-serialize concurrent atomic accesses to global memory.</div>
+
+<!-- ======== Supported Atomic Ops Table ======== -->
+<h2 id="atomic-ops-table">Supported Atomic Operations</h2>
+<table>
+<thead><tr><th>AtomicOp enum</th><th>Semantics</th><th>Widths</th></tr></thead>
+<tbody>
+<tr><td><code>AtomicAdd</code></td><td><code>*ptr += val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicSub</code></td><td><code>*ptr -= val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicAnd</code></td><td><code>*ptr &amp;= val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicOr</code></td><td><code>*ptr |= val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicXor</code></td><td><code>*ptr ^= val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicXchg</code></td><td><code>*ptr = val</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicInc</code> / <code>AtomicDec</code></td><td><code>*ptr ± 1</code></td><td>32 / 64 bit</td></tr>
+<tr><td><code>AtomicMin</code> / <code>AtomicMax</code></td><td>conditional replace</td><td>32 / 64 bit (signed &amp; unsigned)</td></tr>
+<tr><td><code>AtomicCmpXchg</code></td><td>compare-and-swap</td><td>32 / 64 bit</td></tr>
+</tbody>
+</table>
+
+<!-- ======== Diagram: Memory Lifecycle ======== -->
+<h2 id="lifecycle">Memory Object Lifecycle</h2>
+<div class="mermaid-wrap" data-source="stateDiagram-v2
+  [*] --> Allocated : allocateBuffer
+  Allocated --> InUse : load / store / atomic
+  InUse --> InUse : load / store / atomic
+  InUse --> Mapped : mapBuffer
+  Mapped --> InUse : unmapBuffer
+  InUse --> Freed : deallocateBuffer
+  Freed --> Recycled : getNextBuffer reuses index
+  Recycled --> Allocated : allocateBuffer">
+<pre class="mermaid">stateDiagram-v2
+  [*] --> Allocated : allocateBuffer
+  Allocated --> InUse : load / store / atomic
+  InUse --> InUse : load / store / atomic
+  InUse --> Mapped : mapBuffer
+  Mapped --> InUse : unmapBuffer
+  InUse --> Freed : deallocateBuffer
+  Freed --> Recycled : getNextBuffer reuses index
+  Recycled --> Allocated : allocateBuffer</pre>
+</div>
+
+</main>
+
+<footer>
+  <span><a href="index.html">← Core Overview</a></span>
+  <span><a href="../search.html">Search Wiki</a></span>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="overlay" id="overlay"><div class="overlay-inner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:document.documentElement.getAttribute('data-theme')==='dark'?'dark':'default'});
+function renderMermaid(){document.querySelectorAll('.mermaid').forEach(function(el,i){el.removeAttribute('data-processed');el.id='mm-'+i});mermaid.run()}
+
+(function(){
+  const key='neutra-ip-theme';
+  const saved=localStorage.getItem(key);
+  if(saved)document.documentElement.setAttribute('data-theme',saved);
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    localStorage.setItem(key,t);
+    mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});
+    renderMermaid();
+  });
+  renderMermaid();
+})();
+
+/* copy buttons */
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var code=btn.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},1500)});
+  });
+});
+
+/* back-to-top */
+var btt=document.getElementById('backToTop');
+window.addEventListener('scroll',function(){btt.style.display=window.scrollY>300?'flex':'none'});
+btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+
+/* diagram overlay */
+var overlay=document.getElementById('overlay');
+document.querySelectorAll('.mermaid-wrap').forEach(function(w){
+  w.addEventListener('click',function(){
+    overlay.querySelector('.overlay-inner').innerHTML=w.outerHTML;
+    overlay.classList.add('active');
+  });
+});
+overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('active')});
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

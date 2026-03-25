@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shared Utilities &amp; Infrastructure — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip wiki-generator">
+<meta name="date" content="2026-03-25">
+<meta name="git-sha" content="359cce7">
+<meta name="module" content="AI Hedge Fund">
+<meta name="lang" content="python">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:100;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.875rem;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+h1,h2,h3,h4{color:var(--heading);margin-top:1.5em;margin-bottom:.5em}
+h1{font-size:2rem;border-bottom:1px solid var(--border);padding-bottom:.3em}
+h2{font-size:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.2em}
+.hero{background:linear-gradient(135deg,var(--surface),var(--bg));border:1px solid var(--border);border-radius:12px;padding:32px;margin-bottom:24px}
+.hero h1{border:none;margin-top:0}
+.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 20px;text-align:center;min-width:120px}
+.stat .num{font-size:1.5rem;font-weight:700;color:var(--accent)}
+.stat .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0}
+.intro-box .analogy{font-style:italic;color:var(--accent3)}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:20px 0}
+#toc h3{margin-top:0;font-size:1rem}
+#toc ul{list-style:none;padding-left:0}#toc li{padding:2px 0}#toc li::before{content:"›";color:var(--accent);margin-right:8px}#toc a{color:var(--text)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.875rem}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--surface);color:var(--heading);font-weight:600}
+tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:12px 0}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.85rem}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.75rem}.copy-btn:hover{color:var(--accent)}
+.dir-map{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:.85rem;white-space:pre;overflow-x:auto}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;text-align:center}.mermaid-container:hover{border-color:var(--accent)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .inner{max-width:95vw;max-height:95vh;overflow:auto;background:var(--surface);border-radius:12px;padding:24px}
+.reading-time{color:var(--text-muted);font-size:.85rem}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:40px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;z-index:60;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn{display:none!important}body{background:#fff;color:#000}.hero{border:1px solid #ccc}}
+@media(max-width:768px){.stat-row{flex-direction:column}.hero{padding:20px}main{padding:16px}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; utils</nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="reading-time" id="reading-time"></span>
+    <button id="theme-toggle" aria-label="Toggle theme">🌓 Theme</button>
+  </div>
+</header>
+<main id="main-content">
+<div class="hero">
+  <h1>🔧 Shared Utilities &amp; Infrastructure</h1>
+  <p class="subtitle">LLM wrappers, analyst registry, progress tracking, display formatting, and Ollama management</p>
+  <p style="margin-top:8px;font-size:.85rem;color:var(--text-muted)">Source: <code>ai-hedge-fund/src/utils</code> · Generated 2026-03-25 · <code>359cce7</code></p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">9</div><div class="label">Files</div></div>
+    <div class="stat"><div class="num">20</div><div class="label">Analysts</div></div>
+    <div class="stat"><div class="num">30+</div><div class="label">Functions</div></div>
+    <div class="stat"><div class="num">1</div><div class="label">Class</div></div>
+    <div class="stat"><div class="num">~1200</div><div class="label">Lines</div></div>
+  </div>
+</div>
+
+<div class="intro-box">
+  <strong>What is this?</strong>
+  <p>The utils package is the <em>engine room</em> of the AI Hedge Fund. Every agent and every runner depends on these shared primitives. Think of it as <span class="analogy">a backstage crew at a Broadway show: the LLM wrapper (call_llm) is the lighting tech who never misses a cue, the analyst registry (ANALYST_CONFIG) is the cast list, the progress tracker (AgentProgress) is the stage manager calling out scene changes on a live dashboard, and the Ollama module is the equipment truck that makes sure local hardware is powered up and ready.</span></p>
+</div>
+
+<nav id="toc"><h3>Table of Contents</h3><ul></ul></nav>
+
+<h2 id="architecture">Architecture Overview</h2>
+<div class="mermaid-container"><pre class="mermaid">
+graph TB
+    subgraph Utils["src/utils"]
+        LLM["llm.py<br/>call_llm() + retries"]
+        ANA["analysts.py<br/>ANALYST_CONFIG<br/>20 analysts"]
+        PRG["progress.py<br/>AgentProgress<br/>Rich live table"]
+        DSP["display.py<br/>colorama + tabulate<br/>trading output"]
+        OLL["ollama.py<br/>install / start / pull"]
+        DCK["docker.py<br/>Docker Ollama mgmt"]
+        API["api_key.py<br/>get_api_key_from_state"]
+        VIZ["visualize.py<br/>save_graph_as_png"]
+    end
+
+    LLM --> PRG
+    LLM --> ANA
+    OLL --> DCK
+    DSP --> ANA
+
+    Agents["Agent Nodes"] --> LLM
+    Agents --> PRG
+    CLI["CLI Module"] --> ANA
+    CLI --> OLL
+    Runner["Graph Runner"] --> DSP
+    Runner --> VIZ
+</pre></div>
+
+<h2 id="data-flow">Data Flow — call_llm() Retry Pipeline</h2>
+<div class="mermaid-container"><pre class="mermaid">
+sequenceDiagram
+    participant Agent
+    participant call_llm
+    participant Config as get_agent_model_config
+    participant LLM as LangChain Model
+    participant Parse as JSON Parser
+
+    Agent->>call_llm: prompt, pydantic_model, agent_name, state
+    call_llm->>Config: extract model_name + provider
+    Config-->>call_llm: ("gpt-4.1", "OPENAI")
+    call_llm->>LLM: llm.with_structured_output(model)
+
+    loop max_retries (default 3)
+        call_llm->>LLM: llm.invoke(prompt)
+        alt JSON mode supported
+            LLM-->>call_llm: Pydantic instance
+        else Fallback
+            LLM-->>Parse: raw text
+            Parse-->>call_llm: extract_json_from_response()
+        end
+        alt Success
+            call_llm-->>Agent: parsed BaseModel
+        else Error
+            call_llm->>call_llm: retry attempt + 1
+        end
+    end
+    call_llm-->>Agent: default_factory() or create_default_response()
+</pre></div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+<thead><tr><th>Name</th><th>File</th><th>Signature</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>call_llm()</code></td><td>llm.py</td><td>(prompt, pydantic_model, agent_name?, state?, max_retries=3, default_factory?) → BaseModel</td><td>Central LLM invocation with structured output, retries, and fallback defaults</td></tr>
+<tr><td><code>create_default_response()</code></td><td>llm.py</td><td>(model_class: type[BaseModel]) → BaseModel</td><td>Generates safe default instance when all retries fail (str→"Error…", float→0.0)</td></tr>
+<tr><td><code>extract_json_from_response()</code></td><td>llm.py</td><td>(content: str) → dict | None</td><td>Pulls JSON from markdown ``` blocks for non-JSON-mode models</td></tr>
+<tr><td><code>get_agent_model_config()</code></td><td>llm.py</td><td>(state, agent_name) → (model_name, provider)</td><td>Resolves per-agent or global model config from AgentState</td></tr>
+<tr><td><code>ANALYST_CONFIG</code></td><td>analysts.py</td><td>dict — 20 entries</td><td>Registry mapping analyst key → {display_name, description, investing_style, agent_func, order}</td></tr>
+<tr><td><code>ANALYST_ORDER</code></td><td>analysts.py</td><td>list[tuple[str, str]]</td><td>Sorted (display_name, key) pairs derived from ANALYST_CONFIG by order field</td></tr>
+<tr><td><code>get_analyst_nodes()</code></td><td>analysts.py</td><td>() → dict</td><td>Returns {key: (node_name, agent_func)} for LangGraph node creation</td></tr>
+<tr><td><code>get_agents_list()</code></td><td>analysts.py</td><td>() → list[dict]</td><td>Sorted list of analyst dicts for API /agents endpoint</td></tr>
+<tr><td><code>AgentProgress</code></td><td>progress.py</td><td>class</td><td>Singleton Rich live-table tracker with register/unregister handler pattern</td></tr>
+<tr><td><code>progress.update_status()</code></td><td>progress.py</td><td>(agent_name, ticker?, status, analysis?)</td><td>Updates agent row, fires handlers, refreshes Rich table</td></tr>
+<tr><td><code>print_trading_output()</code></td><td>display.py</td><td>(result: dict) → None</td><td>Renders analyst signals + decisions with colorama tables</td></tr>
+<tr><td><code>print_backtest_results()</code></td><td>display.py</td><td>(table_rows: list) → None</td><td>Renders backtest summary with Sharpe/Sortino/max-drawdown</td></tr>
+<tr><td><code>format_backtest_row()</code></td><td>display.py</td><td>(date, ticker, action, …, 14 params) → list</td><td>Formats one ticker row or portfolio summary row with colors</td></tr>
+<tr><td><code>ensure_ollama_and_model()</code></td><td>ollama.py</td><td>(model_name: str) → bool</td><td>Full pipeline: check install → start server → download model</td></tr>
+<tr><td><code>download_model()</code></td><td>ollama.py</td><td>(model_name: str) → bool</td><td>Runs <code>ollama pull</code> with regex progress parsing</td></tr>
+<tr><td><code>is_ollama_installed()</code></td><td>ollama.py</td><td>() → bool</td><td>Platform-aware check via which/where</td></tr>
+<tr><td><code>get_api_key_from_state()</code></td><td>api_key.py</td><td>(state, api_key_name: str) → str | None</td><td>Extracts named API key from state.metadata.request.api_keys</td></tr>
+<tr><td><code>save_graph_as_png()</code></td><td>visualize.py</td><td>(app: CompiledGraph, output_file_path)</td><td>Exports LangGraph to Mermaid PNG via API</td></tr>
+</tbody>
+</table>
+
+<h2 id="analyst-registry">Analyst Registry (20 Analysts)</h2>
+<table>
+<thead><tr><th>#</th><th>Key</th><th>Display Name</th><th>Description</th><th>Style</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>aswath_damodaran</td><td>Aswath Damodaran</td><td>The Dean of Valuation</td><td>Intrinsic value &amp; financial metrics</td></tr>
+<tr><td>1</td><td>ben_graham</td><td>Ben Graham</td><td>The Father of Value Investing</td><td>Margin of safety, undervalued fundamentals</td></tr>
+<tr><td>2</td><td>bill_ackman</td><td>Bill Ackman</td><td>The Activist Investor</td><td>Strategic activism, contrarian positions</td></tr>
+<tr><td>3</td><td>cathie_wood</td><td>Cathie Wood</td><td>The Queen of Growth Investing</td><td>Disruptive innovation, tech-forward</td></tr>
+<tr><td>4</td><td>charlie_munger</td><td>Charlie Munger</td><td>The Rational Thinker</td><td>Quality businesses, long-term value</td></tr>
+<tr><td>5</td><td>michael_burry</td><td>Michael Burry</td><td>The Big Short Contrarian</td><td>Contrarian bets, deep fundamental analysis</td></tr>
+<tr><td>6</td><td>mohnish_pabrai</td><td>Mohnish Pabrai</td><td>The Dhandho Investor</td><td>Value investing, margin of safety</td></tr>
+<tr><td>6</td><td>peter_lynch</td><td>Peter Lynch</td><td>The 10-Bagger Investor</td><td>Buy what you know, growth potential</td></tr>
+<tr><td>7</td><td>phil_fisher</td><td>Phil Fisher</td><td>The Scuttlebutt Investor</td><td>Strong management, innovative products</td></tr>
+<tr><td>8</td><td>rakesh_jhunjhunwala</td><td>Rakesh Jhunjhunwala</td><td>The Big Bull Of India</td><td>Macro insights, emerging markets</td></tr>
+<tr><td>9</td><td>stanley_druckenmiller</td><td>Stanley Druckenmiller</td><td>The Macro Investor</td><td>Macro trends, currencies, commodities</td></tr>
+<tr><td>10</td><td>warren_buffett</td><td>Warren Buffett</td><td>The Oracle of Omaha</td><td>Strong fundamentals, competitive moats</td></tr>
+<tr><td>11</td><td>technical_analyst</td><td>Technical Analyst</td><td>Chart Pattern Specialist</td><td>Chart patterns, technical indicators</td></tr>
+<tr><td>12</td><td>fundamentals_analyst</td><td>Fundamentals Analyst</td><td>Financial Statement Specialist</td><td>Financial statements, economic indicators</td></tr>
+<tr><td>13</td><td>growth_analyst</td><td>Growth Analyst</td><td>Growth Specialist</td><td>Growth trends and valuation</td></tr>
+<tr><td>14</td><td>news_sentiment_analyst</td><td>News Sentiment Analyst</td><td>News Sentiment Specialist</td><td>News analysis, sentiment prediction</td></tr>
+<tr><td>15</td><td>sentiment_analyst</td><td>Sentiment Analyst</td><td>Market Sentiment Specialist</td><td>Investor behavior, market sentiment</td></tr>
+<tr><td>16</td><td>valuation_analyst</td><td>Valuation Analyst</td><td>Company Valuation Specialist</td><td>Fair value models, financial metrics</td></tr>
+</tbody>
+</table>
+
+<h2 id="interactions">Module Interactions</h2>
+<table>
+<thead><tr><th>Source</th><th>Target</th><th>Mechanism</th><th>Data Exchanged</th></tr></thead>
+<tbody>
+<tr><td>llm.py</td><td>src.llm.models</td><td>import get_model, get_model_info</td><td>LangChain model instances, model metadata</td></tr>
+<tr><td>llm.py</td><td>progress.py</td><td>progress.update_status()</td><td>Agent name + retry status strings</td></tr>
+<tr><td>analysts.py</td><td>src.agents.*</td><td>import 20 agent functions</td><td>Callable agent_func references for ANALYST_CONFIG</td></tr>
+<tr><td>display.py</td><td>analysts.py</td><td>import ANALYST_ORDER</td><td>Sort order for agent signal tables</td></tr>
+<tr><td>ollama.py</td><td>docker.py</td><td>delegates when Docker URL detected</td><td>model_name + ollama_url for remote Ollama</td></tr>
+<tr><td>ollama.py</td><td>questionary</td><td>confirm prompts</td><td>User Y/N for install, start, download</td></tr>
+<tr><td>api_key.py</td><td>AgentState</td><td>state.metadata.request.api_keys</td><td>Dict of provider → key_value</td></tr>
+<tr><td>visualize.py</td><td>LangGraph</td><td>app.get_graph().draw_mermaid_png()</td><td>PNG binary data for graph export</td></tr>
+</tbody>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/utils/
+├── __init__.py           # "Utility modules for the application."
+├── llm.py                # call_llm(), create_default_response(),
+│                         #   extract_json_from_response(), get_agent_model_config()
+├── analysts.py           # ANALYST_CONFIG (20 entries), ANALYST_ORDER,
+│                         #   get_analyst_nodes(), get_agents_list()
+├── progress.py           # AgentProgress class (singleton `progress`),
+│                         #   Rich live table, handler registry
+├── display.py            # print_trading_output(), print_backtest_results(),
+│                         #   format_backtest_row(), sort_agent_signals()
+├── ollama.py             # ensure_ollama_and_model(), download_model(),
+│                         #   is_ollama_installed(), start_ollama_server()
+├── docker.py             # Docker-based Ollama: is_ollama_available(),
+│                         #   download_model(), delete_model()
+├── api_key.py            # get_api_key_from_state()
+└── visualize.py          # save_graph_as_png()</div>
+
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+<thead><tr><th>Constant / Default</th><th>File</th><th>Value</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>max_retries</code></td><td>llm.py</td><td>3</td><td>Number of LLM invocation attempts before fallback</td></tr>
+<tr><td>Default model</td><td>llm.py</td><td>gpt-4.1 / OPENAI</td><td>Fallback when no agent-specific config exists</td></tr>
+<tr><td><code>DEFAULT_OLLAMA_SERVER_URL</code></td><td>ollama.py</td><td>http://localhost:11434</td><td>Local Ollama API base (overridable via OLLAMA_BASE_URL env)</td></tr>
+<tr><td>Server poll timeout</td><td>ollama.py</td><td>10 seconds</td><td>Max wait for Ollama server to become responsive</td></tr>
+<tr><td>Docker download timeout</td><td>docker.py</td><td>30 minutes</td><td>Max wait for model download via Docker Ollama</td></tr>
+<tr><td>Docker poll interval</td><td>docker.py</td><td>10 seconds</td><td>Check interval during Docker model download</td></tr>
+<tr><td>Progress refresh rate</td><td>progress.py</td><td>4 Hz</td><td>Rich Live display refresh rate</td></tr>
+<tr><td>Reasoning wrap width</td><td>display.py</td><td>60 chars</td><td>Max column width for reasoning text in tables</td></tr>
+<tr><td>Risk-free rate</td><td>(backtest)</td><td>4.34% annual</td><td>Used for Sharpe/Sortino ratio calculations</td></tr>
+</tbody>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+
+<h3>Example 1 — Using call_llm() with structured output</h3>
+<pre><code class="language-python">from pydantic import BaseModel
+from src.utils.llm import call_llm
+
+class StockSignal(BaseModel):
+    signal: str        # "bullish" | "bearish" | "neutral"
+    confidence: float  # 0.0 – 1.0
+    reasoning: str
+
+# Agent invocation with automatic retries and fallback
+result = call_llm(
+    prompt=[system_msg, human_msg],
+    pydantic_model=StockSignal,
+    agent_name="warren_buffett",
+    state=agent_state,        # carries model config + API keys
+    max_retries=3,
+    default_factory=lambda: StockSignal(
+        signal="neutral", confidence=0.0,
+        reasoning="Error in analysis, using default"
+    ),
+)
+print(result.signal, result.confidence)
+</code></pre>
+
+<h3>Example 2 — AgentProgress handler pattern</h3>
+<pre><code class="language-python">from src.utils.progress import progress
+
+# Register a custom handler (e.g., for SSE streaming)
+@progress.register_handler
+def on_update(agent_name, ticker, status, analysis, timestamp):
+    event = {
+        "agent": agent_name,
+        "ticker": ticker,
+        "status": status,
+        "timestamp": timestamp,
+    }
+    send_sse(event)
+
+# Agents call update_status() during execution
+progress.start()
+progress.update_status("warren_buffett", "AAPL", "analyzing financials")
+progress.update_status("warren_buffett", "AAPL", "done", analysis="bullish 0.85")
+progress.stop()
+
+# Unregister when done
+progress.unregister_handler(on_update)
+</code></pre>
+
+<h3>Example 3 — Analyst registry lookup</h3>
+<pre><code class="language-python">from src.utils.analysts import ANALYST_CONFIG, get_analyst_nodes
+
+# Access analyst metadata
+buffett = ANALYST_CONFIG["warren_buffett"]
+print(buffett["display_name"])     # "Warren Buffett"
+print(buffett["description"])      # "The Oracle of Omaha"
+print(buffett["investing_style"])  # "Seeks companies with strong fundamentals..."
+print(buffett["order"])            # 10
+
+# Get nodes for LangGraph construction
+nodes = get_analyst_nodes()
+# → {"warren_buffett": ("warren_buffett_agent", &lt;function&gt;), ...}
+</code></pre>
+
+</main>
+
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<button id="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  AI Hedge Fund · utils · Generated 2026-03-25 · git <code>359cce7</code>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const THEME_KEY = 'neutra-ip-theme';
+  mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+  function getTheme(){ return localStorage.getItem(THEME_KEY) || 'dark'; }
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem(THEME_KEY, t);
+    document.getElementById('hljs-theme').href = t === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+    renderMermaid(t);
+  }
+
+  function renderMermaid(theme){
+    document.querySelectorAll('.mermaid').forEach(function(el, i){
+      if (!el.getAttribute('data-source')) el.setAttribute('data-source', el.textContent);
+      el.removeAttribute('data-processed');
+      el.innerHTML = el.getAttribute('data-source');
+      el.id = 'mermaid-' + i;
+    });
+    mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  setTheme(getTheme());
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  });
+
+  /* Auto-TOC */
+  var toc = document.querySelector('#toc ul');
+  document.querySelectorAll('h2[id]').forEach(function(h){
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+
+  /* Reading time */
+  var words = document.getElementById('main-content').textContent.split(/\s+/).length;
+  document.getElementById('reading-time').textContent = Math.ceil(words / 200) + ' min read';
+
+  /* Copy buttons */
+  document.querySelectorAll('pre').forEach(function(pre){
+    if (pre.querySelector('.mermaid')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(){
+      var code = pre.querySelector('code');
+      navigator.clipboard.writeText(code ? code.textContent : pre.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+    });
+    pre.appendChild(btn);
+  });
+
+  /* Diagram zoom overlay */
+  var overlay = document.getElementById('diagram-overlay');
+  var inner = document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-container').forEach(function(c){
+    c.addEventListener('click', function(){
+      inner.innerHTML = c.innerHTML;
+      overlay.classList.add('active');
+    });
+  });
+  overlay.addEventListener('click', function(){ overlay.classList.remove('active'); });
+
+  /* Back to top */
+  var btt = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function(){ btt.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+  btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* j/k keyboard nav */
+  document.addEventListener('keydown', function(e){
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var headings = Array.from(document.querySelectorAll('h2[id]'));
+    var scrollY = window.scrollY + 80;
+    var idx = headings.findIndex(function(h){ return h.offsetTop > scrollY; });
+    if (e.key === 'j'){ var next = headings[idx === -1 ? headings.length - 1 : idx]; if (next) next.scrollIntoView({ behavior: 'smooth' }); }
+    if (e.key === 'k'){ var prev = headings[Math.max(0, (idx === -1 ? headings.length : idx) - 2)]; if (prev) prev.scrollIntoView({ behavior: 'smooth' }); }
+  });
+
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

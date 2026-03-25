@@ -1,0 +1,68 @@
+[
+  {
+    "title": "AI Hedge Fund — Multi-Agent Investment Decision System",
+    "path": "index.html",
+    "excerpt": "An AI-powered hedge fund employing 18+ specialized analyst agents modeled after legendary investors like Warren Buffett, Ben Graham, and Cathie Wood to collaboratively analyze stocks, manage risk, and produce trading decisions. Built with LangGraph orchestration, FastAPI backend, and React Flow visual workflow editor. Supports single-run analysis and historical backtesting with performance metrics.",
+    "headings": ["System Architecture", "End-to-End Data Flow", "Key Components", "Sub-Modules", "Agent Investment Strategies", "Directory Map", "Configuration & Environment", "Build & Tech Stack", "Navigation Guide"]
+  },
+  {
+    "title": "AI Hedge Fund/agents — Analyst Agent Framework",
+    "path": "agents/index.html",
+    "excerpt": "20 analyst agents implementing diverse investment strategies. Includes 12 LLM-driven persona agents modeled after legendary investors (Warren Buffett, Ben Graham, Charlie Munger, Michael Burry, Peter Lynch, Cathie Wood, etc.) plus 8 quantitative agents for technicals, fundamentals, valuation, sentiment, growth, and risk management. Each agent fetches financial data, applies strategy-specific analysis, and returns bullish/bearish/neutral signals with confidence scores.",
+    "headings": ["Architecture", "Key Classes", "Data Flow", "Interactions", "Agent Strategies", "Configuration", "Directory Map", "Code Examples"]
+  },
+  {
+    "title": "AI Hedge Fund/backtesting — Historical Backtesting Engine",
+    "path": "backtesting/index.html",
+    "excerpt": "Historical backtesting engine with multi-day simulation loop, portfolio tracking (long/short positions, margin, realized gains), trade execution, performance metrics (Sharpe ratio, Sortino ratio, max drawdown), and SPY benchmark comparison. Key classes: BacktestEngine, Portfolio, TradeExecutor, PerformanceMetricsCalculator, AgentController, BenchmarkCalculator, OutputBuilder.",
+    "headings": ["Architecture", "Key Classes", "Backtest Loop", "Portfolio Management", "Performance Metrics", "Trade Execution", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/graph — LangGraph Workflow Orchestration",
+    "path": "graph/index.html",
+    "excerpt": "LangGraph-based workflow orchestration using StateGraph with AgentState TypedDict. Supports message accumulation via operator.add, dictionary merging via merge_dicts operator, and configurable analyst node composition. The create_workflow() function in main.py builds the graph connecting selected analyst agents to risk manager and portfolio manager nodes.",
+    "headings": ["Architecture", "AgentState", "Workflow Construction", "State Management", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/llm — Multi-Provider LLM Management",
+    "path": "llm/index.html",
+    "excerpt": "Multi-provider LLM model configuration supporting 13+ providers: OpenAI, Anthropic, DeepSeek, Google, Groq, Ollama, Azure OpenAI, XAI, GigaChat, OpenRouter, Mistral, Meta, Alibaba. LLMModel Pydantic config with display_name, model_name, provider. Factory function get_model() handles provider-specific initialization with API key resolution from state, environment, or parameters.",
+    "headings": ["Architecture", "ModelProvider Enum", "LLMModel Config", "get_model() Factory", "API Key Resolution", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/data — Financial Data Models & Caching",
+    "path": "data/index.html",
+    "excerpt": "Pydantic data models for financial data: Price (OHLCV), FinancialMetrics (40+ fields including P/E, ROE, margins, growth rates), LineItem (generic financial line item), InsiderTrade (transaction details), CompanyNews (sentiment-tagged articles), CompanyFacts. In-memory Cache class with per-type storage, merge/deduplication logic, and composite cache keys.",
+    "headings": ["Architecture", "Price Model", "FinancialMetrics Model", "Cache Class", "Portfolio Models", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/tools — Financial Data API Client",
+    "path": "tools/index.html",
+    "excerpt": "Financial Datasets API client with rate limiting (429 backoff with linear delays: 60s, 90s, 120s), pagination for insider trades and company news, in-memory caching integration, and DataFrame conversion. Core functions: get_prices(), get_financial_metrics(), search_line_items(), get_insider_trades(), get_company_news(), get_market_cap(). Base URL: api.financialdatasets.ai.",
+    "headings": ["Architecture", "Rate Limiting", "API Functions", "Caching Integration", "Pagination", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/cli — Command-Line Interface",
+    "path": "cli/index.html",
+    "excerpt": "Command-line interface with CLIInputs dataclass, argument parsing via argparse, interactive analyst selection using questionary prompts, model picking with Ollama support, date resolution with configurable lookback. Supports both single-run hedge fund analysis and backtesting modes with --tickers, --start-date, --end-date, --initial-capital, --margin-requirement flags.",
+    "headings": ["Architecture", "CLIInputs", "Argument Parsing", "Interactive Selection", "Date Resolution", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/utils — Shared Utilities & Infrastructure",
+    "path": "utils/index.html",
+    "excerpt": "Shared utilities including call_llm() with retries and Pydantic parsing, ANALYST_CONFIG registry mapping 20 analyst keys to functions, AgentProgress with Rich live table display, output formatting with colorama and tabulate, Ollama model management (install/start/download/delete), Docker utilities, API key extraction from state, and graph visualization with Mermaid PNG export.",
+    "headings": ["Architecture", "LLM Calling", "Analyst Registry", "Progress Tracking", "Display Formatting", "Ollama Management", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/app_backend — FastAPI Web Backend",
+    "path": "app_backend/index.html",
+    "excerpt": "FastAPI REST API with SSE streaming for real-time agent progress. Routes: POST /hedge-fund/run (SSE execution), POST /hedge-fund/backtest, flows CRUD, API key management, language model listing. Services: graph construction from React Flow nodes/edges, backtest service, portfolio management. Database: SQLAlchemy models for HedgeFundFlow, FlowRun, FlowRunCycle, ApiKey with Alembic migrations.",
+    "headings": ["Architecture", "Routes", "Services", "Database Models", "SSE Events", "Pydantic Schemas", "Configuration", "Directory Map"]
+  },
+  {
+    "title": "AI Hedge Fund/app_frontend — React Visual Workflow Editor",
+    "path": "app_frontend/index.html",
+    "excerpt": "React 18 + TypeScript visual workflow editor using React Flow (@xyflow/react). Features drag-and-drop agent nodes, real-time SSE execution with progress updates, per-agent model selection, backtest visualization, undo/redo history, and flow persistence. Key contexts: FlowContext, NodeContext, LayoutContext, TabsContext. Nodes: AgentNode, StockAnalyzerNode, PortfolioManagerNode, PortfolioStartNode.",
+    "headings": ["Architecture", "Context Providers", "Node Components", "Custom Hooks", "Services", "SSE Streaming", "Configuration", "Directory Map"]
+  }
+]

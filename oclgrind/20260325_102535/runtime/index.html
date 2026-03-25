@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/runtime">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Oclgrind runtime — OpenCL ICD Runtime</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.section-label{font-size:.85rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin:1.5rem 0 .5rem;padding-left:.2rem}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+/* Deep-dive hub */
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1.2rem 0;font-size:.93rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--accent3);color:#000;margin-left:6px;vertical-align:middle}
+.deep-dive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.deep-dive-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.deep-dive-grid .card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.deep-dive-grid .card h4{margin-top:0;color:var(--accent2)}.deep-dive-grid .card p{font-size:.9rem;color:var(--text-muted)}
+.deep-dive-grid .card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.deep-dive-grid .card ul li{margin:.25rem 0}
+/* Theme toggle */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .deep-dive-grid .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.deep-dive-grid{grid-template-columns:1fr}.stat-row{flex-direction:column}}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+
+<main id="main">
+<nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; runtime</nav>
+
+<h1>Oclgrind runtime &mdash; OpenCL ICD Runtime</h1>
+
+<div class="hero">
+  <p class="subtitle">Full OpenCL 1.2 API Implementation &amp; ICD Dispatch Layer</p>
+  <p>The runtime module is Oclgrind&rsquo;s public face: it implements every <code>cl*</code> function from the OpenCL specification, wrapping them around the internal Core simulation engine. It also provides the ICD (Installable Client Driver) dispatch table that lets OpenCL loaders discover and route API calls to Oclgrind, plus the <code>oclgrind</code> launcher binary that uses <code>LD_PRELOAD</code> injection to transparently redirect any OpenCL application.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">5</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">~7.4k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">100+</div><div class="label">cl* Functions</div></div>
+  <div class="stat-box"><div class="num">9</div><div class="label">Wrapper Structs</div></div>
+</div>
+
+<p>
+  <span class="badge blue">OpenCL 1.2 API</span>
+  <span class="badge green">ICD Dispatch</span>
+  <span class="badge yellow">Async Queue</span>
+  <span class="badge red">LD_PRELOAD Injection</span>
+</p>
+
+<!-- What is this? -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this module?</h3>
+<p>Think of the runtime module as a <strong>hotel concierge desk</strong>. An OpenCL application walks up and makes requests &mdash; &ldquo;create a context,&rdquo; &ldquo;allocate a buffer,&rdquo; &ldquo;run this kernel.&rdquo; The concierge (runtime) doesn&rsquo;t do the work itself; it creates a tracking ticket (wrapper struct), validates the request, and delegates the actual heavy lifting to the hotel staff (the <code>core</code> module). The ICD dispatch table is like the hotel&rsquo;s phone directory &mdash; it maps every possible guest request to the right concierge handler. The async queue is the concierge&rsquo;s task board: commands are pinned, dependencies tracked, and work is dispatched in order, with completion callbacks notifying guests when their request is done.</p>
+</div>
+
+<!-- Table of Contents -->
+<h2 id="toc">Table of Contents</h2>
+<nav class="toc">
+<ol>
+  <li><a href="#architecture">Architecture &amp; API Flow</a></li>
+  <li><a href="#async-queue">Async Command Queue</a></li>
+  <li><a href="#structs">Key Structs &amp; Types</a></li>
+  <li><a href="#directory">Directory Map</a></li>
+  <li><a href="#interactions">Module Interactions</a></li>
+  <li><a href="#configuration">Configuration &amp; Environment</a></li>
+  <li><a href="#examples">Code Examples</a></li>
+  <li><a href="#deep-dives">Deep-Dive Pages</a></li>
+</ol>
+</nav>
+
+<!-- Section 1: Architecture -->
+<h2 id="architecture">1 &mdash; Architecture &amp; API Flow</h2>
+<p>Every OpenCL API call enters through the ICD dispatch table, which maps the function pointer to the Oclgrind implementation in <code>runtime.cpp</code>. The runtime function validates arguments, creates or updates the appropriate wrapper struct, delegates to the <code>core</code> simulation engine, and returns the result to the caller.</p>
+
+<div class="diagram-container" data-source="opencl-api-flow">
+<pre class="mermaid">
+flowchart TD
+    APP["OpenCL Application"]
+    ICD["ICD Loader<br><em>libOpenCL.so</em>"]
+    DISP["m_dispatchTable[256]<br><em>icd.h / runtime.cpp</em>"]
+    RT["runtime.cpp<br><em>cl* implementations</em>"]
+    AQ["async_queue<br><em>asyncEnqueue / asyncQueueRelease</em>"]
+    CORE_CTX["core::Context"]
+    CORE_Q["core::Queue"]
+    CORE_K["core::Kernel"]
+    CORE_M["core::Memory"]
+    CORE_P["core::Program"]
+
+    APP -->|"clEnqueue*()"| ICD
+    ICD -->|"dispatch[N]"| DISP
+    DISP --> RT
+    RT -->|"create wrappers<br>validate args"| RT
+    RT -->|"kernel / mem ops"| AQ
+    AQ -->|"queue→enqueue(cmd)"| CORE_Q
+    RT -->|"context mgmt"| CORE_CTX
+    RT -->|"buffer alloc / free"| CORE_M
+    RT -->|"build / compile"| CORE_P
+    CORE_Q -->|"dispatch kernel"| CORE_K
+    CORE_K -->|"read / write"| CORE_M
+
+    style APP fill:#1a2332,stroke:#58a6ff,color:#c9d1d9
+    style ICD fill:#1a2332,stroke:#d29922,color:#c9d1d9
+    style DISP fill:#1c2128,stroke:#58a6ff,color:#c9d1d9
+    style RT fill:#1c2128,stroke:#3fb950,color:#c9d1d9
+    style AQ fill:#1c2128,stroke:#d29922,color:#c9d1d9
+    style CORE_CTX fill:#0d1117,stroke:#58a6ff,color:#c9d1d9
+    style CORE_Q fill:#0d1117,stroke:#58a6ff,color:#c9d1d9
+    style CORE_K fill:#0d1117,stroke:#58a6ff,color:#c9d1d9
+    style CORE_M fill:#0d1117,stroke:#58a6ff,color:#c9d1d9
+    style CORE_P fill:#0d1117,stroke:#58a6ff,color:#c9d1d9
+</pre>
+</div>
+<p class="section-label">Figure 1 &mdash; OpenCL API call flow from application through ICD dispatch into Core</p>
+
+<!-- Section 2: Async Command Queue -->
+<h2 id="async-queue">2 &mdash; Async Command Queue</h2>
+<p>The <code>AsyncQueue</code> subsystem handles all enqueue operations. When a <code>clEnqueue*</code> call is made, the runtime creates a <code>core::Command</code> object, retains any referenced <code>cl_mem</code> or <code>cl_kernel</code> objects, attaches the event wait list, and hands it off to <code>core::Queue::enqueue()</code>. On completion, <code>asyncQueueRelease</code> fires callbacks, releases retained objects, and cleans up event references. Four static maps track the lifecycle: <code>memObjectMap</code>, <code>kernelMap</code>, <code>eventMap</code>, and <code>waitListMap</code>.</p>
+
+<div class="diagram-container" data-source="async-queue-seq">
+<pre class="mermaid">
+sequenceDiagram
+    participant App as Application
+    participant RT as runtime.cpp
+    participant AQ as async_queue
+    participant CQ as core::Queue
+    participant EV as cl_event
+
+    App->>RT: clEnqueueNDRangeKernel()
+    RT->>RT: validate args, clone kernel
+    RT->>AQ: asyncQueueRetain(cmd, kernel)
+    AQ->>AQ: clRetainKernel + retain memArgs
+    RT->>AQ: asyncEnqueue(queue, type, cmd, waitList)
+    AQ->>AQ: attach wait-list events
+    AQ->>CQ: queue→enqueue(cmd)
+    CQ-->>AQ: return core::Event*
+    AQ->>EV: create _cl_event wrapper
+    AQ-->>RT: event ready
+    RT-->>App: CL_SUCCESS + event
+
+    Note over CQ: Command executes asynchronously
+
+    CQ->>AQ: command complete callback
+    AQ->>AQ: asyncQueueRelease(cmd)
+    AQ->>AQ: release cl_mem, cl_kernel
+    AQ->>EV: fire user callbacks
+    AQ->>AQ: release wait-list events
+</pre>
+</div>
+<p class="section-label">Figure 2 &mdash; Sequence diagram of an async kernel enqueue through the command queue</p>
+
+<!-- Section 3: Key Structs -->
+<h2 id="structs">3 &mdash; Key Structs &amp; Types</h2>
+<table>
+<thead><tr><th>Struct / Type</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>_cl_platform_id</code></td><td>icd.h</td><td>Platform singleton; holds only the ICD <code>dispatch</code> void pointer</td></tr>
+<tr><td><code>_cl_device_id</code></td><td>icd.h</td><td>Virtual device descriptor with configurable <code>globalMemSize</code>, <code>constantMemSize</code>, <code>localMemSize</code>, <code>maxWGSize</code></td></tr>
+<tr><td><code>_cl_context</code></td><td>icd.h</td><td>Wraps <code>core::Context*</code>; tracks error callback, properties, refCount, destructor callback stack</td></tr>
+<tr><td><code>_cl_command_queue</code></td><td>icd.h</td><td>Wraps <code>core::Queue*</code>; holds queue properties and refCount</td></tr>
+<tr><td><code>_cl_mem</code></td><td>icd.h</td><td>Memory object: tracks address, size, offset, flags, host pointer, parent (sub-buffers), destructor callbacks</td></tr>
+<tr><td><code>cl_image</code></td><td>icd.h</td><td>Extends <code>_cl_mem</code> with <code>cl_image_format</code> and <code>cl_image_desc</code></td></tr>
+<tr><td><code>_cl_program</code></td><td>icd.h</td><td>Wraps <code>core::Program*</code>; tracks owning context and refCount</td></tr>
+<tr><td><code>_cl_kernel</code></td><td>icd.h</td><td>Wraps <code>core::Kernel*</code>; maintains <code>memArgs</code> map and <code>imageArgs</code> vector for argument tracking</td></tr>
+<tr><td><code>_cl_event</code></td><td>icd.h</td><td>Wraps <code>core::Event*</code>; stores command type, callback list, owning queue, refCount</td></tr>
+<tr><td><code>_cl_sampler</code></td><td>icd.h</td><td>Sampler state: addressing mode, filter mode, normalized coordinates, packed <code>uint32_t sampler</code></td></tr>
+<tr><td><code>m_dispatchTable[256]</code></td><td>runtime.cpp</td><td>ICD function pointer array populated with <code>DISPATCH_TABLE_ENTRY</code> macro; 100+ entries</td></tr>
+<tr><td><code>APICallEntry</code></td><td>runtime.cpp</td><td>RAII guard that pushes/pops function name onto <code>thread_local g_apiCallStack</code> for error reporting</td></tr>
+</tbody>
+</table>
+
+<!-- Section 4: Directory Map -->
+<h2 id="directory">4 &mdash; Directory Map</h2>
+<table>
+<thead><tr><th>File</th><th>Lines</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>runtime.cpp</code></td><td>~6,400</td><td>All <code>cl*</code> API function implementations &amp; ICD dispatch table initialization</td></tr>
+<tr><td><code>icd.h</code></td><td>~255</td><td>ICD macro renames, wrapper struct definitions, forward declarations</td></tr>
+<tr><td><code>async_queue.h</code></td><td>~19</td><td>Async enqueue/retain/release function declarations</td></tr>
+<tr><td><code>async_queue.cpp</code></td><td>~132</td><td>Async command lifecycle: enqueue, retain objects, release &amp; fire callbacks</td></tr>
+<tr><td><code>oclgrind.cpp</code></td><td>~570</td><td>Launcher binary: argument parsing, <code>LD_PRELOAD</code>/<code>LD_LIBRARY_PATH</code> injection, Windows DLL injection</td></tr>
+<tr><td><code>runtime.def</code></td><td>~50</td><td>Windows module definition file for exported symbols</td></tr>
+<tr><td><code>icd.def</code></td><td>~5</td><td>ICD export definition for <code>clIcdGetPlatformIDsKHR</code></td></tr>
+</tbody>
+</table>
+
+<!-- Section 5: Interactions -->
+<h2 id="interactions">5 &mdash; Module Interactions</h2>
+<table>
+<thead><tr><th>Direction</th><th>Target Module</th><th>Interface</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>&#8594;</td><td><code>core::Context</code></td><td><code>new Context()</code>, <code>context-&gt;getGlobalMemory()</code></td><td>Create / destroy simulation context; access global memory</td></tr>
+<tr><td>&#8594;</td><td><code>core::Queue</code></td><td><code>new Queue(ctx)</code>, <code>queue-&gt;enqueue(cmd)</code>, <code>queue-&gt;finish()</code></td><td>Submit commands; flush / finish synchronization barriers</td></tr>
+<tr><td>&#8594;</td><td><code>core::Program</code></td><td><code>Program::createFromSource()</code>, <code>program-&gt;build()</code></td><td>Compile / link OpenCL C source to LLVM IR</td></tr>
+<tr><td>&#8594;</td><td><code>core::Kernel</code></td><td><code>program-&gt;createKernel(name)</code>, <code>kernel-&gt;setArg()</code></td><td>Instantiate kernels, bind arguments</td></tr>
+<tr><td>&#8594;</td><td><code>core::Memory</code></td><td><code>memory-&gt;allocateBuffer()</code>, <code>memory-&gt;mapBuffer()</code></td><td>Allocate/free/map device memory regions</td></tr>
+<tr><td>&#8592;</td><td>ICD Loader</td><td><code>clIcdGetPlatformIDsKHR()</code></td><td>ICD discovery entry point; loader calls to detect platform</td></tr>
+<tr><td>&#8592;</td><td>OpenCL Application</td><td><code>cl*</code> function calls</td><td>Application-facing API surface</td></tr>
+<tr><td>&#8596;</td><td><code>async_queue</code></td><td><code>asyncEnqueue()</code>, <code>asyncQueueRetain()</code>, <code>asyncQueueRelease()</code></td><td>Manage object lifetime across async command execution</td></tr>
+</tbody>
+</table>
+
+<!-- Section 6: Configuration -->
+<h2 id="configuration">6 &mdash; Configuration &amp; Environment Variables</h2>
+<table>
+<thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>OCLGRIND_GLOBAL_MEM_SIZE</code></td><td>128 MiB</td><td>Total global memory reported by the virtual device</td></tr>
+<tr><td><code>OCLGRIND_CONSTANT_MEM_SIZE</code></td><td>64 KiB</td><td>Maximum constant buffer size</td></tr>
+<tr><td><code>OCLGRIND_LOCAL_MEM_SIZE</code></td><td>32 KiB</td><td>Per-workgroup local memory limit</td></tr>
+<tr><td><code>OCLGRIND_MAX_WGSIZE</code></td><td>1024</td><td>Maximum work-group size reported to applications</td></tr>
+<tr><td><code>OCLGRIND_CHECK_API</code></td><td>off</td><td>Print API error diagnostics to stderr when set to <code>1</code></td></tr>
+<tr><td><code>OCLGRIND_BUILD_OPTIONS</code></td><td>&mdash;</td><td>Additional flags passed to the OpenCL compiler on every build</td></tr>
+<tr><td><code>OCLGRIND_TESTING</code></td><td>&mdash;</td><td>When set, launcher skips <code>../lib</code> path resolution (uses exe directory directly)</td></tr>
+<tr><td><code>LD_PRELOAD</code> / <code>DYLD_INSERT_LIBRARIES</code></td><td>&mdash;</td><td>Set by the <code>oclgrind</code> launcher to inject <code>liboclgrind-rt.so</code></td></tr>
+<tr><td><code>LD_LIBRARY_PATH</code> / <code>DYLD_LIBRARY_PATH</code></td><td>&mdash;</td><td>Prepended with Oclgrind lib directory by launcher</td></tr>
+<tr><td><code>OCLGRIND_DATA_RACES</code></td><td>off</td><td>Enable data-race detection plugin</td></tr>
+<tr><td><code>OCLGRIND_INTERACTIVE</code></td><td>off</td><td>Enable interactive debugger mode (<code>-i</code> flag)</td></tr>
+<tr><td><code>OCLGRIND_PLUGINS</code></td><td>&mdash;</td><td>Colon-separated list of plugin shared libraries to load</td></tr>
+</tbody>
+</table>
+
+<!-- Section 7: Code Examples -->
+<h2 id="examples">7 &mdash; Code Examples</h2>
+
+<h3>7.1 &mdash; Platform &amp; Device Initialization (runtime.cpp)</h3>
+<p>The ICD entry point lazily creates the singleton platform and device, reading memory sizes from environment variables:</p>
+<pre><code class="language-cpp">CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
+  cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms)
+{
+  REGISTER_API;
+  if (platforms &amp;&amp; num_entries &lt; 1)
+    ReturnError(NULL, CL_INVALID_VALUE);
+
+  if (!m_platform) {
+    m_platform = new _cl_platform_id;
+    m_platform-&gt;dispatch = m_dispatchTable;
+
+    m_device = new _cl_device_id;
+    m_device-&gt;dispatch = m_dispatchTable;
+    m_device-&gt;globalMemSize  = oclgrind::getEnvInt(
+      "OCLGRIND_GLOBAL_MEM_SIZE", DEFAULT_GLOBAL_MEM_SIZE, false);
+    m_device-&gt;localMemSize   = oclgrind::getEnvInt(
+      "OCLGRIND_LOCAL_MEM_SIZE", DEFAULT_LOCAL_MEM_SIZE, false);
+    m_device-&gt;maxWGSize      = oclgrind::getEnvInt(
+      "OCLGRIND_MAX_WGSIZE", DEFAULT_MAX_WGSIZE, false);
+  }
+  if (platforms)     platforms[0] = m_platform;
+  if (num_platforms) *num_platforms = 1;
+  return CL_SUCCESS;
+}</code></pre>
+
+<h3>7.2 &mdash; Async Enqueue Lifecycle (async_queue.cpp)</h3>
+<p>When a command completes, <code>asyncQueueRelease</code> tears down retained references and fires user callbacks:</p>
+<pre><code class="language-cpp">void asyncQueueRelease(Command* cmd)
+{
+  // Release retained memory objects
+  if (memObjectMap.find(cmd) != memObjectMap.end()) {
+    list&lt;cl_mem&gt; memObjects = memObjectMap[cmd];
+    while (!memObjects.empty()) {
+      clReleaseMemObject(memObjects.front());
+      memObjects.pop_front();
+    }
+    memObjectMap.erase(cmd);
+  }
+
+  // Release kernel (if this was a kernel command)
+  if (cmd-&gt;type == Command::KERNEL) {
+    clReleaseKernel(kernelMap[cmd]);
+    kernelMap.erase(cmd);
+    delete ((KernelCommand*)cmd)-&gt;kernel;
+  }
+
+  // Fire user event callbacks
+  cl_event event = eventMap[cmd];
+  for (auto &amp;cb : event-&gt;callbacks)
+    cb.first(event, event-&gt;event-&gt;state, cb.second);
+
+  // Release wait-list events
+  for (auto &amp;e : waitListMap[cmd])
+    clReleaseEvent(e);
+  waitListMap.erase(cmd);
+  clReleaseEvent(event);
+}</code></pre>
+
+<h3>7.3 &mdash; Launcher LD_PRELOAD Injection (oclgrind.cpp)</h3>
+<p>The <code>oclgrind</code> binary constructs preload paths and uses <code>execvp</code> to replace itself with the target application:</p>
+<pre><code class="language-cpp">// Construct LD_PRELOAD with the Oclgrind runtime library
+string ldPreload = libdir + "/liboclgrind-rt." + LIB_EXTENSION;
+const char* oldLdPreload = getenv(LD_PRELOAD_ENV);
+if (oldLdPreload) {
+  ldPreload += ":";
+  ldPreload += oldLdPreload;
+}
+
+setEnvironment(LD_LIBRARY_PATH_ENV, ldLibraryPath.c_str());
+setEnvironment(LD_PRELOAD_ENV, ldPreload.c_str());
+
+// Replace process with target application
+if (execvp(appArgs[0], appArgs) == -1) {
+  cerr &lt;&lt; "[Oclgrind] Failed to launch target application" &lt;&lt; endl;
+  exit(1);
+}</code></pre>
+
+<!-- Section 8: Deep Dives -->
+<h2 id="deep-dives">8 &mdash; Deep-Dive Pages</h2>
+<div class="hub-note">
+  Each card below links to a focused deep-dive page covering one subsystem of the runtime module in detail.
+</div>
+
+<div class="deep-dive-grid">
+  <a class="card" href="opencl_api_layer.html">
+    <h4>OpenCL API Layer <span class="focus-badge">~6.4k LOC</span></h4>
+    <p>The core of <code>runtime.cpp</code>: 100+ <code>cl*</code> function implementations, argument validation macros, the <code>REGISTER_API</code> call stack, error reporting, and the ICD dispatch table initialization.</p>
+    <ul>
+      <li>Context, queue, buffer, program, kernel create/release</li>
+      <li><code>clEnqueueNDRangeKernel</code> work-group dispatch</li>
+      <li>Image &amp; sampler management</li>
+      <li>Event wait-list validation</li>
+    </ul>
+  </a>
+
+  <a class="card" href="async_command_queue.html">
+    <h4>Async Command Queue <span class="focus-badge">~150 LOC</span></h4>
+    <p>Thread-safe command lifecycle management via <code>asyncEnqueue</code>, <code>asyncQueueRetain</code>, and <code>asyncQueueRelease</code>. Uses four static maps to track retained objects across asynchronous command execution.</p>
+    <ul>
+      <li>Object retain/release across async boundaries</li>
+      <li>Event creation &amp; callback dispatch</li>
+      <li>Wait-list dependency tracking</li>
+    </ul>
+  </a>
+
+  <a class="card" href="icd_dispatch.html">
+    <h4>ICD Dispatch &amp; Launcher <span class="focus-badge">~825 LOC</span></h4>
+    <p>The <code>icd.h</code> header with <code>OCLGRIND_ICD</code> macro renames, wrapper struct definitions, and the <code>oclgrind</code> launcher binary that uses <code>LD_PRELOAD</code> (Linux/macOS) or DLL injection (Windows) to intercept OpenCL calls.</p>
+    <ul>
+      <li><code>m_dispatchTable</code> function pointer array</li>
+      <li><code>OCLGRIND_ICD</code> macro rename strategy</li>
+      <li>Cross-platform launcher (<code>execvp</code> vs <code>CreateRemoteThread</code>)</li>
+    </ul>
+  </a>
+</div>
+
+</main>
+
+<footer class="footer">
+  <p><a href="../index.html">&larr; Back to Oclgrind project overview</a></p>
+  <p>Generated 2026-03-25 &middot; source: <code>src/runtime</code> @ <code>8c243f0</code> &middot; <a href="../index.html#modules">search other modules</a></p>
+</footer>
+
+<script>
+// Theme toggle
+(function(){
+  const KEY='neutra-ip-theme';
+  const toggle=document.getElementById('themeToggle');
+  const saved=localStorage.getItem(KEY);
+  if(saved) document.documentElement.setAttribute('data-theme',saved);
+  toggle.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+  toggle.addEventListener('click',function(){
+    const current=document.documentElement.getAttribute('data-theme');
+    const next=current==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem(KEY,next);
+    toggle.textContent=next==='light'?'☀️':'🌙';
+    const hljsLink=document.getElementById('hljs-theme');
+    if(hljsLink) hljsLink.href=next==='light'
+      ?'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css'
+      :'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  });
+})();
+
+// Back to top
+(function(){
+  const btn=document.getElementById('backToTop');
+  window.addEventListener('scroll',function(){btn.classList.toggle('visible',window.scrollY>400);});
+  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+
+// Copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var btn=document.createElement('button');
+  btn.className='copy-btn';btn.textContent='Copy';
+  btn.addEventListener('click',function(){
+    navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});
+  });
+  block.parentElement.appendChild(btn);
+});
+
+// Mermaid rendering with data-source save
+async function renderMermaid(){
+  const els=document.querySelectorAll('.mermaid');
+  for(let i=0;i<els.length;i++){
+    const el=els[i];
+    const source=el.textContent;
+    const container=el.closest('.diagram-container');
+    if(container&&!container.dataset.mermaidSource) container.dataset.mermaidSource=source;
+    const id='mermaid-'+i;
+    try{
+      const{svg}=await mermaid.render(id,source);
+      el.innerHTML=svg;
+      el.classList.add('mermaid-rendered');
+    }catch(e){console.warn('Mermaid render failed for',id,e);}
+  }
+}
+renderMermaid();
+
+// Diagram overlay
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  var content=document.getElementById('diagramOverlayContent');
+  document.querySelectorAll('.diagram-container').forEach(function(c){
+    c.addEventListener('click',function(){
+      content.innerHTML=c.querySelector('.mermaid-rendered')
+        ?c.querySelector('.mermaid-rendered').innerHTML
+        :'<p style="color:var(--text-muted)">Diagram not rendered</p>';
+      overlay.classList.add('active');
+    });
+  });
+  overlay.addEventListener('click',function(){overlay.classList.remove('active');});
+})();
+
+// Highlight.js
+if(typeof hljs!=='undefined') hljs.highlightAll();
+(function(){var m=document.querySelector('main');if(mkdir -p neutra_bridges/test/data)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+</script>
+</body>
+</html>

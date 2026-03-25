@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Data Race Detection Deep-Dive — Oclgrind Plugins</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:6px;z-index:999}
+.skip-link:focus{top:1rem}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.breadcrumb{font-size:.9rem;color:var(--text-muted)}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.4rem .8rem;border-radius:6px;cursor:pointer;font-size:.85rem}
+main{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.hero{text-align:center;margin-bottom:2.5rem}
+.focus-label{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .7rem;border-radius:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+h1{color:var(--heading);font-size:2rem;margin-top:.5rem}
+.hero p{color:var(--text-muted);max-width:660px;margin:.8rem auto 0}
+h2{color:var(--heading);font-size:1.4rem;margin:2rem 0 .8rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
+h3{color:var(--heading);font-size:1.15rem;margin:1.5rem 0 .5rem}
+p,ul,ol{margin-bottom:1rem}
+ul,ol{padding-left:1.5rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;position:relative}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:.15rem .4rem;border-radius:4px;font-size:.9em}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0}
+.callout.warn{border-left:4px solid var(--accent3)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem}
+.copy-btn:hover{color:var(--text)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin:1.5rem 0;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:"⛶ click to expand";position:absolute;top:.5rem;right:.7rem;font-size:.7rem;color:var(--text-muted)}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;justify-content:center;align-items:center;padding:2rem}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--surface);border-radius:12px;padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:.5rem;right:1rem;font-size:1.5rem;background:none;border:none;color:var(--text);cursor:pointer}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;z-index:100}
+footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem}
+footer a{margin:0 .5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{border:1px solid var(--border);padding:.5rem .8rem;text-align:left;font-size:.9rem}
+th{background:var(--surface);color:var(--heading)}
+@media print{body{background:#fff;color:#000}.theme-toggle,.back-to-top,.copy-btn,.skip-link,.overlay{display:none!important}header{border-bottom:2px solid #000}a{color:#000;text-decoration:underline}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">plugins</a> &rsaquo; Race Detection</nav>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+</header>
+
+<main id="main">
+<div class="hero">
+  <span class="focus-label">Focus Deep-Dive</span>
+  <h1>Data Race Detection</h1>
+  <p>Shadow-memory tracking of per-work-item accesses, happens-before ordering via barriers, and inter-group race detection across a full kernel invocation.</p>
+</div>
+
+<h2>1&nbsp; Architecture Overview</h2>
+<p>The <code>RaceDetector</code> maintains shadow metadata for every byte touched during kernel execution. The design operates at two levels:</p>
+<ul>
+  <li><strong>Intra-group</strong> — work-items within the same work-group are checked at every <code>barrier()</code> call and at work-group completion.</li>
+  <li><strong>Inter-group</strong> — when a work-group completes, its accumulated global accesses are merged into a kernel-wide map and cross-checked against other groups.</li>
+</ul>
+
+<div class="mermaid-wrap" data-source="graph TD
+    WI0[Work-Item 0 Access] --> WIG[wiGlobal per-WI AccessMap]
+    WI1[Work-Item 1 Access] --> WIG
+    WIG -->|barrier / WG complete| SYNC[syncWorkItems]
+    SYNC --> WGG[wgGlobal merged AccessMap]
+    SYNC -->|race found?| LOG1[logRace intra-group]
+    WGG -->|workGroupComplete| MERGE[Merge into m_globalAccesses]
+    MERGE -->|race found?| LOG2[insertKernelRace inter-group]
+    LOG2 -->|kernelEnd| LOGALL[Log all kernel races]">
+<pre class="mermaid">graph TD
+    WI0[Work-Item 0 Access] --> WIG[wiGlobal per-WI AccessMap]
+    WI1[Work-Item 1 Access] --> WIG
+    WIG -->|barrier / WG complete| SYNC[syncWorkItems]
+    SYNC --> WGG[wgGlobal merged AccessMap]
+    SYNC -->|race found?| LOG1[logRace intra-group]
+    WGG -->|workGroupComplete| MERGE[Merge into m_globalAccesses]
+    MERGE -->|race found?| LOG2[insertKernelRace inter-group]
+    LOG2 -->|kernelEnd| LOGALL[Log all kernel races]</pre>
+</div>
+
+<h2>2&nbsp; WorkGroupState Data Structure</h2>
+<p>Each work-group gets a <code>WorkGroupState</code> containing three sets of per-address access maps:</p>
+
+<pre><code class="language-cpp">struct WorkGroupState
+{
+  size_t numWorkItems;
+  // Per work-item access maps for local memory
+  std::vector&lt;AccessMap&gt; wiLocal;
+  // Per work-item access maps for global memory
+  std::vector&lt;AccessMap&gt; wiGlobal;
+  // Merged work-group level global accesses
+  AccessMap wgGlobal;
+};</code></pre>
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<p>Each <code>AccessMap</code> is an <code>unordered_map&lt;size_t, AccessRecord&gt;</code> using a pool allocator for cache-friendly allocation. An <code>AccessRecord</code> holds at most one load and one store <code>MemoryAccess</code> per address — the detector keeps the "most interesting" (non-atomic) access to maximize detection coverage.</p>
+
+<div class="callout">
+  <strong>Why one load + one store per address?</strong> Storing every access would consume enormous memory. Instead, the detector greedily replaces atomic accesses with non-atomic ones (via the <code>insert()</code> method), since atomics can never race. This gives the best chance of detecting real races while keeping memory O(touched bytes).
+</div>
+
+<h2>3&nbsp; MemoryAccess Bit-Packing</h2>
+<p>Each <code>MemoryAccess</code> is packed into an 8-bit <code>info</code> field plus entity ID and instruction pointer:</p>
+<table>
+  <tr><th>Bit</th><th>Name</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>SET_BIT</td><td>Access record is populated</td></tr>
+  <tr><td>1</td><td>STORE_BIT</td><td>1 = store, 0 = load</td></tr>
+  <tr><td>2</td><td>ATOMIC_BIT</td><td>Access used an atomic operation</td></tr>
+  <tr><td>3</td><td>WG_BIT</td><td>1 = work-group level, 0 = work-item level</td></tr>
+</table>
+<p>The <code>storeData</code> field records the byte value written, enabling the <em>uniform write</em> optimization — if two work-items write the same value, it may be considered safe (controlled by <code>OCLGRIND_UNIFORM_WRITES</code>).</p>
+
+<h2>4&nbsp; Happens-Before via Barriers</h2>
+<p>OpenCL's <code>barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE)</code> establishes happens-before ordering. When the detector sees <code>workGroupBarrier</code>, it calls <code>syncWorkItems</code> for the relevant address space:</p>
+
+<pre><code class="language-cpp">void RaceDetector::workGroupBarrier(const WorkGroup* workGroup,
+                                    uint32_t flags)
+{
+  if (flags & CLK_LOCAL_MEM_FENCE)
+  {
+    syncWorkItems(workGroup->getLocalMemory(), STATE(workGroup),
+                  STATE(workGroup).wiLocal);
+  }
+  if (flags & CLK_GLOBAL_MEM_FENCE)
+  {
+    syncWorkItems(m_context->getGlobalMemory(), STATE(workGroup),
+                  STATE(workGroup).wiGlobal);
+  }
+}</code></pre>
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<p><code>syncWorkItems</code> iterates all per-work-item access maps, cross-checks each against the accumulated work-group map for conflicts, merges them in, then clears per-work-item maps — establishing a new "epoch" where accesses before the barrier cannot race with accesses after it.</p>
+
+<div class="mermaid-wrap" data-source="sequenceDiagram
+    participant WI0 as Work-Item 0
+    participant WI1 as Work-Item 1
+    participant WGA as WG Accumulator
+    participant DET as Race Detector
+    WI0->>DET: store addr 0x100
+    WI1->>DET: load addr 0x100
+    Note over DET: Both recorded in wiLocal/wiGlobal
+    WI0->>DET: barrier(CLK_LOCAL_MEM_FENCE)
+    WI1->>DET: barrier(CLK_LOCAL_MEM_FENCE)
+    DET->>DET: syncWorkItems()
+    DET->>DET: check WI0.store vs WI1.load → RACE!
+    DET->>WGA: merge into wgAccesses
+    DET->>DET: clear per-WI maps (new epoch)
+    WI0->>DET: load addr 0x100
+    Note over DET: No race (post-barrier epoch)">
+<pre class="mermaid">sequenceDiagram
+    participant WI0 as Work-Item 0
+    participant WI1 as Work-Item 1
+    participant WGA as WG Accumulator
+    participant DET as Race Detector
+    WI0->>DET: store addr 0x100
+    WI1->>DET: load addr 0x100
+    Note over DET: Both recorded in wiLocal/wiGlobal
+    WI0->>DET: barrier(CLK_LOCAL_MEM_FENCE)
+    WI1->>DET: barrier(CLK_LOCAL_MEM_FENCE)
+    DET->>DET: syncWorkItems()
+    DET->>DET: check WI0.store vs WI1.load → RACE!
+    DET->>WGA: merge into wgAccesses
+    DET->>DET: clear per-WI maps (new epoch)
+    WI0->>DET: load addr 0x100
+    Note over DET: No race (post-barrier epoch)</pre>
+</div>
+
+<h2>5&nbsp; Race Classification: The check() Function</h2>
+<p>Two accesses are compared by the <code>check()</code> method. A race is reported only when:</p>
+<ol>
+  <li>Both accesses are set (populated).</li>
+  <li>They originate from <em>different</em> work-items.</li>
+  <li>They are <em>not both atomic</em> (two atomics synchronize implicitly).</li>
+  <li>At least one is a <strong>store</strong> — and either they form a read-write pair, or a write-write pair with non-uniform data (unless <code>OCLGRIND_UNIFORM_WRITES</code> is set).</li>
+</ol>
+
+<div class="callout warn">
+  <strong>Uniform writes caveat:</strong> By default, two work-items writing the <em>same byte value</em> to the same address are not flagged. Set <code>OCLGRIND_UNIFORM_WRITES=1</code> to also flag these as races. This is conservative but may produce false positives for legitimate parallel-init patterns.
+</div>
+
+<h2>6&nbsp; Inter-Group Detection</h2>
+<p>At <code>workGroupComplete</code>, the work-group's merged global accesses (<code>wgGlobal</code>) are checked against the kernel-wide <code>m_globalAccesses</code> map. A bank of 4096 mutexes (indexed by <code>offset &amp; 0xFFF</code>) serializes concurrent work-group completions without a single global lock:</p>
+<ul>
+  <li>Three cross-checks are performed per address: load-vs-store, store-vs-load, and store-vs-store.</li>
+  <li>Races are deduplicated by instruction pair — if two entities produce the same instruction combination, only the lowest address is kept.</li>
+  <li>All detected races are logged at <code>kernelEnd</code> via <code>logRace</code>, which reports read-write or write-write type, memory address, and both entities' global/local/group IDs.</li>
+</ul>
+
+<h2>7&nbsp; Thread Safety</h2>
+<p>The <code>WorkerState</code> uses <code>THREAD_LOCAL</code> storage so each CPU thread managing work-groups has its own state map. Only the inter-group merge path requires synchronization (via the mutex bank and <code>kernelRacesMutex</code>).</p>
+
+<div class="callout">
+  <strong>Pool Allocator:</strong> All <code>AccessMap</code> instances share a pool allocator with 8192-entry blocks. This dramatically reduces heap fragmentation when millions of addresses are tracked across many work-items.
+</div>
+
+<h2>8&nbsp; The registerAccess Entry Point</h2>
+<p>Every memory hook (<code>memoryLoad</code>, <code>memoryStore</code>, <code>memoryAtomicLoad</code>, <code>memoryAtomicStore</code>) funnels into <code>registerAccess</code>. This function:</p>
+<ol>
+  <li>Skips <strong>private</strong> and <strong>constant</strong> address spaces — private memory is per-work-item and cannot race; constant memory is read-only.</li>
+  <li>Validates the address range with <code>isAddressValid</code> to avoid recording accesses to invalid memory.</li>
+  <li>Constructs a <code>MemoryAccess</code> and computes the work-item's linear index within the work-group.</li>
+  <li>Inserts the access into the correct per-work-item <code>AccessMap</code> (global or local, indexed by address space).</li>
+  <li>For stores, records the data byte for uniform-write detection.</li>
+</ol>
+
+<pre><code class="language-cpp">void RaceDetector::registerAccess(
+  const Memory* memory, const WorkGroup* workGroup,
+  const WorkItem* workItem, size_t address,
+  size_t size, bool atomic, const uint8_t* storeData)
+{
+  unsigned addrSpace = memory->getAddressSpace();
+  if (addrSpace == AddrSpacePrivate ||
+      addrSpace == AddrSpaceConstant)
+    return;
+  if (!memory->isAddressValid(address, size))
+    return;
+
+  MemoryAccess access(workGroup, workItem,
+                      storeData != NULL, atomic);
+
+  // Compute linear WI index within work-group
+  size_t index;
+  if (workItem) {
+    Size3 wgsize = workGroup->getGroupSize();
+    Size3 lid    = workItem->getLocalID();
+    index = lid.x + (lid.y + lid.z * wgsize.y) * wgsize.x;
+  } else {
+    index = STATE(workGroup).wiLocal.size() - 1;
+  }
+
+  // Select map by address space
+  AccessMap& accesses =
+    (addrSpace == AddrSpaceGlobal)
+      ? STATE(workGroup).wiGlobal[index]
+      : STATE(workGroup).wiLocal[index];
+
+  // Record each byte individually
+  for (size_t i = 0; i < size; i++) {
+    if (storeData) access.setStoreData(storeData[i]);
+    insert(accesses[address + i], access);
+  }
+}</code></pre>
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<h2>9&nbsp; Race Deduplication</h2>
+<p>The <code>insertRace</code> method prevents duplicate reports. Two races are considered identical if they involve the same pair of <code>MemoryAccess</code> records (regardless of order). When a duplicate is found, the detector keeps the entry with the <em>lowest</em> memory address — giving the user the most actionable location.</p>
+
+<h2>10&nbsp; Logging Output</h2>
+<p>Each race report includes:</p>
+<ul>
+  <li><strong>Race type</strong> — "Read-write" or "Write-write".</li>
+  <li><strong>Address space and hex address</strong> — e.g., <code>global memory address 0x4080</code>.</li>
+  <li><strong>Kernel name.</strong></li>
+  <li><strong>Both entities</strong> — showing Global ID, Local ID, and Group ID for work-items, or Group index for work-group-level accesses.</li>
+  <li><strong>LLVM IR instruction</strong> for each entity, enabling precise source mapping.</li>
+</ul>
+
+<div class="callout warn">
+  <strong>Performance note:</strong> Race detection adds significant overhead. For large kernels (millions of work-items), the per-byte tracking can consume gigabytes of memory. Consider using <code>OCLGRIND_DATA_RACES=0</code> when debugging only memory-validity issues with MemCheck.
+</div>
+
+</main>
+
+<footer>
+  <a href="index.html">← Plugins Overview</a> | <a href="../search.html">Search Wiki</a>
+  <p style="margin-top:.5rem">Generated 2026-03-25 · Oclgrind Internal Wiki</p>
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    <pre class="mermaid" id="overlay-diagram"></pre>
+  </div>
+</div>
+
+<button class="back-to-top" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'neutral'});
+function renderMermaid(){document.querySelectorAll('pre.mermaid').forEach(async(el,i)=>{const id='mm-'+Date.now()+'-'+i;const{svg}=await mermaid.render(id,el.textContent.trim());el.innerHTML=svg;el.classList.add('rendered')})}
+renderMermaid();
+
+function toggleTheme(){const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('neutra-ip-theme',t)}
+(function(){const t=localStorage.getItem('neutra-ip-theme');if(t)document.documentElement.dataset.theme=t})();
+
+function copyCode(btn){const code=btn.previousElementSibling||btn.parentElement.querySelector('code');navigator.clipboard.writeText(code.textContent).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)})}
+
+document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{const src=w.dataset.source;if(!src)return;const el=document.getElementById('overlay-diagram');el.textContent=src;document.getElementById('overlay').classList.add('active');mermaid.render('ov-'+Date.now(),src).then(({svg})=>el.innerHTML=svg)})});
+function closeOverlay(){document.getElementById('overlay').classList.remove('active')}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOverlay()});
+
+window.addEventListener('scroll',()=>{document.getElementById('btt').style.display=window.scrollY>400?'block':'none'});
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

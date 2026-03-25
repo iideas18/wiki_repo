@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>ICD Dispatch Table Deep-Dive — Oclgrind Wiki</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:900px;margin:0 auto;padding:1rem 1.5rem 3rem}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3{color:var(--heading);margin:1.4em 0 .6em}
+h1{font-size:1.8rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h2{font-size:1.35rem}h3{font-size:1.1rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:.15em .35em;border-radius:4px;font-size:.9em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:1rem}
+.focus-label{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;text-transform:uppercase;margin-right:.5rem;vertical-align:middle}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem}
+.hero p{color:var(--text-muted);margin-top:.5rem}
+.callout{border-left:4px solid var(--accent3);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.callout.warn{border-color:var(--accent4)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin:1rem 0;cursor:pointer;text-align:center}
+.copy-btn{position:absolute;top:.4rem;right:.4rem;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.75rem;cursor:pointer}
+.copy-btn:hover{color:var(--accent)}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;justify-content:center;align-items:center}
+#overlay.show{display:flex}
+#overlay svg{max-width:90vw;max-height:90vh}
+#back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;display:none;z-index:50}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;float:right}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:4px 12px;z-index:100}
+.skip-link:focus{left:0}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-muted)}
+@media print{body{color:#000;background:#fff}.theme-toggle,#back-to-top,.copy-btn,.skip-link{display:none!important}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">runtime</a> &rsaquo; ICD Dispatch Table</nav>
+<main id="main">
+<div class="hero"><span class="focus-label">Focus</span><h1>ICD Dispatch Table Deep-Dive</h1>
+<p>How <code>icd.h</code> defines the function-pointer dispatch table, how <code>oclgrind.cpp</code> injects Oclgrind via <code>LD_PRELOAD</code>, and how the ICD model routes every OpenCL call to the simulator.</p></div>
+
+<h2>What is ICD?</h2>
+<p>The <strong>Installable Client Driver</strong> (ICD) model lets multiple OpenCL implementations coexist. An ICD loader (e.g. <code>libOpenCL.so</code>) dispatches each <code>cl*</code> call through a per-platform function-pointer table. Every OpenCL struct's first field is <code>void* dispatch</code>, pointing to this table.</p>
+
+<div class="mermaid-wrap" data-source="graph LR
+  App[Host Application] -->|clCreateBuffer| Loader[ICD Loader libOpenCL.so]
+  Loader -->|dispatch table[42]| OG[oclgrind-rt.so]
+  Loader -->|dispatch table[42]| NV[nvidia-opencl.so]
+  Loader -->|dispatch table[42]| AMD[amdocl64.so]"><pre class="mermaid">graph LR
+  App[Host Application] -->|clCreateBuffer| Loader[ICD Loader libOpenCL.so]
+  Loader -->|dispatch table[42]| OG[oclgrind-rt.so]
+  Loader -->|dispatch table[42]| NV[nvidia-opencl.so]
+  Loader -->|dispatch table[42]| AMD[amdocl64.so]</pre></div>
+
+<h2>The Rename Macro Block</h2>
+<p>When built with <code>-DOCLGRIND_ICD</code>, <code>icd.h</code> renames every public <code>cl*</code> symbol to <code>_cl*</code>. This avoids linker clashes with the ICD loader — Oclgrind's functions are only reachable through the dispatch table.</p>
+
+<pre><code class="language-cpp">// icd.h — symbol renaming (excerpt)
+#ifdef OCLGRIND_ICD
+#define clCreateContext      _clCreateContext
+#define clCreateBuffer       _clCreateBuffer
+#define clEnqueueNDRangeKernel _clEnqueueNDRangeKernel
+// ... ~90 more definitions
+#endif</code></pre>
+
+<div class="callout"><strong>Note:</strong> The 256-slot dispatch table <code>m_dispatchTable[256]</code> is declared as <code>extern</code> in <code>icd.h</code> and populated at library load time. Each slot maps to the corresponding OpenCL API ordinal defined by the Khronos ICD specification.</div>
+
+<h2>Struct Layout — dispatch First</h2>
+<p>Every struct in <code>icd.h</code> starts with <code>void* dispatch</code>. The ICD loader casts the handle, reads the first pointer, and indexes into it. Oclgrind sets this pointer to <code>m_dispatchTable</code> in every <code>new _cl_*</code> allocation.</p>
+
+<pre><code class="language-cpp">// Creating a new event — dispatch is always first
+cl_event _event     = new _cl_event;
+_event-&gt;dispatch    = m_dispatchTable;  // ICD slot pointer
+_event-&gt;context     = queue-&gt;context;
+_event-&gt;queue       = queue;
+_event-&gt;type        = type;
+_event-&gt;event       = event;            // Core::Event*
+_event-&gt;refCount    = 1;</code></pre>
+
+<h2>oclgrind.cpp — The Injection Launcher</h2>
+<p>The <code>oclgrind</code> executable does <em>not</em> implement OpenCL. It launches the user's application with <code>LD_PRELOAD</code> (Linux), <code>DYLD_INSERT_LIBRARIES</code> (macOS), or DLL injection (Windows) pointing to <code>liboclgrind-rt</code>.</p>
+
+<div class="mermaid-wrap" data-source="sequenceDiagram
+  participant User as $ oclgrind ./myapp
+  participant OG as oclgrind.cpp
+  participant ENV as Environment
+  participant Target as myapp
+  User->>OG: parseArguments()
+  OG->>OG: map --data-races → OCLGRIND_DATA_RACES=1
+  OG->>ENV: setenv(LD_PRELOAD, liboclgrind-rt.so)
+  OG->>ENV: setenv(LD_LIBRARY_PATH, ...)
+  OG->>Target: execvp(appArgs)
+  Note over Target: Loads with oclgrind-rt intercepting OpenCL"><pre class="mermaid">sequenceDiagram
+  participant User as $ oclgrind ./myapp
+  participant OG as oclgrind.cpp
+  participant ENV as Environment
+  participant Target as myapp
+  User->>OG: parseArguments()
+  OG->>OG: map --data-races → OCLGRIND_DATA_RACES=1
+  OG->>ENV: setenv(LD_PRELOAD, liboclgrind-rt.so)
+  OG->>ENV: setenv(LD_LIBRARY_PATH, ...)
+  OG->>Target: execvp(appArgs)
+  Note over Target: Loads with oclgrind-rt intercepting OpenCL</pre></div>
+
+<h2>Windows DLL Injection</h2>
+<p>On Windows, <code>oclgrind.cpp</code> takes a different approach: it creates the target process in a <strong>suspended</strong> state, allocates memory in the child process for the DLL path, writes it, and launches a remote thread calling <code>LoadLibraryA</code>. After the DLL loads, it calls <code>initOclgrind</code> via another remote thread, then resumes the main thread.</p>
+
+<div class="callout warn"><strong>Architecture check:</strong> On Windows, <code>checkWow64()</code> verifies that parent and child match (both 32-bit or both 64-bit). A mismatch triggers a clear error message telling the user to switch binaries.</div>
+
+<h2>Platform Enumeration</h2>
+<p>The ICD loader discovers Oclgrind by calling
+<code>clIcdGetPlatformIDsKHR</code> (exported from the runtime library). This
+function lazily creates the singleton <code>m_platform</code> and
+<code>m_device</code>, reading memory sizes from environment variables like
+<code>OCLGRIND_GLOBAL_MEM_SIZE</code>.</p>
+
+<h2>Platform Info Queries</h2>
+<p><code>clGetPlatformInfo</code> returns metadata about the Oclgrind platform.
+The implementation is a switch statement over <code>param_name</code>
+that returns static strings and version numbers:</p>
+
+<pre><code class="language-cpp">// clGetPlatformInfo excerpt
+switch (param_name) {
+  case CL_PLATFORM_NAME:    data = "Oclgrind";       break;
+  case CL_PLATFORM_VENDOR:  data = "Oclgrind";       break;
+  case CL_PLATFORM_VERSION:
+    data = "OpenCL 3.0 (Oclgrind " PACKAGE_VERSION ")";
+    break;
+  case CL_PLATFORM_EXTENSIONS:
+    data = "cl_khr_icd";
+    break;
+  case CL_PLATFORM_ICD_SUFFIX_KHR:
+    data = "oclg";
+    break;
+  // ...
+}</code></pre>
+
+<div class="callout">
+<strong>Extension function lookup:</strong>
+<code>clGetExtensionFunctionAddress</code> only recognises two names —
+<code>"clIcdGetPlatformIDsKHR"</code> and <code>"clGetPlatformInfo"</code>.
+All other queries return <code>NULL</code>.
+</div>
+
+<h2>Device Initialisation Detail</h2>
+<p>The singleton <code>m_device</code> is created alongside the platform. Its
+memory sizes are populated from environment variables with defaults:</p>
+<ul>
+<li><code>OCLGRIND_GLOBAL_MEM_SIZE</code> → 128 MiB</li>
+<li><code>OCLGRIND_CONSTANT_MEM_SIZE</code> → 64 KiB</li>
+<li><code>OCLGRIND_LOCAL_MEM_SIZE</code> → 32 KiB</li>
+<li><code>OCLGRIND_MAX_WGSIZE</code> → 1024</li>
+</ul>
+<p>These values are read once via <code>oclgrind::getEnvInt()</code> and cached
+in the device struct for the lifetime of the process.</p>
+
+<h2>Linux vs macOS vs Windows</h2>
+<p>The injection mechanism differs by platform:</p>
+<table>
+<thead><tr><th>OS</th><th>Mechanism</th><th>Library</th></tr></thead>
+<tbody>
+<tr><td>Linux</td><td><code>LD_PRELOAD</code></td><td><code>liboclgrind-rt.so</code></td></tr>
+<tr><td>macOS</td><td><code>DYLD_INSERT_LIBRARIES</code></td><td><code>liboclgrind-rt.dylib</code></td></tr>
+<tr><td>Windows</td><td>Remote DLL injection</td><td><code>oclgrind-rt.dll</code></td></tr>
+</tbody>
+</table>
+
+<div class="callout warn">
+<strong>macOS caveat:</strong> On macOS, <code>DYLD_FORCE_FLAT_NAMESPACE=1</code>
+is also set to ensure the injected library's symbols override the
+system OpenCL framework. Without this, symbol interposition would fail.
+</div>
+
+<h2>Library Path Resolution</h2>
+<p><code>getLibDirPath()</code> in <code>oclgrind.cpp</code> resolves the path to
+the library directory by reading <code>/proc/self/exe</code> (Linux),
+<code>_NSGetExecutablePath</code> (macOS), or <code>GetModuleFileName</code>
+(Windows), stripping the binary name, then appending
+<code>/lib</code> (or staying in-place during testing).</p>
+
+<h2>ICD Dispatch Table Layout</h2>
+<p>The table is a 256-slot <code>void*</code> array. Each slot corresponds
+to the ordinal defined by the Khronos ICD specification. For example
+slot 0 is <code>clGetPlatformIDs</code>, slot 4 is <code>clCreateContext</code>,
+etc. Oclgrind fills every slot it supports; unsupported slots are
+<code>NULL</code> (the ICD loader returns <code>CL_INVALID_OPERATION</code>
+if called).</p>
+
+<h3>How Dispatch Works at Runtime</h3>
+<p>When the ICD loader receives a call like <code>clCreateBuffer(ctx, ...)</code>,
+it dereferences <code>ctx-&gt;dispatch</code> (which is
+<code>m_dispatchTable</code>), indexes to the <code>clCreateBuffer</code> slot,
+and calls the function pointer. This indirection costs one memory load
+per API call — negligible for a simulator.</p>
+
+<h2>Supported OpenCL Version</h2>
+<p>Oclgrind advertises <strong>OpenCL 3.0</strong> at both the platform and
+device level. The ICD suffix is <code>"oclg"</code> — this is used by
+the loader to distinguish Oclgrind from other drivers in
+<code>/etc/OpenCL/vendors/</code>.</p>
+
+<h2>The cl_khr_icd Extension</h2>
+<p>The only extension Oclgrind reports is <code>cl_khr_icd</code>. This
+extension defines two entry points:</p>
+<ul>
+<li><code>clIcdGetPlatformIDsKHR</code> — discovers the platform</li>
+<li><code>clGetExtensionFunctionAddressForPlatform</code> — looks up
+extension functions by name</li>
+</ul>
+<p>Oclgrind's implementation of the latter returns <code>NULL</code> for
+everything except <code>"clIcdGetPlatformIDsKHR"</code> and
+<code>"clGetPlatformInfo"</code>.</p>
+
+<div class="callout">
+<strong>Vendor file:</strong> To register with the ICD loader on Linux, create
+<code>/etc/OpenCL/vendors/oclgrind.icd</code> containing the path to
+<code>liboclgrind-rt.so</code>. The <code>oclgrind</code> launcher bypasses
+this by using <code>LD_PRELOAD</code> instead.
+</div>
+
+<h2>Security Implications</h2>
+<p>The <code>LD_PRELOAD</code> injection technique requires that the
+target binary is not setuid/setgid — the dynamic linker ignores
+<code>LD_PRELOAD</code> for privileged executables. On Windows, the
+remote-thread DLL injection requires the launching process to have
+<code>PROCESS_ALL_ACCESS</code> rights on the child, which is granted
+automatically since <code>oclgrind.exe</code> creates the child itself.</p>
+
+<h2>Testing Mode</h2>
+<p>When the environment variable <code>OCLGRIND_TESTING</code> is set,
+<code>getLibDirPath()</code> skips the <code>../lib</code> suffix and looks
+for the runtime library in the same directory as the executable. This
+allows the test suite to run against an uninstalled build.</p>
+
+<h2>Edge Cases &amp; Common Pitfalls</h2>
+<table>
+<thead><tr><th>Scenario</th><th>Behaviour</th><th>Resolution</th></tr></thead>
+<tbody>
+<tr><td>LD_PRELOAD path is wrong</td><td>App loads system OpenCL instead of Oclgrind — runs on real GPU</td><td>Verify <code>liboclgrind-rt.so</code> path; use <code>ldd</code> to confirm</td></tr>
+<tr><td>Target binary is setuid</td><td>Dynamic linker ignores <code>LD_PRELOAD</code>; injection silently fails</td><td>Run the binary without setuid, or use the ICD vendor file approach</td></tr>
+<tr><td>32/64-bit architecture mismatch (Windows)</td><td><code>checkWow64()</code> detects mismatch → error message</td><td>Use matching architecture for <code>oclgrind.exe</code> and the target</td></tr>
+<tr><td>Multiple OpenCL platforms installed</td><td>ICD loader returns all platforms; app must select Oclgrind by name</td><td>Filter by <code>CL_PLATFORM_NAME == "Oclgrind"</code></td></tr>
+<tr><td>Unsupported dispatch table slot called</td><td><code>NULL</code> function pointer → ICD loader returns <code>CL_INVALID_OPERATION</code></td><td>Only use OpenCL functions that Oclgrind implements</td></tr>
+<tr><td>Missing <code>.icd</code> vendor file</td><td>ICD loader doesn't discover Oclgrind; <code>clGetPlatformIDs</code> omits it</td><td>Create <code>/etc/OpenCL/vendors/oclgrind.icd</code> or use <code>LD_PRELOAD</code></td></tr>
+<tr><td>DYLD_INSERT_LIBRARIES on macOS SIP</td><td>System Integrity Protection strips the variable for protected binaries</td><td>Disable SIP for testing, or use the ICD vendor file method</td></tr>
+</tbody>
+</table>
+
+<h2>Troubleshooting</h2>
+<h3>Application does not see Oclgrind platform</h3>
+<p>Run <code>clinfo</code> under the same environment. If Oclgrind is missing, either the <code>.icd</code> file is absent or <code>LD_PRELOAD</code> was not set. On Linux, verify with <code>ls /etc/OpenCL/vendors/</code> and check that the path inside the <code>.icd</code> file resolves to an existing <code>liboclgrind-rt.so</code>.</p>
+
+<h3>Windows injection fails with access denied</h3>
+<p>If <code>oclgrind.exe</code> cannot open the child process with <code>PROCESS_ALL_ACCESS</code>, anti-virus software may be blocking remote thread creation. Add an exception for <code>oclgrind.exe</code> or run from an elevated command prompt.</p>
+
+<h3>Symbol clashes when not using ICD mode</h3>
+<p>If Oclgrind is built without <code>-DOCLGRIND_ICD</code>, the <code>cl*</code> symbols are exported directly and will clash with the system ICD loader. Always build with ICD mode enabled when installing alongside other OpenCL drivers.</p>
+
+<h2>Platform Discovery Flow</h2>
+<p>When an application calls <code>clGetPlatformIDs</code>, the ICD loader scans <code>/etc/OpenCL/vendors/*.icd</code> for vendor files. Each file contains the path to a shared library. The loader opens the library and calls <code>clIcdGetPlatformIDsKHR</code> to retrieve the platform handle. Oclgrind's implementation lazily creates the singleton <code>m_platform</code> and <code>m_device</code> at this point, reading memory configuration from environment variables.</p>
+
+<h3>Vendor file registration</h3>
+<p>To register without using <code>LD_PRELOAD</code>, create <code>/etc/OpenCL/vendors/oclgrind.icd</code> containing the absolute path to <code>liboclgrind-rt.so</code>. This approach is preferred for system-wide installation and avoids the security restrictions of <code>LD_PRELOAD</code> on setuid binaries.</p>
+
+<h2>Related Topics</h2>
+<ul>
+<li><a href="opencl_api_layer.html">OpenCL API Layer</a> — the <code>cl*</code> implementations behind the dispatch table</li>
+<li><a href="async_command_queue.html">Async Command Queue</a> — how enqueued commands flow after dispatch</li>
+<li><a href="../kernel/cli_interface.html">CLI Interface</a> — the <code>oclgrind-kernel</code> tool that bypasses ICD entirely</li>
+<li><a href="index.html">Runtime Module Overview</a> — parent page with links to all runtime sub-topics</li>
+</ul>
+</main>
+<button id="back-to-top" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div id="overlay" onclick="this.classList.remove('show')"></div>
+<footer>
+<a href="index.html">← runtime module</a> · <a href="../search.html">Search</a>
+</footer>
+<script>
+function toggleTheme(){const t=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=t;localStorage.setItem("neutra-ip-theme",t)}
+(function(){const t=localStorage.getItem("neutra-ip-theme");if(t)document.documentElement.dataset.theme=t})();
+window.addEventListener("scroll",()=>{document.getElementById("back-to-top").style.display=scrollY>300?"block":"none"});
+document.querySelectorAll("pre:not(.mermaid)").forEach(p=>{const b=document.createElement("button");b.className="copy-btn";b.textContent="Copy";b.onclick=()=>{navigator.clipboard.writeText(p.textContent.replace(/^Copy/,""));b.textContent="✓";setTimeout(()=>b.textContent="Copy",1500)};p.appendChild(b)});
+(async function renderMermaid(){const{default:mermaid}=await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");mermaid.initialize({startOnLoad:false,theme:document.documentElement.dataset.theme==="dark"?"dark":"default"});await mermaid.run({querySelector:".mermaid"});document.querySelectorAll(".mermaid-wrap").forEach(w=>{w.addEventListener("click",()=>{const o=document.getElementById("overlay");o.innerHTML=w.querySelector("svg").outerHTML;o.classList.add("show")})})})();
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

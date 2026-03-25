@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="gpgpu-sim_distribution/">
+<meta name="wiki-source-rev" content="a4ce3fe">
+<title>GPGPU-Sim — Cycle-Level GPU Simulator</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>GPGPU-Sim</h1>
+<div class="hero">
+  <div class="subtitle">Cycle-Level GPU Simulator for CUDA &amp; OpenCL Workloads</div>
+  <p>GPGPU-Sim is a detailed, cycle-level simulator that models contemporary graphics processing units (GPUs) running compute workloads written in CUDA or OpenCL. It includes an interconnection network simulator (BookSim-based InterSim2), a configurable power model (AccelWattch/McPAT), and a performance visualization tool (AerialVision). GPGPU-Sim has been rigorously validated against real NVIDIA hardware from various generations.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">&#127919; Cycle-Level Accuracy</span>
+    <span class="badge green">&#128268; CUDA 4.2 &ndash; 11</span>
+    <span class="badge yellow">&#9889; Accel-Sim Compatible</span>
+    <span class="badge red">&#128161; AccelWattch Power Model</span>
+  </p>
+</div>
+
+<!-- Intro box -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>GPGPU-Sim is a research simulator that lets you run real CUDA and OpenCL programs on a virtual GPU, modeling every cycle of the hardware pipeline. It exists because studying GPU microarchitecture on real hardware is extremely difficult &mdash; the internals are proprietary and invisible. GPGPU-Sim makes the GPU transparent: every cache miss, every warp stall, every DRAM bank conflict is observable and configurable.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine you want to understand how a massive airport operates &mdash; from check-in to landing. You cannot observe the real airport&rsquo;s internal systems directly, so you build a detailed scale model where every gate, runway, baggage conveyor, and control tower operates exactly as the real one does. You can now change the number of runways, add terminals, reroute baggage, and watch the exact second-by-second consequences. GPGPU-Sim is that scale model for GPUs: it replaces the opaque silicon chip with a transparent software replica.</p>
+</details>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">9</div><div class="label">Modules</div></div>
+  <div class="stat-box"><div class="num">131k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">C/C++</div><div class="label">Language</div></div>
+  <div class="stat-box"><div class="num">300</div><div class="label">Source Files</div></div>
+</div>
+
+<!-- SYSTEM ARCHITECTURE -->
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph APP["Application Layer"]
+    CUDA["CUDA Application"]
+    OCL["OpenCL Application"]
+  end
+  subgraph RUNTIME["Runtime Libraries"]
+    LIBCUDA["libcuda<br/>CUDA API Interception"]
+    LIBOCL["libopencl<br/>OpenCL API"]
+  end
+  subgraph ENTRY["Simulator Entry"]
+    EP["gpgpusim_entrypoint<br/>Stream Manager"]
+    AHM["abstract_hardware_model<br/>Kernel, Warp, Instruction Abstractions"]
+  end
+  subgraph CORE["GPU Core Simulation (gpgpu-sim)"]
+    GPUSIM["gpu-sim<br/>Top-Level Simulator"]
+    SHADER["shader<br/>Shader Core Array &amp; Warp Schedulers"]
+    CACHE["gpu-cache<br/>L1/Texture/Const Caches"]
+    L2["l2cache<br/>L2 Cache Partitions"]
+    DRAM["dram / dram_sched<br/>DRAM Timing &amp; Scheduling"]
+    SCORE["scoreboard<br/>Warp Dependency Tracking"]
+  end
+  subgraph FUNC["Functional Simulation (cuda-sim)"]
+    PTXLD["ptx_loader<br/>PTX Binary Loading"]
+    PTXIR["ptx_ir<br/>IR Representation"]
+    PTXSIM["ptx_sim<br/>Warp Execution"]
+    INSTR["instructions<br/>PTX Opcode Execution"]
+    MEM["memory<br/>Address Space Model"]
+  end
+  subgraph ICNT["Interconnect (InterSim2)"]
+    ICNTI["interconnect_interface"]
+    TM["trafficmanager<br/>Flit Injection &amp; Routing"]
+    NET["networks<br/>Mesh, Torus, Fly, Fat-tree"]
+    RTR["routers<br/>IQ, Event, Chaos"]
+  end
+  subgraph POWER["Power Model (AccelWattch)"]
+    WRAP["gpgpu_sim_wrapper<br/>Power Interface"]
+    PROC["processor / core<br/>McPAT Components"]
+    CACTI["cacti<br/>Cache Area &amp; Timing"]
+  end
+  CUDA --> LIBCUDA
+  OCL --> LIBOCL
+  LIBCUDA --> EP
+  LIBOCL --> EP
+  EP --> AHM
+  AHM --> GPUSIM
+  GPUSIM --> SHADER
+  SHADER --> SCORE
+  SHADER --> CACHE
+  SHADER --> PTXSIM
+  PTXSIM --> PTXIR
+  PTXSIM --> INSTR
+  INSTR --> MEM
+  CACHE --> L2
+  L2 --> ICNTI
+  ICNTI --> TM
+  TM --> NET
+  TM --> RTR
+  L2 --> DRAM
+  GPUSIM --> WRAP
+  WRAP --> PROC
+  PROC --> CACTI
+</pre>
+</div>
+
+<!-- MODULE CARDS -->
+<p class="section-label">Core Simulation Engine</p>
+<div class="module-grid">
+  <a href="gpgpu_sim_doc/index.html" class="module-card">
+    <h3>gpgpu-sim</h3>
+    <div class="tagline">GPU Timing Simulation &mdash; Shader Cores, Caches, DRAM</div>
+    <p>The heart of the simulator: models shader core arrays with warp schedulers, multi-level cache hierarchy (L1/L2), DRAM timing with bank-level parallelism, and the scoreboard for dependency tracking. Drives cycle-by-cycle execution of GPU kernels.</p>
+    <div class="stats"><span>46 files</span><span>25.5k LOC</span><span>Caches &middot; DRAM &middot; Scheduler</span></div>
+  </a>
+  <a href="cuda_sim_doc/index.html" class="module-card">
+    <h3>cuda-sim</h3>
+    <div class="tagline">PTX Functional Simulation &mdash; Instruction Decode &amp; Execute</div>
+    <p>Functionally simulates PTX instructions: loads PTX binaries, builds an IR, and executes each instruction including memory operations, control flow, and special functions. Provides the functional correctness layer that feeds the timing model.</p>
+    <div class="stats"><span>28 files</span><span>24.5k LOC</span><span>PTX &middot; Warp Execution</span></div>
+  </a>
+  <a href="core_doc/index.html" class="module-card">
+    <h3>Core Infrastructure</h3>
+    <div class="tagline">Hardware Abstraction, Entry Point &amp; Stream Management</div>
+    <p>The foundational layer: <code>abstract_hardware_model</code> defines kernel, warp, and instruction abstractions; <code>gpgpusim_entrypoint</code> bootstraps simulation; <code>stream_manager</code> handles CUDA streams and concurrency; <code>option_parser</code> manages configuration.</p>
+    <div class="stats"><span>15 files</span><span>5.3k LOC</span><span>Abstractions &middot; Config</span></div>
+  </a>
+</div>
+
+<p class="section-label">Interconnect &amp; Power</p>
+<div class="module-grid">
+  <a href="intersim2_doc/index.html" class="module-card">
+    <h3>InterSim2</h3>
+    <div class="tagline">Interconnection Network Simulator (BookSim-based)</div>
+    <p>A full NoC simulator integrated into GPGPU-Sim: models various network topologies (mesh, torus, butterfly, fat-tree, dragonfly), virtual-channel routers, arbitration schemes, and credit-based flow control. Simulates flit-level traffic between shader cores and memory partitions.</p>
+    <div class="stats"><span>115 files</span><span>26.6k LOC</span><span>7 topologies &middot; 5 allocators</span></div>
+  </a>
+  <a href="accelwattch_doc/index.html" class="module-card">
+    <h3>AccelWattch</h3>
+    <div class="tagline">GPU Power Modeling Framework (McPAT/CACTI-based)</div>
+    <p>Models GPU power consumption using analytical models derived from McPAT and CACTI. Estimates dynamic and leakage power for processor cores, shared caches, memory controllers, NoC, and I/O controllers. Validated against NVIDIA Volta hardware.</p>
+    <div class="stats"><span>72 files</span><span>49.4k LOC</span><span>McPAT &middot; CACTI &middot; Volta-validated</span></div>
+  </a>
+</div>
+
+<p class="section-label">Runtime Libraries &amp; Tools</p>
+<div class="module-grid">
+  <a href="libcuda/index.html" class="module-card">
+    <h3>libcuda</h3>
+    <div class="tagline">CUDA Runtime API Interception Library</div>
+    <p>Intercepts CUDA API calls from applications and redirects them to the GPGPU-Sim simulator instead of real GPU hardware. Handles kernel launches, memory allocation, and device management.</p>
+    <div class="stats"><span>7 files</span><span>CUDA API</span></div>
+  </a>
+  <a href="libopencl/index.html" class="module-card">
+    <h3>libopencl</h3>
+    <div class="tagline">OpenCL Runtime API Interception</div>
+    <p>Provides OpenCL API compatibility, allowing OpenCL workloads to run on the simulated GPU. Translates OpenCL constructs to the internal simulation model.</p>
+    <div class="stats"><span>2 files</span><span>OpenCL API</span></div>
+  </a>
+  <a href="cuobjdump_to_ptxplus/index.html" class="module-card">
+    <h3>cuobjdump_to_ptxplus</h3>
+    <div class="tagline">CUDA Binary Disassembly &amp; PTXPlus Conversion</div>
+    <p>Parses cuobjdump output to extract and convert CUDA binary code into PTXPlus format, enabling simulation of pre-compiled CUDA binaries and SASS instructions.</p>
+    <div class="stats"><span>14 files</span><span>Lex/Yacc parsers</span></div>
+  </a>
+  <a href="aerialvision/index.html" class="module-card">
+    <h3>AerialVision</h3>
+    <div class="tagline">Performance Visualization Tool</div>
+    <p>A Python-based GUI tool for visualizing GPGPU-Sim simulation output: warp activity, memory access patterns, IPC over time, and other performance metrics. Uses log file parsing and interactive plotting.</p>
+    <div class="stats"><span>9 files</span><span>Python &middot; GUI</span></div>
+  </a>
+</div>
+
+<!-- NAVIGATION GUIDE -->
+<h2 id="navigation">Navigation Guide</h2>
+<table style="max-width:700px">
+  <tr><th>Level</th><th>What You&rsquo;ll Find</th><th>When to Use</th></tr>
+  <tr><td><strong>0 &mdash; Project Hub</strong> (this page)</td><td>Project overview, module map, architecture diagrams</td><td>Getting started, finding the right module</td></tr>
+  <tr><td><strong>1 &mdash; Module Overview</strong></td><td>Architecture diagram, key components, sub-module cards, narrated walkthrough</td><td>Understanding a module&rsquo;s purpose and structure</td></tr>
+  <tr><td><strong>2 &mdash; Sub-Module Deep Dive</strong></td><td>Source-level classes, algorithms, configs, code examples, focus pages</td><td>Implementing, debugging, or extending code</td></tr>
+</table>
+
+<!-- CROSS-MODULE CONNECTION -->
+<h2 id="cross-module">How the Modules Connect &mdash; A Memory Request Journey</h2>
+<p>This diagram traces a single memory load instruction from the application layer through functional simulation, timing simulation, the interconnect, and DRAM &mdash; showing how all major modules collaborate.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant APP as CUDA App
+    participant LIB as libcuda
+    participant SM as Stream Manager
+    participant SH as Shader Core<br/>(gpgpu-sim)
+    participant FS as ptx_sim<br/>(cuda-sim)
+    participant L1 as L1 Data Cache<br/>(gpu-cache)
+    participant ICNT as InterSim2<br/>(interconnect)
+    participant L2 as L2 Cache<br/>(l2cache)
+    participant DR as DRAM<br/>(dram)
+    participant PW as AccelWattch<br/>(power)
+
+    APP->>LIB: cudaMemcpy / kernel launch
+    LIB->>SM: enqueue kernel to stream
+    SM->>SH: dispatch thread blocks to cores
+    SH->>FS: functional execute instruction
+    FS-->>SH: effective address computed
+    SH->>L1: issue memory request (mem_fetch)
+    Note over L1: L1 HIT: return data in ~28 cycles
+    L1->>ICNT: L1 MISS: inject request flit
+    ICNT->>L2: route flit to memory partition
+    Note over ICNT: Mesh/crossbar traversal ~20-100 cycles
+    L2->>DR: L2 MISS: issue DRAM command
+    DR-->>L2: data returned after tRAS+tCAS
+    L2-->>ICNT: reply flit with data
+    ICNT-->>L1: deliver to requesting core
+    L1-->>SH: unblock waiting warp
+    SH->>PW: report activity counters
+    PW-->>SH: power/energy estimate
+</pre>
+</div>
+<blockquote>
+<strong>Key insight:</strong> The boundary between functional and timing simulation is critical: <code>cuda-sim</code> computes <em>what</em> happens (correct addresses, values), while <code>gpgpu-sim</code> determines <em>when</em> it happens (cycle-accurate timing). The interconnect (InterSim2) faithfully models the latency and contention of moving data between cores and memory. AccelWattch observes hardware activity counters to estimate power.
+</blockquote>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>gpgpu-sim_distribution/
+├── src/
+│   ├── abstract_hardware_model.h/cc   ← Role: Kernel, warp, instruction abstractions
+│   ├── gpgpusim_entrypoint.h/cc       ← Role: Simulator bootstrap &amp; main loop
+│   ├── stream_manager.h/cc            ← Role: CUDA stream &amp; event management
+│   ├── option_parser.h/cc             ← Role: Configuration file parsing
+│   ├── debug.h/cc                     ← Role: Debug output utilities
+│   ├── trace.h/cc                     ← Role: Simulation trace infrastructure
+│   ├── gpgpu-sim/                     ← Role: Core timing simulation (46 files)
+│   ├── cuda-sim/                      ← Role: PTX functional simulation (28 files)
+│   ├── intersim2/                     ← Role: Interconnect network simulator (115 files)
+│   └── accelwattch/                   ← Role: Power modeling (72 files)
+├── libcuda/                           ← Role: CUDA runtime API interception
+├── libopencl/                         ← Role: OpenCL runtime API
+├── cuobjdump_to_ptxplus/              ← Role: Binary disassembly tool
+├── aerialvision/                      ← Role: Python visualization GUI
+├── configs/                           ← Role: Pre-built GPU configuration files
+├── doc/                               ← Role: Documentation
+├── README.md
+└── CMakeLists.txt
+</code></pre>
+</details>
+
+<!-- BUILD & TECH STACK -->
+<h2 id="build">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>Languages</h4><p>C++ (primary), C, Python (AerialVision), Lex/Yacc (parsers)</p></div>
+  <div class="card"><h4>Build System</h4><p>CMake + Make &mdash; supports both traditional Makefiles and modern CMake builds</p></div>
+  <div class="card"><h4>Key Dependencies</h4><p>CUDA Toolkit (4.2&ndash;11), Flex/Bison, Xlib (AerialVision), PTX grammar</p></div>
+  <div class="card"><h4>Simulation Modes</h4><p>Execution-driven (intercepts real CUDA calls) and Trace-driven (Accel-Sim SASS traces via NVBit)</p></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer"><a href="search.html">&#128269; Search</a> &nbsp;|&nbsp; GPGPU-Sim Wiki &mdash; Generated 2026-03-25 from commit a4ce3fe</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+</body></html>

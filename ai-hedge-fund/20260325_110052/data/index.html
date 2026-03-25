@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Financial Data Models &amp; Caching — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip-wiki 2026-03-25 359cce7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px;z-index:100}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+.hero{margin-bottom:32px}.hero h1{font-size:2rem;color:var(--heading);margin-bottom:4px}.hero .subtitle{color:var(--text-muted);font-size:1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;flex:1;min-width:120px;text-align:center}.stat-card .val{font-size:1.4rem;font-weight:700;color:var(--accent)}.stat-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:6px;padding:16px 20px;margin:24px 0}.intro-box h2{font-size:1.1rem;color:var(--accent2);margin-bottom:6px}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:24px 0}#toc h2{font-size:1rem;margin-bottom:8px;color:var(--heading)}#toc ul{list-style:none;padding-left:0}#toc li{padding:2px 0}#toc a{font-size:.9rem}
+section{margin:32px 0}section h2{font-size:1.4rem;color:var(--heading);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:16px}section h3{font-size:1.1rem;color:var(--heading);margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.88rem}th,td{border:1px solid var(--border);padding:8px 10px;text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;overflow-x:auto;margin:12px 0;position:relative}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{color:inherit;background:var(--code-bg);padding:2px 5px;border-radius:3px;font-size:.88em}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.75rem}.copy-btn:hover{color:var(--accent)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:"🔍 Click to zoom";position:absolute;top:6px;right:10px;font-size:.7rem;color:var(--text-muted)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.diagram-overlay.active{display:flex}.diagram-overlay .inner{background:var(--bg);border-radius:8px;padding:24px;max-width:95vw;max-height:95vh;overflow:auto}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:monospace;font-size:.85rem;white-space:pre}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:48px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;z-index:60}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn,.mermaid-wrap::after{display:none!important}body{background:#fff;color:#000}pre{border-color:#ccc}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; data</nav>
+  <button id="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
+</header>
+
+<main id="main-content">
+<div class="hero">
+  <h1>📊 Financial Data Models &amp; Caching</h1>
+  <p class="subtitle">ai-hedge-fund/src/data &mdash; Pydantic schemas, in-memory cache &amp; portfolio types</p>
+</div>
+<div class="stat-row">
+  <div class="stat-card"><span class="val">15</span><span class="lbl">Models</span></div>
+  <div class="stat-card"><span class="val">40+</span><span class="lbl">Metric Fields</span></div>
+  <div class="stat-card"><span class="val">5</span><span class="lbl">Cache Domains</span></div>
+  <div class="stat-card"><span class="val">O(1)</span><span class="lbl">Dedup Lookup</span></div>
+</div>
+
+<div class="intro-box">
+  <h2>💡 What is this?</h2>
+  <p>Picture a <strong>filing cabinet with color-coded folders</strong>. Each folder type (Price, FinancialMetrics, InsiderTrade, etc.) has a strict template — every document inside must have exactly the right fields. The <code>Cache</code> class is the desk tray on top: recently-used documents sit there for instant re-access instead of pulling from the API drawer every time. New documents are <strong>merged and deduplicated</strong> automatically via a key field (e.g., <code>time</code> for prices, <code>report_period</code> for metrics).</p>
+</div>
+
+<nav id="toc"><h2>📑 Table of Contents</h2><ul></ul></nav>
+<p id="reading-time" style="color:var(--text-muted);font-size:.82rem"></p>
+
+<!-- Model Hierarchy -->
+<section id="model-hierarchy">
+<h2>Model Hierarchy</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="classDiagram
+  class Price {
+    +float open
+    +float close
+    +float high
+    +float low
+    +int volume
+    +str time
+  }
+  class FinancialMetrics {
+    +str ticker
+    +str report_period
+    +float|None market_cap
+    +float|None price_to_earnings_ratio
+    ... 35+ more fields
+  }
+  class LineItem {
+    +str ticker
+    +str report_period
+    +str period
+    +str currency
+    +extra=allow
+  }
+  class InsiderTrade {
+    +str ticker
+    +str filing_date
+    +float|None transaction_value
+    ... 10 more fields
+  }
+  class CompanyNews {
+    +str ticker
+    +str title
+    +str source
+    +str date
+    +str url
+  }
+  class Cache {
+    -dict _prices_cache
+    -dict _financial_metrics_cache
+    -dict _line_items_cache
+    -dict _insider_trades_cache
+    -dict _company_news_cache
+    +_merge_data()
+    +get_prices()
+    +set_prices()
+  }
+  PriceResponse o-- Price
+  FinancialMetricsResponse o-- FinancialMetrics
+  InsiderTradeResponse o-- InsiderTrade
+  CompanyNewsResponse o-- CompanyNews
+  Cache ..> Price : caches
+  Cache ..> FinancialMetrics : caches
+">classDiagram
+  class Price {
+    +float open
+    +float close
+    +float high
+    +float low
+    +int volume
+    +str time
+  }
+  class FinancialMetrics {
+    +str ticker
+    +str report_period
+    +float|None market_cap
+    +float|None price_to_earnings_ratio
+    ... 35+ more fields
+  }
+  class LineItem {
+    +str ticker
+    +str report_period
+    +str period
+    +str currency
+    +extra=allow
+  }
+  class InsiderTrade {
+    +str ticker
+    +str filing_date
+    +float|None transaction_value
+    ... 10 more fields
+  }
+  class CompanyNews {
+    +str ticker
+    +str title
+    +str source
+    +str date
+    +str url
+  }
+  class Cache {
+    -dict _prices_cache
+    -dict _financial_metrics_cache
+    -dict _line_items_cache
+    -dict _insider_trades_cache
+    -dict _company_news_cache
+    +_merge_data()
+    +get_prices()
+    +set_prices()
+  }
+  PriceResponse o-- Price
+  FinancialMetricsResponse o-- FinancialMetrics
+  InsiderTradeResponse o-- InsiderTrade
+  CompanyNewsResponse o-- CompanyNews
+  Cache ..> Price : caches
+  Cache ..> FinancialMetrics : caches</pre></div>
+</section>
+
+<!-- Cache Flow -->
+<section id="cache-flow">
+<h2>Cache Read / Write Flow</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="sequenceDiagram
+  participant Agent
+  participant API_Module as tools/api.py
+  participant Cache
+  participant Remote as Financial API
+  Agent->>API_Module: get_prices(AAPL, ...)
+  API_Module->>Cache: get_prices(cache_key)
+  alt cache hit
+    Cache-->>API_Module: list[dict]
+  else cache miss
+    API_Module->>Remote: GET /prices/?ticker=AAPL
+    Remote-->>API_Module: JSON response
+    API_Module->>Cache: set_prices(key, data)
+    Note over Cache: _merge_data deduplicates by time
+  end
+  API_Module-->>Agent: list[Price]
+">sequenceDiagram
+  participant Agent
+  participant API_Module as tools/api.py
+  participant Cache
+  participant Remote as Financial API
+  Agent->>API_Module: get_prices(AAPL, ...)
+  API_Module->>Cache: get_prices(cache_key)
+  alt cache hit
+    Cache-->>API_Module: list[dict]
+  else cache miss
+    API_Module->>Remote: GET /prices/?ticker=AAPL
+    Remote-->>API_Module: JSON response
+    API_Module->>Cache: set_prices(key, data)
+    Note over Cache: _merge_data deduplicates by time
+  end
+  API_Module-->>Agent: list[Price]</pre></div>
+</section>
+
+<!-- Key Symbols -->
+<section id="key-symbols">
+<h2>Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Symbol</th><th>File</th><th>Kind</th><th>Description</th></tr>
+  <tr><td><code>Price</code></td><td>models.py</td><td>BaseModel</td><td>OHLCV bar: open, close, high, low, volume, time</td></tr>
+  <tr><td><code>PriceResponse</code></td><td>models.py</td><td>BaseModel</td><td>Wrapper: ticker + list[Price]</td></tr>
+  <tr><td><code>FinancialMetrics</code></td><td>models.py</td><td>BaseModel</td><td>40+ nullable financial ratios &amp; growth metrics</td></tr>
+  <tr><td><code>FinancialMetricsResponse</code></td><td>models.py</td><td>BaseModel</td><td>Wrapper: list[FinancialMetrics]</td></tr>
+  <tr><td><code>LineItem</code></td><td>models.py</td><td>BaseModel</td><td>Dynamic financial statement line item (extra="allow")</td></tr>
+  <tr><td><code>InsiderTrade</code></td><td>models.py</td><td>BaseModel</td><td>SEC insider filing: shares, price, transaction_value</td></tr>
+  <tr><td><code>CompanyNews</code></td><td>models.py</td><td>BaseModel</td><td>News article: title, source, date, url, sentiment</td></tr>
+  <tr><td><code>CompanyFacts</code></td><td>models.py</td><td>BaseModel</td><td>Company metadata: sector, industry, employees, CIK</td></tr>
+  <tr><td><code>Position</code></td><td>models.py</td><td>BaseModel</td><td>Portfolio position: cash, shares, ticker</td></tr>
+  <tr><td><code>Portfolio</code></td><td>models.py</td><td>BaseModel</td><td>Dict of positions + total_cash</td></tr>
+  <tr><td><code>AnalystSignal</code></td><td>models.py</td><td>BaseModel</td><td>Agent output: signal, confidence, reasoning, max_position_size</td></tr>
+  <tr><td><code>TickerAnalysis</code></td><td>models.py</td><td>BaseModel</td><td>Per-ticker dict of analyst_name → AnalystSignal</td></tr>
+  <tr><td><code>Cache</code></td><td>cache.py</td><td>class</td><td>In-memory store with 5 domain-specific dicts</td></tr>
+  <tr><td><code>Cache._merge_data()</code></td><td>cache.py</td><td>method</td><td>Deduplicates by key_field using O(1) set lookup</td></tr>
+  <tr><td><code>get_cache()</code></td><td>cache.py</td><td>function</td><td>Returns the global singleton <code>_cache</code> instance</td></tr>
+</table>
+</section>
+
+<!-- Interactions -->
+<section id="interactions">
+<h2>Module Interactions</h2>
+<table>
+  <tr><th>From</th><th>To</th><th>Interaction</th></tr>
+  <tr><td>tools/api.py</td><td>data/models.py</td><td>Imports all Pydantic models for response parsing</td></tr>
+  <tr><td>tools/api.py</td><td>data/cache.py</td><td>Calls <code>get_cache()</code> to read/write cached API data</td></tr>
+  <tr><td>Every agent</td><td>data/models.py</td><td>Receives typed model instances (Price, FinancialMetrics, etc.)</td></tr>
+  <tr><td>graph/state.py</td><td>data/models.py</td><td>AgentState.data holds portfolio matching Portfolio schema</td></tr>
+  <tr><td>Cache.set_*</td><td>Cache._merge_data</td><td>All setters route through _merge_data for dedup</td></tr>
+</table>
+</section>
+
+<!-- Directory Map -->
+<section id="directory">
+<h2>Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/data/
+├── __init__.py       # (empty — package marker)
+├── models.py         # 15 Pydantic models: Price, FinancialMetrics, LineItem,
+│                     #   InsiderTrade, CompanyNews, CompanyFacts, Position,
+│                     #   Portfolio, AnalystSignal, TickerAnalysis, + Response wrappers
+└── cache.py          # Cache class (5 domains), _merge_data, get_cache()</div>
+</section>
+
+<!-- Configuration -->
+<section id="configuration">
+<h2>Configuration — Cache Domains</h2>
+<table>
+  <tr><th>Domain</th><th>Cache Dict</th><th>Dedup Key</th><th>Data Type</th></tr>
+  <tr><td>Prices</td><td><code>_prices_cache</code></td><td><code>time</code></td><td>OHLCV bars</td></tr>
+  <tr><td>Financial Metrics</td><td><code>_financial_metrics_cache</code></td><td><code>report_period</code></td><td>Quarterly/TTM ratios</td></tr>
+  <tr><td>Line Items</td><td><code>_line_items_cache</code></td><td><code>report_period</code></td><td>Income/Balance/Cash items</td></tr>
+  <tr><td>Insider Trades</td><td><code>_insider_trades_cache</code></td><td><code>filing_date</code></td><td>SEC insider filings</td></tr>
+  <tr><td>Company News</td><td><code>_company_news_cache</code></td><td><code>date</code></td><td>News articles</td></tr>
+</table>
+</section>
+
+<!-- Code Examples -->
+<section id="examples">
+<h2>Code Examples</h2>
+<h3>Example 1 — Using Cache Directly</h3>
+<pre><code class="language-python">from src.data.cache import get_cache
+
+cache = get_cache()
+
+# Store price data
+cache.set_prices("AAPL_2025-01-01_2025-06-01", [
+    {"open": 150.0, "close": 152.5, "high": 153.0,
+     "low": 149.5, "volume": 80000000, "time": "2025-01-02"},
+    {"open": 152.5, "close": 151.0, "high": 154.0,
+     "low": 150.0, "volume": 75000000, "time": "2025-01-03"},
+])
+
+# Retrieve — returns list[dict] or None
+cached = cache.get_prices("AAPL_2025-01-01_2025-06-01")
+print(len(cached))  # 2
+
+# Adding overlapping data — dedup by 'time'
+cache.set_prices("AAPL_2025-01-01_2025-06-01", [
+    {"open": 152.5, "close": 151.0, "high": 154.0,
+     "low": 150.0, "volume": 75000000, "time": "2025-01-03"},  # duplicate
+    {"open": 151.0, "close": 155.0, "high": 156.0,
+     "low": 150.5, "volume": 90000000, "time": "2025-01-06"},  # new
+])
+print(len(cache.get_prices("AAPL_2025-01-01_2025-06-01")))  # 3</code></pre>
+
+<h3>Example 2 — FinancialMetrics Field Categories</h3>
+<pre><code class="language-python">from src.data.models import FinancialMetrics
+
+# FinancialMetrics groups ~40 fields into categories:
+# Valuation:  market_cap, enterprise_value, P/E, P/B, P/S, EV/EBITDA, EV/Rev, FCF yield, PEG
+# Margins:    gross_margin, operating_margin, net_margin
+# Returns:    ROE, ROA, ROIC
+# Efficiency: asset_turnover, inventory_turnover, receivables_turnover, DSO, operating_cycle
+# Liquidity:  current_ratio, quick_ratio, cash_ratio, operating_cash_flow_ratio
+# Leverage:   debt_to_equity, debt_to_assets, interest_coverage
+# Growth:     revenue, earnings, book_value, EPS, FCF, operating_income, EBITDA growth
+# Per-share:  EPS, book_value_per_share, FCF_per_share, payout_ratio
+
+m = FinancialMetrics(ticker="AAPL", report_period="2025-03-31",
+                     period="ttm", currency="USD", market_cap=3.2e12)
+print(m.market_cap)  # 3200000000000.0</code></pre>
+</section>
+</main>
+
+<button id="back-to-top" aria-label="Back to top">↑</button>
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<footer>AI Hedge Fund Wiki &middot; Generated 2026-03-25 &middot; <code>359cce7</code> &middot; data module</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const THEME_KEY='neutra-ip-theme';
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t);document.getElementById('theme-toggle').textContent=t==='dark'?'🌙 Theme':'☀️ Theme';renderMermaid()}
+  document.getElementById('theme-toggle').addEventListener('click',()=>{applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')});
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+
+  mermaid.initialize({startOnLoad:false,theme:'default'});
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  renderMermaid();
+
+  const toc=document.querySelector('#toc ul');document.querySelectorAll('section[id]').forEach(s=>{const h=s.querySelector('h2');if(h){const li=document.createElement('li');const a=document.createElement('a');a.href='#'+s.id;a.textContent=h.textContent.replace(/^[\u{1F300}-\u{1FAFF}]/u,'').trim();li.appendChild(a);toc.appendChild(li)}});
+  const words=document.querySelector('main').textContent.trim().split(/\s+/).length;document.getElementById('reading-time').textContent='⏱ '+Math.max(1,Math.round(words/200))+' min read';
+  document.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.mermaid'))return;const btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',()=>{navigator.clipboard.writeText(pre.textContent.replace('Copy','').trim());btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});pre.appendChild(btn)});
+  const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
+  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+  const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  const sections=[...document.querySelectorAll('section[id]')];document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;let idx=-1;const y=window.scrollY+80;sections.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});if(e.key==='j'&&idx<sections.length-1)sections[idx+1].scrollIntoView({behavior:'smooth'});if(e.key==='k'&&idx>0)sections[idx-1].scrollIntoView({behavior:'smooth'})});
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

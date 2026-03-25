@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/kernel">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Oclgrind kernel — Standalone Kernel Runner</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.breadcrumb{font-size:.95rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.hub-note{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:1.2rem 1.6rem;margin:1.5rem 0;font-size:.92rem;color:var(--text-muted)}
+.hub-note strong{color:var(--accent)}
+.focus-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;background:var(--accent3);color:#000}
+.deep-dive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.deep-dive-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.deep-dive-grid .card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.deep-dive-grid .card h4{margin-top:0;color:var(--accent2)}
+.deep-dive-grid .card p{font-size:.9rem;color:var(--text-muted)}
+.deep-dive-grid .card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.deep-dive-grid .card ul li{margin:.25rem 0}
+.section-label{font-size:.85rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin:1.5rem 0 .5rem;padding-left:.2rem}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .deep-dive-grid .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.deep-dive-grid{grid-template-columns:1fr}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; kernel</nav>
+<h1>kernel &mdash; Standalone Kernel Runner</h1>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">3</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">~1.2k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">20</div><div class="label">CLI Flags</div></div>
+  <div class="stat-box"><div class="num">C++</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">CLI Tool</span>
+  <span class="badge green">Standalone Execution</span>
+  <span class="badge yellow">Simulation File Format</span>
+  <span class="badge red">Testing &amp; Development</span>
+</p>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this?</h3>
+<p>The <strong>kernel</strong> module provides the <code>oclgrind-kernel</code> command-line tool &mdash; a standalone entry point for executing OpenCL kernels <em>without writing an OpenCL host application</em>. Instead of calling <code>clCreateContext</code>, <code>clBuildProgram</code>, <code>clSetKernelArg</code>, etc., you describe everything in a simple text file (a &ldquo;sim file&rdquo;), and the <code>Simulation</code> class orchestrates the entire lifecycle for you.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine you are a chef who normally works in a large restaurant kitchen (the full OpenCL host program) &mdash; with waiters taking orders, a cashier, and a seating host. Now imagine a tiny food truck with a single window. You hand in a recipe card (the sim file) listing the dish name and ingredients, and the truck cooks it immediately &mdash; no waiters, no seating chart, no cashier. That food truck is <code>oclgrind-kernel</code>: a stripped-down shortcut to get straight to the cooking (kernel execution) without the ceremony of the full restaurant (runtime API).</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Module Architecture</h2>
+<p>The kernel module consists of two key components: a <code>Simulation</code> class that manages the entire kernel execution lifecycle, and a CLI entry point that translates command-line flags into environment variables understood by the core engine.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  CLI["oclgrind-kernel.cpp<br/>CLI Entry Point"]
+  PA["parseArguments()<br/>Process 20+ flags"]
+  SE["setEnvironment()<br/>Map flags → OCLGRIND_* vars"]
+  SIM["Simulation::load()<br/>Parse sim file"]
+  OP["Open program file<br/>(source or bitcode)"]
+  BUILD["Program::build()<br/>Compile OpenCL C → LLVM IR"]
+  BC["Program::createFromBitcodeFile()<br/>Load precompiled bitcode"]
+  KRN["Program::createKernel()<br/>Extract named kernel"]
+  ARGS["parseArgument() × N<br/>Parse typed argument headers"]
+  ALLOC["Memory::allocateBuffer()<br/>Allocate global buffers"]
+  RUN["Simulation::run()"]
+  KI["KernelInvocation::run()<br/>Execute NDRange"]
+  DUMP["dumpArgument()<br/>Print output buffers"]
+
+  CLI --> PA
+  PA --> SE
+  PA -->|"simfile path"| SIM
+  SIM --> OP
+  OP -->|"magic 0x4243"| BC
+  OP -->|"else source"| BUILD
+  BC --> KRN
+  BUILD --> KRN
+  KRN --> ARGS
+  ARGS --> ALLOC
+  ALLOC --> RUN
+  RUN --> KI
+  KI --> DUMP
+</pre>
+</div>
+
+<h2 id="lifecycle">Simulation Lifecycle</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant User as User / Shell
+  participant CLI as oclgrind-kernel
+  participant SIM as Simulation
+  participant CTX as Context
+  participant PRG as Program
+  participant KRN as Kernel
+  participant MEM as Memory
+  participant KI as KernelInvocation
+
+  User->>CLI: oclgrind-kernel [flags] sim.file
+  CLI->>CLI: parseArguments() → setEnvironment()
+  CLI->>SIM: Simulation()
+  SIM->>CTX: new Context()
+  CLI->>SIM: load("sim.file")
+  SIM->>SIM: Read program path, kernel name, NDRange, WGSize
+  alt Source (.cl)
+    SIM->>PRG: new Program(ctx, source)
+    SIM->>PRG: build(BUILD, "")
+  else Bitcode (.bc)
+    SIM->>PRG: createFromBitcodeFile(ctx, path)
+  end
+  SIM->>KRN: program→createKernel(name)
+  loop For each argument
+    SIM->>SIM: parseArgument(index) — read header tokens
+    SIM->>MEM: allocateBuffer(size, flags)
+    SIM->>MEM: store(data, address, size)
+    SIM->>KRN: setArgument(index, value)
+  end
+  CLI->>SIM: run(dumpGlobalMemory)
+  SIM->>KI: KernelInvocation::run(ctx, kernel, 3, offset, ndrange, wgsize)
+  KI-->>SIM: Execution complete
+  SIM->>SIM: dumpArgument() for each dump-flagged arg
+  SIM-->>CLI: return
+  CLI-->>User: Output results
+</pre>
+</div>
+
+<h2 id="classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Symbol</th><th>File</th><th>Description</th></tr>
+  <tr><td><code>Simulation</code></td><td>Simulation.h</td><td>Main class: owns Context, Kernel, and Program. Orchestrates load → parse → run lifecycle.</td></tr>
+  <tr><td><code>Simulation::load()</code></td><td>Simulation.cpp</td><td>Parses the sim file: reads program path, kernel name, NDRange, work-group size, and all arguments. Returns <code>false</code> on any error.</td></tr>
+  <tr><td><code>Simulation::run()</code></td><td>Simulation.cpp</td><td>Asserts all arguments are set, calls <code>KernelInvocation::run()</code>, then dumps flagged output buffers.</td></tr>
+  <tr><td><code>Simulation::parseArgument()</code></td><td>Simulation.cpp</td><td>Parses a single argument: reads header tokens (<code>size</code>, <code>type</code>, <code>fill</code>, <code>range</code>, <code>dump</code>, <code>ro</code>/<code>wo</code>, <code>null</code>, <code>noinit</code>, <code>hex</code>), allocates memory, stores data.</td></tr>
+  <tr><td><code>Simulation::get&lt;T&gt;()</code></td><td>Simulation.cpp</td><td>Template helper that reads a typed value from the sim file, skipping comments (<code>#</code>) and blank lines.</td></tr>
+  <tr><td><code>Simulation::dumpArgument&lt;T&gt;()</code></td><td>Simulation.cpp</td><td>Reads back a buffer from global memory and prints element-by-element to stdout, supporting hex formatting.</td></tr>
+  <tr><td><code>Simulation::parseFill&lt;T&gt;()</code></td><td>Simulation.cpp</td><td>Fills an argument buffer with a single repeated value (e.g., <code>fill=0</code>).</td></tr>
+  <tr><td><code>Simulation::parseRange&lt;T&gt;()</code></td><td>Simulation.cpp</td><td>Fills an argument buffer with a range of values: <code>start:increment:end</code>.</td></tr>
+  <tr><td><code>ArgDataType</code> (enum)</td><td>Simulation.h</td><td>Enumerates 11 supported types: <code>TYPE_NONE</code>, <code>TYPE_CHAR</code> through <code>TYPE_DOUBLE</code>.</td></tr>
+  <tr><td><code>DumpArg</code> (struct)</td><td>Simulation.h</td><td>Stores address, size, type, name, and hex flag for an argument marked with <code>dump</code>.</td></tr>
+  <tr><td><code>main()</code></td><td>oclgrind-kernel.cpp</td><td>Entry point: calls <code>parseArguments()</code>, creates <code>Simulation</code>, calls <code>load()</code> then <code>run()</code>.</td></tr>
+  <tr><td><code>parseArguments()</code></td><td>oclgrind-kernel.cpp</td><td>Iterates <code>argv</code>, matches 20+ flags via <code>strcmp</code>, calls <code>setEnvironment()</code> for each.</td></tr>
+  <tr><td><code>setEnvironment()</code></td><td>oclgrind-kernel.cpp</td><td>Cross-platform wrapper: calls <code>setenv()</code> on POSIX or <code>_putenv_s()</code> on Windows.</td></tr>
+  <tr><td><code>printUsage()</code></td><td>oclgrind-kernel.cpp</td><td>Prints the full help text with all flags and descriptions to stdout.</td></tr>
+  <tr><td><code>readValue&lt;T&gt;()</code></td><td>Simulation.cpp</td><td>Free-standing template utility that reads a typed value from an <code>istream</code>, with special 1-byte char handling.</td></tr>
+</table>
+
+<h2 id="interactions">Interactions with Other Modules</h2>
+<table>
+  <tr><th>Dependency</th><th>Module</th><th>Direction</th><th>How &amp; Why</th></tr>
+  <tr><td><code>Context</code></td><td>core</td><td>kernel → core</td><td><code>Simulation</code> creates and owns a <code>Context</code> instance, which provides global memory and plugin lifecycle management.</td></tr>
+  <tr><td><code>Program</code></td><td>core</td><td>kernel → core</td><td><code>Simulation::load()</code> either builds from source via <code>Program::build()</code> or loads precompiled bitcode via <code>Program::createFromBitcodeFile()</code>.</td></tr>
+  <tr><td><code>Kernel</code></td><td>core</td><td>kernel → core</td><td>Obtained from <code>Program::createKernel()</code>. The Simulation calls <code>getNumArguments()</code>, <code>getArgumentSize()</code>, <code>getArgumentTypeName()</code>, and <code>setArgument()</code>.</td></tr>
+  <tr><td><code>KernelInvocation</code></td><td>core</td><td>kernel → core</td><td><code>Simulation::run()</code> calls <code>KernelInvocation::run()</code> to dispatch the NDRange execution with context, kernel, sizes.</td></tr>
+  <tr><td><code>Memory</code></td><td>core</td><td>kernel → core</td><td><code>parseArgument()</code> calls <code>getGlobalMemory()</code> to allocate buffers and store initial data. <code>dumpArgument()</code> calls <code>load()</code> to read results back.</td></tr>
+  <tr><td>Plugins (all)</td><td>plugins</td><td>core → plugins</td><td>Indirectly activated via environment variables. CLI flags like <code>--data-races</code> set <code>OCLGRIND_DATA_RACES</code>, which <code>Context</code> reads to load the corresponding plugin.</td></tr>
+  <tr><td>Runtime (ICD)</td><td>runtime</td><td>none</td><td>The kernel module <strong>bypasses</strong> the runtime entirely &mdash; it talks directly to core, providing a simpler alternative execution path.</td></tr>
+</table>
+
+<h2 id="configuration">CLI Flags &amp; Configuration</h2>
+<p>Every CLI flag maps directly to an <code>OCLGRIND_*</code> environment variable via the <code>setEnvironment()</code> helper. The core engine reads these variables at <code>Context</code> construction time.</p>
+<table>
+  <tr><th>CLI Flag</th><th>Short</th><th>Env Variable</th><th>Argument</th><th>Description</th></tr>
+  <tr><td><code>--build-options</code></td><td>&mdash;</td><td><code>OCLGRIND_BUILD_OPTIONS</code></td><td>OPTIONS</td><td>Additional options passed to the OpenCL compiler (Clang)</td></tr>
+  <tr><td><code>--compute-units</code></td><td>&mdash;</td><td><code>OCLGRIND_COMPUTE_UNITS</code></td><td>UNITS</td><td>Override the number of compute units reported by the device</td></tr>
+  <tr><td><code>--constant-mem-size</code></td><td>&mdash;</td><td><code>OCLGRIND_CONSTANT_MEM_SIZE</code></td><td>BYTES</td><td>Set the constant memory size of the simulated device</td></tr>
+  <tr><td><code>--data-races</code></td><td>&mdash;</td><td><code>OCLGRIND_DATA_RACES</code></td><td>&mdash;</td><td>Enable data-race detection plugin (RaceDetector)</td></tr>
+  <tr><td><code>--disable-pch</code></td><td>&mdash;</td><td><code>OCLGRIND_DISABLE_PCH</code></td><td>&mdash;</td><td>Disable precompiled headers (slower but avoids PCH issues)</td></tr>
+  <tr><td><code>--dump-spir</code></td><td>&mdash;</td><td><code>OCLGRIND_DUMP_SPIR</code></td><td>&mdash;</td><td>Dump compiled SPIR / LLVM IR to temporary files for inspection</td></tr>
+  <tr><td><code>--global-mem</code></td><td><code>-g</code></td><td><em>internal flag</em></td><td>&mdash;</td><td>Output entire global memory contents at exit</td></tr>
+  <tr><td><code>--global-mem-size</code></td><td>&mdash;</td><td><code>OCLGRIND_GLOBAL_MEM_SIZE</code></td><td>BYTES</td><td>Set the global memory size of the simulated device</td></tr>
+  <tr><td><code>--help</code></td><td><code>-h</code></td><td>&mdash;</td><td>&mdash;</td><td>Display usage information and exit</td></tr>
+  <tr><td><code>--inst-counts</code></td><td>&mdash;</td><td><code>OCLGRIND_INST_COUNTS</code></td><td>&mdash;</td><td>Enable instruction counting plugin (opcode histograms)</td></tr>
+  <tr><td><code>--interactive</code></td><td><code>-i</code></td><td><code>OCLGRIND_INTERACTIVE</code></td><td>&mdash;</td><td>Enable interactive debugger (GDB-like kernel debugging)</td></tr>
+  <tr><td><code>--local-mem-size</code></td><td>&mdash;</td><td><code>OCLGRIND_LOCAL_MEM_SIZE</code></td><td>BYTES</td><td>Set the local memory size per work-group</td></tr>
+  <tr><td><code>--log</code></td><td>&mdash;</td><td><code>OCLGRIND_LOG</code></td><td>LOGFILE</td><td>Redirect log and error messages to a file</td></tr>
+  <tr><td><code>--max-errors</code></td><td>&mdash;</td><td><code>OCLGRIND_MAX_ERRORS</code></td><td>NUM</td><td>Limit the number of error/warning messages before suppression</td></tr>
+  <tr><td><code>--max-wgsize</code></td><td>&mdash;</td><td><code>OCLGRIND_MAX_WGSIZE</code></td><td>WGSIZE</td><td>Override the maximum work-group size of the device</td></tr>
+  <tr><td><code>--num-threads</code></td><td>&mdash;</td><td><code>OCLGRIND_NUM_THREADS</code></td><td>NUM</td><td>Set the number of worker threads for parallel work-group execution</td></tr>
+  <tr><td><code>--pch-dir</code></td><td>&mdash;</td><td><code>OCLGRIND_PCH_DIR</code></td><td>DIR</td><td>Override directory containing precompiled OpenCL builtin headers</td></tr>
+  <tr><td><code>--plugins</code></td><td>&mdash;</td><td><code>OCLGRIND_PLUGINS</code></td><td>PLUGINS</td><td>Load colon-separated list of additional plugin shared libraries</td></tr>
+  <tr><td><code>--quick</code></td><td><code>-q</code></td><td><code>OCLGRIND_QUICK</code></td><td>&mdash;</td><td>Only run first and last work-group (fast smoke test)</td></tr>
+  <tr><td><code>--uniform-writes</code></td><td>&mdash;</td><td><code>OCLGRIND_UNIFORM_WRITES</code></td><td>&mdash;</td><td>Don&rsquo;t suppress uniform write-write data-races</td></tr>
+  <tr><td><code>--uninitialized</code></td><td>&mdash;</td><td><code>OCLGRIND_UNINITIALIZED</code></td><td>&mdash;</td><td>Report usage of uninitialized memory values</td></tr>
+  <tr><td><code>--version</code></td><td><code>-v</code></td><td>&mdash;</td><td>&mdash;</td><td>Display version information and exit</td></tr>
+</table>
+
+<h2 id="sim-file-format">Simulation File Format</h2>
+<p>The sim file is a plain-text format parsed by <code>Simulation::load()</code>. Lines starting with <code>#</code> are comments. The format is:</p>
+<pre><code class="language-cpp">// Sim file structure (parsed by Simulation::load):
+// Line 1: program file path  (e.g., "vecadd.cl" or "vecadd.bc")
+// Line 2: kernel name         (e.g., "vecadd")
+// Line 3: NDRange x y z       (e.g., "1024 1 1")
+// Line 4: work-group size x y z (e.g., "64 1 1")
+// Lines 5+: argument headers + data, one per kernel argument
+//
+// Argument header format:  &lt;token token ...&gt;
+// Tokens: size=N, type (int/float/...), fill=V, range=S:I:E,
+//         dump, hex, noinit, null, ro, wo</code></pre>
+
+<h3 id="example-simfile">Example Sim File</h3>
+<pre><code class="language-cpp">// vecadd.sim — add two vectors of 8 floats
+vecadd.cl          # OpenCL source file
+vecadd             # Kernel name
+8 1 1              # NDRange: 8 work-items
+8 1 1              # Work-group size: single group of 8
+
+# Argument 0: input buffer A (read-only, 8 floats filled with 1.0)
+&lt;float size=32 ro fill=1.0&gt;
+
+# Argument 1: input buffer B (read-only, range 0..7)
+&lt;float size=32 ro range=0:1:7&gt;
+
+# Argument 2: output buffer C (write-only, dump results)
+&lt;float size=32 wo noinit dump&gt;</code></pre>
+
+<h2 id="code-examples">Code Examples</h2>
+
+<h3>Simulation Construction &amp; Lifecycle</h3>
+<pre><code class="language-cpp">// From oclgrind-kernel.cpp — the complete main() flow
+int main(int argc, char* argv[])
+{
+  // Step 1: Parse CLI flags and set environment variables
+  if (!parseArguments(argc, argv))
+    return 1;
+
+  // Step 2: Create simulation (allocates Context)
+  Simulation simulation;
+
+  // Step 3: Load sim file (compile program, create kernel, parse args)
+  if (!simulation.load(simfile))
+    return 1;
+
+  // Step 4: Execute the kernel and dump results
+  simulation.run(outputGlobalMemory);
+}</code></pre>
+
+<h3>Argument Parsing — Header Token Processing</h3>
+<pre><code class="language-cpp">// Simplified from Simulation::parseArgument()
+// Each argument has a header like: &lt;float size=32 ro fill=1.0 dump&gt;
+void Simulation::parseArgument(size_t index)
+{
+  size_t size = SIZE_MAX;
+  ArgDataType type = TYPE_NONE;
+  bool dump = false, hex = false, noinit = false, null = false;
+  string fill, range;
+
+  // Read header tokens between &lt; and &gt;
+  // Recognized tokens: char/uchar/.../double, size=N, fill=V,
+  //   range=S:I:E, dump, hex, noinit, null, ro, wo
+
+  // After parsing: allocate buffer, store initial data
+  Memory* globalMemory = m_context-&gt;getGlobalMemory();
+  size_t address = globalMemory-&gt;allocateBuffer(size, flags);
+  globalMemory-&gt;store(data, address, size);
+
+  // Bind argument to kernel
+  m_kernel-&gt;setArgument(index, value);
+}</code></pre>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for <code>src/kernel/</code></summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/kernel/
+├── Simulation.h           ← Class declaration: Simulation, ArgDataType enum, DumpArg struct
+├── Simulation.cpp         ← Implementation: load(), run(), parseArgument(), get&lt;T&gt;(), dumpArgument&lt;T&gt;()
+│                             parseFill&lt;T&gt;(), parseRange&lt;T&gt;(), parseArgumentData&lt;T&gt;(), readValue&lt;T&gt;()
+│                             ~780 lines — the core simulation engine
+└── oclgrind-kernel.cpp    ← CLI entry point: main(), parseArguments(), setEnvironment(), printUsage()
+                              ~317 lines — flag parsing and orchestration</code></pre>
+</details>
+
+<h2 id="deep-dives">Deep Dives</h2>
+<div class="hub-note">
+  <strong>&#128269; Focus pages</strong> provide implementation-level detail on specific mechanisms within this module.
+</div>
+<div class="deep-dive-grid">
+  <a class="card" href="simulation_lifecycle.html">
+    <h4>Simulation Lifecycle <span class="focus-badge">FOCUS</span></h4>
+    <p>Step-by-step walkthrough of the load → parse → execute pipeline inside the <code>Simulation</code> class.</p>
+    <ul>
+      <li>Sim file parsing with line-by-line error recovery</li>
+      <li>Bitcode vs. source detection (magic bytes <code>0x42 0x43</code>)</li>
+      <li>Argument header tokenizer and type inference</li>
+      <li>Buffer allocation, fill/range initializers, dump logic</li>
+    </ul>
+  </a>
+  <a class="card" href="cli_interface.html">
+    <h4>CLI Interface <span class="focus-badge">FOCUS</span></h4>
+    <p>How <code>oclgrind-kernel</code> bridges the gap between shell invocations and the core simulation engine.</p>
+    <ul>
+      <li>Complete flag → environment variable mapping</li>
+      <li>Cross-platform <code>setEnvironment()</code> (POSIX vs. Win32)</li>
+      <li>Error handling and usage output</li>
+      <li>Integration with plugin activation</li>
+    </ul>
+  </a>
+</div>
+
+<div class="footer">
+  <p><a href="../index.html">&larr; Back to Oclgrind overview</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></p>
+  <p>Oclgrind Wiki &mdash; Generated 2026-03-25 from source revision <code>8c243f0</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var nav=document.querySelector('.breadcrumb');if(nav){var rt=document.createElement('span');rt.style.cssText='float:right;font-size:.85rem;color:var(--text-muted)';rt.textContent='\u23F1 ~'+mins+' min read';nav.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="ai-hedge-fund/src">
+<meta name="wiki-source-rev" content="359cce7">
+<title>AI Hedge Fund &mdash; Multi-Agent Investment Decision System</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>AI Hedge Fund</h1>
+<div class="hero">
+  <p class="subtitle">Multi-Agent Investment Decision System</p>
+  <p>An AI-powered hedge fund that employs 18+ specialized analyst agents &mdash; each modeled after legendary investors like Warren Buffett, Ben Graham, and Cathie Wood &mdash; to collaboratively analyze stocks, manage risk, and produce trading decisions. Built with LangGraph for orchestration, FastAPI for the web backend, and React Flow for visual workflow editing.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">&#129302; 20 Analyst Agents</span>
+    <span class="badge green">&#128200; LangGraph Orchestration</span>
+    <span class="badge yellow">&#128187; Full-Stack Web App</span>
+    <span class="badge red">&#9888;&#65039; Educational Only</span>
+  </p>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>AI Hedge Fund is a proof-of-concept system that uses multiple AI agents to make collaborative stock trading decisions. Each agent embodies a different investing philosophy &mdash; from deep value (Ben Graham) to disruptive growth (Cathie Wood) &mdash; and generates buy/sell/hold signals with confidence scores. A portfolio manager agent synthesizes all signals under risk constraints to produce final trading orders. The system supports both single-run analysis and historical backtesting with performance metrics like Sharpe ratio and max drawdown.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine a Wall Street investment committee meeting: around the table sit 18 analysts, each with a different specialty &mdash; one reads only balance sheets, another tracks insider trades, a third watches price charts. They each write down their recommendation on a card (buy, sell, or hold) with a confidence percentage. The risk manager then checks the portfolio&rsquo;s current exposure and sets position limits. Finally, the portfolio manager reads all the cards, weighs the consensus, and places the actual orders &mdash; but only within the limits the risk manager set. That&rsquo;s exactly what this system does, except the analysts are LLM-powered agents and the meeting happens in a LangGraph workflow.</p>
+</details>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">20</div><div class="label">Analyst Agents</div></div>
+  <div class="stat-box"><div class="num">10</div><div class="label">Sub-Modules</div></div>
+  <div class="stat-box"><div class="num">55+</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Primary Language</div></div>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph Input["Input Layer"]
+    CLI["CLI Interface<br/>src/cli/"]
+    WebUI["Web App<br/>app/frontend/"]
+  end
+
+  subgraph Orchestration["Workflow Orchestration"]
+    Main["main.py<br/>run_hedge_fund()"]
+    Graph["LangGraph StateGraph<br/>src/graph/state.py"]
+  end
+
+  subgraph Agents["Analyst Agents (src/agents/)"]
+    direction LR
+    VA["Value Agents<br/>Graham, Buffett,<br/>Munger, Burry, Pabrai"]
+    GA["Growth Agents<br/>Cathie Wood, Lynch,<br/>Fisher, Druckenmiller"]
+    QA["Quantitative Agents<br/>Technicals, Fundamentals,<br/>Valuation, Growth Analyst"]
+    SA["Sentiment Agents<br/>News Sentiment,<br/>Sentiment Analyst"]
+  end
+
+  subgraph Risk["Risk &amp; Decision"]
+    RM["Risk Manager<br/>Volatility &amp; Correlation"]
+    PM["Portfolio Manager<br/>Final Decisions"]
+  end
+
+  subgraph DataLayer["Data Layer"]
+    API["Financial API Client<br/>src/tools/api.py"]
+    Cache["In-Memory Cache<br/>src/data/cache.py"]
+    Models["Data Models<br/>src/data/models.py"]
+  end
+
+  subgraph BacktestSys["Backtesting Engine"]
+    BT["BacktestEngine<br/>src/backtesting/engine.py"]
+    Portfolio["Portfolio Tracker"]
+    Metrics["Performance Metrics"]
+  end
+
+  CLI --> Main
+  WebUI -->|FastAPI SSE| Main
+  Main --> Graph
+  Graph --> Agents
+  Agents --> RM
+  RM --> PM
+  PM -->|Trading Decisions| BT
+  Agents -.->|fetch data| API
+  API --> Cache
+  API --> Models
+  BT --> Portfolio
+  BT --> Metrics
+</pre>
+</div>
+
+<h2 id="data-flow">End-to-End Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant User
+  participant CLI as CLI / Web UI
+  participant WF as LangGraph Workflow
+  participant Agent as Analyst Agent (x20)
+  participant API as Financial API
+  participant Cache as Data Cache
+  participant RM as Risk Manager
+  participant PM as Portfolio Manager
+
+  User->>CLI: Select tickers, agents, model
+  CLI->>WF: run_hedge_fund(tickers, portfolio, analysts)
+  WF->>Agent: Parallel agent execution
+  Agent->>Cache: Check cached data
+  Cache-->>Agent: Cache hit (if available)
+  Agent->>API: get_financial_metrics() / get_prices()
+  API-->>Agent: Financial data (P/E, FCF, prices...)
+  Agent->>Agent: Analyze with strategy-specific logic
+  Agent-->>WF: Signal (bullish/bearish/neutral, confidence, reasoning)
+  WF->>RM: All analyst signals + portfolio state
+  RM->>RM: Calculate volatility, correlation, position limits
+  RM-->>WF: Risk-adjusted position limits per ticker
+  WF->>PM: Analyst signals + risk limits + portfolio snapshot
+  PM->>PM: LLM synthesizes signals into trades
+  PM-->>WF: PortfolioManagerOutput (buy/sell/hold decisions)
+  WF-->>CLI: Final decisions + analyst signals
+  CLI-->>User: Display trading table + reasoning
+</pre>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>stock analysis request for AAPL</strong> as it flows through the entire system:</p>
+<ol style="line-height:2;">
+<li><strong>User Input (CLI/Web)</strong> &mdash; The user selects ticker AAPL, picks 5 analysts (Buffett, Graham, Technicals, Sentiment, Valuation), and chooses GPT-4o as the LLM model.</li>
+<li><strong>Workflow Creation</strong> &mdash; <code>create_workflow()</code> builds a LangGraph <code>StateGraph</code> with nodes for each selected analyst, plus risk_manager and portfolio_manager. Edges connect analysts &rarr; risk &rarr; portfolio.</li>
+<li><strong>State Initialization</strong> &mdash; <code>AgentState</code> is populated with tickers, date range, portfolio snapshot (cash: $100k, no positions), and model configuration.</li>
+<li><strong>Parallel Agent Execution</strong> &mdash; All 5 analyst agents run concurrently. Each fetches financial data via <code>src/tools/api.py</code> (with caching in <code>src/data/cache.py</code>).</li>
+<li><strong>Warren Buffett Agent</strong> &mdash; Analyzes AAPL&rsquo;s moat (ROE &gt; 15%), earnings consistency (10 quarters), management quality, and calculates intrinsic value using owner earnings DCF. Returns: bullish, 82% confidence.</li>
+<li><strong>Ben Graham Agent</strong> &mdash; Computes Graham Number (<code>sqrt(22.5 &times; EPS &times; BVPS)</code>), checks net-net value (NCAV), current ratio &ge; 2, debt ratio. Returns: neutral, 55% confidence.</li>
+<li><strong>Technical Analyst</strong> &mdash; Calculates EMA crossovers (8/21/55), RSI, Bollinger Bands, ADX, Hurst exponent. Ensemble-weights 5 strategies (trend 25%, momentum 25%, mean reversion 20%, volatility 15%, stat arb 15%). Returns: bullish, 68% confidence.</li>
+<li><strong>Sentiment Analyst</strong> &mdash; Fetches insider trades (30% weight) and news articles (70% weight). LLM classifies top 5 articles. Aggregates with weighted voting. Returns: bullish, 71% confidence.</li>
+<li><strong>Valuation Analyst</strong> &mdash; Runs 4 valuation methods: DCF (35%), Owner Earnings (35%), EV/EBITDA (20%), Residual Income (10%). Probability-weights bear/base/bull scenarios. Returns: neutral, 60% confidence.</li>
+<li><strong>Risk Manager</strong> &mdash; Calculates 60-day rolling volatility (annualized), percentile rank, and cross-ticker correlation. Sets position limit to 20% of portfolio ($20k) adjusted by volatility multiplier.</li>
+<li><strong>Portfolio Manager</strong> &mdash; Receives 5 signals (3 bullish, 2 neutral) plus risk limits. LLM prompt constrains decisions to allowed actions (buy up to 100 shares at $195). Decides: buy 50 shares AAPL, confidence 75%.</li>
+<li><strong>Output Display</strong> &mdash; Results shown as a formatted table with per-agent signals, final decision, and portfolio summary. In backtest mode, this repeats daily across the date range.</li>
+</ol>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>Component</th><th>File / Module</th><th>Role</th></tr>
+<tr><td><code>run_hedge_fund()</code></td><td>src/main.py</td><td>Main entry point &mdash; builds LangGraph workflow and executes agent pipeline</td></tr>
+<tr><td><code>AgentState</code></td><td>src/graph/state.py</td><td>LangGraph TypedDict state with message accumulation and dict merging</td></tr>
+<tr><td><code>create_workflow()</code></td><td>src/main.py</td><td>Constructs StateGraph connecting analyst nodes &rarr; risk &rarr; portfolio manager</td></tr>
+<tr><td><code>BacktestEngine</code></td><td>src/backtesting/engine.py</td><td>Orchestrates multi-day backtesting with data prefetching and trade execution</td></tr>
+<tr><td><code>Portfolio</code></td><td>src/backtesting/portfolio.py</td><td>Tracks positions (long/short), cash, margin, and realized gains</td></tr>
+<tr><td><code>risk_management_agent()</code></td><td>src/agents/risk_manager.py</td><td>Volatility-adjusted position sizing with correlation analysis</td></tr>
+<tr><td><code>portfolio_management_agent()</code></td><td>src/agents/portfolio_manager.py</td><td>LLM-driven synthesis of analyst signals into constrained trading decisions</td></tr>
+<tr><td><code>_make_api_request()</code></td><td>src/tools/api.py</td><td>Financial Datasets API client with rate limiting (429 backoff) and caching</td></tr>
+<tr><td><code>LLMModel</code></td><td>src/llm/models.py</td><td>Multi-provider model config (OpenAI, Anthropic, Groq, Ollama, DeepSeek, etc.)</td></tr>
+<tr><td><code>Cache</code></td><td>src/data/cache.py</td><td>In-memory cache for prices, metrics, insider trades, and news data</td></tr>
+<tr><td><code>call_llm()</code></td><td>src/utils/llm.py</td><td>Unified LLM calling with JSON mode, retries, and Pydantic parsing</td></tr>
+<tr><td><code>ANALYST_CONFIG</code></td><td>src/utils/analysts.py</td><td>Registry mapping 20 analyst keys to display names, descriptions, and functions</td></tr>
+<tr><td>FastAPI Backend</td><td>app/backend/</td><td>REST API + SSE streaming for web UI (flows, runs, API keys)</td></tr>
+<tr><td>React Frontend</td><td>app/frontend/</td><td>Visual workflow editor using React Flow with real-time agent execution</td></tr>
+</table>
+
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <a class="card" href="agents/index.html">
+    <h4>&#129302; Agents</h4>
+    <p>20 analyst agents modeled after legendary investors (Buffett, Graham, Burry, etc.) plus technical, fundamental, sentiment, and valuation analysts. Each generates buy/sell/hold signals with confidence scores.</p>
+    <ul><li>src/agents/ &middot; 20 Python files</li><li>12 LLM-driven persona agents + 8 quantitative agents</li></ul>
+  </a>
+  <a class="card" href="backtesting/index.html">
+    <h4>&#128200; Backtesting</h4>
+    <p>Historical backtesting engine with portfolio tracking, trade execution, performance metrics (Sharpe, Sortino, max drawdown), and SPY benchmark comparison.</p>
+    <ul><li>src/backtesting/ &middot; 9 Python files</li><li>BacktestEngine, Portfolio, TradeExecutor, PerformanceMetrics</li></ul>
+  </a>
+  <a class="card" href="graph/index.html">
+    <h4>&#128279; Graph &amp; Workflow</h4>
+    <p>LangGraph-based workflow orchestration with <code>AgentState</code> TypedDict, dict-merge operators, and configurable analyst node composition.</p>
+    <ul><li>src/graph/ &middot; 2 Python files</li><li>StateGraph, AgentState, merge_dicts</li></ul>
+  </a>
+  <a class="card" href="llm/index.html">
+    <h4>&#129504; LLM Configuration</h4>
+    <p>Multi-provider LLM model management supporting 13+ providers (OpenAI, Anthropic, Groq, Ollama, DeepSeek, Google, Azure, etc.) with JSON mode and Pydantic output parsing.</p>
+    <ul><li>src/llm/ &middot; 2 Python files</li><li>ModelProvider enum, LLMModel, get_model()</li></ul>
+  </a>
+  <a class="card" href="data/index.html">
+    <h4>&#128451; Data Models &amp; Cache</h4>
+    <p>Pydantic data models for prices, financial metrics, insider trades, company news, and portfolio state. In-memory cache with deduplication and merge logic.</p>
+    <ul><li>src/data/ &middot; 3 Python files</li><li>Price, FinancialMetrics, LineItem, InsiderTrade, Cache</li></ul>
+  </a>
+  <a class="card" href="tools/index.html">
+    <h4>&#128295; API Tools</h4>
+    <p>Financial Datasets API client with rate limiting (429 backoff), pagination, caching integration, and DataFrame conversion for the entire financial data pipeline.</p>
+    <ul><li>src/tools/ &middot; 2 Python files</li><li>get_prices(), get_financial_metrics(), search_line_items()</li></ul>
+  </a>
+  <a class="card" href="cli/index.html">
+    <h4>&#9000;&#65039; CLI Interface</h4>
+    <p>Command-line interface with interactive analyst selection (questionary prompts), model picking, date resolution, and argument parsing for both single runs and backtesting.</p>
+    <ul><li>src/cli/ &middot; 2 Python files</li><li>CLIInputs dataclass, parse_cli_inputs()</li></ul>
+  </a>
+  <a class="card" href="utils/index.html">
+    <h4>&#128736; Utilities</h4>
+    <p>Shared utilities: LLM calling with retries, progress tracking (Rich live table), analyst registry, display formatting (colorama + tabulate), Ollama management, and graph visualization.</p>
+    <ul><li>src/utils/ &middot; 7 Python files</li><li>call_llm(), AgentProgress, ANALYST_CONFIG, display helpers</li></ul>
+  </a>
+  <a class="card" href="app_backend/index.html">
+    <h4>&#127760; Web Backend</h4>
+    <p>FastAPI REST API with SSE streaming for real-time agent progress, SQLAlchemy database for flow persistence, and Pydantic schemas for request/response validation.</p>
+    <ul><li>app/backend/ &middot; 15+ Python files</li><li>HedgeFundFlow, FlowRun, BacktestService</li></ul>
+  </a>
+  <a class="card" href="app_frontend/index.html">
+    <h4>&#127912; Web Frontend</h4>
+    <p>React + TypeScript visual workflow editor using React Flow (@xyflow/react). Drag-and-drop agent nodes, real-time SSE execution, model selection per agent, and backtest visualization.</p>
+    <ul><li>app/frontend/src/ &middot; 40+ TypeScript/TSX files</li><li>FlowContext, NodeContext, AgentNode, StockAnalyzerNode</li></ul>
+  </a>
+</div>
+
+<h2 id="agent-strategies">Agent Investment Strategies</h2>
+<table>
+<tr><th>Agent</th><th>Strategy</th><th>Key Metrics</th><th>Signal Thresholds</th></tr>
+<tr><td>Aswath Damodaran</td><td>Intrinsic Value DCF</td><td>FCF yield, ROIC, CAPM cost of equity</td><td>Margin of Safety &plusmn;25%</td></tr>
+<tr><td>Ben Graham</td><td>Deep Value</td><td>Graham Number, NCAV, current ratio &ge;2</td><td>Score &ge;70% of 15 pts max</td></tr>
+<tr><td>Bill Ackman</td><td>Quality + Activism</td><td>ROE &gt;15%, brand moat, D/E &lt;1</td><td>DCF margin of safety</td></tr>
+<tr><td>Cathie Wood</td><td>Disruptive Growth</td><td>R&amp;D &gt;15%, revenue acceleration</td><td>Score &ge;70% max</td></tr>
+<tr><td>Charlie Munger</td><td>Moat Quality</td><td>ROIC &gt;15%, pricing power, predictability</td><td>Score &ge;7.5/10</td></tr>
+<tr><td>Michael Burry</td><td>Contrarian Deep Value</td><td>FCF yield &gt;8%, EV/EBIT &lt;10</td><td>Score &ge;70% of 12 pts</td></tr>
+<tr><td>Mohnish Pabrai</td><td>Capital Preservation</td><td>Downside protection, FCF yield, doubling potential</td><td>Score &ge;7.5/10</td></tr>
+<tr><td>Peter Lynch</td><td>GARP (PEG focus)</td><td>PEG &lt;1, ten-bagger potential</td><td>Score &ge;7.5/10</td></tr>
+<tr><td>Phil Fisher</td><td>Scuttlebutt Growth</td><td>Revenue CAGR, R&amp;D ratio, margin stability</td><td>Score &ge;7.5/10</td></tr>
+<tr><td>Rakesh Jhunjhunwala</td><td>Multi-Dimensional</td><td>EPS growth, profitability, cash flow</td><td>MOS &plusmn;30%</td></tr>
+<tr><td>Stanley Druckenmiller</td><td>Macro + Momentum</td><td>Growth momentum, risk-reward ratio</td><td>Asymmetric focus</td></tr>
+<tr><td>Warren Buffett</td><td>Moat + Owner Earnings</td><td>ROE, consistency, book value growth</td><td>Composite scoring</td></tr>
+<tr><td>Technicals</td><td>Multi-Strategy Ensemble</td><td>EMA, RSI, Bollinger, ADX, Hurst</td><td>Weighted signal &gt;0.6</td></tr>
+<tr><td>Fundamentals</td><td>Basic Metrics</td><td>ROE, growth, health, valuation ratios</td><td>2+/4 signals</td></tr>
+<tr><td>Growth Analyst</td><td>Growth Trends</td><td>PEG, FCF growth, margin trends</td><td>Score &gt;0.6</td></tr>
+<tr><td>Valuation</td><td>Multi-Method DCF</td><td>Owner earnings, WACC DCF, EV/EBITDA, RIM</td><td>Gap &gt;&plusmn;15%</td></tr>
+<tr><td>Sentiment</td><td>Market Mood</td><td>Insider buy/sell ratio + news tone</td><td>Weighted voting</td></tr>
+<tr><td>News Sentiment</td><td>Article Classification</td><td>LLM-classified article sentiment</td><td>Aggregated voting</td></tr>
+<tr><td>Risk Manager</td><td>Position Sizing</td><td>60-day vol, correlation, portfolio exposure</td><td>Vol-adjusted limits</td></tr>
+<tr><td>Portfolio Manager</td><td>Decision Synthesis</td><td>All signals + risk limits + allowed actions</td><td>LLM-constrained</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>ai-hedge-fund/
+├── src/
+│   ├── main.py                    ← Role: Workflow entry point, LangGraph builder
+│   ├── backtester.py              ← Role: Backtesting CLI entry point
+│   ├── agents/                    ← Role: 20 analyst agent implementations
+│   │   ├── warren_buffett.py      ← Role: Moat + owner earnings strategy
+│   │   ├── ben_graham.py          ← Role: Deep value (Graham Number, NCAV)
+│   │   ├── portfolio_manager.py   ← Role: Final decision synthesis
+│   │   ├── risk_manager.py        ← Role: Volatility-adjusted position limits
+│   │   ├── technicals.py          ← Role: Multi-strategy technical analysis
+│   │   ├── valuation.py           ← Role: Four-method DCF valuation
+│   │   └── ... (14 more agents)
+│   ├── backtesting/               ← Role: Historical backtesting engine
+│   │   ├── engine.py              ← Role: Main backtest loop orchestrator
+│   │   ├── portfolio.py           ← Role: Position and cash tracking
+│   │   ├── trader.py              ← Role: Trade execution dispatcher
+│   │   ├── metrics.py             ← Role: Sharpe, Sortino, max drawdown
+│   │   └── ...
+│   ├── graph/                     ← Role: LangGraph state management
+│   │   └── state.py               ← Role: AgentState TypedDict + merge operators
+│   ├── llm/                       ← Role: Multi-provider model configuration
+│   │   └── models.py              ← Role: 13+ provider support (OpenAI, Anthropic, etc.)
+│   ├── data/                      ← Role: Data models and caching
+│   │   ├── models.py              ← Role: Pydantic models (Price, Metrics, etc.)
+│   │   └── cache.py               ← Role: In-memory data cache
+│   ├── tools/                     ← Role: Financial data API client
+│   │   └── api.py                 ← Role: Rate-limited API with pagination
+│   ├── cli/                       ← Role: Command-line interface
+│   │   └── input.py               ← Role: Argument parsing + interactive prompts
+│   └── utils/                     ← Role: Shared utilities
+│       ├── llm.py                 ← Role: Unified LLM calling with retries
+│       ├── analysts.py            ← Role: Analyst config registry
+│       ├── progress.py            ← Role: Rich progress tracking
+│       ├── display.py             ← Role: Table formatting (colorama + tabulate)
+│       └── ollama.py              ← Role: Local Ollama model management
+├── app/
+│   ├── backend/                   ← Role: FastAPI REST API + SSE
+│   │   ├── routes/                ← Role: API endpoints (hedge-fund, flows, keys)
+│   │   ├── services/              ← Role: Business logic (graph, backtest, portfolio)
+│   │   ├── database/              ← Role: SQLAlchemy models + migrations
+│   │   └── models/                ← Role: Pydantic request/response schemas
+│   └── frontend/                  ← Role: React + TypeScript visual editor
+│       └── src/
+│           ├── nodes/             ← Role: React Flow node components
+│           ├── contexts/          ← Role: FlowContext, NodeContext providers
+│           ├── hooks/             ← Role: useNodeState, useFlowConnection
+│           └── components/        ← Role: Layout, panels, settings UI
+├── tests/                         ← Role: Pytest test suite
+├── pyproject.toml                 ← Role: Poetry dependencies + project config
+└── .env.example                   ← Role: Environment variable template
+</code></pre>
+</details>
+
+<h2 id="configuration">Configuration &amp; Environment</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>OPENAI_API_KEY</code></td><td>&mdash;</td><td>OpenAI API key for GPT-4o, GPT-4o-mini models</td></tr>
+<tr><td><code>ANTHROPIC_API_KEY</code></td><td>&mdash;</td><td>Anthropic API key for Claude models</td></tr>
+<tr><td><code>GROQ_API_KEY</code></td><td>&mdash;</td><td>Groq API key for fast inference</td></tr>
+<tr><td><code>DEEPSEEK_API_KEY</code></td><td>&mdash;</td><td>DeepSeek API key</td></tr>
+<tr><td><code>FINANCIAL_DATASETS_API_KEY</code></td><td>&mdash;</td><td>Financial data provider (free for AAPL, GOOGL, MSFT, NVDA, TSLA)</td></tr>
+<tr><td><code>OLLAMA_BASE_URL</code></td><td>http://localhost:11434</td><td>Local Ollama server URL</td></tr>
+<tr><td><code>initial_cash</code></td><td>100000</td><td>Starting portfolio cash for backtesting</td></tr>
+<tr><td><code>margin_requirement</code></td><td>0.5</td><td>Margin requirement for short positions (50%)</td></tr>
+<tr><td><code>annual_trading_days</code></td><td>252</td><td>Trading days per year for annualization</td></tr>
+<tr><td><code>annual_rf_rate</code></td><td>0.0434</td><td>Annual risk-free rate for Sharpe ratio calculation</td></tr>
+<tr><td><code>default_model</code></td><td>gpt-4.1</td><td>Default LLM model for agent reasoning</td></tr>
+<tr><td><code>max_retries</code></td><td>3</td><td>LLM call retry count on failure</td></tr>
+</table>
+
+<h2 id="tech-stack">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>Core Languages</h4><p>Python 3.11+ (backend), TypeScript (frontend)</p></div>
+  <div class="card"><h4>AI/ML Stack</h4><p>LangChain, LangGraph, OpenAI/Anthropic/Groq SDKs, Pydantic v2</p></div>
+  <div class="card"><h4>Web Framework</h4><p>FastAPI (backend), React 18 + Vite 5 (frontend)</p></div>
+  <div class="card"><h4>UI Libraries</h4><p>@xyflow/react (React Flow), shadcn-ui, Tailwind CSS</p></div>
+  <div class="card"><h4>Data &amp; Finance</h4><p>pandas, numpy, Financial Datasets API</p></div>
+  <div class="card"><h4>Database &amp; State</h4><p>SQLAlchemy + Alembic (flows, runs), SSE streaming</p></div>
+</div>
+
+<h2 id="navigation">Navigation Guide</h2>
+<table style="max-width:700px">
+  <tr><th>Level</th><th>What You&rsquo;ll Find</th><th>When to Use</th></tr>
+  <tr><td><strong>Overview</strong> (this page)</td><td>System architecture, agent strategy table, project map</td><td>Getting started, understanding the whole system</td></tr>
+  <tr><td><strong>Sub-Module Deep Dive</strong></td><td>Class-level details, data flow diagrams, configuration, code examples</td><td>Implementing, debugging, or extending a specific module</td></tr>
+</table>
+
+<div class="footer"><a href="search.html">&#128269; Search</a> &nbsp;|&nbsp; AI Hedge Fund Wiki &mdash; Generated 2026-03-25</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(hljsLink) hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

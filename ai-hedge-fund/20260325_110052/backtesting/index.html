@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>backtesting — AI Hedge Fund Wiki</title>
+<meta name="generator" content="neutra-wiki-gen 2026-03-25 359cce7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+/* ── CSS tokens ─────────────────────────────────────────── */
+:root{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;--hero:#161b22;--code-bg:#1c2128;--table-alt:#1c2128;--muted:#8b949e;--warn:#d29922;--shadow:0 1px 3px rgba(0,0,0,.4)}
+[data-theme="light"]{--bg:#fff;--fg:#1f2328;--card:#f6f8fa;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--hero:#f6f8fa;--code-bg:#f6f8fa;--table-alt:#f6f8fa;--muted:#656d76;--warn:#9a6700;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:100;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+
+/* layout */
+.container{max-width:960px;margin:0 auto;padding:0 20px 60px}
+header{background:var(--hero);border-bottom:1px solid var(--border);padding:14px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.breadcrumb{font-size:.85rem;color:var(--muted)}
+.breadcrumb a{color:var(--accent)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--fg);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.85rem}
+
+/* hero */
+.hero{background:var(--hero);border:1px solid var(--border);border-radius:10px;padding:28px 24px;margin:28px 0 24px;box-shadow:var(--shadow)}
+.hero h1{margin:0 0 4px;font-size:1.65rem}
+.hero .subtitle{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.stat-row{display:flex;gap:18px;flex-wrap:wrap}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:.82rem;min-width:100px;text-align:center}
+.stat strong{display:block;font-size:1.15rem;color:var(--accent)}
+
+/* intro box */
+.intro-box{background:var(--card);border-left:4px solid var(--accent2);border-radius:6px;padding:16px 20px;margin:20px 0}
+.intro-box h2{margin:0 0 6px;font-size:1rem}
+
+/* toc */
+.toc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:24px 0}
+.toc h2{margin:0 0 8px;font-size:1rem}.toc ul{margin:0;padding-left:20px}.toc li{margin:2px 0;font-size:.88rem}
+
+/* sections */
+h2.section{border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:36px}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px 10px;border:1px solid var(--border);text-align:left}
+th{background:var(--card);position:sticky;top:0}
+tr:nth-child(even){background:var(--table-alt)}
+
+/* code */
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;position:relative}
+pre code{color:inherit;font-family:"SFMono-Regular",Consolas,monospace;font-size:.82rem}
+code{font-family:"SFMono-Regular",Consolas,monospace;font-size:.88em}
+.copy-btn{position:absolute;top:6px;right:8px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:2px 8px}
+
+/* mermaid */
+.diagram-wrap{position:relative;margin:16px 0;overflow:hidden;border:1px solid var(--border);border-radius:8px;padding:12px}
+.diagram-wrap .zoom-btn{position:absolute;top:6px;right:8px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:2px 8px;z-index:2}
+.diagram-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;justify-content:center;align-items:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .inner{max-width:95vw;max-height:95vh;overflow:auto;background:var(--bg);border-radius:10px;padding:24px}
+
+/* back-to-top */
+#back-to-top{position:fixed;bottom:28px;right:28px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;box-shadow:var(--shadow);z-index:50}
+
+/* dir-map */
+.dir-map{font-family:monospace;font-size:.82rem;white-space:pre;line-height:1.5}
+
+/* print */
+@media print{header,#back-to-top,.copy-btn,.zoom-btn,#theme-toggle{display:none!important}.hero,.toc,.intro-box{break-inside:avoid}body{background:#fff;color:#000}a{color:#000;text-decoration:underline}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; backtesting</nav>
+  <button id="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
+</header>
+
+<main id="main" class="container">
+
+<!-- ════ Hero ════ -->
+<section class="hero">
+  <h1>🧪 backtesting</h1>
+  <p class="subtitle">Historical Backtesting Engine — simulate trading strategies against real market data</p>
+  <div class="stat-row">
+    <div class="stat"><strong>11</strong>files</div>
+    <div class="stat"><strong>8</strong>classes</div>
+    <div class="stat"><strong>~1 115</strong>LOC</div>
+    <div class="stat"><strong>Python</strong>lang</div>
+    <div class="stat"><strong>11</strong>TypedDicts</div>
+  </div>
+</section>
+
+<!-- ════ Intro ════ -->
+<div class="intro-box">
+  <h2>✈️ What is this?</h2>
+  <p>Think of the backtesting module as a <strong>flight simulator for trading</strong>. Just as pilots rehearse instrument failures and turbulence in a simulator before flying real passengers, this engine replays historical market data day-by-day, lets AI analyst agents make buy/sell/short/cover decisions, executes those trades against a virtual portfolio, and scores the outcome with industry-standard risk metrics — all without risking a single real dollar.</p>
+</div>
+
+<!-- ════ TOC ════ -->
+<nav class="toc" aria-label="Table of Contents">
+  <h2>📑 Table of Contents</h2>
+  <ul id="toc-list"></ul>
+</nav>
+
+<!-- ════ Architecture ════ -->
+<h2 class="section" id="architecture">Architecture</h2>
+<p>The class diagram below shows how the eight core classes collaborate. <code>BacktestEngine</code> is the orchestrator; it delegates agent invocation, trade execution, valuation, metrics, benchmarking, and output to single-responsibility components.</p>
+<div class="diagram-wrap">
+  <button class="zoom-btn" aria-label="Zoom diagram">⛶ Zoom</button>
+  <pre class="mermaid" data-source="arch">
+classDiagram
+    class BacktestEngine {
+        -Portfolio _portfolio
+        -TradeExecutor _executor
+        -AgentController _agent_controller
+        -PerformanceMetricsCalculator _perf
+        -OutputBuilder _results
+        -BenchmarkCalculator _benchmark
+        +run_backtest() PerformanceMetrics
+        +get_portfolio_values() list
+        -_prefetch_data()
+    }
+    class Portfolio {
+        -PortfolioSnapshot _portfolio
+        +apply_long_buy(ticker, qty, price) int
+        +apply_long_sell(ticker, qty, price) int
+        +apply_short_open(ticker, qty, price) int
+        +apply_short_cover(ticker, qty, price) int
+        +get_snapshot() PortfolioSnapshot
+        +get_cash() float
+        +get_positions() Mapping
+    }
+    class TradeExecutor {
+        +execute_trade(ticker, action, qty, price, portfolio) int
+    }
+    class AgentController {
+        +run_agent(agent, ...) AgentOutput
+    }
+    class PerformanceMetricsCalculator {
+        +annual_trading_days int
+        +annual_rf_rate float
+        +compute_metrics(values) PerformanceMetrics
+        +update_metrics(metrics, values)
+    }
+    class BenchmarkCalculator {
+        +get_return_pct(ticker, start, end) float
+    }
+    class OutputBuilder {
+        +build_day_rows(...) list
+        +print_rows(rows)
+    }
+    class Valuation {
+        +calculate_portfolio_value()$ float
+        +compute_exposures()$ dict
+        +compute_portfolio_summary()$ dict
+    }
+
+    BacktestEngine --> Portfolio : owns
+    BacktestEngine --> TradeExecutor : owns
+    BacktestEngine --> AgentController : owns
+    BacktestEngine --> PerformanceMetricsCalculator : owns
+    BacktestEngine --> OutputBuilder : owns
+    BacktestEngine --> BenchmarkCalculator : owns
+    BacktestEngine ..> Valuation : calls
+    TradeExecutor --> Portfolio : mutates
+    AgentController ..> Portfolio : reads snapshot
+    OutputBuilder ..> Valuation : calls summary
+  </pre>
+</div>
+
+<!-- ════ Data Flow ════ -->
+<h2 class="section" id="data-flow">Data Flow</h2>
+<p>Each business day is a single iteration of the backtest loop. The sequence diagram traces one day through the engine.</p>
+<div class="diagram-wrap">
+  <button class="zoom-btn" aria-label="Zoom diagram">⛶ Zoom</button>
+  <pre class="mermaid" data-source="flow">
+sequenceDiagram
+    participant CLI as cli.py
+    participant E as BacktestEngine
+    participant API as tools/api
+    participant AC as AgentController
+    participant Agent as AI Agent
+    participant TX as TradeExecutor
+    participant P as Portfolio
+    participant V as Valuation
+    participant M as MetricsCalc
+    participant B as BenchmarkCalc
+    participant O as OutputBuilder
+
+    CLI->>E: run_backtest()
+    E->>API: _prefetch_data() — prices, financials, news
+    loop each business day
+        E->>API: get_price_data(ticker, date)
+        E->>AC: run_agent(agent, tickers, dates, portfolio)
+        AC->>Agent: agent(tickers, portfolio_snapshot, ...)
+        Agent-->>AC: AgentOutput {decisions, analyst_signals}
+        AC-->>E: normalized decisions
+        loop each ticker
+            E->>TX: execute_trade(ticker, action, qty, price, portfolio)
+            TX->>P: apply_long_buy / sell / short_open / short_cover
+            P-->>TX: executed qty
+        end
+        E->>V: calculate_portfolio_value(portfolio, prices)
+        E->>V: compute_exposures(portfolio, prices)
+        E->>B: get_return_pct("SPY", start, current)
+        E->>O: build_day_rows(...)
+        E->>O: print_rows(table)
+        E->>M: compute_metrics(portfolio_values)
+    end
+    E-->>CLI: PerformanceMetrics
+  </pre>
+</div>
+
+<!-- ════ Key Classes ════ -->
+<h2 class="section" id="key-classes">Key Classes &amp; Types</h2>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Name</th><th>File</th><th>Kind</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><code>BacktestEngine</code></td><td>engine.py</td><td>class</td><td>Orchestrates the full backtest loop — prefetch, iterate days, delegate decisions & trades</td></tr>
+<tr><td><code>Portfolio</code></td><td>portfolio.py</td><td>class</td><td>Encapsulates cash, long/short positions, margin tracking, cost-basis accounting</td></tr>
+<tr><td><code>TradeExecutor</code></td><td>trader.py</td><td>class</td><td>Maps action strings to Portfolio mutations; validates quantities</td></tr>
+<tr><td><code>AgentController</code></td><td>controller.py</td><td>class</td><td>Invokes the AI agent callable, normalizes output decisions &amp; signals</td></tr>
+<tr><td><code>PerformanceMetricsCalculator</code></td><td>metrics.py</td><td>class</td><td>Computes Sharpe, Sortino, max drawdown from the equity curve</td></tr>
+<tr><td><code>BenchmarkCalculator</code></td><td>benchmarks.py</td><td>class</td><td>Computes buy-and-hold return % for SPY (or any ticker) benchmark</td></tr>
+<tr><td><code>OutputBuilder</code></td><td>output.py</td><td>class</td><td>Builds formatted daily table rows; delegates printing to display utils</td></tr>
+<tr><td><code>Action</code></td><td>types.py</td><td>Enum</td><td>BUY / SELL / SHORT / COVER / HOLD — the five trade actions</td></tr>
+<tr><td><code>PortfolioSnapshot</code></td><td>types.py</td><td>TypedDict</td><td>Immutable snapshot: cash, margin, positions, realized gains</td></tr>
+<tr><td><code>PositionState</code></td><td>types.py</td><td>TypedDict</td><td>Per-ticker long/short shares, cost basis, margin used</td></tr>
+<tr><td><code>PerformanceMetrics</code></td><td>types.py</td><td>TypedDict</td><td>Sharpe, Sortino, max drawdown, exposures (all optional floats)</td></tr>
+<tr><td><code>AgentOutput</code></td><td>types.py</td><td>TypedDict</td><td>Decisions + analyst_signals returned by the AI agent</td></tr>
+<tr><td><code>PortfolioValuePoint</code></td><td>types.py</td><td>TypedDict</td><td>Daily equity-curve point with exposures</td></tr>
+<tr><td><code>TickerRealizedGains</code></td><td>types.py</td><td>TypedDict</td><td>Realized PnL per side (long/short) for a single ticker</td></tr>
+</tbody>
+</table></div>
+
+<!-- ════ Interactions ════ -->
+<h2 class="section" id="interactions">External Interactions</h2>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Peer</th><th>Direction</th><th>Details</th></tr></thead>
+<tbody>
+<tr><td><code>src/main.py</code> → <code>run_hedge_fund</code></td><td>← called by engine</td><td>The AI agent entry-point; <code>AgentController</code> wraps & normalizes its output</td></tr>
+<tr><td><code>src/tools/api</code></td><td>← called by engine</td><td>Fetches price data, financial metrics, insider trades, company news via <code>get_prices</code>, <code>get_price_data</code>, etc.</td></tr>
+<tr><td><code>src/llm/models</code></td><td>← used by CLI</td><td>Model registry (<code>LLM_ORDER</code>, <code>OLLAMA_LLM_ORDER</code>) for interactive model selection</td></tr>
+<tr><td><code>src/utils/analysts</code></td><td>← used by CLI</td><td><code>ANALYST_ORDER</code> list for interactive analyst checkbox</td></tr>
+<tr><td><code>src/utils/display</code></td><td>← used by OutputBuilder</td><td><code>format_backtest_row</code> and <code>print_backtest_results</code> for table rendering</td></tr>
+<tr><td><code>src/utils/ollama</code></td><td>← used by CLI</td><td><code>ensure_ollama_and_model</code> for local LLM health-check</td></tr>
+<tr><td>Data cache layer</td><td>← transparent</td><td><code>tools/api</code> functions cache responses so repeated date-ranges are instant</td></tr>
+</tbody>
+</table></div>
+
+<!-- ════ Deep Dive ════ -->
+<h2 class="section" id="deep-dive">Deep Dive</h2>
+
+<h3 id="dd-portfolio">Portfolio Management (Long / Short / Margin)</h3>
+<p>The <code>Portfolio</code> class maintains a <code>PortfolioSnapshot</code> dict containing cash, margin state, per-ticker positions, and realized gains. Four mutation methods handle the trade lifecycle:</p>
+<ul>
+  <li><strong><code>apply_long_buy</code></strong> — deducts cash, updates weighted-average cost basis. If cash is insufficient, buys the maximum affordable quantity.</li>
+  <li><strong><code>apply_long_sell</code></strong> — realizes gain/loss <code>(price − avg_cost) × qty</code>, credits cash, resets cost basis when position hits zero.</li>
+  <li><strong><code>apply_short_open</code></strong> — requires margin <code>proceeds × margin_requirement</code>. Credits short proceeds, debits margin. Falls back to maximum affordable quantity.</li>
+  <li><strong><code>apply_short_cover</code></strong> — buys-to-cover, realizes <code>(avg_short_price − price) × qty</code>, releases proportional margin.</li>
+</ul>
+<p>All methods return the <em>actually executed</em> quantity (which may be less than requested).</p>
+
+<h3 id="dd-metrics">Performance Metrics (Sharpe / Sortino / Drawdown)</h3>
+<p><code>PerformanceMetricsCalculator</code> takes the equity curve (<code>list[PortfolioValuePoint]</code>) and computes:</p>
+<ul>
+  <li><strong>Sharpe Ratio</strong> — <code>√252 × mean(excess) / std(excess)</code> where <code>excess = daily_return − daily_rf</code>. Default risk-free rate: 4.34 % annual.</li>
+  <li><strong>Sortino Ratio</strong> — same numerator but denominator uses <em>downside deviation</em> <code>√mean(min(excess,0)²)</code>. Returns ∞ when positive mean but zero downside.</li>
+  <li><strong>Max Drawdown</strong> — percentage peak-to-trough loss from cumulative maximum. Reports the date of the worst drawdown.</li>
+</ul>
+<p>Metrics are computed only after 3+ data points to avoid noisy early results.</p>
+
+<h3 id="dd-trade">Trade Execution &amp; Agent Loop</h3>
+<p><code>TradeExecutor.execute_trade</code> is a lightweight dispatcher: it coerces the action string into the <code>Action</code> enum then routes to the corresponding <code>Portfolio.apply_*</code> method. <code>AgentController.run_agent</code> wraps the AI agent callable, converts the <code>Portfolio</code> to a plain snapshot dict (for legacy compatibility), and normalizes every ticker's decision to ensure <code>action</code> and <code>quantity</code> keys always exist — defaulting to <code>hold / 0</code>.</p>
+
+<!-- ════ Directory Map ════ -->
+<h2 class="section" id="dir-map">Directory Map</h2>
+<div class="dir-map">src/backtesting/
+├── __init__.py          Public API &amp; re-exports
+├── benchmarks.py        BenchmarkCalculator — SPY buy-and-hold return
+├── cli.py               CLI entry-point with argparse + questionary
+├── controller.py        AgentController — invoke &amp; normalize agent
+├── engine.py            BacktestEngine — main loop orchestrator
+├── metrics.py           PerformanceMetricsCalculator — Sharpe / Sortino / DD
+├── output.py            OutputBuilder — daily table row formatting
+├── portfolio.py         Portfolio — cash / position / margin state
+├── trader.py            TradeExecutor — action → portfolio mutation
+├── types.py             TypedDicts, Enums, type aliases
+└── valuation.py         Pure functions: portfolio value, exposures, summary</div>
+
+<!-- ════ Configuration ════ -->
+<h2 class="section" id="configuration">Configuration Reference</h2>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Parameter</th><th>Default</th><th>Where Set</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>initial_capital</code></td><td>100 000</td><td>cli.py</td><td>Starting cash in the virtual portfolio</td></tr>
+<tr><td><code>margin_requirement</code></td><td>0.0</td><td>cli.py</td><td>Fraction of short proceeds held as margin (0 = no margin)</td></tr>
+<tr><td><code>annual_trading_days</code></td><td>252</td><td>metrics.py</td><td>Trading days/year for annualizing returns</td></tr>
+<tr><td><code>annual_rf_rate</code></td><td>0.0434</td><td>metrics.py</td><td>Annual risk-free rate (4.34 %) for Sharpe/Sortino</td></tr>
+<tr><td><code>start_date</code></td><td>now − 1 month</td><td>cli.py</td><td>Backtest start date (YYYY-MM-DD)</td></tr>
+<tr><td><code>end_date</code></td><td>today</td><td>cli.py</td><td>Backtest end date (YYYY-MM-DD)</td></tr>
+<tr><td><code>tickers</code></td><td>—</td><td>cli.py</td><td>Comma-separated stock tickers to trade</td></tr>
+<tr><td><code>lookback window</code></td><td>1 month</td><td>engine.py</td><td>Rolling window the agent sees per day</td></tr>
+<tr><td><code>prefetch lookback</code></td><td>1 year</td><td>engine.py</td><td>Historical data pre-loaded for caching</td></tr>
+<tr><td><code>--ollama</code></td><td>false</td><td>cli.py</td><td>Use local Ollama LLM instead of cloud provider</td></tr>
+<tr><td><code>--analysts-all</code></td><td>false</td><td>cli.py</td><td>Select all available analysts non-interactively</td></tr>
+</tbody>
+</table></div>
+
+<!-- ════ Code Examples ════ -->
+<h2 class="section" id="code-examples">Code Examples</h2>
+
+<h3>Portfolio.apply_long_buy — weighted average cost basis</h3>
+<pre><code class="language-python">def apply_long_buy(self, ticker: str, quantity: int, price: float) -> int:
+    if quantity <= 0:
+        return 0
+    position = self._portfolio["positions"][ticker]
+    cost = quantity * price
+    if cost <= self._portfolio["cash"]:
+        old_shares = position["long"]
+        old_cost_basis = position["long_cost_basis"]
+        total_shares = old_shares + quantity
+        if total_shares > 0:
+            total_old_cost = old_cost_basis * old_shares
+            position["long_cost_basis"] = (total_old_cost + cost) / total_shares
+        position["long"] = total_shares
+        self._portfolio["cash"] -= cost
+        return quantity
+    # Fallback: buy as many shares as cash allows
+    max_qty = int(self._portfolio["cash"] / price) if price > 0 else 0
+    if max_qty > 0:
+        return self.apply_long_buy(ticker, max_qty, price)  # recurse once
+    return 0</code></pre>
+
+<h3>PerformanceMetricsCalculator.compute_metrics — Sharpe &amp; Sortino</h3>
+<pre><code class="language-python">def compute_metrics(self, values):
+    df = pd.DataFrame(values).set_index("Date")
+    df["Daily Return"] = df["Portfolio Value"].pct_change()
+    clean = df["Daily Return"].dropna()
+    if len(clean) < 2:
+        return {"sharpe_ratio": None, "sortino_ratio": None, "max_drawdown": None}
+
+    daily_rf = self.annual_rf_rate / self.annual_trading_days   # 0.0434 / 252
+    excess = clean - daily_rf
+    mean_ex, std_ex = excess.mean(), excess.std()
+
+    sharpe = float(np.sqrt(252) * mean_ex / std_ex) if std_ex > 1e-12 else 0.0
+
+    downside = np.minimum(excess, 0)
+    dd_dev = float(np.sqrt(np.mean(downside**2)))
+    sortino = float(np.sqrt(252) * mean_ex / dd_dev) if dd_dev > 1e-12 else (
+        float("inf") if mean_ex > 0 else 0.0
+    )
+
+    rolling_max = df["Portfolio Value"].cummax()
+    drawdown = (df["Portfolio Value"] - rolling_max) / rolling_max
+    max_dd = float(drawdown.min() * 100)
+    return {"sharpe_ratio": sharpe, "sortino_ratio": sortino, "max_drawdown": max_dd}</code></pre>
+
+<h3>TradeExecutor.execute_trade — action dispatch</h3>
+<pre><code class="language-python">class TradeExecutor:
+    def execute_trade(self, ticker, action, quantity, current_price, portfolio):
+        if quantity is None or quantity <= 0:
+            return 0
+        action_enum = Action(action)  # coerce string → enum
+        if action_enum == Action.BUY:
+            return portfolio.apply_long_buy(ticker, int(quantity), float(current_price))
+        if action_enum == Action.SELL:
+            return portfolio.apply_long_sell(ticker, int(quantity), float(current_price))
+        if action_enum == Action.SHORT:
+            return portfolio.apply_short_open(ticker, int(quantity), float(current_price))
+        if action_enum == Action.COVER:
+            return portfolio.apply_short_cover(ticker, int(quantity), float(current_price))
+        return 0  # hold</code></pre>
+
+<!-- ════ Footer meta ════ -->
+<hr>
+<p style="font-size:.78rem;color:var(--muted)">
+  Generated 2026-03-25 · git <code>359cce7</code> · source <code>ai-hedge-fund/src/backtesting</code> · 11 files · ~1 115 LOC
+</p>
+</main>
+
+<!-- Diagram overlay -->
+<div class="diagram-overlay" id="diagram-overlay">
+  <div class="inner" id="diagram-overlay-inner"></div>
+</div>
+
+<!-- Back-to-top -->
+<button id="back-to-top" aria-label="Back to top">↑</button>
+
+<!-- ── Scripts ──────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') || 'dark';
+}
+function mermaidTheme() {
+  return currentTheme() === 'dark' ? 'dark' : 'default';
+}
+
+/* ── Mermaid init (startOnLoad:false) ── */
+mermaid.initialize({ startOnLoad: false, theme: mermaidTheme() });
+
+/* Render all diagrams */
+async function renderMermaid() {
+  mermaid.initialize({ startOnLoad: false, theme: mermaidTheme() });
+  document.querySelectorAll('pre.mermaid').forEach(el => {
+    const src = el.getAttribute('data-source');
+    if (!el.dataset.original) el.dataset.original = el.textContent;
+    el.removeAttribute('data-processed');
+    el.innerHTML = el.dataset.original;
+    el.id = '';
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+}
+await renderMermaid();
+
+/* ── TOC generation ── */
+(function buildTOC() {
+  const toc = document.getElementById('toc-list');
+  if (!toc) return;
+  document.querySelectorAll('h2.section, h3[id]').forEach(h => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    if (h.tagName === 'H3') li.style.marginLeft = '16px';
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+/* ── Reading time ── */
+(function readingTime() {
+  const text = document.querySelector('main')?.innerText || '';
+  const wpm = 200;
+  const mins = Math.max(1, Math.round(text.split(/\s+/).length / wpm));
+  const sub = document.querySelector('.hero .subtitle');
+  if (sub) sub.textContent += ` · ${mins} min read`;
+})();
+
+/* ── Theme toggle with mermaid re-render ── */
+(function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const btn = document.getElementById('theme-toggle');
+  const hljsLink = document.getElementById('hljs-theme');
+  function syncUI() {
+    const t = currentTheme();
+    btn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+    hljsLink.href = t === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  syncUI();
+  btn.addEventListener('click', async () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    syncUI();
+    await renderMermaid();
+  });
+})();
+
+/* ── Copy buttons ── */
+document.querySelectorAll('pre > code').forEach(block => {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(block.textContent).then(() => {
+      btn.textContent = '✓';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+  block.parentElement.style.position = 'relative';
+  block.parentElement.appendChild(btn);
+});
+
+/* ── Diagram zoom/overlay ── */
+(function diagramZoom() {
+  const overlay = document.getElementById('diagram-overlay');
+  const inner = document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.zoom-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.diagram-wrap');
+      const svg = wrap.querySelector('svg') || wrap.querySelector('pre.mermaid');
+      if (!svg) return;
+      inner.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    });
+  });
+  overlay.addEventListener('click', () => overlay.classList.remove('active'));
+})();
+
+/* ── Back-to-top ── */
+(function backToTop() {
+  const btn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', () => {
+    btn.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
+
+/* ── j/k keyboard nav ── */
+(function jkNav() {
+  const headings = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'j' || e.key === 'k') {
+      const y = window.scrollY + 60;
+      let idx = headings.findIndex(h => h.offsetTop > y);
+      if (e.key === 'k') idx = Math.max(0, (idx <= 0 ? headings.length : idx) - 2);
+      else if (idx < 0) idx = headings.length - 1;
+      if (headings[idx]) headings[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+})();
+
+/* ── highlight.js ── */
+hljs.highlightAll();
+</script>
+</body>
+</html>

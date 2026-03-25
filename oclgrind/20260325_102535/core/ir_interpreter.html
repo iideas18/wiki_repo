@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>LLVM IR Interpreter Deep-Dive — Oclgrind Core</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--border);border:none;color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+main{max-width:920px;margin:0 auto;padding:32px 24px}
+.hero{margin-bottom:2rem}
+.hero h1{font-size:1.8rem;color:var(--heading);margin-bottom:.5rem}
+.hero p{color:var(--text-muted);font-size:1rem}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+h2{font-size:1.35rem;color:var(--heading);margin:2rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.1rem;color:var(--heading);margin:1.4rem 0 .5rem}
+p,ul,ol{margin-bottom:1rem}
+ul,ol{padding-left:1.5rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:1rem 0;position:relative}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88em;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.7rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{text-align:left;padding:10px 14px;border:1px solid var(--border)}
+th{background:var(--surface);color:var(--heading);font-size:.85rem;text-transform:uppercase;letter-spacing:.03em}
+td{font-size:.9rem}
+.callout{background:var(--surface);border-left:4px solid var(--accent3);padding:14px 18px;border-radius:0 8px 8px 0;margin:1.2rem 0}
+.callout strong{color:var(--accent3)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:1.2rem 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-wrap::after{content:"⛶";position:absolute;top:8px;right:12px;font-size:.8rem;color:var(--text-muted)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:2rem;cursor:zoom-out}
+.overlay.active{display:flex}
+.overlay .mermaid-wrap{max-width:95vw;max-height:95vh;overflow:auto;cursor:default;margin:0}
+footer{max-width:920px;margin:3rem auto 0;padding:24px;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:100}
+@media print{header,.theme-toggle,.copy-btn,.back-to-top,.skip-link,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.mermaid-wrap{break-inside:avoid}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">core</a> &rsaquo; LLVM IR Interpreter</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" aria-label="Toggle theme">🌓 Theme</button>
+</header>
+
+<main id="main">
+<section class="hero">
+  <h1>LLVM IR Interpreter Deep-Dive <span class="focus-label" style="display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle">Focus Deep-Dive</span></h1>
+  <p>How <code>WorkItem</code> steps through LLVM IR instruction-by-instruction — the execution loop, opcode dispatch, call frames, PHI nodes, and builtin function resolution.</p>
+</section>
+
+<!-- ======== Execution Architecture ======== -->
+<h2 id="architecture">Execution Architecture</h2>
+<p>Each OpenCL work-item is modelled by a <code>WorkItem</code> object that acts as a tiny single-threaded interpreter. The work-group scheduler repeatedly calls <code>step()</code>, which executes exactly one LLVM IR instruction per invocation:</p>
+
+<div class="mermaid-wrap" data-source="flowchart TD
+  S[WorkGroup scheduler] -->|calls| STEP[WorkItem::step]
+  STEP --> CHK{hasBegun?}
+  CHK -- No --> NOTIFY_BEGIN[notifyWorkItemBegin]
+  NOTIFY_BEGIN --> EXEC
+  CHK -- Yes --> EXEC[execute current instruction]
+  EXEC --> ADV[advance currInst++]
+  ADV --> BLK{nextBlock set?}
+  BLK -- Yes --> MOVE[prevBlock = currBlock<br/>currBlock = nextBlock<br/>currInst = begin]
+  BLK -- No --> RET
+  MOVE --> RET{state == FINISHED?}
+  RET -- Yes --> NOTIFY_END[notifyWorkItemComplete]
+  RET -- No --> DONE[return m_state]
+  NOTIFY_END --> DONE">
+<pre class="mermaid">flowchart TD
+  S[WorkGroup scheduler] -->|calls| STEP[WorkItem::step]
+  STEP --> CHK{hasBegun?}
+  CHK -- No --> NOTIFY_BEGIN[notifyWorkItemBegin]
+  NOTIFY_BEGIN --> EXEC
+  CHK -- Yes --> EXEC[execute current instruction]
+  EXEC --> ADV[advance currInst++]
+  ADV --> BLK{nextBlock set?}
+  BLK -- Yes --> MOVE[prevBlock = currBlock<br/>currBlock = nextBlock<br/>currInst = begin]
+  BLK -- No --> RET
+  MOVE --> RET{state == FINISHED?}
+  RET -- Yes --> NOTIFY_END[notifyWorkItemComplete]
+  RET -- No --> DONE[return m_state]
+  NOTIFY_END --> DONE</pre>
+</div>
+
+<h3>WorkItem state machine</h3>
+<table>
+<thead><tr><th>State</th><th>Meaning</th><th>Transition trigger</th></tr></thead>
+<tbody>
+<tr><td><code>READY</code></td><td>Can execute the next instruction</td><td>Initial state; set after barrier release</td></tr>
+<tr><td><code>BARRIER</code></td><td>Waiting at a <code>barrier()</code> call</td><td><code>work_group_barrier</code> builtin sets this</td></tr>
+<tr><td><code>FINISHED</code></td><td>Kernel function has returned</td><td><code>ret</code> instruction with empty call stack</td></tr>
+</tbody>
+</table>
+
+<!-- ======== Step & Execute ======== -->
+<h2 id="step-execute">The step() / execute() Loop</h2>
+<pre><code class="language-cpp">WorkItem::State WorkItem::step() {
+    assert(m_state == READY);
+    if (!m_position-&gt;hasBegun) {
+        m_position-&gt;hasBegun = true;
+        m_context-&gt;notifyWorkItemBegin(this);
+    }
+    execute(&amp;*m_position-&gt;currInst);
+
+    if (++m_position-&gt;currInst == m_position-&gt;currBlock-&gt;end()
+        || m_position-&gt;nextBlock) {
+        if (m_position-&gt;nextBlock) {
+            m_position-&gt;prevBlock = m_position-&gt;currBlock;
+            m_position-&gt;currBlock = m_position-&gt;nextBlock;
+            m_position-&gt;nextBlock = NULL;
+            m_position-&gt;currInst  = m_position-&gt;currBlock-&gt;begin();
+        }
+    }
+    if (m_state == FINISHED)
+        m_context-&gt;notifyWorkItemComplete(this);
+    return m_state;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<p>The <code>execute()</code> method wraps the opcode dispatch with result management and PHI commit logic:</p>
+
+<pre><code class="language-cpp">void WorkItem::execute(const llvm::Instruction* instruction) {
+    // 1. Allocate result storage from pool
+    pair&lt;unsigned,unsigned&gt; sz = getValueSize(instruction);
+    TypedValue result = {sz.first, sz.second, NULL};
+    if (result.size)
+        result.data = m_pool.alloc(result.size * result.num);
+
+    // 2. Commit PHI temporaries accumulated from the previous block
+    if (instruction-&gt;getOpcode() != llvm::Instruction::PHI
+        &amp;&amp; m_phiTemps.size() &gt; 0) {
+        for (auto&amp; kv : m_phiTemps)
+            setValue(kv.first, kv.second);
+        m_phiTemps.clear();
+    }
+
+    // 3. Dispatch the actual opcode handler
+    dispatch(instruction, result);
+
+    // 4. Store the result (PHI results go to temp map)
+    if (result.size) {
+        if (instruction-&gt;getOpcode() != llvm::Instruction::PHI)
+            setValue(instruction, result);
+        else
+            m_phiTemps[instruction] = result;
+    }
+
+    // 5. Notify plugins
+    m_context-&gt;notifyInstructionExecuted(this, instruction, result);
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="callout"><strong>⚠ PHI two-phase commit:</strong> PHI nodes read from the <em>previous</em> block's values and must not overwrite the value map until all PHI instructions at the top of the current block have been evaluated. Results are stashed in <code>m_phiTemps</code> and bulk-committed when the first non-PHI instruction is reached.</div>
+
+<!-- ======== Opcode Dispatch ======== -->
+<h2 id="dispatch">Opcode Dispatch</h2>
+<p>The <code>dispatch()</code> method is a large <code>switch</code> on <code>instruction-&gt;getOpcode()</code> with 45+ cases. Each case calls a dedicated handler method defined via the <code>INSTRUCTION</code> macro:</p>
+
+<pre><code class="language-cpp">#define INSTRUCTION(name) \
+  void WorkItem::name(const llvm::Instruction* instruction, TypedValue&amp; result)
+
+// dispatch() — abbreviated
+void WorkItem::dispatch(const llvm::Instruction* instruction, TypedValue&amp; result) {
+    switch (instruction-&gt;getOpcode()) {
+        case llvm::Instruction::Add:           add(instruction, result); break;
+        case llvm::Instruction::Alloca:        alloc(instruction, result); break;
+        case llvm::Instruction::Br:            br(instruction, result); break;
+        case llvm::Instruction::Call:          call(instruction, result); break;
+        case llvm::Instruction::GetElementPtr: gep(instruction, result); break;
+        case llvm::Instruction::ICmp:          icmp(instruction, result); break;
+        case llvm::Instruction::Load:          load(instruction, result); break;
+        case llvm::Instruction::PHI:           phi(instruction, result); break;
+        case llvm::Instruction::Ret:           ret(instruction, result); break;
+        case llvm::Instruction::Store:         store(instruction, result); break;
+        // ... 35+ more cases
+        case llvm::Instruction::Unreachable:
+            FATAL_ERROR("Encountered unreachable instruction");
+        default:
+            FATAL_ERROR("Unsupported instruction: %d", instruction-&gt;getOpcode());
+    }
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<h3>Instruction categories</h3>
+<table>
+<thead><tr><th>Category</th><th>Handlers</th></tr></thead>
+<tbody>
+<tr><td>Arithmetic</td><td><code>add</code>, <code>sub</code>, <code>mul</code>, <code>sdiv</code>, <code>udiv</code>, <code>srem</code>, <code>urem</code></td></tr>
+<tr><td>Floating-point</td><td><code>fadd</code>, <code>fsub</code>, <code>fmul</code>, <code>fdiv</code>, <code>frem</code>, <code>fneg</code></td></tr>
+<tr><td>Bitwise</td><td><code>bwand</code>, <code>bwor</code>, <code>bwxor</code>, <code>shl</code>, <code>lshr</code>, <code>ashr</code></td></tr>
+<tr><td>Comparison</td><td><code>icmp</code>, <code>fcmp</code></td></tr>
+<tr><td>Memory</td><td><code>load</code>, <code>store</code>, <code>alloc</code>, <code>gep</code>, <code>addrspacecast</code></td></tr>
+<tr><td>Control flow</td><td><code>br</code>, <code>swtch</code>, <code>phi</code>, <code>select</code>, <code>call</code>, <code>ret</code></td></tr>
+<tr><td>Conversion</td><td><code>sext</code>, <code>zext</code>, <code>itrunc</code>, <code>fpext</code>, <code>fptrunc</code>, <code>fptosi</code>, <code>fptoui</code>, <code>sitofp</code>, <code>uitofp</code>, <code>inttoptr</code>, <code>ptrtoint</code>, <code>bitcast</code></td></tr>
+<tr><td>Vector</td><td><code>extractelem</code>, <code>insertelem</code>, <code>shuffle</code>, <code>extractval</code>, <code>insertval</code></td></tr>
+</tbody>
+</table>
+
+<!-- ======== Stack Frames ======== -->
+<h2 id="stack-frames">Stack Frames &amp; Function Calls</h2>
+<p>The execution position is held in a <code>Position</code> struct that acts as the interpreter's call-frame stack:</p>
+
+<pre><code class="language-cpp">struct WorkItem::Position {
+    bool                               hasBegun;
+    const llvm::BasicBlock*            prevBlock;    // for PHI resolution
+    const llvm::BasicBlock*            currBlock;    // current basic block
+    const llvm::BasicBlock*            nextBlock;    // set by br/switch
+    llvm::BasicBlock::const_iterator   currInst;     // instruction pointer
+    std::stack&lt;const llvm::Instruction*&gt; callStack;  // return addresses
+    std::stack&lt;std::list&lt;size_t&gt;&gt;      allocations;  // per-frame alloca tracking
+};</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<div class="mermaid-wrap" data-source="sequenceDiagram
+  participant Sched as WorkGroup
+  participant WI as WorkItem
+  participant Pos as Position
+  participant Mem as Private Memory
+
+  Sched->>WI: step()
+  WI->>WI: execute(call instruction)
+  WI->>Pos: push currInst onto callStack
+  WI->>Pos: push new allocation list
+  WI->>Pos: nextBlock = callee entry block
+  Note over Pos: IP now points into callee
+
+  loop callee body
+    Sched->>WI: step()
+  end
+
+  WI->>WI: execute(ret instruction)
+  WI->>Pos: pop callStack → restore IP
+  WI->>Mem: deallocateBuffer for each alloca
+  WI->>Pos: pop allocation list
+  Note over Pos: IP restored to caller">
+<pre class="mermaid">sequenceDiagram
+  participant Sched as WorkGroup
+  participant WI as WorkItem
+  participant Pos as Position
+  participant Mem as Private Memory
+
+  Sched->>WI: step()
+  WI->>WI: execute(call instruction)
+  WI->>Pos: push currInst onto callStack
+  WI->>Pos: push new allocation list
+  WI->>Pos: nextBlock = callee entry block
+  Note over Pos: IP now points into callee
+
+  loop callee body
+    Sched->>WI: step()
+  end
+
+  WI->>WI: execute(ret instruction)
+  WI->>Pos: pop callStack → restore IP
+  WI->>Mem: deallocateBuffer for each alloca
+  WI->>Pos: pop allocation list
+  Note over Pos: IP restored to caller</pre>
+</div>
+
+<h3>Call instruction handler</h3>
+<pre><code class="language-cpp">INSTRUCTION(call) {
+    const llvm::CallInst* callInst = (const llvm::CallInst*)instruction;
+    const llvm::Function* function = callInst-&gt;getCalledFunction();
+
+    // Resolve indirect calls
+    if (!function) {
+        const llvm::Value* v = callInst-&gt;getCalledOperand();
+        function = (const llvm::Function*)((const llvm::User*)v)-&gt;getOperand(0);
+    }
+
+    if (!function-&gt;isDeclaration()) {
+        // User-defined function: push stack frame
+        m_position-&gt;callStack.push(&amp;*m_position-&gt;currInst);
+        m_position-&gt;allocations.push(std::list&lt;size_t&gt;());
+        m_position-&gt;nextBlock = &amp;*function-&gt;begin();
+
+        // Bind arguments (handle byval copies)
+        for (auto arg = function-&gt;arg_begin(); arg != function-&gt;arg_end(); arg++) {
+            TypedValue value = getOperand(callInst-&gt;getArgOperand(arg-&gt;getArgNo()));
+            if (arg-&gt;hasByValAttr()) {
+                size_t sz  = getTypeSize(arg-&gt;getParamByValType());
+                void*  src = m_privateMemory-&gt;getPointer(value.getPointer());
+                size_t ptr = m_privateMemory-&gt;allocateBuffer(sz, 0, (uint8_t*)src);
+                m_position-&gt;allocations.top().push_back(ptr);
+                TypedValue addr = {sizeof(size_t), 1, m_pool.alloc(sizeof(size_t))};
+                addr.setPointer(ptr);
+                setValue(&amp;*arg, addr);
+            } else {
+                setValue(&amp;*arg, m_pool.clone(value));
+            }
+        }
+        return;
+    }
+
+    // External / builtin function
+    InterpreterCache::Builtin builtin = m_cache-&gt;getBuiltin(function);
+    builtin.function.func(this, callInst, builtin.name,
+                          builtin.overload, result, builtin.function.op);
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== Branch & PHI ======== -->
+<h2 id="branches-phi">Branch Handling &amp; PHI Nodes</h2>
+<h3>Conditional and unconditional branches</h3>
+<pre><code class="language-cpp">INSTRUCTION(br) {
+    if (instruction-&gt;getNumOperands() == 1) {
+        // Unconditional
+        m_position-&gt;nextBlock =
+            (const llvm::BasicBlock*)instruction-&gt;getOperand(0);
+    } else {
+        // Conditional: operand 0 = i1 predicate
+        bool pred = getOperand(instruction-&gt;getOperand(0)).getUInt();
+        m_position-&gt;nextBlock = (const llvm::BasicBlock*)
+            (pred ? instruction-&gt;getOperand(2)    // true dest
+                  : instruction-&gt;getOperand(1));  // false dest
+    }
+}
+
+INSTRUCTION(phi) {
+    const llvm::PHINode* phiNode = (const llvm::PHINode*)instruction;
+    const llvm::Value* incoming =
+        phiNode-&gt;getIncomingValueForBlock(m_position-&gt;prevBlock);
+    memcpy(result.data, getOperand(incoming).data, result.size * result.num);
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<!-- ======== Builtins ======== -->
+<h2 id="builtins">Builtin Function System</h2>
+<p>When <code>call</code> encounters a function that is a <em>declaration</em> (no body in the IR), the <code>InterpreterCache</code> resolves it to a builtin entry:</p>
+
+<pre><code class="language-cpp">struct BuiltinFunction {
+    void (*func)(WorkItem*, const llvm::CallInst*,
+                 const std::string&amp; name, const std::string&amp; overload,
+                 TypedValue&amp; result, void* op);
+    void* op;   // optional function pointer for generic wrappers
+};
+
+// Registration maps
+extern BuiltinFunctionMap        workItemBuiltins;       // exact name match
+extern BuiltinFunctionPrefixList workItemPrefixBuiltins; // prefix match</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<h3>Generic vector wrappers</h3>
+<p>Math builtins are registered via generic wrappers that apply a C function element-wise across vector operands:</p>
+
+<pre><code class="language-cpp">// Apply a 1-arg double function to each vector element
+static void f1arg(WorkItem* wi, const llvm::CallInst* ci,
+                  const string&amp; name, const string&amp; overload,
+                  TypedValue&amp; result, double (*func)(double)) {
+    for (unsigned i = 0; i &lt; result.num; i++)
+        result.setFloat(func(FARGV(0, i)), i);
+}
+
+// Registration example (conceptual):
+//   workItemBuiltins["sin"]  = {f1arg, (void*)sin};
+//   workItemBuiltins["cos"]  = {f1arg, (void*)cos};
+//   workItemBuiltins["sqrt"] = {f1arg, (void*)sqrt};</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+<h3>Builtin categories</h3>
+<table>
+<thead><tr><th>Category</th><th>Examples</th><th>Registration style</th></tr></thead>
+<tbody>
+<tr><td>Work-item queries</td><td><code>get_global_id</code>, <code>get_local_id</code>, <code>get_group_id</code></td><td>Exact name</td></tr>
+<tr><td>Math (1-arg)</td><td><code>sin</code>, <code>cos</code>, <code>sqrt</code>, <code>log</code>, <code>exp</code></td><td><code>f1arg</code> wrapper + C stdlib pointer</td></tr>
+<tr><td>Math (2-arg)</td><td><code>pow</code>, <code>fmod</code>, <code>min</code>, <code>max</code></td><td><code>f2arg</code> wrapper</td></tr>
+<tr><td>Math (3-arg)</td><td><code>clamp</code>, <code>mix</code>, <code>mad</code></td><td><code>f3arg</code> wrapper</td></tr>
+<tr><td>Atomics</td><td><code>atomic_add</code>, <code>atomic_cmpxchg</code></td><td>Exact name → <code>atomic_op</code> handler</td></tr>
+<tr><td>Synchronization</td><td><code>barrier</code>, <code>work_group_barrier</code></td><td>Sets <code>m_state = BARRIER</code></td></tr>
+<tr><td>Memory</td><td><code>vload</code>, <code>vstore</code>, <code>async_work_group_copy</code></td><td>Exact / prefix</td></tr>
+<tr><td>Printf</td><td><code>printf</code></td><td>Dedicated handler with format parsing</td></tr>
+</tbody>
+</table>
+
+<div class="callout"><strong>⚠ Prefix matching:</strong> Some builtins like <code>convert_*</code> and <code>vload*</code> use <em>prefix matching</em> via <code>workItemPrefixBuiltins</code>. The dispatcher iterates the prefix list and calls the first handler whose prefix matches the start of the mangled function name.</div>
+
+<!-- ======== Operand Resolution ======== -->
+<h2 id="operand-resolution">Operand Resolution</h2>
+<p><code>getOperand()</code> resolves any LLVM <code>Value</code> to a <code>TypedValue</code>:</p>
+<ul>
+  <li><strong>Arguments, instructions, globals</strong> → looked up in the value store via <code>getValue()</code></li>
+  <li><strong>Constant expressions</strong> → recursively dispatched through the interpreter</li>
+  <li><strong>Constant data</strong> → fetched from the <code>InterpreterCache</code></li>
+</ul>
+
+<div class="mermaid-wrap" data-source="flowchart LR
+  V[llvm::Value*] --> A{Argument or Instruction?}
+  A -- Yes --> VS[getValue from m_values]
+  A -- No --> B{ConstantExpr?}
+  B -- Yes --> D[dispatch as instruction]
+  B -- No --> C{ConstantData?}
+  C -- Yes --> IC[InterpreterCache::getConstant]
+  C -- No --> ERR[fatal error]">
+<pre class="mermaid">flowchart LR
+  V[llvm::Value*] --> A{Argument or Instruction?}
+  A -- Yes --> VS[getValue from m_values]
+  A -- No --> B{ConstantExpr?}
+  B -- Yes --> D[dispatch as instruction]
+  B -- No --> C{ConstantData?}
+  C -- Yes --> IC[InterpreterCache::getConstant]
+  C -- No --> ERR[fatal error]</pre>
+</div>
+
+</main>
+
+<footer>
+  <span><a href="index.html">← Core Overview</a></span>
+  <span><a href="../search.html">Search Wiki</a></span>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="overlay" id="overlay"><div class="overlay-inner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:document.documentElement.getAttribute('data-theme')==='dark'?'dark':'default'});
+function renderMermaid(){document.querySelectorAll('.mermaid').forEach(function(el,i){el.removeAttribute('data-processed');el.id='mm-'+i});mermaid.run()}
+
+(function(){
+  const key='neutra-ip-theme';
+  const saved=localStorage.getItem(key);
+  if(saved)document.documentElement.setAttribute('data-theme',saved);
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    localStorage.setItem(key,t);
+    mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});
+    renderMermaid();
+  });
+  renderMermaid();
+})();
+
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var code=btn.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},1500)});
+  });
+});
+
+var btt=document.getElementById('backToTop');
+window.addEventListener('scroll',function(){btt.style.display=window.scrollY>300?'flex':'none'});
+btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+
+var overlay=document.getElementById('overlay');
+document.querySelectorAll('.mermaid-wrap').forEach(function(w){
+  w.addEventListener('click',function(){
+    overlay.querySelector('.overlay-inner').innerHTML=w.outerHTML;
+    overlay.classList.add('active');
+  });
+});
+overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('active')});
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

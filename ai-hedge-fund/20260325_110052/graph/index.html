@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LangGraph Workflow Orchestration — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip-wiki 2026-03-25 359cce7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px;z-index:100}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.85rem;color:var(--text-muted)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+.hero{margin-bottom:32px}.hero h1{font-size:2rem;color:var(--heading);margin-bottom:4px}.hero .subtitle{color:var(--text-muted);font-size:1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;flex:1;min-width:120px;text-align:center}.stat-card .val{font-size:1.4rem;font-weight:700;color:var(--accent)}.stat-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:6px;padding:16px 20px;margin:24px 0}.intro-box h2{font-size:1.1rem;color:var(--accent2);margin-bottom:6px}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:24px 0}#toc h2{font-size:1rem;margin-bottom:8px;color:var(--heading)}#toc ul{list-style:none;padding-left:0}#toc li{padding:2px 0}#toc a{font-size:.9rem}
+section{margin:32px 0}section h2{font-size:1.4rem;color:var(--heading);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:16px}section h3{font-size:1.1rem;color:var(--heading);margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.88rem}th,td{border:1px solid var(--border);padding:8px 10px;text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;overflow-x:auto;margin:12px 0;position:relative}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{color:inherit;background:var(--code-bg);padding:2px 5px;border-radius:3px;font-size:.88em}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.75rem}.copy-btn:hover{color:var(--accent)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:"🔍 Click to zoom";position:absolute;top:6px;right:10px;font-size:.7rem;color:var(--text-muted)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.diagram-overlay.active{display:flex}.diagram-overlay .inner{background:var(--bg);border-radius:8px;padding:24px;max-width:95vw;max-height:95vh;overflow:auto}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:monospace;font-size:.85rem;white-space:pre}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:48px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;z-index:60}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn,.mermaid-wrap::after{display:none!important}body{background:#fff;color:#000}pre{border-color:#ccc}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; graph</nav>
+  <button id="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
+</header>
+
+<main id="main-content">
+<!-- Hero -->
+<div class="hero">
+  <h1>🔀 LangGraph Workflow Orchestration</h1>
+  <p class="subtitle">ai-hedge-fund/src/graph &mdash; State management &amp; agent DAG construction</p>
+</div>
+<div class="stat-row">
+  <div class="stat-card"><span class="val">2</span><span class="lbl">Source Files</span></div>
+  <div class="stat-card"><span class="val">3</span><span class="lbl">State Fields</span></div>
+  <div class="stat-card"><span class="val">~130</span><span class="lbl">Lines (main.py)</span></div>
+  <div class="stat-card"><span class="val">DAG</span><span class="lbl">Execution Model</span></div>
+</div>
+
+<!-- Intro -->
+<div class="intro-box">
+  <h2>💡 What is this?</h2>
+  <p>Think of this module as the <strong>assembly line blueprint</strong> for the hedge fund. Just as a car factory defines which stations (welding, painting, inspection) run in what order, this module defines which AI analyst agents run, how their outputs merge, and when the final portfolio manager makes a decision. <code>AgentState</code> is the shared clipboard every worker writes to; <code>create_workflow()</code> is the foreman wiring the stations together via a LangGraph <code>StateGraph</code>.</p>
+</div>
+
+<!-- TOC -->
+<nav id="toc"><h2>📑 Table of Contents</h2><ul></ul></nav>
+<p id="reading-time" style="color:var(--text-muted);font-size:.82rem"></p>
+
+<!-- Section: Architecture -->
+<section id="architecture">
+<h2>Architecture Overview</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="graph LR
+  START([start_node]) --> A1[Analyst 1]
+  START --> A2[Analyst 2]
+  START --> AN[Analyst N]
+  A1 --> RM[risk_management_agent]
+  A2 --> RM
+  AN --> RM
+  RM --> PM[portfolio_manager]
+  PM --> END_NODE([END])
+">graph LR
+  START([start_node]) --> A1[Analyst 1]
+  START --> A2[Analyst 2]
+  START --> AN[Analyst N]
+  A1 --> RM[risk_management_agent]
+  A2 --> RM
+  AN --> RM
+  RM --> PM[portfolio_manager]
+  PM --> END_NODE([END])</pre></div>
+<p>The workflow is a <strong>fan-out / fan-in DAG</strong>. The <code>start_node</code> broadcasts state to every selected analyst in parallel. All analyst outputs merge via the <code>merge_dicts</code> reducer, then flow sequentially through risk management and the portfolio manager.</p>
+</section>
+
+<!-- Section: State Diagram -->
+<section id="state-machine">
+<h2>State Flow</h2>
+<div class="mermaid-wrap"><pre class="mermaid" data-source="stateDiagram-v2
+  [*] --> start_node : HumanMessage
+  start_node --> analysts : fan-out
+  analysts --> risk_management : merge signals
+  risk_management --> portfolio_manager : risk-adjusted
+  portfolio_manager --> [*] : trading decisions
+">stateDiagram-v2
+  [*] --> start_node : HumanMessage
+  start_node --> analysts : fan-out
+  analysts --> risk_management : merge signals
+  risk_management --> portfolio_manager : risk-adjusted
+  portfolio_manager --> [*] : trading decisions</pre></div>
+</section>
+
+<!-- Section: AgentState -->
+<section id="agent-state">
+<h2>AgentState TypedDict</h2>
+<p>The core state object shared across every node. Each field uses an <strong>Annotated reducer</strong> so LangGraph knows how to merge parallel outputs:</p>
+<table>
+  <tr><th>Field</th><th>Type</th><th>Reducer</th><th>Purpose</th></tr>
+  <tr><td><code>messages</code></td><td><code>Sequence[BaseMessage]</code></td><td><code>operator.add</code></td><td>Append-only conversation log</td></tr>
+  <tr><td><code>data</code></td><td><code>dict[str, any]</code></td><td><code>merge_dicts</code></td><td>Shared data: tickers, portfolio, analyst_signals, dates</td></tr>
+  <tr><td><code>metadata</code></td><td><code>dict[str, any]</code></td><td><code>merge_dicts</code></td><td>Config: show_reasoning, model_name, model_provider</td></tr>
+</table>
+</section>
+
+<!-- Section: Key Classes / Functions -->
+<section id="key-symbols">
+<h2>Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Symbol</th><th>File</th><th>Kind</th><th>Description</th></tr>
+  <tr><td><code>AgentState</code></td><td>state.py</td><td>TypedDict</td><td>Shared state passed through every graph node</td></tr>
+  <tr><td><code>merge_dicts(a,b)</code></td><td>state.py</td><td>function</td><td>Shallow-merge reducer for dict fields ({**a, **b})</td></tr>
+  <tr><td><code>show_agent_reasoning()</code></td><td>state.py</td><td>function</td><td>Pretty-prints agent JSON output to console</td></tr>
+  <tr><td><code>convert_to_serializable()</code></td><td>state.py</td><td>nested fn</td><td>Recursively converts objects (pandas, custom) to JSON-safe types</td></tr>
+  <tr><td><code>create_workflow()</code></td><td>main.py</td><td>function</td><td>Builds the StateGraph DAG with selected analysts</td></tr>
+  <tr><td><code>run_hedge_fund()</code></td><td>main.py</td><td>function</td><td>Compiles workflow &amp; invokes with initial state</td></tr>
+  <tr><td><code>start(state)</code></td><td>main.py</td><td>function</td><td>Identity node — entry point that passes state through</td></tr>
+  <tr><td><code>parse_hedge_fund_response()</code></td><td>main.py</td><td>function</td><td>Parses final JSON trading decisions from last message</td></tr>
+  <tr><td><code>StateGraph</code></td><td>langgraph</td><td>class</td><td>LangGraph class that builds executable agent DAGs</td></tr>
+  <tr><td><code>ANALYST_ORDER</code></td><td>utils/analysts.py</td><td>list</td><td>Canonical ordering of analyst keys for iteration</td></tr>
+  <tr><td><code>get_analyst_nodes()</code></td><td>utils/analysts.py</td><td>function</td><td>Returns dict mapping analyst key → (node_name, node_func)</td></tr>
+</table>
+</section>
+
+<!-- Section: Interactions -->
+<section id="interactions">
+<h2>Module Interactions</h2>
+<table>
+  <tr><th>From</th><th>To</th><th>Interaction</th></tr>
+  <tr><td>main.py</td><td>graph/state.py</td><td>Imports <code>AgentState</code> for StateGraph construction</td></tr>
+  <tr><td>main.py</td><td>utils/analysts.py</td><td>Calls <code>get_analyst_nodes()</code> for dynamic analyst registration</td></tr>
+  <tr><td>main.py</td><td>agents/portfolio_manager</td><td>Registers <code>portfolio_management_agent</code> node</td></tr>
+  <tr><td>main.py</td><td>agents/risk_manager</td><td>Registers <code>risk_management_agent</code> node</td></tr>
+  <tr><td>main.py</td><td>utils/display</td><td>Calls <code>print_trading_output()</code> after execution</td></tr>
+  <tr><td>main.py</td><td>cli/input</td><td>Parses CLI inputs (tickers, dates, model, analysts)</td></tr>
+  <tr><td>Any agent</td><td>AgentState.data</td><td>Writes analyst_signals via merge_dicts reducer</td></tr>
+</table>
+</section>
+
+<!-- Section: Directory Map -->
+<section id="directory">
+<h2>Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/
+├── graph/
+│   ├── __init__.py          # (empty — package marker)
+│   └── state.py             # AgentState, merge_dicts, show_agent_reasoning
+├── main.py                  # create_workflow(), run_hedge_fund(), CLI entry
+├── agents/                  # Individual analyst agent implementations
+├── utils/
+│   ├── analysts.py          # ANALYST_ORDER, get_analyst_nodes()
+│   ├── display.py           # print_trading_output()
+│   └── progress.py          # Progress tracking helper
+└── cli/
+    └── input.py             # parse_cli_inputs()</div>
+</section>
+
+<!-- Section: Configuration -->
+<section id="configuration">
+<h2>Configuration Reference</h2>
+<table>
+  <tr><th>Parameter</th><th>Source</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>tickers</code></td><td>CLI / API</td><td>required</td><td>List of stock symbols to analyze</td></tr>
+  <tr><td><code>start_date</code></td><td>CLI / API</td><td>calculated</td><td>Analysis window start (ISO date)</td></tr>
+  <tr><td><code>end_date</code></td><td>CLI / API</td><td>today</td><td>Analysis window end (ISO date)</td></tr>
+  <tr><td><code>selected_analysts</code></td><td>CLI / API</td><td>all</td><td>Analyst agent keys to include in graph</td></tr>
+  <tr><td><code>model_name</code></td><td>CLI / API</td><td>gpt-4.1</td><td>LLM model identifier string</td></tr>
+  <tr><td><code>model_provider</code></td><td>CLI / API</td><td>OpenAI</td><td>LLM provider name (see llm module)</td></tr>
+  <tr><td><code>show_reasoning</code></td><td>CLI flag</td><td>False</td><td>Print intermediate agent reasoning</td></tr>
+  <tr><td><code>initial_cash</code></td><td>CLI / API</td><td>100 000</td><td>Starting portfolio cash</td></tr>
+  <tr><td><code>margin_requirement</code></td><td>CLI / API</td><td>0.0</td><td>Margin requirement ratio</td></tr>
+</table>
+</section>
+
+<!-- Section: Code Examples -->
+<section id="examples">
+<h2>Code Examples</h2>
+<h3>Example 1 — Building &amp; Running a Workflow</h3>
+<pre><code class="language-python">from src.main import run_hedge_fund
+
+result = run_hedge_fund(
+    tickers=["AAPL", "GOOGL"],
+    start_date="2025-01-01",
+    end_date="2025-06-01",
+    portfolio={
+        "cash": 100000,
+        "margin_requirement": 0.0,
+        "margin_used": 0.0,
+        "positions": {
+            "AAPL": {"long": 0, "short": 0, "long_cost_basis": 0.0,
+                      "short_cost_basis": 0.0, "short_margin_used": 0.0},
+            "GOOGL": {"long": 0, "short": 0, "long_cost_basis": 0.0,
+                       "short_cost_basis": 0.0, "short_margin_used": 0.0},
+        },
+        "realized_gains": {"AAPL": {"long": 0.0, "short": 0.0},
+                            "GOOGL": {"long": 0.0, "short": 0.0}},
+    },
+    selected_analysts=["technical_analyst", "fundamentals_analyst"],
+    model_name="gpt-4.1",
+    model_provider="OpenAI",
+)
+print(result["decisions"])</code></pre>
+
+<h3>Example 2 — Understanding the merge_dicts Reducer</h3>
+<pre><code class="language-python">from src.graph.state import merge_dicts
+
+# When two analyst nodes return simultaneously, LangGraph
+# calls the reducer to combine their outputs:
+state_a = {"analyst_signals": {"tech": {"signal": "buy"}}}
+state_b = {"analyst_signals": {"fundamental": {"signal": "sell"}}}
+
+merged = merge_dicts(state_a, state_b)
+# Result: {"analyst_signals": {"fundamental": {"signal": "sell"}}}
+# NOTE: This is a SHALLOW merge — nested keys are overwritten.
+# Each agent writes to its own top-level key to avoid collisions.</code></pre>
+
+<h3>Example 3 — Custom Workflow with Subset of Analysts</h3>
+<pre><code class="language-python">from src.main import create_workflow
+
+# Build a lightweight workflow with only 2 analysts
+workflow = create_workflow(["technical_analyst", "sentiment_analyst"])
+agent = workflow.compile()
+# The resulting graph: start → tech + sentiment → risk → portfolio → END</code></pre>
+</section>
+</main>
+
+<button id="back-to-top" aria-label="Back to top">↑</button>
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<footer>AI Hedge Fund Wiki &middot; Generated 2026-03-25 &middot; <code>359cce7</code> &middot; graph module</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  /* Theme */
+  const THEME_KEY='neutra-ip-theme';
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t);document.getElementById('theme-toggle').textContent=t==='dark'?'🌙 Theme':'☀️ Theme';renderMermaid()}
+  document.getElementById('theme-toggle').addEventListener('click',()=>{applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')});
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+
+  /* Mermaid */
+  mermaid.initialize({startOnLoad:false,theme:'default'});
+  function renderMermaid(){const t=document.documentElement.getAttribute('data-theme');mermaid.initialize({startOnLoad:false,theme:t==='dark'?'dark':'default'});document.querySelectorAll('.mermaid[data-processed]').forEach(el=>{const src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.innerHTML=src}});document.querySelectorAll('.mermaid:not([data-processed])').forEach((el,i)=>{if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent.trim());const id='m'+Date.now()+i;mermaid.render(id,el.getAttribute('data-source')).then(({svg})=>{el.innerHTML=svg;el.setAttribute('data-processed','true')}).catch(()=>{})})}
+  renderMermaid();
+
+  /* TOC */
+  const toc=document.querySelector('#toc ul');document.querySelectorAll('section[id]').forEach(s=>{const h=s.querySelector('h2');if(h){const li=document.createElement('li');const a=document.createElement('a');a.href='#'+s.id;a.textContent=h.textContent.replace(/^[\u{1F300}-\u{1FAFF}]/u,'').trim();li.appendChild(a);toc.appendChild(li)}});
+
+  /* Reading time */
+  const words=document.querySelector('main').textContent.trim().split(/\s+/).length;document.getElementById('reading-time').textContent='⏱ '+Math.max(1,Math.round(words/200))+' min read';
+
+  /* Copy buttons */
+  document.querySelectorAll('pre').forEach(pre=>{if(pre.querySelector('.mermaid'))return;const btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',()=>{navigator.clipboard.writeText(pre.textContent.replace('Copy','').trim());btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});pre.appendChild(btn)});
+
+  /* Diagram zoom */
+  const overlay=document.getElementById('diagram-overlay'),inner=document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-wrap').forEach(w=>{w.addEventListener('click',()=>{inner.innerHTML=w.querySelector('.mermaid').innerHTML;overlay.classList.add('active')})});
+  overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+
+  /* Back to top */
+  const btt=document.getElementById('back-to-top');window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'block':'none'});btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+  /* j/k nav */
+  const sections=[...document.querySelectorAll('section[id]')];document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;let idx=-1;const y=window.scrollY+80;sections.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});if(e.key==='j'&&idx<sections.length-1)sections[idx+1].scrollIntoView({behavior:'smooth'});if(e.key==='k'&&idx>0)sections[idx-1].scrollIntoView({behavior:'smooth'})});
+
+  /* hljs */
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

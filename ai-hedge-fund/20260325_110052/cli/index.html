@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Command-Line Interface — AI Hedge Fund</title>
+<meta name="generator" content="neutra-ip wiki-generator">
+<meta name="date" content="2026-03-25">
+<meta name="git-sha" content="359cce7">
+<meta name="module" content="AI Hedge Fund">
+<meta name="lang" content="python">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:100;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.875rem;color:var(--text-muted)}
+.breadcrumb a{color:var(--accent)}
+#theme-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+main{max-width:960px;margin:0 auto;padding:24px}
+h1,h2,h3,h4{color:var(--heading);margin-top:1.5em;margin-bottom:.5em}
+h1{font-size:2rem;border-bottom:1px solid var(--border);padding-bottom:.3em}
+h2{font-size:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.2em}
+.hero{background:linear-gradient(135deg,var(--surface),var(--bg));border:1px solid var(--border);border-radius:12px;padding:32px;margin-bottom:24px}
+.hero h1{border:none;margin-top:0}
+.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 20px;text-align:center;min-width:120px}
+.stat .num{font-size:1.5rem;font-weight:700;color:var(--accent)}
+.stat .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0}
+.intro-box .analogy{font-style:italic;color:var(--accent3)}
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:20px 0}
+#toc h3{margin-top:0;font-size:1rem}
+#toc ul{list-style:none;padding-left:0}
+#toc li{padding:2px 0}
+#toc li::before{content:"›";color:var(--accent);margin-right:8px}
+#toc a{color:var(--text)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.875rem}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--surface);color:var(--heading);font-weight:600}
+tr:nth-child(even){background:var(--surface)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:12px 0}
+pre code{color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.85rem}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.75rem}
+.copy-btn:hover{color:var(--accent)}
+.dir-map{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:.85rem;white-space:pre;overflow-x:auto}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin:16px 0;cursor:pointer;text-align:center}
+.mermaid-container:hover{border-color:var(--accent)}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .inner{max-width:95vw;max-height:95vh;overflow:auto;background:var(--surface);border-radius:12px;padding:24px}
+.reading-time{color:var(--text-muted);font-size:.85rem}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:40px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;z-index:60;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+@media print{header,#back-to-top,#theme-toggle,.copy-btn{display:none!important}body{background:#fff;color:#000}.hero{border:1px solid #ccc}}
+@media(max-width:768px){.stat-row{flex-direction:column}.hero{padding:20px}main{padding:16px}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">AI Hedge Fund</a> &rsaquo; cli</nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="reading-time" id="reading-time"></span>
+    <button id="theme-toggle" aria-label="Toggle theme">🌓 Theme</button>
+  </div>
+</header>
+<main id="main-content">
+<div class="hero">
+  <h1>🖥️ Command-Line Interface</h1>
+  <p class="subtitle">Interactive CLI for configuring and launching hedge fund analysis runs</p>
+  <p style="margin-top:8px;font-size:.85rem;color:var(--text-muted)">Source: <code>ai-hedge-fund/src/cli</code> · Generated 2026-03-25 · <code>359cce7</code></p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">7</div><div class="label">Functions</div></div>
+    <div class="stat"><div class="num">1</div><div class="label">Dataclass</div></div>
+    <div class="stat"><div class="num">12</div><div class="label">CLI Args</div></div>
+    <div class="stat"><div class="num">2</div><div class="label">Files</div></div>
+    <div class="stat"><div class="num">~290</div><div class="label">Lines</div></div>
+  </div>
+</div>
+
+<div class="intro-box">
+  <strong>What is this?</strong>
+  <p>The CLI module is the <em>front door</em> of the AI Hedge Fund — it collects every parameter needed for a trading run (tickers, analysts, model, dates, capital) before handing control to the graph engine. Think of it as <span class="analogy">an airline check-in kiosk: it validates your ticket (arguments), asks for your seat preference (interactive prompts via questionary), and prints your boarding pass (a CLIInputs dataclass) before you board the plane.</span></p>
+</div>
+
+<nav id="toc"><h3>Table of Contents</h3><ul></ul></nav>
+
+<h2 id="architecture">Architecture Overview</h2>
+<div class="mermaid-container"><pre class="mermaid">
+graph TD
+    A["CLI Entry Point<br/>parse_cli_inputs()"] --> B["argparse<br/>add_common_args + add_date_args"]
+    B --> C{"--tickers / --analysts<br/>flags provided?"}
+    C -- "Yes" --> D["parse_tickers()<br/>parse flags"]
+    C -- "No" --> E["questionary<br/>Interactive prompts"]
+    E --> F["select_analysts()<br/>checkbox UI"]
+    E --> G["select_model()<br/>select UI"]
+    D --> H["resolve_dates()"]
+    F --> H
+    G --> H
+    H --> I["CLIInputs dataclass"]
+    I --> J["Graph Engine /<br/>Backtest Runner"]
+</pre></div>
+
+<h2 id="data-flow">Data Flow</h2>
+<div class="mermaid-container"><pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant ArgParse as argparse
+    participant Q as questionary
+    participant CLI as parse_cli_inputs()
+    participant Out as CLIInputs
+
+    User->>ArgParse: python main.py --tickers AAPL,MSFT ...
+    ArgParse->>CLI: Namespace(tickers, model, analysts, ...)
+    alt Interactive mode
+        CLI->>Q: select_analysts() checkbox
+        Q-->>CLI: ["warren_buffett","cathie_wood"]
+        CLI->>Q: select_model(use_ollama)
+        Q-->>CLI: ("gpt-4.1","OPENAI")
+    end
+    CLI->>CLI: resolve_dates(start, end)
+    CLI->>Out: CLIInputs(tickers, analysts, model, dates, cash)
+</pre></div>
+
+<h2 id="key-classes">Key Classes & Functions</h2>
+<table>
+<thead><tr><th>Name</th><th>Kind</th><th>Signature / Fields</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>CLIInputs</code></td><td>dataclass</td><td>tickers, selected_analysts, model_name, model_provider, start_date, end_date, initial_cash, margin_requirement, show_reasoning, show_agent_graph, raw_args</td><td>Immutable container holding every resolved CLI parameter</td></tr>
+<tr><td><code>parse_cli_inputs()</code></td><td>function</td><td>(*, description, require_tickers, default_months_back, include_graph_flag, include_reasoning_flag) → CLIInputs</td><td>Top-level orchestrator — builds parser, runs prompts, returns dataclass</td></tr>
+<tr><td><code>add_common_args()</code></td><td>function</td><td>(parser, *, require_tickers, include_analyst_flags, include_ollama) → ArgumentParser</td><td>Registers --tickers, --analysts, --analysts-all, --ollama, --model</td></tr>
+<tr><td><code>add_date_args()</code></td><td>function</td><td>(parser, *, default_months_back) → ArgumentParser</td><td>Registers --start-date and --end-date with optional defaults</td></tr>
+<tr><td><code>parse_tickers()</code></td><td>function</td><td>(tickers_arg: str | None) → list[str]</td><td>Splits comma-separated string, strips whitespace</td></tr>
+<tr><td><code>select_analysts()</code></td><td>function</td><td>(flags: dict | None) → list[str]</td><td>Returns analysts from --analysts-all, --analysts flag, or interactive checkbox</td></tr>
+<tr><td><code>select_model()</code></td><td>function</td><td>(use_ollama: bool, model_flag: str | None) → tuple[str, str]</td><td>Returns (model_name, provider) via flag lookup or interactive select</td></tr>
+<tr><td><code>resolve_dates()</code></td><td>function</td><td>(start_date, end_date, *, default_months_back) → tuple[str, str]</td><td>Validates date format, fills defaults from today − N months</td></tr>
+<tr><td><code>ANALYST_ORDER</code></td><td>import</td><td>list[tuple[str, str]]</td><td>Sorted (display_name, key) pairs from ANALYST_CONFIG</td></tr>
+<tr><td><code>LLM_ORDER</code></td><td>import</td><td>list of model tuples</td><td>Cloud LLM choices for select_model()</td></tr>
+<tr><td><code>OLLAMA_LLM_ORDER</code></td><td>import</td><td>list of model tuples</td><td>Local Ollama model choices for select_model()</td></tr>
+<tr><td><code>find_model_by_name()</code></td><td>import</td><td>(name: str) → ModelInfo | None</td><td>Looks up model metadata by name string</td></tr>
+<tr><td><code>ensure_ollama_and_model()</code></td><td>import</td><td>(model_name: str) → bool</td><td>Verifies Ollama install, starts server, pulls model</td></tr>
+</tbody>
+</table>
+
+<h2 id="interactions">Module Interactions</h2>
+<table>
+<thead><tr><th>Source</th><th>Target</th><th>Mechanism</th><th>Data Exchanged</th></tr></thead>
+<tbody>
+<tr><td>input.py</td><td>src.utils.analysts</td><td>import ANALYST_ORDER</td><td>Sorted (display_name, key) list for checkbox choices</td></tr>
+<tr><td>input.py</td><td>src.llm.models</td><td>import LLM_ORDER, OLLAMA_LLM_ORDER, get_model_info, find_model_by_name</td><td>Model lists and metadata for select_model()</td></tr>
+<tr><td>input.py</td><td>src.utils.ollama</td><td>import ensure_ollama_and_model</td><td>Boolean success when verifying Ollama + model</td></tr>
+<tr><td>input.py</td><td>questionary</td><td>checkbox / select / text</td><td>Interactive user selections (analysts, model, custom name)</td></tr>
+<tr><td>input.py</td><td>colorama</td><td>Fore / Style constants</td><td>Colored terminal output for confirmations</td></tr>
+<tr><td>parse_cli_inputs()</td><td>main.py / backtest.py</td><td>returns CLIInputs</td><td>Complete run configuration consumed by graph runner</td></tr>
+</tbody>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">ai-hedge-fund/src/cli/
+├── __init__.py          # Empty package marker
+└── input.py             # 289 lines — all CLI logic
+    ├── CLIInputs        # @dataclass — 11 fields
+    ├── add_common_args() # --tickers, --analysts, --ollama, --model
+    ├── add_date_args()  # --start-date, --end-date
+    ├── parse_tickers()  # comma split + strip
+    ├── select_analysts()# questionary checkbox / flag parse
+    ├── select_model()   # questionary select / flag lookup
+    ├── resolve_dates()  # validate + default fill
+    └── parse_cli_inputs() # orchestrator → CLIInputs</div>
+
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+<thead><tr><th>Argument</th><th>Type</th><th>Default</th><th>Added By</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--tickers</code></td><td>str</td><td>None</td><td>add_common_args</td><td>Comma-separated ticker symbols (e.g. AAPL,MSFT)</td></tr>
+<tr><td><code>--analysts</code></td><td>str</td><td>None</td><td>add_common_args</td><td>Comma-separated analyst keys</td></tr>
+<tr><td><code>--analysts-all</code></td><td>flag</td><td>False</td><td>add_common_args</td><td>Use all available analysts</td></tr>
+<tr><td><code>--ollama</code></td><td>flag</td><td>False</td><td>add_common_args</td><td>Use Ollama for local LLM inference</td></tr>
+<tr><td><code>--model</code></td><td>str</td><td>None</td><td>add_common_args</td><td>Specific model name (e.g. gpt-4o)</td></tr>
+<tr><td><code>--start-date</code></td><td>str</td><td>today − N months</td><td>add_date_args</td><td>Start date in YYYY-MM-DD format</td></tr>
+<tr><td><code>--end-date</code></td><td>str</td><td>today</td><td>add_date_args</td><td>End date in YYYY-MM-DD format</td></tr>
+<tr><td><code>--initial-cash</code></td><td>float</td><td>100000.0</td><td>parse_cli_inputs</td><td>Starting cash (alias: --initial-capital)</td></tr>
+<tr><td><code>--margin-requirement</code></td><td>float</td><td>0.0</td><td>parse_cli_inputs</td><td>Margin ratio for shorts (e.g. 0.5 = 50%)</td></tr>
+<tr><td><code>--show-reasoning</code></td><td>flag</td><td>False</td><td>parse_cli_inputs</td><td>Show agent reasoning output</td></tr>
+<tr><td><code>--show-agent-graph</code></td><td>flag</td><td>False</td><td>parse_cli_inputs</td><td>Render LangGraph agent graph</td></tr>
+</tbody>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+
+<h3>Example 1 — Basic single-run invocation</h3>
+<pre><code class="language-python"># main.py entry point
+from src.cli.input import parse_cli_inputs
+
+inputs = parse_cli_inputs(
+    description="AI Hedge Fund — Single Run",
+    require_tickers=True,
+    default_months_back=3,
+    include_reasoning_flag=True,
+    include_graph_flag=True,
+)
+
+# inputs is a CLIInputs dataclass with every field resolved
+print(f"Tickers: {inputs.tickers}")
+print(f"Analysts: {inputs.selected_analysts}")
+print(f"Model: {inputs.model_name} ({inputs.model_provider})")
+print(f"Date range: {inputs.start_date} → {inputs.end_date}")
+print(f"Capital: ${inputs.initial_cash:,.2f}")
+</code></pre>
+
+<h3>Example 2 — Programmatic analyst selection (non-interactive)</h3>
+<pre><code class="language-python">from src.cli.input import select_analysts, select_model, resolve_dates
+
+# Pass flags dict to skip interactive prompts
+analysts = select_analysts({"analysts_all": False, "analysts": "warren_buffett,cathie_wood"})
+# → ["warren_buffett", "cathie_wood"]
+
+# Flag-based model selection
+model_name, provider = select_model(use_ollama=False, model_flag="gpt-4.1")
+# → ("gpt-4.1", "OPENAI")
+
+# Date resolution with validation
+start, end = resolve_dates(None, "2026-03-25", default_months_back=6)
+# → ("2025-09-25", "2026-03-25")
+</code></pre>
+
+<h3>Example 3 — CLIInputs dataclass fields</h3>
+<pre><code class="language-python">from dataclasses import dataclass
+from typing import Optional
+import argparse
+
+@dataclass
+class CLIInputs:
+    tickers: list[str]
+    selected_analysts: list[str]
+    model_name: str
+    model_provider: str
+    start_date: str          # YYYY-MM-DD
+    end_date: str            # YYYY-MM-DD
+    initial_cash: float      # default 100_000.0
+    margin_requirement: float # default 0.0
+    show_reasoning: bool = False
+    show_agent_graph: bool = False
+    raw_args: Optional[argparse.Namespace] = None
+</code></pre>
+
+</main>
+
+<div class="diagram-overlay" id="diagram-overlay"><div class="inner" id="diagram-overlay-inner"></div></div>
+<button id="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  AI Hedge Fund · cli · Generated 2026-03-25 · git <code>359cce7</code>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const THEME_KEY = 'neutra-ip-theme';
+  mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+  /* --- Theme --- */
+  function getTheme(){ return localStorage.getItem(THEME_KEY) || 'dark'; }
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem(THEME_KEY, t);
+    document.getElementById('hljs-theme').href = t === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+    renderMermaid(t);
+  }
+
+  /* --- Mermaid with source preservation --- */
+  function renderMermaid(theme){
+    document.querySelectorAll('.mermaid').forEach(function(el, i){
+      if (!el.getAttribute('data-source')) el.setAttribute('data-source', el.textContent);
+      el.removeAttribute('data-processed');
+      el.innerHTML = el.getAttribute('data-source');
+      el.id = 'mermaid-' + i;
+    });
+    mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  setTheme(getTheme());
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  });
+
+  /* --- Auto-TOC --- */
+  var toc = document.querySelector('#toc ul');
+  document.querySelectorAll('h2[id]').forEach(function(h){
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+
+  /* --- Reading time --- */
+  var words = document.getElementById('main-content').textContent.split(/\s+/).length;
+  document.getElementById('reading-time').textContent = Math.ceil(words / 200) + ' min read';
+
+  /* --- Copy buttons --- */
+  document.querySelectorAll('pre').forEach(function(pre){
+    if (pre.querySelector('.mermaid')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(){
+      var code = pre.querySelector('code');
+      navigator.clipboard.writeText(code ? code.textContent : pre.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+    });
+    pre.appendChild(btn);
+  });
+
+  /* --- Diagram zoom overlay --- */
+  var overlay = document.getElementById('diagram-overlay');
+  var inner = document.getElementById('diagram-overlay-inner');
+  document.querySelectorAll('.mermaid-container').forEach(function(c){
+    c.addEventListener('click', function(){
+      inner.innerHTML = c.innerHTML;
+      overlay.classList.add('active');
+    });
+  });
+  overlay.addEventListener('click', function(){ overlay.classList.remove('active'); });
+
+  /* --- Back to top --- */
+  var btt = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function(){ btt.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+  btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* --- j/k keyboard nav --- */
+  document.addEventListener('keydown', function(e){
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var headings = Array.from(document.querySelectorAll('h2[id]'));
+    var scrollY = window.scrollY + 80;
+    var idx = headings.findIndex(function(h){ return h.offsetTop > scrollY; });
+    if (e.key === 'j'){ var next = headings[idx === -1 ? headings.length - 1 : idx]; if (next) next.scrollIntoView({ behavior: 'smooth' }); }
+    if (e.key === 'k'){ var prev = headings[Math.max(0, (idx === -1 ? headings.length : idx) - 2)]; if (prev) prev.scrollIntoView({ behavior: 'smooth' }); }
+  });
+
+  /* --- highlight.js --- */
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

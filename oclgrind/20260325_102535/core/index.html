@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/core">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>Oclgrind core — Simulation Engine</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:2rem}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;max-width:960px;margin:0 auto;padding:1rem 1.5rem 3rem}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{color:var(--heading);margin-top:2rem}
+h1{font-size:2rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h2{font-size:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{font-size:1.15rem}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:4px;z-index:1000}
+.skip-link:focus{top:1rem}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.hero-subtitle{color:var(--text-muted);font-size:1rem;margin-top:-.5rem}
+.stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin:1rem 0}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.75rem 1.1rem;text-align:center;min-width:110px}
+.stat-card .num{font-size:1.6rem;font-weight:700;color:var(--accent)}
+.stat-card .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0 1rem}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600}
+.badge-lang{background:var(--accent);color:#fff}
+.badge-layer{background:var(--accent2);color:#fff}
+.badge-status{background:var(--accent3);color:#fff}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent2);border-radius:6px;padding:1rem 1.25rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent2)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin:1.5rem 0}
+.toc summary{font-weight:600;cursor:pointer;color:var(--heading)}
+.toc ul{margin:.5rem 0 0;padding-left:1.25rem}
+.toc li{margin:.25rem 0}
+.toc a{color:var(--accent);font-size:.9rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem}
+th{background:var(--surface);color:var(--heading);text-align:left;padding:.6rem .75rem;border:1px solid var(--border)}
+td{padding:.55rem .75rem;border:1px solid var(--border)}
+tr:nth-child(even) td{background:var(--table-even)}
+tr:nth-child(odd) td{background:var(--table-odd)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:1rem;overflow-x:auto;position:relative}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:.15rem .35rem;border-radius:3px;font-size:.88em;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.code-block-wrapper{position:relative}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem;z-index:1}
+.copy-btn:hover{color:var(--heading);border-color:var(--accent)}
+.diagram-container{margin:1.5rem 0;cursor:zoom-in;text-align:center}
+.diagram-container svg{max-width:100%}
+.zoom-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;justify-content:center;align-items:center;cursor:zoom-out;padding:2rem}
+.zoom-overlay.active{display:flex}
+.zoom-overlay svg{max-width:95vw;max-height:95vh}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:"SFMono-Regular",Consolas,monospace;font-size:.85rem;line-height:1.5;white-space:pre;overflow-x:auto}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;transition:border-color .2s}
+.card:hover{border-color:var(--accent)}
+.card h4{margin:0 0 .4rem;color:var(--accent)}
+.card p{margin:0;font-size:.85rem;color:var(--text-muted)}
+.card a{display:block;text-decoration:none}
+.theme-toggle{position:fixed;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.4rem .75rem;border-radius:6px;cursor:pointer;font-size:1.1rem;z-index:100}
+.theme-toggle:hover{border-color:var(--accent)}
+.back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.back-to-top.visible{display:flex}
+footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;font-size:.85rem;color:var(--text-muted)}
+footer a{color:var(--accent)}
+@media print{
+  body{background:#fff;color:#000;max-width:100%}
+  .theme-toggle,.back-to-top,.copy-btn,.skip-link{display:none!important}
+  .zoom-overlay{display:none!important}
+  a{color:#000;text-decoration:underline}
+  pre,code,.dir-map{background:#f5f5f5;border-color:#ccc}
+  table{font-size:.8rem}
+  h1,h2,h3,h4{color:#000}
+  .stat-card{border-color:#ccc}
+  .intro-box{border-left-color:#1a7f37}
+}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<button class="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0})">↑</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <span>core</span></nav>
+
+<main id="main">
+
+<h1>Oclgrind <code>core</code> — Simulation Engine</h1>
+<p class="hero-subtitle">LLVM IR interpreter, OpenCL memory model, and plugin-driven instrumentation hub</p>
+
+<!-- ── Stat Row ── -->
+<div class="stat-row">
+  <div class="stat-card"><div class="num">21</div><div class="label">Source Files</div></div>
+  <div class="stat-card"><div class="num">~12k</div><div class="label">Lines of C++</div></div>
+  <div class="stat-card"><div class="num">10</div><div class="label">Key Classes</div></div>
+  <div class="stat-card"><div class="num">4</div><div class="label">Address Spaces</div></div>
+  <div class="stat-card"><div class="num">11</div><div class="label">Atomic Ops</div></div>
+</div>
+
+<!-- ── Badges ── -->
+<div class="badge-row">
+  <span class="badge badge-lang">C++14</span>
+  <span class="badge badge-lang">LLVM IR</span>
+  <span class="badge badge-layer">Simulation Core</span>
+  <span class="badge badge-status">Stable</span>
+  <span class="badge" style="background:var(--accent4);color:#fff">OpenCL 1.2 / 2.0</span>
+</div>
+
+<!-- ── Intro Box ── -->
+<div class="intro-box">
+  <h3>💡 What is this &amp; why does it exist?</h3>
+  <p>Think of the <code>core</code> module as a <strong>flight simulator for GPU kernels</strong>. Just as a flight simulator recreates every control surface, weather system, and instrument reading so a pilot can train without risking an aircraft, the core module recreates every work-item thread, memory bank, and barrier synchronisation so a developer can test OpenCL kernels without needing actual GPU hardware — and with full visibility into what every instruction does.</p>
+  <p>At its heart sits an <strong>LLVM IR interpreter</strong> (<code>WorkItem</code>) that steps through compiled kernel bitcode instruction-by-instruction. Surrounding it are a faithful <strong>memory model</strong> with four address spaces, a <strong>barrier-aware work-group scheduler</strong>, and a <strong>plugin dispatch bus</strong> that fires callbacks on every memory access, instruction, and synchronisation event — enabling race detectors, uninitialised-read checkers, and custom analysis passes to observe execution without modifying the engine.</p>
+</div>
+
+<!-- ── TOC ── -->
+<details class="toc" open>
+  <summary>Table of Contents</summary>
+  <ul id="toc-list"></ul>
+</details>
+
+<!-- ── Architecture Diagram ── -->
+<h2 id="architecture">Architecture Overview</h2>
+<p>The diagram below shows how the major classes compose into a simulation pipeline — from OpenCL source compilation through kernel dispatch to per-work-item execution.</p>
+<div class="diagram-container" onclick="zoomDiagram(this)">
+  <pre class="mermaid" data-source="">
+flowchart TD
+    subgraph Compilation
+        SRC["OpenCL Source"] --> PRG["Program\n(Clang → LLVM IR)"]
+        PRG --> KRN["Kernel\n(argument binding)"]
+    end
+    subgraph Dispatch
+        QUE["Queue\n(command scheduling)"] --> KI["KernelInvocation\n(NDRange orchestrator)"]
+        KRN --> KI
+    end
+    subgraph Execution
+        KI --> WG["WorkGroup\n(barrier sync)"]
+        WG --> WI["WorkItem\n(IR interpreter)"]
+    end
+    subgraph MemoryModel["Memory Model"]
+        GLB["Global Memory\nAddrSpace 1"]
+        LOC["Local Memory\nAddrSpace 3"]
+        PRI["Private Memory\nAddrSpace 0"]
+        CON["Constant Memory\nAddrSpace 2"]
+    end
+    WI -->|load/store| GLB
+    WI -->|load/store| PRI
+    WG -->|async_copy| LOC
+    WI -->|read| CON
+    subgraph Instrumentation
+        CTX["Context\n(plugin hub)"]
+        PLG["Plugin (abstract)\n→ RaceDetector\n→ UninitChecker\n→ InstCounter"]
+    end
+    WI -.->|notifyInstruction| CTX
+    WG -.->|notifyBarrier| CTX
+    CTX -.->|dispatch| PLG
+  </pre>
+</div>
+
+<!-- ── Key Classes ── -->
+<h2 id="key-classes">Key Classes</h2>
+<table>
+  <thead><tr><th>Class / Struct</th><th>File</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td><code>Context</code></td><td><code>Context.h/.cpp</code></td><td>Central hub — owns global memory, LLVM context, plugin registry; dispatches all <code>notify*</code> callbacks to registered plugins</td></tr>
+    <tr><td><code>Context::Message</code></td><td><code>Context.h</code></td><td>Stream-style structured logging with indent control and work-item context injection</td></tr>
+    <tr><td><code>Memory</code></td><td><code>Memory.h/.cpp</code></td><td>Typed address-space memory with buffer allocation, load/store, atomic ops, and address validation</td></tr>
+    <tr><td><code>Memory::Buffer</code></td><td><code>Memory.h</code></td><td>Individual allocation unit — size, flags, raw data pointer</td></tr>
+    <tr><td><code>WorkItem</code></td><td><code>WorkItem.h/.cpp</code></td><td>LLVM IR interpreter — steps one instruction at a time, maintains SSA value map, private memory, and call stack</td></tr>
+    <tr><td><code>InterpreterCache</code></td><td><code>WorkItem.h</code></td><td>Per-kernel cache for builtin function look-ups, constant pre-computation, and SSA value IDs</td></tr>
+    <tr><td><code>WorkGroup</code></td><td><code>WorkGroup.h/.cpp</code></td><td>Owns local memory, manages barrier synchronisation, async copies, and work-item scheduling within a group</td></tr>
+    <tr><td><code>KernelInvocation</code></td><td><code>KernelInvocation.h/.cpp</code></td><td>NDRange orchestrator — partitions global work into work-groups, distributes to worker threads</td></tr>
+    <tr><td><code>Kernel</code></td><td><code>Kernel.h/.cpp</code></td><td>Argument binding &amp; metadata — wraps an <code>llvm::Function</code> with OpenCL-specific qualifiers and type info</td></tr>
+    <tr><td><code>Program</code></td><td><code>Program.h/.cpp</code></td><td>Compilation pipeline — invokes Clang to compile OpenCL C → LLVM IR, applies optimisation passes, creates kernels</td></tr>
+    <tr><td><code>Plugin</code></td><td><code>Plugin.h/.cpp</code></td><td>Abstract observer base — virtual hooks for instruction, memory, barrier, and lifecycle events</td></tr>
+    <tr><td><code>Queue</code></td><td><code>Queue.h/.cpp</code></td><td>Command queue — enqueue/execute model for buffer read/write/copy/fill, kernel dispatch, map/unmap</td></tr>
+    <tr><td><code>Command</code> family</td><td><code>Queue.h</code></td><td>Polymorphic command structs (<code>KernelCommand</code>, <code>BufferCommand</code>, <code>CopyCommand</code>, <code>FillBufferCommand</code>, etc.)</td></tr>
+    <tr><td><code>TypedValue</code></td><td><code>common.h</code></td><td>Size-tagged value container — supports float/int/pointer get/set, used throughout the SSA value map</td></tr>
+    <tr><td><code>MemoryPool</code></td><td><code>common.h</code></td><td>Arena allocator for fast per-work-item allocation of instruction results without per-value <code>free()</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ── Execution-Flow Diagram ── -->
+<h2 id="execution-flow">Kernel Execution Flow</h2>
+<p>This sequence diagram traces the lifecycle of a single kernel dispatch — from enqueue through work-group barrier synchronisation to completion.</p>
+<div class="diagram-container" onclick="zoomDiagram(this)">
+  <pre class="mermaid" data-source="">
+sequenceDiagram
+    participant Host
+    participant Q as Queue
+    participant KI as KernelInvocation
+    participant WG as WorkGroup
+    participant WI as WorkItem
+    participant Mem as Memory
+    participant Ctx as Context
+    participant Plg as Plugin
+
+    Host->>Q: enqueue(KernelCommand)
+    Q->>KI: KernelInvocation::run(context, kernel, dims)
+    KI->>WG: new WorkGroup(wgid)
+    WG->>WI: new WorkItem(lid)
+    loop Each instruction
+        WI->>WI: step() → execute(instruction)
+        WI->>Mem: load / store / atomic
+        WI->>Ctx: notifyInstructionExecuted()
+        Ctx->>Plg: instructionExecuted()
+    end
+    WI->>WG: notifyBarrier(fence)
+    Note over WG: All items reach barrier
+    WG->>WG: clearBarrier()
+    loop Resume after barrier
+        WI->>WI: step()
+    end
+    WI->>WG: notifyFinished()
+    WG->>Ctx: notifyWorkGroupComplete()
+    Ctx->>Plg: workGroupComplete()
+    KI->>Ctx: notifyKernelEnd()
+    Ctx->>Plg: kernelEnd()
+  </pre>
+</div>
+
+<!-- ── Interactions ── -->
+<h2 id="interactions">Cross-Class Interactions</h2>
+<table>
+  <thead><tr><th>Caller</th><th>Callee</th><th>Mechanism</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>WorkItem</code></td><td><code>Context</code></td><td><code>notifyInstructionExecuted()</code></td><td>Fires after every interpreted LLVM instruction with the result value</td></tr>
+    <tr><td><code>WorkItem</code></td><td><code>Memory</code></td><td><code>load()</code> / <code>store()</code> / <code>atomic()</code></td><td>All data movement goes through the <code>Memory</code> abstraction matching the target address space</td></tr>
+    <tr><td><code>WorkGroup</code></td><td><code>Context</code></td><td><code>notifyWorkGroupBarrier()</code></td><td>Signals barrier events so plugins can check for divergent barriers or deadlocks</td></tr>
+    <tr><td><code>Context</code></td><td><code>Plugin</code></td><td>Virtual dispatch loop</td><td>Iterates <code>m_plugins</code> list, calling the matching virtual method on each registered plugin</td></tr>
+    <tr><td><code>KernelInvocation</code></td><td><code>WorkGroup</code></td><td>Constructor + <code>getNextWorkItem()</code></td><td>Creates work-groups, drives the round-robin scheduler that steps work-items</td></tr>
+    <tr><td><code>Queue</code></td><td><code>KernelInvocation</code></td><td><code>KernelInvocation::run()</code></td><td>The queue's <code>executeKernel()</code> delegates to the static factory that builds and runs the invocation</td></tr>
+    <tr><td><code>Program</code></td><td><code>Kernel</code></td><td><code>createKernel()</code></td><td>Extracts the named <code>llvm::Function</code>, wraps it in a <code>Kernel</code> with metadata</td></tr>
+    <tr><td><code>Memory</code></td><td><code>Context</code></td><td><code>notifyMemoryLoad/Store()</code></td><td>Every read and write triggers a plugin callback through the context for instrumentation</td></tr>
+  </tbody>
+</table>
+
+<!-- ── Deep-Dive Hub ── -->
+<h2 id="deep-dives">Deep-Dive Focus Pages</h2>
+<div class="card-grid">
+  <div class="card">
+    <a href="memory_model.html">
+      <h4>🧠 Memory Model</h4>
+      <p>Address-space layout, buffer allocation strategy, atomic operations, and the <code>Memory::Buffer</code> lifecycle. Covers Private / Global / Constant / Local semantics.</p>
+    </a>
+  </div>
+  <div class="card">
+    <a href="ir_interpreter.html">
+      <h4>⚙️ IR Interpreter</h4>
+      <p>How <code>WorkItem::step()</code> decodes and dispatches 45+ LLVM instructions, the SSA value map, builtin function resolution, and <code>InterpreterCache</code> optimisations.</p>
+    </a>
+  </div>
+  <div class="card">
+    <a href="plugin_dispatch.html">
+      <h4>🔌 Plugin Dispatch</h4>
+      <p>The <code>Context</code> → <code>Plugin</code> observer bus: 20+ virtual hooks, dynamic library loading (<code>OCLGRIND_PLUGINS</code>), thread-safety negotiation, and the <code>Message</code> logging system.</p>
+    </a>
+  </div>
+</div>
+
+<!-- ── Directory Map ── -->
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">src/core/
+├── common.h               Shared types: Size3, TypedValue, enums, MemoryPool
+├── common.cpp             Utility functions, constant resolution, GEP helpers
+├── Context.h              Context class + Message inner class
+├── Context.cpp            Plugin loading, notify* dispatch implementation
+├── Memory.h               Memory class + Buffer struct
+├── Memory.cpp             Buffer alloc/dealloc, load/store, atomic ops
+├── WorkItem.h             WorkItem class + InterpreterCache + BuiltinFunction
+├── WorkItem.cpp           LLVM IR instruction dispatch (45+ opcodes)
+├── WorkItemBuiltins.cpp   OpenCL built-in function implementations
+├── WorkGroup.h            WorkGroup class, AsyncCopy, Barrier structs
+├── WorkGroup.cpp          Barrier synchronisation, async copy execution
+├── KernelInvocation.h     KernelInvocation class
+├── KernelInvocation.cpp   NDRange partition, multi-threaded worker dispatch
+├── Kernel.h               Kernel class — argument metadata wrapper
+├── Kernel.cpp             Argument binding, qualifier queries
+├── Program.h              Program class — compilation pipeline
+├── Program.cpp            Clang invocation, bitcode I/O, dead-code pruning
+├── Plugin.h               Plugin abstract base class
+├── Plugin.cpp             Default isThreadSafe() implementation
+├── Queue.h                Queue + Command hierarchy (13 command types)
+├── Queue.cpp              Command enqueue/execute, buffer ops
+└── gen_opencl-c.h.cmake   CMake template for generating opencl-c.h header</div>
+
+<!-- ── Configuration ── -->
+<h2 id="configuration">Configuration &amp; Environment Variables</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>OCLGRIND_INST_COUNTS</code></td><td>bool</td><td>0</td><td>Enable per-instruction execution counting at kernel end</td></tr>
+    <tr><td><code>OCLGRIND_DATA_RACES</code></td><td>bool</td><td>0</td><td>Activate the data-race detection plugin</td></tr>
+    <tr><td><code>OCLGRIND_UNINITIALIZED</code></td><td>bool</td><td>0</td><td>Detect reads from uninitialised memory</td></tr>
+    <tr><td><code>OCLGRIND_INTERACTIVE</code></td><td>bool</td><td>0</td><td>Enable interactive GDB-style debugger for stepping through kernels</td></tr>
+    <tr><td><code>OCLGRIND_PLUGINS</code></td><td>string</td><td>""</td><td>Colon-separated list of shared-library plugin paths to load at start-up</td></tr>
+    <tr><td><code>OCLGRIND_NUM_THREADS</code></td><td>int</td><td>1</td><td>Number of worker threads for parallel work-group execution</td></tr>
+    <tr><td><code>OCLGRIND_QUICK</code></td><td>bool</td><td>0</td><td>Skip detailed memory-access checks for faster simulation</td></tr>
+    <tr><td><code>OCLGRIND_BUILD_OPTIONS</code></td><td>string</td><td>""</td><td>Extra Clang flags appended when compiling OpenCL programs</td></tr>
+    <tr><td><code>OCLGRIND_PCH_DIR</code></td><td>path</td><td>install</td><td>Directory containing pre-compiled OpenCL header (<code>.pch</code>)</td></tr>
+    <tr><td><code>OCLGRIND_DUMP_SPIR</code></td><td>bool</td><td>0</td><td>Dump SPIR bitcode to disk after compilation for debugging</td></tr>
+    <tr><td><code>OCLGRIND_DISABLE_PCH</code></td><td>bool</td><td>0</td><td>Force full header compilation instead of using PCH (slower but useful for modified headers)</td></tr>
+    <tr><td><code>OCLGRIND_MAX_ERRORS</code></td><td>int</td><td>1000</td><td>Cap on the number of error messages before suppression</td></tr>
+    <tr><td><code>OCLGRIND_GLOBAL_MEM_SIZE</code></td><td>int (MB)</td><td>1024</td><td>Maximum total global memory available to allocations</td></tr>
+    <tr><td><code>OCLGRIND_LOCAL_MEM_SIZE</code></td><td>int (KB)</td><td>32</td><td>Maximum local memory per work-group</td></tr>
+  </tbody>
+</table>
+
+<!-- ── Code Examples ── -->
+<h2 id="code-examples">Code Examples</h2>
+
+<h3 id="ex-plugin-hooks">Plugin Observer Interface</h3>
+<p>The <code>Plugin</code> base class defines virtual hooks that any analysis pass can override. The <code>Context</code> iterates registered plugins and calls these on every simulation event:</p>
+<div class="code-block-wrapper">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><code class="language-cpp">class Plugin
+{
+public:
+  Plugin(const Context* context);
+  virtual ~Plugin();
+
+  virtual void instructionExecuted(const WorkItem* workItem,
+                                   const llvm::Instruction* instruction,
+                                   const TypedValue&amp; result) {}
+  virtual void memoryLoad(const Memory* memory, const WorkItem* workItem,
+                          size_t address, size_t size) {}
+  virtual void memoryStore(const Memory* memory, const WorkItem* workItem,
+                           size_t address, size_t size,
+                           const uint8_t* storeData) {}
+  virtual void memoryAtomicLoad(const Memory* memory, const WorkItem* workItem,
+                                AtomicOp op, size_t address, size_t size) {}
+  virtual void workGroupBarrier(const WorkGroup* workGroup, uint32_t flags) {}
+  virtual void kernelBegin(const KernelInvocation* kernelInvocation) {}
+  virtual void kernelEnd(const KernelInvocation* kernelInvocation) {}
+
+  virtual bool isThreadSafe() const;
+
+protected:
+  const Context* m_context;
+};</code></pre>
+</div>
+
+<h3 id="ex-typed-value">TypedValue — Size-Tagged Data Container</h3>
+<p>Every SSA value produced by the interpreter is wrapped in a <code>TypedValue</code>. The struct provides typed accessors for the raw byte buffer:</p>
+<div class="code-block-wrapper">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><code class="language-cpp">struct TypedValue
+{
+  unsigned size;        // bytes per element
+  unsigned num;         // number of vector elements (1 for scalar)
+  unsigned char* data;  // raw byte storage
+
+  double   getFloat(unsigned index = 0) const;
+  size_t   getPointer(unsigned index = 0) const;
+  int64_t  getSInt(unsigned index = 0) const;
+  uint64_t getUInt(unsigned index = 0) const;
+
+  void setFloat(double value, unsigned index = 0);
+  void setPointer(size_t value, unsigned index = 0);
+  void setSInt(int64_t value, unsigned index = 0);
+  void setUInt(uint64_t value, unsigned index = 0);
+
+  struct TypedValue clone() const;
+};</code></pre>
+</div>
+
+<h3 id="ex-address-spaces">Address Space &amp; Atomic Enumerations</h3>
+<p>The four OpenCL address spaces and supported atomic operations are defined as enums in <code>common.h</code>:</p>
+<div class="code-block-wrapper">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><code class="language-cpp">enum AddressSpace
+{
+  AddrSpacePrivate  = 0,   // per-work-item scratch
+  AddrSpaceGlobal   = 1,   // shared across all work-items
+  AddrSpaceConstant = 2,   // read-only global
+  AddrSpaceLocal    = 3,   // shared within a work-group
+};
+
+enum AtomicOp
+{
+  AtomicAdd, AtomicAnd, AtomicCmpXchg,
+  AtomicDec, AtomicInc, AtomicMax,
+  AtomicMin, AtomicOr,  AtomicSub,
+  AtomicXchg, AtomicXor,
+};</code></pre>
+</div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <p>← <a href="../index.html">Oclgrind Overview</a> · <a href="../search.html">Search Wiki</a></p>
+  <p>Generated 2026-03-25 · source rev <code>8c243f0</code></p>
+</footer>
+
+<!-- ── Zoom Overlay ── -->
+<div class="zoom-overlay" id="zoomOverlay" onclick="closeZoom()"></div>
+
+<!-- ── Mermaid ── -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});
+
+// Save original data-source, then render
+async function renderMermaid(){
+  document.querySelectorAll('pre.mermaid').forEach(el=>{
+    if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);
+  });
+  try{await mermaid.run({querySelector:'pre.mermaid'});}catch(e){console.warn('Mermaid render:',e);}
+}
+renderMermaid();
+
+// Theme toggle
+function toggleTheme(){
+  const html=document.documentElement;
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('neutra-ip-theme',next);
+  // Re-render mermaid with matching theme
+  mermaid.initialize({startOnLoad:false,theme:next==='dark'?'dark':'default',securityLevel:'loose'});
+  document.querySelectorAll('pre.mermaid').forEach(el=>{
+    const src=el.getAttribute('data-source');
+    if(src){el.removeAttribute('data-processed');el.textContent=src;}
+  });
+  renderMermaid();
+}
+
+// Restore saved theme
+(function(){
+  const saved=localStorage.getItem('neutra-ip-theme');
+  if(saved){
+    document.documentElement.setAttribute('data-theme',saved);
+    if(saved==='light')mermaid.initialize({startOnLoad:false,theme:'default',securityLevel:'loose'});
+  }
+})();
+
+// Auto-generate TOC
+(function(){
+  const toc=document.getElementById('toc-list');
+  if(!toc)return;
+  document.querySelectorAll('main h2[id],main h3[id]').forEach(h=>{
+    const li=document.createElement('li');
+    if(h.tagName==='H3')li.style.marginLeft='1rem';
+    const a=document.createElement('a');
+    a.href='#'+h.id;
+    a.textContent=h.textContent;
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+// Copy button
+function copyCode(btn){
+  const code=btn.parentElement.querySelector('code');
+  navigator.clipboard.writeText(code.textContent).then(()=>{
+    btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy',1500);
+  });
+}
+
+// Diagram zoom
+function zoomDiagram(container){
+  const svg=container.querySelector('svg');
+  if(!svg)return;
+  const overlay=document.getElementById('zoomOverlay');
+  overlay.innerHTML='';
+  overlay.appendChild(svg.cloneNode(true));
+  overlay.classList.add('active');
+}
+function closeZoom(){document.getElementById('zoomOverlay').classList.remove('active');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeZoom();});
+
+// Back-to-top visibility
+window.addEventListener('scroll',()=>{
+  const btn=document.querySelector('.back-to-top');
+  btn.classList.toggle('visible',window.scrollY>400);
+});
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>

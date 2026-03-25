@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="index.html">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source-rev" content="8c243f0">
+<title>CLI Interface Deep-Dive — Oclgrind Wiki</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:900px;margin:0 auto;padding:1rem 1.5rem 3rem}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3{color:var(--heading);margin:1.4em 0 .6em}
+h1{font-size:1.8rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h2{font-size:1.35rem}h3{font-size:1.1rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0}
+code{background:var(--code-bg);padding:.15em .35em;border-radius:4px;font-size:.9em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:1rem}
+.focus-label{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;text-transform:uppercase;margin-right:.5rem;vertical-align:middle}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem}
+.hero p{color:var(--text-muted);margin-top:.5rem}
+.callout{border-left:4px solid var(--accent3);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.callout.warn{border-color:var(--accent4)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin:1rem 0;cursor:pointer;text-align:center}
+.copy-btn{position:absolute;top:.4rem;right:.4rem;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.75rem;cursor:pointer}
+.copy-btn:hover{color:var(--accent)}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;justify-content:center;align-items:center}
+#overlay.show{display:flex}
+#overlay svg{max-width:90vw;max-height:90vh}
+#back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;display:none;z-index:50}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;float:right}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:4px 12px;z-index:100}
+.skip-link:focus{left:0}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-muted)}
+table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{border:1px solid var(--border);padding:.45rem .7rem;text-align:left}th{background:var(--surface)}
+@media print{body{color:#000;background:#fff}.theme-toggle,#back-to-top,.copy-btn,.skip-link{display:none!important}}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<nav class="breadcrumb"><a href="../index.html">Oclgrind</a> &rsaquo; <a href="index.html">kernel</a> &rsaquo; CLI Interface</nav>
+<main id="main">
+<div class="hero"><span class="focus-label">Focus</span><h1>CLI Interface Deep-Dive</h1>
+<p>How <code>oclgrind-kernel.cpp</code> parses command-line arguments, maps them to <code>OCLGRIND_*</code> environment variables, and drives the <code>Simulation</code> class.</p></div>
+
+<h2>Architecture</h2>
+<div class="mermaid-wrap" data-source="graph LR
+  CLI[oclgrind-kernel] -->|parseArguments| ENV[setenv OCLGRIND_*]
+  CLI -->|positional arg| SIM[Simulation::load]
+  SIM -->|.sim file| RUN[Simulation::run]
+  ENV -.->|read by| Core[Core subsystem]"><pre class="mermaid">graph LR
+  CLI[oclgrind-kernel] -->|parseArguments| ENV[setenv OCLGRIND_*]
+  CLI -->|positional arg| SIM[Simulation::load]
+  SIM -->|.sim file| RUN[Simulation::run]
+  ENV -.->|read by| Core[Core subsystem]</pre></div>
+
+<p>The <code>oclgrind-kernel</code> binary is the standalone kernel simulator. Unlike <code>oclgrind</code> (which wraps an existing app via <code>LD_PRELOAD</code>), this tool reads a <code>.sim</code> file directly and executes the kernel outside any OpenCL runtime.</p>
+
+<h2>Flag → Environment Variable Mapping</h2>
+<p>Every CLI flag calls <code>setEnvironment(name, value)</code> which wraps <code>setenv()</code> (POSIX) or <code>_putenv_s()</code> (Windows). The Core subsystem reads these variables at initialisation.</p>
+
+<table><thead><tr><th>CLI Flag</th><th>Environment Variable</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>--build-options OPT</code></td><td><code>OCLGRIND_BUILD_OPTIONS</code></td><td>OPT string</td></tr>
+<tr><td><code>--data-races</code></td><td><code>OCLGRIND_DATA_RACES</code></td><td><code>"1"</code></td></tr>
+<tr><td><code>--global-mem-size N</code></td><td><code>OCLGRIND_GLOBAL_MEM_SIZE</code></td><td>N bytes</td></tr>
+<tr><td><code>--local-mem-size N</code></td><td><code>OCLGRIND_LOCAL_MEM_SIZE</code></td><td>N bytes</td></tr>
+<tr><td><code>--max-wgsize N</code></td><td><code>OCLGRIND_MAX_WGSIZE</code></td><td>N</td></tr>
+<tr><td><code>--interactive / -i</code></td><td><code>OCLGRIND_INTERACTIVE</code></td><td><code>"1"</code></td></tr>
+<tr><td><code>--inst-counts</code></td><td><code>OCLGRIND_INST_COUNTS</code></td><td><code>"1"</code></td></tr>
+<tr><td><code>--plugins LIBS</code></td><td><code>OCLGRIND_PLUGINS</code></td><td>colon-separated</td></tr>
+<tr><td><code>--quick / -q</code></td><td><code>OCLGRIND_QUICK</code></td><td><code>"1"</code></td></tr>
+<tr><td><code>--uninitialized</code></td><td><code>OCLGRIND_UNINITIALIZED</code></td><td><code>"1"</code></td></tr>
+<tr><td><code>--num-threads N</code></td><td><code>OCLGRIND_NUM_THREADS</code></td><td>N</td></tr>
+<tr><td><code>--log FILE</code></td><td><code>OCLGRIND_LOG</code></td><td>path</td></tr>
+<tr><td><code>--max-errors N</code></td><td><code>OCLGRIND_MAX_ERRORS</code></td><td>N</td></tr>
+<tr><td><code>-g / --global-mem</code></td><td><em>(local flag)</em></td><td>sets <code>outputGlobalMemory</code></td></tr>
+</tbody></table>
+
+<div class="callout"><strong>Note:</strong> The <code>-g</code> / <code>--global-mem</code> flag is unique to <code>oclgrind-kernel</code> — it sets a local boolean rather than an environment variable, passing it as the <code>dumpGlobalMemory</code> parameter to <code>Simulation::run()</code>.</div>
+
+<h2>Argument Parsing Loop</h2>
+<p>The parser is a simple <code>strcmp</code> chain — no getopt or library dependency. The first positional (non-flag) argument is taken as the <code>.sim</code> file path; any extra positional argument triggers an error.</p>
+
+<pre><code class="language-cpp">// Simplified parseArguments logic from oclgrind-kernel.cpp
+static bool parseArguments(int argc, char* argv[]) {
+  for (int i = 1; i &lt; argc; i++) {
+    if (!strcmp(argv[i], "--data-races")) {
+      setEnvironment("OCLGRIND_DATA_RACES", "1");
+    }
+    else if (!strcmp(argv[i], "--global-mem-size")) {
+      if (++i &gt;= argc) { cerr &lt;&lt; "Missing argument"; return false; }
+      setEnvironment("OCLGRIND_GLOBAL_MEM_SIZE", argv[i]);
+    }
+    else if (argv[i][0] == '-') {
+      cerr &lt;&lt; "Unrecognised option '" &lt;&lt; argv[i] &lt;&lt; "'"; return false;
+    }
+    else {
+      if (simfile == NULL) simfile = argv[i];
+      else { cerr &lt;&lt; "Unexpected positional argument"; return false; }
+    }
+  }
+  if (simfile == NULL) { printUsage(); return false; }
+  return true;
+}</code></pre>
+
+<h2>Execution Flow</h2>
+<div class="mermaid-wrap" data-source="sequenceDiagram
+  participant U as User
+  participant CLI as oclgrind-kernel
+  participant SIM as Simulation
+  participant CTX as Core::Context
+  U->>CLI: oclgrind-kernel --data-races test.sim
+  CLI->>CLI: setenv(OCLGRIND_DATA_RACES, 1)
+  CLI->>SIM: simulation.load('test.sim')
+  SIM->>CTX: new Context()
+  SIM->>SIM: parse .sim header
+  SIM->>SIM: build program &amp; create kernel
+  SIM->>SIM: parseArgument() × N
+  SIM-->>CLI: true
+  CLI->>SIM: simulation.run(false)
+  SIM->>CTX: KernelInvocation::run
+  SIM-->>U: dump results to stdout"><pre class="mermaid">sequenceDiagram
+  participant U as User
+  participant CLI as oclgrind-kernel
+  participant SIM as Simulation
+  participant CTX as Core::Context
+  U->>CLI: oclgrind-kernel --data-races test.sim
+  CLI->>CLI: setenv(OCLGRIND_DATA_RACES, 1)
+  CLI->>SIM: simulation.load('test.sim')
+  SIM->>CTX: new Context()
+  SIM->>SIM: parse .sim header
+  SIM->>SIM: build program &amp; create kernel
+  SIM->>SIM: parseArgument() × N
+  SIM-->>CLI: true
+  CLI->>SIM: simulation.run(false)
+  SIM->>CTX: KernelInvocation::run
+  SIM-->>U: dump results to stdout</pre></div>
+
+<h2>Usage Examples</h2>
+<pre><code class="language-cpp">// Basic kernel run
+// $ oclgrind-kernel vecadd.sim
+
+// Enable data-race detection and interactive debugging
+// $ oclgrind-kernel --data-races --interactive vecadd.sim
+
+// Limit memory and dump global memory at exit
+// $ oclgrind-kernel --global-mem-size 67108864 -g vecadd.sim
+
+// Load custom plugins, limit errors, log to file
+// $ oclgrind-kernel --plugins myplugin.so --max-errors 10 \
+//     --log errors.txt vecadd.sim</code></pre>
+
+<div class="callout warn">
+<strong>Difference from <code>oclgrind</code>:</strong> The <code>oclgrind</code>
+wrapper launches an arbitrary application with <code>LD_PRELOAD</code>
+injection. <code>oclgrind-kernel</code> runs a single kernel from a
+<code>.sim</code> file — no OpenCL runtime, no ICD loader, and no host
+application needed.
+</div>
+
+<h2>Environment Variable Helper</h2>
+<p>The <code>setEnvironment()</code> function abstracts the platform
+difference between POSIX and Windows:</p>
+
+<pre><code class="language-cpp">static void setEnvironment(const char* name, const char* value) {
+#if defined(_WIN32) &amp;&amp; !defined(__MINGW32__)
+  _putenv_s(name, value);
+#else
+  setenv(name, value, 1);
+#endif
+}</code></pre>
+
+<div class="callout">
+<strong>Overwrite semantics:</strong> The third argument to <code>setenv</code>
+is <code>1</code>, meaning CLI flags always override any pre-existing
+environment variables. This lets users combine shell-level defaults
+with per-invocation overrides.
+</div>
+
+<h2>Error Behaviour</h2>
+<p>Argument parsing failures produce specific messages and return
+<code>false</code>, causing <code>main()</code> to return exit code 1.
+Common errors include:</p>
+<ul>
+<li>Missing value after a flag that requires one (e.g. <code>--log</code>
+without a path)</li>
+<li>Unrecognised flag (anything starting with <code>-</code> that
+does not match known options)</li>
+<li>Duplicate positional arguments (only one <code>.sim</code> file is
+accepted)</li>
+<li>No positional argument at all → prints usage and exits</li>
+</ul>
+
+<h2>Plugin Loading</h2>
+<p>The <code>--plugins</code> flag accepts a colon-separated list of shared
+library paths. These are stored in <code>OCLGRIND_PLUGINS</code> and loaded
+by the Core subsystem at context creation time. Plugins can hook into
+memory accesses, kernel invocations, and other simulation events to
+implement custom analysis passes.</p>
+
+<h2>Interactive Debugging Mode</h2>
+<p>When <code>--interactive</code> (or <code>-i</code>) is passed, the Core
+subsystem enters a GDB-like command loop at each kernel invocation.
+Users can inspect work-item state, set breakpoints on specific
+global IDs, and step through LLVM IR instructions. This mode is
+invaluable for debugging complex race conditions or out-of-bounds
+accesses.</p>
+
+<h2>Quick Mode</h2>
+<p>The <code>--quick</code> flag sets <code>OCLGRIND_QUICK=1</code>, causing
+the simulator to only execute the first and last work-groups. This
+dramatically reduces simulation time for large NDRanges while still
+catching boundary-related bugs.</p>
+
+<div class="callout warn">
+<strong>Quick mode limitation:</strong> Bugs that only manifest in
+middle work-groups will be missed. Use quick mode for rapid
+iteration during development, but run the full simulation before
+release.
+</div>
+
+<h2>Version and Help Output</h2>
+<p>Both <code>-v / --version</code> and <code>-h / --help</code> cause the
+program to print information and call <code>exit(0)</code> immediately,
+skipping simulation entirely. The version output includes the
+<code>PACKAGE_VERSION</code> macro set at build time, the copyright
+notice, and a link to the GitHub repository.</p>
+
+<h2>Comparison: oclgrind vs oclgrind-kernel</h2>
+<table>
+<thead><tr><th>Feature</th><th>oclgrind</th><th>oclgrind-kernel</th></tr></thead>
+<tbody>
+<tr><td>Input</td><td>Arbitrary application</td><td><code>.sim</code> file</td></tr>
+<tr><td>Injection</td><td>LD_PRELOAD / DLL</td><td>Direct Core API</td></tr>
+<tr><td>OpenCL runtime</td><td>Full ICD-compatible</td><td>None</td></tr>
+<tr><td>Global mem dump</td><td>No</td><td>Yes (<code>-g</code>)</td></tr>
+<tr><td>Argument dump</td><td>No</td><td>Yes (per-arg <code>dump</code>)</td></tr>
+</tbody>
+</table>
+
+<h2>Edge Cases &amp; Common Pitfalls</h2>
+<table>
+<thead><tr><th>Scenario</th><th>Behaviour</th><th>Resolution</th></tr></thead>
+<tbody>
+<tr><td>No <code>.sim</code> file argument</td><td>Prints usage text, exits with code 1</td><td>Provide a valid <code>.sim</code> file as the last positional argument</td></tr>
+<tr><td>Two positional arguments</td><td><code>"Unexpected positional argument"</code> error</td><td>Only one <code>.sim</code> file is accepted per invocation</td></tr>
+<tr><td><code>--global-mem-size</code> without value</td><td><code>"Missing argument"</code> error, exit 1</td><td>Always pass the byte count after the flag</td></tr>
+<tr><td>Flag after positional argument</td><td>Treated as a second positional → error</td><td>Place all flags <em>before</em> the <code>.sim</code> path</td></tr>
+<tr><td>Environment variable already set</td><td>CLI flag silently overwrites it (<code>setenv</code> overwrite=1)</td><td>Intended behaviour — CLI takes precedence</td></tr>
+<tr><td>Invalid <code>.sim</code> file path</td><td><code>Simulation::load()</code> fails with an I/O error</td><td>Verify the path exists and is readable</td></tr>
+<tr><td>Plugin shared library not found</td><td>Core logs a <code>dlopen</code> / <code>LoadLibrary</code> error at context creation</td><td>Use absolute paths or ensure <code>LD_LIBRARY_PATH</code> is set</td></tr>
+</tbody>
+</table>
+
+<h2>Troubleshooting</h2>
+<h3>Simulation loads but produces no output</h3>
+<p>Ensure at least one kernel argument has the <code>dump</code> modifier in its header, or pass <code>-g</code> to dump all global memory. Without either, <code>oclgrind-kernel</code> runs silently.</p>
+
+<h3>Interactive mode does not start</h3>
+<p>Verify that <code>--interactive</code> is spelled correctly. A common mistake is passing <code>-I</code> (uppercase) which is not recognised and triggers an <em>"Unrecognised option"</em> error. The short form is lowercase <code>-i</code>.</p>
+
+<h3>Memory limit appears to have no effect</h3>
+<p>The <code>--global-mem-size</code> value is in <strong>bytes</strong>, not megabytes. Passing <code>--global-mem-size 64</code> gives you 64 bytes, not 64 MiB. Use <code>67108864</code> for 64 MiB.</p>
+
+<h3>Plugin causes segfault at startup</h3>
+<p>Plugins are loaded via <code>dlopen</code> during <code>Core::Context</code> creation. If a plugin has unresolved symbols or an incompatible ABI version, the process crashes before any simulation output. Test plugins in isolation by loading them with <code>LD_PRELOAD</code> first to check for link errors.</p>
+
+<h2>Related Topics</h2>
+<ul>
+<li><a href="simulation_lifecycle.html">Simulation Lifecycle</a> — how <code>Simulation::load()</code> and <code>Simulation::run()</code> work internally</li>
+<li><a href="../runtime/icd_dispatch.html">ICD Dispatch Table</a> — how the <code>oclgrind</code> wrapper (LD_PRELOAD mode) differs from <code>oclgrind-kernel</code></li>
+<li><a href="../runtime/opencl_api_layer.html">OpenCL API Layer</a> — the runtime that <code>oclgrind</code> injects vs. the direct Core usage in <code>oclgrind-kernel</code></li>
+<li><a href="index.html">Kernel Module Overview</a> — parent page with links to all kernel sub-topics</li>
+</ul>
+</main>
+<button id="back-to-top" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div id="overlay" onclick="this.classList.remove('show')"></div>
+<footer>
+<a href="index.html">← kernel module</a> · <a href="../search.html">Search</a>
+</footer>
+<script>
+function toggleTheme(){const t=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=t;localStorage.setItem("neutra-ip-theme",t)}
+(function(){const t=localStorage.getItem("neutra-ip-theme");if(t)document.documentElement.dataset.theme=t})();
+window.addEventListener("scroll",()=>{document.getElementById("back-to-top").style.display=scrollY>300?"block":"none"});
+document.querySelectorAll("pre:not(.mermaid)").forEach(p=>{const b=document.createElement("button");b.className="copy-btn";b.textContent="Copy";b.onclick=()=>{navigator.clipboard.writeText(p.textContent.replace(/^Copy/,""));b.textContent="✓";setTimeout(()=>b.textContent="Copy",1500)};p.appendChild(b)});
+(async function renderMermaid(){const{default:mermaid}=await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");mermaid.initialize({startOnLoad:false,theme:document.documentElement.dataset.theme==="dark"?"dark":"default"});await mermaid.run({querySelector:".mermaid"});document.querySelectorAll(".mermaid-wrap").forEach(w=>{w.addEventListener("click",()=>{const o=document.getElementById("overlay");o.innerHTML=w.querySelector("svg").outerHTML;o.classList.add("show")})})})();
+</script>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+</body>
+</html>
