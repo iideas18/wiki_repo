@@ -331,6 +331,8 @@ const Fault NoFault = nullptr;</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
+document.querySelectorAll('pre.mermaid,.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+
 (function(){
   const stored = localStorage.getItem('neutra-ip-theme');
   if(stored) document.documentElement.setAttribute('data-theme', stored);
@@ -425,7 +427,8 @@ const Fault NoFault = nullptr;</code></pre>
   });
 
   var overlay = document.getElementById('diagramOverlay');
-  var overlayContent = document.getElementById('diagramOverlayContent');
+if(!overlay)return;
+var overlayContent = document.getElementById('diagramOverlayContent');
   var currentScale = 1;
 
   window.openOverlay = function(container){

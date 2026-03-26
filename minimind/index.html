@@ -465,7 +465,7 @@ document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
   wrap.addEventListener('click', () => {
     const svg = wrap.querySelector('svg');
     if (!svg) return;
-    zoomInner.innerHTML = svg.outerHTML;
+    zoomInner.innerHTML = ''; zoomInner.appendChild(svg.cloneNode(true));
     zoomScale = 1;
     zoomInner.style.transform = `scale(${zoomScale})`;
     overlay.classList.add('active');

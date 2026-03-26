@@ -406,6 +406,7 @@ document.querySelectorAll('.mermaid-wrapper').forEach(w => {
   });
 });
 overlay.addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('wheel', function(e){e.preventDefault();var s=parseFloat(zoomContent.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));zoomContent.dataset.scale=s;zoomContent.style.transform='scale('+s+')';},{passive:false});
 
 // Keyboard nav
 document.addEventListener('keydown', e => {
