@@ -420,7 +420,7 @@ static void f1arg(WorkItem* wi, const llvm::CallInst* ci,
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
 mermaid.initialize({startOnLoad:false,theme:document.documentElement.getAttribute('data-theme')==='dark'?'dark':'default'});
-function renderMermaid(){document.querySelectorAll('.mermaid').forEach(function(el,i){el.removeAttribute('data-processed');el.id='mm-'+i});mermaid.run()}
+function renderMermaid(){document.querySelectorAll('.mermaid').forEach(function(el,i){el.removeAttribute('data-processed');el.id='mm-'+i});try{mermaid.run()}catch(e){console.warn('mermaid:',e)}}
 
 (function(){
   const key='neutra-ip-theme';
@@ -450,11 +450,13 @@ btt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'
 var overlay=document.getElementById('overlay');
 document.querySelectorAll('.mermaid-wrap').forEach(function(w){
   w.addEventListener('click',function(){
-    overlay.querySelector('.overlay-inner').innerHTML=w.outerHTML;
+    (function(){var _t=overlay.querySelector('.overlay-inner');_t.innerHTML='';_t.appendChild(w.cloneNode(true))})();
     overlay.classList.add('active');
   });
 });
 overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('active')});
+
+(function(){var _ov=document.getElementById('overlay');if(!_ov)return;var _c=_ov.querySelector('div')||_ov;_ov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_c.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_c.dataset.scale=s;_c.style.transform='scale('+s+')';},{passive:false});}());
 </script>
 </body>
 </html>

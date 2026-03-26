@@ -480,6 +480,8 @@ renderMermaid();
 // Highlight.js
 if(typeof hljs!=='undefined') hljs.highlightAll();
 (function(){var m=document.querySelector('main');if(mkdir -p neutra_bridges/test/data)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+
+document.getElementById('diagramOverlayContent').addEventListener('wheel',function(e){e.preventDefault();if(!document.getElementById('diagramOverlay').classList.contains('active'))return;var s=parseFloat(this.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));this.dataset.scale=s;this.style.transform='scale('+s+')';},{passive:false});
 </script>
 </body>
 </html>

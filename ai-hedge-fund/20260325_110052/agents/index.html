@@ -363,7 +363,7 @@ function applyTheme(){
     el.textContent=src;
   });
   mermaid.initialize({startOnLoad:false,theme:d==='dark'?'dark':'default'});
-  mermaid.run({querySelector:'.mermaid'});
+  try{mermaid.run({querySelector:'.mermaid'});}catch(e){console.warn('mermaid:',e)}
 }
 btn.addEventListener('click',function(){
   var cur=document.documentElement.getAttribute('data-theme');
@@ -378,7 +378,7 @@ mermaid.initialize({startOnLoad:false,theme:saved==='light'?'default':'dark'});
 document.querySelectorAll('.mermaid').forEach(function(el){
   el.setAttribute('data-source',el.textContent);
 });
-mermaid.run({querySelector:'.mermaid'});
+try{mermaid.run({querySelector:'.mermaid'});}catch(e){console.warn('mermaid:',e)}
 applyTheme();
 
 /* ── hljs ── */
@@ -449,6 +449,8 @@ document.addEventListener('keydown',function(e){
 });
 
 })();
+
+document.getElementById('diagramInner').addEventListener('wheel',function(e){e.preventDefault();if(!document.getElementById('diagramOverlay').classList.contains('active'))return;var s=parseFloat(this.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));this.dataset.scale=s;this.style.transform='scale('+s+')';},{passive:false});
 </script>
 </body>
 </html>
