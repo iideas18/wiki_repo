@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-generated" content="2026-03-26">
+<meta name="wiki-source" content="minimind/trainer">
+<meta name="wiki-source-rev" content="83e52f6">
+<title>Training Pipeline — MiniMind Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.4)}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:8px;background:var(--accent);color:#fff;padding:6px 16px;border-radius:var(--radius);z-index:999;font-weight:600}.skip-link:focus{top:8px}
+.wrapper{max-width:960px;margin:0 auto;padding:0 20px 60px}
+/* Breadcrumb */
+.breadcrumb{padding:16px 0;font-size:.85rem;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}.breadcrumb span{margin:0 6px}
+/* Theme toggle */
+.theme-toggle{position:fixed;top:14px;right:18px;z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:1.1rem;line-height:1;color:var(--text);box-shadow:var(--shadow)}
+/* Hero */
+.hero{text-align:center;padding:36px 0 20px}.hero h1{font-size:2rem;color:var(--heading);margin-bottom:6px}.hero .subtitle{color:var(--text-muted);font-size:1.05rem}
+/* Stats row */
+.stats{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin:18px 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 22px;text-align:center}.stat-card .num{font-size:1.5rem;font-weight:700;color:var(--accent)}.stat-card .label{font-size:.78rem;color:var(--text-muted)}
+/* Badges */
+.badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 0 24px}.badge{padding:4px 12px;border-radius:12px;font-size:.78rem;font-weight:600;background:var(--surface);border:1px solid var(--border)}.badge.blue{color:var(--accent);border-color:var(--accent)}.badge.green{color:var(--accent2);border-color:var(--accent2)}.badge.yellow{color:var(--accent3);border-color:var(--accent3)}.badge.red{color:var(--accent4);border-color:var(--accent4)}
+/* Intro box */
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:var(--radius);padding:18px 22px;margin-bottom:28px}.intro-box h3{color:var(--accent);margin-bottom:6px;font-size:.95rem}.intro-box p{font-size:.92rem}
+/* Reading time */
+.reading-time{text-align:center;color:var(--text-muted);font-size:.82rem;margin-bottom:12px}
+/* TOC */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 22px;margin-bottom:30px}.toc h2{font-size:1rem;color:var(--heading);margin-bottom:8px}.toc ol{padding-left:20px}.toc li{margin:3px 0;font-size:.88rem}.toc a{color:var(--accent)}
+/* Sections */
+section{margin-bottom:36px}
+h2.section-title{font-size:1.35rem;color:var(--heading);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:16px}
+h3{color:var(--heading);margin:14px 0 8px;font-size:1.05rem}
+/* Tables */
+.table-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:9px 12px;border:1px solid var(--border);text-align:left}
+th{background:var(--surface);color:var(--heading);font-weight:600;white-space:nowrap}
+tr:nth-child(even){background:var(--surface)}
+/* Code blocks */
+.code-block{position:relative;margin:14px 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.code-block .label{display:block;background:var(--surface);padding:5px 14px;font-size:.78rem;color:var(--text-muted);border-bottom:1px solid var(--border)}
+.code-block pre{margin:0;padding:14px;background:var(--code-bg);overflow-x:auto;font-size:.84rem;line-height:1.55}
+.code-block code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:6px;right:8px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:.72rem;cursor:pointer;color:var(--text-muted)}.copy-btn:hover{color:var(--accent)}
+/* Mermaid */
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:14px 0;text-align:center;cursor:pointer;position:relative}
+.mermaid-wrap .zoom-hint{position:absolute;top:8px;right:12px;font-size:.72rem;color:var(--text-muted)}
+.mermaid-wrap svg{max-width:100%}
+/* Diagram overlay */
+.diagram-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);justify-content:center;align-items:center;padding:20px;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .inner{background:var(--bg);border-radius:var(--radius);padding:24px;max-width:95vw;max-height:95vh;overflow:auto}
+/* Cards hub */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:14px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color .2s}.card:hover{border-color:var(--accent)}
+.card h4{font-size:.95rem;color:var(--heading);margin-bottom:4px}.card p{font-size:.82rem;color:var(--text-muted)}
+/* Directory map */
+.dir-map{font-family:monospace;font-size:.84rem;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px;white-space:pre;overflow-x:auto;line-height:1.6}
+/* Back to top */
+.back-top{position:fixed;bottom:22px;right:22px;background:var(--accent);color:#fff;width:38px;height:38px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;border:none;box-shadow:var(--shadow);z-index:80}
+.back-top.show{display:flex}
+/* Footer */
+footer{text-align:center;padding:24px 0;font-size:.78rem;color:var(--text-muted);border-top:1px solid var(--border);margin-top:40px}
+/* Print */
+@media print{.theme-toggle,.back-top,.skip-link,.zoom-hint,.copy-btn{display:none!important}body{background:#fff;color:#000}.hero h1,.section-title,h3{color:#000}table,th,td{border-color:#ccc}.mermaid-wrap,.code-block{break-inside:avoid}}
+/* Keyboard focus */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
+
+<div class="wrapper" id="main">
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">MiniMind</a><span>›</span><span>Training Pipeline</span>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>🏋️ Training Pipeline</h1>
+  <p class="subtitle">10 Training Scripts Covering Pretrain to RLHF</p>
+</header>
+
+<!-- Reading time -->
+<p class="reading-time">📖 Estimated reading time: 9 min</p>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card"><div class="num">11</div><div class="label">Files</div></div>
+  <div class="stat-card"><div class="num">10</div><div class="label">Training Modes</div></div>
+  <div class="stat-card"><div class="num">~2800</div><div class="label">Lines</div></div>
+  <div class="stat-card"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- Badges -->
+<div class="badges">
+  <span class="badge blue">🔵 Pretrain</span><span class="badge blue">🔵 SFT</span>
+  <span class="badge green">🟢 LoRA</span><span class="badge green">🟢 DPO</span>
+  <span class="badge yellow">🟡 PPO</span><span class="badge yellow">🟡 GRPO</span><span class="badge yellow">🟡 SPO</span>
+  <span class="badge red">🔴 Distillation</span><span class="badge red">🔴 Reasoning</span>
+</div>
+
+<!-- Intro box -->
+<div class="intro-box">
+  <h3>💡 Analogy — A Multi-Stage School Education</h3>
+  <p>Think of the training pipeline as a student progressing through school. <strong>Pretraining</strong> is elementary school—learning the basics of language from a massive textbook. <strong>SFT</strong> is high school—learning to follow instructions from a tutor. <strong>DPO/PPO/GRPO/SPO</strong> are university seminars—refining judgment by comparing good and bad answers under expert feedback. <strong>LoRA</strong> is a crash course—quickly adapting knowledge without rewriting everything. <strong>Distillation</strong> is mentorship—a senior model teaching a junior one. <strong>Reasoning</strong> is the final thesis—learning to show your work step by step.</p>
+</div>
+
+<!-- TOC -->
+<nav class="toc" aria-label="Table of Contents">
+  <h2>📑 Table of Contents</h2>
+  <ol>
+    <li><a href="#architecture">Architecture Overview</a></li>
+    <li><a href="#key-api">Key Classes &amp; Functions</a></li>
+    <li><a href="#dataflow">Data-Flow Diagram</a></li>
+    <li><a href="#interactions">Module Interactions</a></li>
+    <li><a href="#deep-dives">Deep-Dive Hub</a></li>
+    <li><a href="#directory">Directory Map</a></li>
+    <li><a href="#config">Configuration Reference</a></li>
+    <li><a href="#examples">Code Examples</a></li>
+  </ol>
+</nav>
+
+<!-- 1. Architecture -->
+<section id="architecture">
+<h2 class="section-title">1. Architecture Overview</h2>
+<p>The training pipeline is organized as a progressive curriculum. Each script shares a
+common loop (data → forward → loss → backward → optimize) but specializes in its
+objective and data format. The dependency graph below shows the recommended training
+order: pretrain first, then branch into SFT, LoRA, or distillation, and finally
+RLHF alignment via DPO, PPO, GRPO, or SPO.</p>
+<div class="mermaid-wrap" onclick="zoomDiagram(this)" role="img" aria-label="Training pipeline architecture diagram">
+  <span class="zoom-hint">🔍 Click to zoom</span>
+  <div class="mermaid" data-source="arch">
+flowchart TD
+    TU[trainer_utils.py<br/>Shared Utils]
+    TK[train_tokenizer.py<br/>BPE Tokenizer]
+
+    PT[train_pretrain.py<br/>Pretraining]
+    SFT[train_full_sft.py<br/>Full SFT]
+    LORA[train_lora.py<br/>LoRA SFT]
+
+    DPO[train_dpo.py<br/>DPO]
+    PPO[train_ppo.py<br/>PPO]
+    GRPO[train_grpo.py<br/>GRPO]
+    SPO[train_spo.py<br/>SPO]
+
+    DIST[train_distillation.py<br/>Distillation]
+    REAS[train_reason.py<br/>Reasoning]
+
+    TK --> PT
+    PT --> SFT
+    PT --> LORA
+    SFT --> DPO
+    DPO --> REAS
+    SFT --> PPO
+    SFT --> GRPO
+    SFT --> SPO
+    PT --> DIST
+
+    TU -.->|init, LR, ckpt| PT
+    TU -.-> SFT
+    TU -.-> LORA
+    TU -.-> DPO
+    TU -.-> PPO
+    TU -.-> GRPO
+    TU -.-> SPO
+    TU -.-> DIST
+    TU -.-> REAS
+
+    style TU fill:#1f6feb,stroke:#58a6ff,color:#fff
+    style PT fill:#238636,stroke:#3fb950,color:#fff
+    style SFT fill:#238636,stroke:#3fb950,color:#fff
+    style LORA fill:#2ea043,stroke:#3fb950,color:#fff
+    style DPO fill:#9a6700,stroke:#d29922,color:#fff
+    style PPO fill:#9a6700,stroke:#d29922,color:#fff
+    style GRPO fill:#9a6700,stroke:#d29922,color:#fff
+    style SPO fill:#9a6700,stroke:#d29922,color:#fff
+    style DIST fill:#b62324,stroke:#f85149,color:#fff
+    style REAS fill:#b62324,stroke:#f85149,color:#fff
+    style TK fill:#1f6feb,stroke:#58a6ff,color:#fff
+  </div>
+</div>
+</section>
+
+<!-- 2. Key API -->
+<section id="key-api">
+<h2 class="section-title">2. Key Classes &amp; Functions</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Symbol</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>get_lr(step, total, lr)</code></td><td>trainer_utils.py</td><td>func</td><td>Cosine learning-rate schedule: <code>lr*(0.1+0.45*(1+cos(π·step/total)))</code></td></tr>
+    <tr><td><code>init_distributed_mode()</code></td><td>trainer_utils.py</td><td>func</td><td>Initializes DDP with NCCL backend &amp; sets local rank</td></tr>
+    <tr><td><code>lm_checkpoint()</code></td><td>trainer_utils.py</td><td>func</td><td>Save/load checkpoints (model, optimizer, epoch, step, wandb_id)</td></tr>
+    <tr><td><code>init_model(cfg, weight, tok, dir, dev)</code></td><td>trainer_utils.py</td><td>func</td><td>Builds model + tokenizer from config, loads optional pretrained weights</td></tr>
+    <tr><td><code>SkipBatchSampler</code></td><td>trainer_utils.py</td><td>class</td><td>Sampler that skips first N batches for training resume</td></tr>
+    <tr><td><code>train_pretrain.main()</code></td><td>train_pretrain.py</td><td>func</td><td>Next-token prediction loop with AdamW, cosine LR, grad accumulation</td></tr>
+    <tr><td><code>train_full_sft.main()</code></td><td>train_full_sft.py</td><td>func</td><td>SFT on instruction data with chat template formatting</td></tr>
+    <tr><td><code>save_lora()</code></td><td>train_lora.py</td><td>func</td><td>Extracts &amp; saves only LoRA adapter weights (~0.5% of params)</td></tr>
+    <tr><td><code>dpo_loss()</code></td><td>train_dpo.py</td><td>func</td><td>Bradley-Terry preference loss with beta-scaled log-ratio</td></tr>
+    <tr><td><code>logits_to_log_probs()</code></td><td>train_dpo.py</td><td>func</td><td>Converts model logits to per-token log probabilities</td></tr>
+    <tr><td><code>CriticModel</code></td><td>train_ppo.py</td><td>class</td><td>Value head on top of MiniMindForCausalLM for PPO critic</td></tr>
+    <tr><td><code>distillation_loss()</code></td><td>train_distillation.py</td><td>func</td><td>KL divergence with temperature: <code>T²·KL(student ‖ teacher)</code></td></tr>
+    <tr><td><code>AutoAdaptiveValueTracker</code></td><td>train_spo.py</td><td>class</td><td>Bayesian baseline with KL-adaptive ρ via Beta distribution</td></tr>
+    <tr><td><code>compute_rho()</code></td><td>train_spo.py</td><td>func</td><td>Decay rate: <code>2^(−kl / D_half)</code> for adaptive baseline</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- 3. Data-Flow Diagram -->
+<section id="dataflow">
+<h2 class="section-title">3. Data-Flow Diagram</h2>
+<p>Every training script follows this core loop. RLHF variants add reward / reference-model steps between Loss and Backward.</p>
+<div class="mermaid-wrap" onclick="zoomDiagram(this)" role="img" aria-label="Training step data flow">
+  <span class="zoom-hint">🔍 Click to zoom</span>
+  <div class="mermaid" data-source="dataflow">
+sequenceDiagram
+    participant DL as DataLoader
+    participant M as Model
+    participant L as Loss Function
+    participant O as Optimizer
+    participant C as Checkpoint
+
+    DL->>M: batch (input_ids, labels)
+    M->>L: logits
+    Note over L: CE / DPO / PPO / KL-distill
+    L->>M: loss.backward()
+    Note over M: Gradient Accumulation (N steps)
+    M->>O: accumulated gradients
+    Note over O: AdamW + grad clip (1.0)
+    O->>M: updated parameters
+    O->>C: periodic save (epoch, step, optimizer)
+    Note over C: lm_checkpoint()
+  </div>
+</div>
+</section>
+
+<!-- 4. Interactions -->
+<section id="interactions">
+<h2 class="section-title">4. Module Interactions</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Source</th><th>Target</th><th>Interaction</th></tr></thead>
+  <tbody>
+    <tr><td>All train_*.py</td><td>trainer_utils.py</td><td>Import <code>get_lr</code>, <code>init_model</code>, <code>lm_checkpoint</code>, <code>Logger</code></td></tr>
+    <tr><td>train_pretrain.py</td><td>model/dataset</td><td>Loads <code>PretrainDataset</code>, creates <code>MiniMindForCausalLM</code></td></tr>
+    <tr><td>train_full_sft.py</td><td>model/dataset</td><td>Loads <code>SFTDataset</code>, resumes from pretrain checkpoint</td></tr>
+    <tr><td>train_lora.py</td><td>model</td><td>Calls <code>apply_lora()</code> then freezes non-LoRA params</td></tr>
+    <tr><td>train_dpo.py</td><td>model</td><td>Frozen reference model + trainable policy; <code>DPODataset</code></td></tr>
+    <tr><td>train_ppo.py</td><td>model</td><td>4 models: policy, ref, critic, reward; GAE advantage</td></tr>
+    <tr><td>train_grpo.py</td><td>reward model</td><td>External <code>InternLM2-1.8B-reward</code> scores generations</td></tr>
+    <tr><td>train_spo.py</td><td>reward model</td><td>Same reward model; <code>AutoAdaptiveValueTracker</code> baseline</td></tr>
+    <tr><td>train_distillation.py</td><td>teacher model</td><td>Frozen teacher provides soft targets; student trained on mixed loss</td></tr>
+    <tr><td>train_reason.py</td><td>model</td><td>10× loss weight on think/answer special tokens; starts from DPO weights</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- 5. Deep-Dive Hub -->
+<section id="deep-dives">
+<h2 class="section-title">5. Deep-Dive Hub</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>🎯 RLHF Pipeline</h4>
+    <p>DPO uses Bradley-Terry preference model (β=0.1). PPO adds critic + GAE with clipped objective. GRPO generates 8 responses and normalizes group-relative advantages. SPO uses a single generation with Bayesian adaptive baseline (ρ = 2^(−kl/D_half)).</p>
+  </div>
+  <div class="card">
+    <h4>📉 Cosine LR &amp; Grad Accumulation</h4>
+    <p><code>get_lr()</code> implements cosine annealing: <code>lr × (0.1 + 0.45 × (1 + cos(π·step/total)))</code>. Gradient accumulation allows effective batch sizes N× physical batch. Gradient clipping at norm 1.0 prevents explosion.</p>
+  </div>
+  <div class="card">
+    <h4>💾 Checkpoint &amp; Resume</h4>
+    <p><code>lm_checkpoint()</code> saves model, optimizer, epoch, step, wandb_id, and world_size. <code>SkipBatchSampler</code> skips already-processed batches on resume. Supports multi-GPU DDP state restoration.</p>
+  </div>
+  <div class="card">
+    <h4>🧬 Knowledge Distillation</h4>
+    <p>Student-teacher framework: total_loss = α·CE + (1−α)·T²·KL(student ‖ teacher). Default α=0.5, T=1.5. Teacher is frozen; only student gradients flow. Temperature softens probability distributions for richer supervision signal.</p>
+  </div>
+</div>
+</section>
+
+<!-- 6. Directory Map -->
+<section id="directory">
+<h2 class="section-title">6. Directory Map</h2>
+<p>All 11 files live in the <code>trainer/</code> directory. Shared infrastructure is in
+<code>trainer_utils.py</code>; each training paradigm gets its own self-contained script
+that imports from the shared utilities module.</p>
+<div class="dir-map">trainer/
+├── trainer_utils.py        # Shared utils: LR, DDP, checkpoint, init_model
+├── train_tokenizer.py      # BPE tokenizer training (vocab=6400)
+├── train_pretrain.py       # Next-token prediction pretraining
+├── train_full_sft.py       # Full supervised fine-tuning
+├── train_lora.py           # LoRA adapter fine-tuning
+├── train_dpo.py            # Direct Preference Optimization
+├── train_ppo.py            # Proximal Policy Optimization + CriticModel
+├── train_grpo.py           # Group Relative Policy Optimization
+├── train_spo.py            # Self-Play Optimization + AdaptiveTracker
+├── train_distillation.py   # KL-divergence knowledge distillation
+└── train_reason.py         # Reasoning with weighted special tokens</div>
+</section>
+
+<!-- 7. Configuration -->
+<section id="config">
+<h2 class="section-title">7. Configuration Reference</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Knob</th><th>Default</th><th>Script(s)</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>batch_size</code></td><td>32</td><td>pretrain</td><td>16 for SFT, 4 for DPO/PPO</td></tr>
+    <tr><td><code>learning_rate</code></td><td>5e-4</td><td>pretrain</td><td>1e-6 SFT, 1e-4 LoRA, 4e-8 DPO</td></tr>
+    <tr><td><code>max_seq_len</code></td><td>340</td><td>pretrain</td><td>720 for reasoning</td></tr>
+    <tr><td><code>epochs</code></td><td>1–2</td><td>all</td><td>50 for LoRA</td></tr>
+    <tr><td><code>grad_accumulation</code></td><td>varies</td><td>all</td><td>Effective batch = batch_size × accumulation</td></tr>
+    <tr><td><code>grad_clip</code></td><td>1.0</td><td>all</td><td>Max gradient norm</td></tr>
+    <tr><td><code>from_weight</code></td><td>'pretrain'</td><td>SFT, DPO, …</td><td>'dpo' for reasoning</td></tr>
+    <tr><td><code>lora_rank</code></td><td>8</td><td>LoRA</td><td>LoRA decomposition rank</td></tr>
+    <tr><td><code>beta</code></td><td>0.1</td><td>DPO</td><td>KL constraint strength</td></tr>
+    <tr><td><code>num_generations</code></td><td>8</td><td>GRPO</td><td>Responses per prompt for group scoring</td></tr>
+    <tr><td><code>alpha</code></td><td>0.5</td><td>distillation</td><td>CE vs KL loss weight balance</td></tr>
+    <tr><td><code>temperature</code></td><td>1.5</td><td>distillation</td><td>Softmax temperature for soft targets</td></tr>
+    <tr><td><code>vocab_size</code></td><td>6400</td><td>tokenizer</td><td>ByteLevel BPE vocabulary size</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- 8. Code Examples -->
+<section id="examples">
+<h2 class="section-title">8. Code Examples</h2>
+<p>Below are annotated excerpts from the most important functions in the training pipeline.
+These snippets are simplified for clarity — see the source files for full implementations.</p>
+
+<h3>Cosine Learning Rate Schedule</h3>
+<div class="code-block">
+  <span class="label">trainer_utils.py — get_lr()</span>
+  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button>
+  <pre><code class="language-python">import math
+
+def get_lr(current_step, total_steps, lr):
+    """Cosine annealing with warm floor at 10% of peak LR."""
+    return lr * (0.1 + 0.45 * (1 + math.cos(math.pi * current_step / total_steps)))</code></pre>
+</div>
+
+<h3>DPO Loss with Bradley-Terry Model</h3>
+<div class="code-block">
+  <span class="label">train_dpo.py — dpo_loss()</span>
+  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button>
+  <pre><code class="language-python">import torch
+import torch.nn.functional as F
+
+def dpo_loss(policy_chosen_logps, policy_rejected_logps,
+             ref_chosen_logps, ref_rejected_logps, beta=0.1):
+    """Direct Preference Optimization with frozen reference model."""
+    chosen_rewards = beta * (policy_chosen_logps - ref_chosen_logps)
+    rejected_rewards = beta * (policy_rejected_logps - ref_rejected_logps)
+    return -F.logsigmoid(chosen_rewards - rejected_rewards).mean()</code></pre>
+</div>
+
+<h3>Knowledge Distillation Loss</h3>
+<div class="code-block">
+  <span class="label">train_distillation.py — distillation_loss()</span>
+  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button>
+  <pre><code class="language-python">def distillation_loss(student_logits, teacher_logits, temperature=1.5):
+    """KL divergence scaled by T² for knowledge transfer."""
+    s_probs = F.log_softmax(student_logits / temperature, dim=-1)
+    t_probs = F.softmax(teacher_logits / temperature, dim=-1)
+    return (temperature ** 2) * F.kl_div(s_probs, t_probs, reduction='batchmean')</code></pre>
+</div>
+</section>
+
+</div><!-- /wrapper -->
+
+<!-- Diagram Overlay -->
+<div class="diagram-overlay" id="overlay" onclick="closeOverlay()">
+  <div class="inner" id="overlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- Back to top -->
+<button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
+
+<!-- Footer -->
+<footer>
+  <p>Generated 2026-03-26 from <code>minimind/trainer</code> @ <a href="#">83e52f6</a></p>
+  <p>MiniMind Internal Wiki · Training Pipeline Deep Dive</p>
+  <p style="margin-top:4px">11 files · 10 training modes · ~2800 lines · Python</p>
+</footer>
+
+<!-- Mermaid + Highlight.js -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script>
+(function(){
+  // Theme
+  const KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  function applyTheme(t){root.setAttribute('data-theme',t);toggle.textContent=t==='dark'?'🌙':'☀️';localStorage.setItem(KEY,t)}
+  const saved = localStorage.getItem(KEY);
+  applyTheme(saved||'dark');
+  toggle.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+  // Mermaid
+  mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});
+  document.querySelectorAll('.mermaid[data-source]').forEach(async(el,i)=>{
+    const id='mmd-'+i;
+    try{const{svg}=await mermaid.render(id,el.textContent.trim());el.innerHTML=svg}catch(e){el.innerHTML='<p style="color:var(--accent4)">Diagram render failed</p>'}
+  });
+
+  // Highlight.js
+  hljs.highlightAll();
+
+  // Back to top
+  const btn=document.getElementById('backTop');
+  window.addEventListener('scroll',()=>{btn.classList.toggle('show',window.scrollY>400)});
+  btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+  // Keyboard nav
+  document.addEventListener('keydown',e=>{
+    if(e.key==='t'&&!e.ctrlKey&&!e.metaKey&&document.activeElement===document.body)toggle.click();
+    if(e.key==='Escape')closeOverlay();
+  });
+})();
+
+// Copy code
+function copyCode(btn){
+  const code=btn.parentElement.querySelector('code');
+  navigator.clipboard.writeText(code.textContent).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});
+}
+
+// Diagram zoom
+function zoomDiagram(wrap){
+  const svg=wrap.querySelector('svg');
+  if(!svg)return;
+  const overlay=document.getElementById('overlay');
+  document.getElementById('overlayContent').innerHTML=svg.outerHTML;
+  overlay.classList.add('active');
+}
+function closeOverlay(){document.getElementById('overlay').classList.remove('active')}
+</script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/arch/arm/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>arm — ARM/AArch64 ISA Implementation | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../index.html">arch</a> &rsaquo; arm</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>arm — ARM/AArch64 ISA Implementation</h1>
+    <p class="subtitle">Comprehensive ARM architecture support including AArch32, AArch64, TrustZone security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The ARM ISA implementation is like a Swiss Army knife — compact and versatile. The decoder flips between three blades: 32-bit ARM mode (the full-size knife), 16-bit Thumb mode (the compact tool), and 64-bit AArch64 mode (the modern multi-tool). TrustZone adds a lockbox (Secure World) that even the main blade can't access, while SVE extends the toolkit with adjustable-length vector tools that scale to any width.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>gem5's ARM implementation is one of the most feature-complete ISA ports, supporting ARMv7 (AArch32) through ARMv8+ (AArch64). It models the full ARM exception model, security extensions, virtualization, and advanced SIMD/SVE vector processing.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Decoder"
+      ArmDec["ArmISA::Decoder"]
+      ARM32["ARM Mode\n(32-bit fixed)"]
+      Thumb["Thumb Mode\n(16/32-bit)"]
+      A64["AArch64 Mode\n(32-bit fixed)"]
+      ArmDec --> ARM32
+      ArmDec --> Thumb
+      ArmDec --> A64
+    end
+
+    subgraph "Security Model"
+      EL0["EL0 (User)"]
+      EL1["EL1 (Kernel)"]
+      EL2["EL2 (Hypervisor)"]
+      EL3["EL3 (Secure Monitor)"]
+      NS["Non-Secure World"]
+      S["Secure World\n(TrustZone)"]
+    end
+
+    subgraph "Extensions"
+      PMU["PMU\n(counters)"]
+      SVE["SVE/SVE2\n(scalable vectors)"]
+      HTM["HTM\n(transactions)"]
+      Semi["Semihosting\n(host I/O)"]
+    end
+
+    EL0 --> EL1 --> EL2 --> EL3
+    EL3 --> NS
+    EL3 --> S
+    </pre>
+  </div>
+
+  <h2 id="decoder">Instruction Decoder</h2>
+  <p>The ARM decoder handles three instruction sets within the same architecture: ARM (32-bit fixed-width), Thumb (16/32-bit variable), and AArch64 (32-bit fixed-width but different encoding). The current execution state determines which decoder path is used.</p>
+
+  <pre><code class="language-cpp">namespace ArmISA {
+
+class Decoder : public InstDecoder
+{
+  public:
+    void moreBytes(const PCStateBase &amp;pc, Addr fetchPC) override;
+    bool instReady() const override;
+    StaticInstPtr decode(PCStateBase &amp;nextPC) override;
+
+  private:
+    // Decode based on current execution state
+    StaticInstPtr decodeInst(ExtMachInst mach_inst);
+
+    // AArch32 decode paths
+    StaticInstPtr decodeArm(ExtMachInst mach_inst);
+    StaticInstPtr decodeThumb(ExtMachInst mach_inst);
+
+    // AArch64 decode path
+    StaticInstPtr decodeAArch64(ExtMachInst mach_inst);
+
+    bool bigThumb;    // In second half of 32-bit Thumb
+    bool aarch64;     // AArch64 execution state
+    ExtMachInst emi;
+};</code></pre>
+
+  <h2 id="exception-levels">Exception Levels</h2>
+  <p>ARM uses a hierarchical exception level model that cleanly separates privilege levels and security states:</p>
+
+  <table>
+    <thead><tr><th>Level</th><th>Name</th><th>Typical Use</th><th>Key Registers</th></tr></thead>
+    <tbody>
+      <tr><td><strong>EL0</strong></td><td>User</td><td>Application code</td><td>SP_EL0</td></tr>
+      <tr><td><strong>EL1</strong></td><td>Kernel</td><td>OS kernel, device drivers</td><td>SCTLR_EL1, TTBR0_EL1, TTBR1_EL1</td></tr>
+      <tr><td><strong>EL2</strong></td><td>Hypervisor</td><td>Virtual machine manager</td><td>HCR_EL2, VTTBR_EL2</td></tr>
+      <tr><td><strong>EL3</strong></td><td>Secure Monitor</td><td>TrustZone firmware (ATF)</td><td>SCR_EL3</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="trustzone">TrustZone Security</h2>
+  <p>TrustZone partitions the system into Secure and Non-Secure worlds. EL3 (Secure Monitor) mediates transitions. gem5 models the full security extension including secure memory regions, secure interrupts, and world switching.</p>
+
+  <pre><code class="language-cpp">// Security state check
+bool isSecure(ThreadContext *tc) {
+    SCR scr = tc-&gt;readMiscReg(MISCREG_SCR_EL3);
+    return !scr.ns;  // NS bit = 0 means Secure
+}
+
+// Exception model considers security state for:
+// - Memory access permissions (secure vs non-secure)
+// - Interrupt routing (FIQ to Secure World)
+// - Page table selection (secure/non-secure TTBR)
+// - Device access (TrustZone-aware peripherals)</code></pre>
+
+  <h2 id="fault-handling">Fault Handling</h2>
+  <p>ARM faults implement the full exception model including precise exception levels, syndrome registers, and fault address reporting.</p>
+
+  <pre><code class="language-cpp">namespace ArmISA {
+
+class ArmFault : public FaultBase
+{
+  protected:
+    ExceptionLevel toEL;     // Target exception level
+    OperatingMode toMode;    // Target mode (AArch32)
+    FaultSource faultSource; // Hardware or software fault
+
+  public:
+    void invoke(ThreadContext *tc, const StaticInstPtr &amp;inst) override;
+
+    // ARM-specific: update syndrome register
+    virtual uint32_t iss() const = 0;      // Instruction Specific Syndrome
+    virtual ExceptionClass ec() const = 0; // Exception Class
+
+    // Determine target EL based on routing rules
+    ExceptionLevel targetEL(ThreadContext *tc) const;
+};
+
+// Specific faults
+class UndefinedInstruction : public ArmFault { /* EC=0x00 */ };
+class SupervisorCall : public ArmFault { /* EC=0x15 (SVC) */ };
+class HypervisorCall : public ArmFault { /* EC=0x16 (HVC) */ };
+class SecureMonitorCall : public ArmFault { /* EC=0x17 (SMC) */ };
+class DataAbort : public ArmFault {
+    Addr faultAddr;     // FAR_ELx
+    bool isWrite;
+    /* EC=0x24 (lower EL) or 0x25 (same EL) */
+};
+class PrefetchAbort : public ArmFault { /* EC=0x20/0x21 */ };
+
+} // namespace ArmISA</code></pre>
+
+  <h2 id="sve">SVE/SVE2 — Scalable Vector Extension</h2>
+  <p>gem5 supports ARM's Scalable <a href="../riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Vector</a> Extension with configurable vector lengths (128-2048 bits). SVE uses predication for per-element control and a programming model that is vector-length agnostic.</p>
+
+  <pre><code class="language-cpp">// SVE registers are scalable — width set at configuration time
+// Z0-Z31: Vector registers (VL bits wide)
+// P0-P15: Predicate registers (VL/8 bits wide)
+// FFR: First Fault Register
+
+// Vector length configuration (in Python config)
+// system.cpu.isa.sve_vl = 256  # 256-bit vectors (4 doubles)</code></pre>
+
+  <h2 id="htm">Hardware Transactional Memory</h2>
+  <p>gem5 models ARM's TME (Transactional <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> Extension) including transaction start/commit/abort and conflict detection.</p>
+
+  <pre><code class="language-cpp">class HTMCheckpoint
+{
+  public:
+    void save(ThreadContext *tc);
+    void restore(ThreadContext *tc);
+
+    // Transaction state
+    bool isValid() const;
+    int getNumRetries() const;
+    Addr getAbortAddress() const;
+
+  private:
+    std::array&lt;RegVal, NumIntRegs&gt; intRegs;
+    PCStateBase *pcState;
+    int nesting;  // Transaction nesting depth
+};</code></pre>
+
+  <h2 id="pmu">Performance Monitoring Unit</h2>
+  <p>The ARM PMU models hardware performance counters that count architectural events. It uses the <a title="An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code." href="../../sim_doc/probe/index.html">probe</a> framework to attach to <a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a> events without modifying pipeline code.</p>
+
+  <pre><code class="language-cpp">// ARM PMU event types
+enum PMUEvent {
+    SW_INCR        = 0x00,  // Software increment
+    L1I_CACHE_REFILL = 0x01, // L1 I-cache refill
+    L1D_CACHE_REFILL = 0x03, // L1 D-cache refill
+    L1D_CACHE      = 0x04,  // L1 D-cache access
+    INST_RETIRED   = 0x08,  // Instruction retired
+    EXC_TAKEN      = 0x09,  // Exception taken
+    BR_MIS_PRED    = 0x10,  // Branch misprediction
+    CPU_CYCLES     = 0x11,  // CPU cycle count
+    BR_PRED        = 0x12,  // Branch predicted
+    MEM_ACCESS     = 0x13,  // Data memory access
+    // ... many more event types
+};</code></pre>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: AArch64 Exception Entry</h3>
+    <ol>
+      <li><strong>Trigger</strong> — A DataAbort fault occurs when the CPU accesses an unmapped page at EL0 (user space).</li>
+      <li><strong>Target EL</strong> — The fault routing logic checks HCR_EL2 and SCR_EL3 to determine the target exception level. For a standard OS, data aborts route to EL1.</li>
+      <li><strong>State Save</strong> — The processor saves PSTATE to SPSR_EL1 and the return address to ELR_EL1. The faulting address is written to FAR_EL1.</li>
+      <li><strong>Syndrome</strong> — ESR_EL1 is loaded with the exception syndrome: EC (exception class = DataAbort), ISS (instruction-specific syndrome including DFSC, WnR bit).</li>
+      <li><strong>Vector Jump</strong> — PC is set to VBAR_EL1 + offset (0x000 for synchronous from lower EL using AArch64). Execution continues at the kernel's exception handler.</li>
+      <li><strong>Handler</strong> — The OS reads FAR_EL1 and ESR_EL1 to determine what happened, maps the page, then returns via ERET to resume the faulting instruction.</li>
+    </ol>
+  </div>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Decoder</code></td><td>decoder.hh</td><td>ARM/Thumb/AArch64 instruction decoder</td></tr>
+      <tr><td><code>ArmISA::ISA</code></td><td>isa.hh</td><td>ARM ISA state (system registers, CPSR/PSTATE)</td></tr>
+      <tr><td><code>ArmMMU</code></td><td>ArmMMU.py</td><td>ARM MMU with multi-level page table walk</td></tr>
+      <tr><td><code>ArmFault</code></td><td>faults.hh</td><td>Exception hierarchy with syndrome generation</td></tr>
+      <tr><td><code>Interrupts</code></td><td>interrupts.hh</td><td>GIC (<a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../generic/index.html">Generic</a> Interrupt Controller) interface</td></tr>
+      <tr><td><code>PMU</code></td><td>ArmPMU.py</td><td>Performance counter unit using probe listeners</td></tr>
+      <tr><td><code>HTMCheckpoint</code></td><td>htm.hh</td><td>Transactional memory checkpoint/restore</td></tr>
+      <tr><td><code>ArmSystem</code></td><td>ArmSystem.py</td><td>ARM-specific system config (GIC, EL support)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AArch32</strong></td><td>32-bit ARM execution state (ARMv7 compatible)</td></tr>
+      <tr><td><strong>AArch64</strong></td><td>64-bit ARM execution state (ARMv8+)</td></tr>
+      <tr><td><strong>Thumb</strong></td><td>Compact 16/32-bit instruction encoding for AArch32</td></tr>
+      <tr><td><strong>Exception Level (EL)</strong></td><td>ARM privilege hierarchy: EL0 (user) through EL3 (secure monitor)</td></tr>
+      <tr><td><strong>TrustZone</strong></td><td>Hardware security extension partitioning Secure and Non-Secure worlds</td></tr>
+      <tr><td><strong>SVE</strong></td><td>Scalable Vector Extension — variable-length SIMD with predication</td></tr>
+      <tr><td><strong>GIC</strong></td><td>Generic Interrupt Controller — ARM's standard interrupt distribution mechanism</td></tr>
+      <tr><td><strong>PSTATE</strong></td><td>Processor State register in AArch64 (condition flags, exception mask, EL)</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

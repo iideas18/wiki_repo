@@ -1,0 +1,32 @@
+[
+  {
+    "title": "MiniMind — From-Scratch LLM Training Framework",
+    "path": "index.html",
+    "content": "MiniMind lightweight LLM training framework transformer MoE mixture of experts LoRA low-rank adaptation pretrain SFT supervised fine-tuning DPO direct preference optimization PPO proximal policy optimization GRPO group relative policy optimization SPO self-play optimization distillation MiniMindConfig MiniMindModel MiniMindForCausalLM Attention FeedForward MoEGate PretrainDataset SFTDataset DPODataset RLAIFDataset tokenizer vocabulary training pipeline data processing inference deployment",
+    "section": "Overview"
+  },
+  {
+    "title": "Model Architecture — Transformer, MoE, and LoRA",
+    "path": "model/index.html",
+    "content": "MiniMindModel MiniMindForCausalLM MiniMindConfig Transformer decoder causal language model Attention multi-head grouped-query attention RoPE rotary positional embedding RMSNorm root mean square normalization FeedForward SwiGLU activation MoEGate mixture of experts top-k routing auxiliary load balancing loss LoRA low-rank adaptation lora_a lora_b rank alpha scaling merge_lora init_model LMHead embedding weight tying KV-cache inference hidden_dim num_heads num_layers vocab_size max_seq_len",
+    "section": "Model"
+  },
+  {
+    "title": "Training Pipeline — Pretrain to RLHF",
+    "path": "trainer/index.html",
+    "content": "pretrain pre-training causal language modeling next token prediction cross entropy loss SFT supervised fine-tuning instruction tuning chat template DPO direct preference optimization chosen rejected reward margin RLHF reinforcement learning human feedback PPO proximal policy optimization actor critic GAE advantage GRPO group relative policy optimization reward model SPO self-play optimization distillation knowledge distillation teacher student KL divergence train_pretrain train_sft train_dpo train_ppo train_grpo learning rate cosine scheduler warmup AdamW gradient accumulation mixed precision bf16 fp16 distributed training",
+    "section": "Training"
+  },
+  {
+    "title": "Dataset Pipeline — Data Loading and Preprocessing",
+    "path": "dataset/index.html",
+    "content": "PretrainDataset SFTDataset DPODataset RLAIFDataset data loading preprocessing tokenization BPE byte pair encoding ChatGLM tokenizer vocabulary build_vocab train_tokenizer data collator padding truncation max_length sequence packing conversation format instruction response system prompt json jsonl parquet arrow streaming shuffle seed sampler DataLoader num_workers pin_memory batch_size corpus Wikipedia BookCorpus alpaca sharegpt",
+    "section": "Dataset"
+  },
+  {
+    "title": "Deployment & Scripts — API Server, Web Demo, Conversion",
+    "path": "scripts/index.html",
+    "content": "API server FastAPI OpenAI compatible chat completions streaming web demo Gradio Streamlit interface model conversion export_model Hugging Face transformers format GGUF llama.cpp quantization INT4 INT8 eval_model evaluation perplexity benchmark MMLU C-Eval generate inference text generation temperature top_p top_k repetition_penalty sampling greedy beam search serve deploy endpoint load model checkpoint resume training script command line arguments config yaml",
+    "section": "Scripts"
+  }
+]

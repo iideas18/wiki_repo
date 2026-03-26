@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/kern">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>kern — OS Kernel Support · gem5 Wiki</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a2e;--card:#f8f9fa;--card-border:#e0e0e0;--accent:#0969da;--accent2:#6f42c1;--hero-bg:linear-gradient(135deg,#4a1942 0%,#6b2d5b 50%,#893168 100%);--hero-fg:#fff;--code-bg:#f6f8fa;--table-stripe:#f8f9fa;--badge-bg:#ddf4ff;--badge-fg:#0969da;--toc-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.12);--focus:#2188ff;--print-hide:block}
+[data-theme=dark]{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--card-border:#30363d;--accent:#58a6ff;--accent2:#bc8cff;--hero-bg:linear-gradient(135deg,#0d1117 0%,#1a0a1a 50%,#2d1a2d 100%);--hero-fg:#f0f6fc;--code-bg:#161b22;--table-stripe:#161b22;--badge-bg:#1f3044;--badge-fg:#58a6ff;--toc-bg:#161b22;--shadow:0 1px 3px rgba(0,0,0,.5)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--hero-bg);color:var(--hero-fg);padding:2.5rem 2rem 2rem;position:relative}
+.breadcrumb{font-size:.9rem;margin-bottom:1rem;opacity:.85}
+.breadcrumb a{color:var(--hero-fg);opacity:.8}.breadcrumb a:hover{opacity:1}
+h1{margin:0 0 .5rem;font-size:2rem;font-weight:700}
+.subtitle{font-size:1.1rem;opacity:.85;margin-bottom:1.5rem}
+.stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat-item{background:rgba(255,255,255,.12);padding:.4rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.badge{background:var(--badge-bg);color:var(--badge-fg);padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600}
+.theme-toggle{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:var(--hero-fg);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.theme-toggle:hover{background:rgba(255,255,255,.25)}
+.reading-time{font-size:.8rem;opacity:.7;margin-top:.5rem}
+main{max-width:960px;margin:0 auto;padding:1.5rem}
+.intro-box{background:var(--badge-bg);border-left:4px solid var(--accent);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin:1.5rem 0;font-size:.95rem}
+.intro-box strong{color:var(--accent)}
+.toc{background:var(--toc-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.toc summary{font-weight:700;cursor:pointer;font-size:1rem}
+.toc ul{margin:.5rem 0 0;padding-left:1.5rem}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+section{margin:2rem 0}
+h2{font-size:1.5rem;border-bottom:2px solid var(--card-border);padding-bottom:.3rem;margin:2rem 0 1rem}
+h3{font-size:1.2rem;margin:1.5rem 0 .75rem;color:var(--accent2)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{text-align:left;padding:.6rem .75rem;border:1px solid var(--card-border)}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even) td{background:var(--table-stripe)}
+.diagram-container{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1.25rem;margin:1rem 0;cursor:pointer;position:relative}
+.diagram-container:hover{box-shadow:var(--shadow)}
+.diagram-container::after{content:'⛶';position:absolute;top:.5rem;right:.75rem;font-size:1.1rem;opacity:.5}
+pre{background:var(--code-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0;color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--card);border:1px solid var(--card-border);color:var(--fg);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.25rem}
+.card h4{margin:0 0 .5rem;color:var(--accent)}
+.card p{margin:0;font-size:.9rem;opacity:.85}
+.dir-tree{font-family:monospace;font-size:.85rem;background:var(--code-bg);padding:1rem;border-radius:8px;border:1px solid var(--card-border);line-height:1.8}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:99}
+footer{text-align:center;padding:2rem;font-size:.8rem;opacity:.6;border-top:1px solid var(--card-border);margin-top:3rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:2rem}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border-radius:12px;padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:.5rem;right:1rem;font-size:1.5rem;cursor:pointer;background:none;border:none;color:var(--fg)}
+@media print{.theme-toggle,.back-to-top,.skip-link,.copy-btn,.overlay{display:none!important}header{background:#4a1942!important;-webkit-print-color-adjust:exact}body{font-size:11pt}}
+@media(max-width:768px){main{padding:1rem}.stat-row{gap:.75rem}.card-grid{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+<nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; kern</nav>
+<h1>kern</h1>
+<p class="subtitle">OS Kernel Support — syscall types, kernel events, and OS abstraction layer</p>
+<div class="stat-row">
+<span class="stat-item">📁 17 files</span>
+<span class="stat-item">📏 2.6K LOC</span>
+<span class="stat-item">🐧 3 OSes</span>
+<span class="stat-item">💻 C++</span>
+</div>
+<div class="badge-row">
+<span class="badge">Linux</span>
+<span class="badge">FreeBSD</span>
+<span class="badge">Solaris</span>
+<span class="badge">Syscall Types</span>
+<span class="badge">Kernel Events</span>
+</div>
+<div class="reading-time">~8 min read</div>
+</header>
+<main id="main">
+<div class="intro-box">
+<strong>🔌 Analogy:</strong> The <code>kern</code> module is the <em>translator</em> between simulated programs and the host OS. When a program running inside gem5 calls <code>stat()</code> or <code>open()</code>, the simulator needs to know the exact byte layout of structures like <code>struct stat</code> for the target OS (Linux, FreeBSD, or Solaris). <code>kern</code> provides those OS-specific type definitions — think of it as a phrase book that translates between "Linux-speak" and "gem5-speak."
+</div>
+
+<details class="toc" open>
+<summary>Table of Contents</summary>
+<ul>
+<li><a href="#architecture">Architecture Overview</a></li>
+<li><a href="#os-hierarchy">OS Class Hierarchy</a></li>
+<li><a href="#key-classes">Key Classes</a></li>
+<li><a href="#linux-deep-dive">Deep Dive: Linux Support</a></li>
+<li><a href="#events-deep-dive">Deep Dive: Kernel Events</a></li>
+<li><a href="#type-mapping">Type Mapping Tables</a></li>
+<li><a href="#interactions">Cross-Module Interactions</a></li>
+<li><a href="#directory-map">Directory Map</a></li>
+<li><a href="#config-table">Configuration &amp; Usage</a></li>
+<li><a href="#code-examples">Code Examples</a></li>
+</ul>
+</details>
+
+<section>
+<h2 id="architecture">Architecture Overview</h2>
+<p>The <code>kern</code> module provides OS-specific type definitions, structure layouts, and kernel event handlers needed by gem5's syscall emulation (SE) and full-system (FS) modes. It defines the target-side view of syscall structures — <code>struct stat</code>, <code>struct rusage</code>, <code>utsname</code>, etc. — so the simulator can correctly marshal data between simulated user programs and host-side implementations.</p>
+<div class="diagram-container" data-diagram="arch">
+<pre class="mermaid">flowchart TD
+    App["Simulated Application"]
+    SE["Syscall Emulation Layer"]
+    OS["OperatingSystem (base)"]
+    LIN["Linux"]
+    BSD["FreeBSD"]
+    SOL["Solaris"]
+    EVT["System Events"]
+    SKIP["SkipFuncBase"]
+    PANIC["PanicOrOopsEvent"]
+    DMESG["dumpDmesg()"]
+
+    App -->|"syscall"| SE
+    SE --> OS
+    OS --> LIN
+    OS --> BSD
+    OS --> SOL
+    LIN --> EVT
+    EVT --> SKIP
+    EVT --> PANIC
+    PANIC --> DMESG
+</pre>
+</div>
+<p>The module is intentionally small (~2.6K LOC across 17 files), as it primarily defines data structures and event hooks rather than complex logic. Each OS subclass inherits from <code>OperatingSystem</code> and provides target-specific structure layouts that the syscall emulation layer uses for data marshalling.</p>
+</section>
+
+<section>
+<h2 id="os-hierarchy">OS Class Hierarchy</h2>
+<div class="diagram-container" data-diagram="hierarchy">
+<pre class="mermaid">classDiagram
+    class OperatingSystem {
+        +tgt_stat
+        +tgt_stat64
+        +utsname
+        +rlimit
+        +timeval
+        +rusage
+        +tgt_iovec
+    }
+    class Linux {
+        +size_t : uint64_t
+        +off_t : int64_t
+        +uid_t : uint32_t
+        +gid_t : uint32_t
+        +tgt_stat
+        +tgt_stat64
+    }
+    class FreeBSD {
+        +size_t : uint64_t
+        +isTtyReq()
+        +TIOCGETA
+        +TIOCSETA
+    }
+    class Solaris {
+        +rlim_t : uint64_t
+        +tgt_timespec
+        +tgt_stat
+    }
+    OperatingSystem <|-- Linux
+    OperatingSystem <|-- FreeBSD
+    OperatingSystem <|-- Solaris
+</pre>
+</div>
+<p>Each OS subclass provides the same set of target structures but with OS-specific field layouts, sizes, and constants. The syscall emulation code is templated on the OS type, so it automatically uses the correct structure definitions for the simulated operating system.</p>
+</section>
+
+<section>
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<thead><tr><th>Class</th><th>Parent</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>OperatingSystem</code></td><td>—</td><td>operatingsystem.hh</td><td>Abstract <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">base</a>: defines target syscall struct interfaces</td></tr>
+<tr><td><code>Linux</code></td><td><code>OperatingSystem</code></td><td>linux/linux.hh</td><td>Linux-specific types: stat, stat64, uid_t, gid_t, signal constants</td></tr>
+<tr><td><code>FreeBSD</code></td><td><code>OperatingSystem</code></td><td>freebsd/freebsd.hh</td><td>FreeBSD types and ioctl codes (TIOCGETA, FIONREAD)</td></tr>
+<tr><td><code>Solaris</code></td><td><code>OperatingSystem</code></td><td>solaris/solaris.hh</td><td>Solaris/SunOS types: rlim_t, tgt_timespec, tgt_stat</td></tr>
+<tr><td><code>SkipFuncBase</code></td><td><code>PCEvent</code></td><td>system_events.hh</td><td>Base class for function-skipping events at specific PCs</td></tr>
+<tr><td><code>PanicOrOopsEvent</code></td><td><code>PCEvent</code></td><td>linux/events.hh</td><td>Handles kernel panic/oops: configurable halt, warn, or dmesg dump</td></tr>
+<tr><td><code>DebugPrintk</code></td><td>template</td><td>linux/events.hh</td><td>Captures kernel printk output during full-system simulation</td></tr>
+<tr><td><code>dumpDmesg()</code></td><td>function</td><td>linux/helpers.hh</td><td>Extracts kernel log ring buffer for debugging</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="linux-deep-dive">Deep Dive: Linux Support</h2>
+<h3 id="linux-types">Type Definitions</h3>
+<p>The <code>Linux</code> class defines target-architecture types that match the Linux kernel's ABI. These are used by syscall emulation to correctly convert between simulated and host representations:</p>
+<table>
+<thead><tr><th>Target Type</th><th>C++ Type</th><th>Size</th><th>Usage</th></tr></thead>
+<tbody>
+<tr><td><code>size_t</code></td><td><code>uint64_t</code></td><td>8 bytes</td><td>Buffer sizes, counts</td></tr>
+<tr><td><code>off_t</code></td><td><code>int64_t</code></td><td>8 bytes</td><td>File offsets</td></tr>
+<tr><td><code>time_t</code></td><td><code>int64_t</code></td><td>8 bytes</td><td>Timestamps</td></tr>
+<tr><td><code>clock_t</code></td><td><code>int64_t</code></td><td>8 bytes</td><td><a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> clock ticks</td></tr>
+<tr><td><code>uid_t</code></td><td><code>uint32_t</code></td><td>4 bytes</td><td>User IDs</td></tr>
+<tr><td><code>gid_t</code></td><td><code>uint32_t</code></td><td>4 bytes</td><td><a href="../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Group</a> IDs</td></tr>
+<tr><td><code>dev_t</code></td><td><code>uint64_t</code></td><td>8 bytes</td><td>Device numbers</td></tr>
+<tr><td><code>ino_t</code></td><td><code>uint64_t</code></td><td>8 bytes</td><td>Inode numbers</td></tr>
+</tbody>
+</table>
+
+<h3 id="linux-stat">stat Structures</h3>
+<p>Linux defines two stat structure variants, matching the kernel's 32-bit and 64-bit ABIs:</p>
+<ul>
+<li><code>tgt_stat</code> — 32-bit stat structure with <code>st_dev</code>, <code>st_ino</code>, <code>st_mode</code>, <code>st_nlink</code>, <code>st_uid</code>, <code>st_gid</code>, <code>st_size</code>, <code>st_atime</code>, etc.</li>
+<li><code>tgt_stat64</code> — 64-bit stat structure with wider fields for large file support</li>
+</ul>
+<p>Architecture-specific variants exist under <code>kern/linux/</code> subdirectories for <a title="Comprehensive ARM architecture support including <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../arch_doc/arm/index.html">ARM</a>, <a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../arch_doc/x86/index.html">x86</a>, MIPS, SPARC, and RISC-V, handling ABI differences like padding and field ordering.</p>
+
+<h3 id="linux-events">Linux Kernel Events</h3>
+<p>In full-system mode, <code>kern/linux/events.hh</code> provides PC-based event hooks for kernel debugging:</p>
+<div class="card-grid">
+<div class="card">
+<h4>🚨 PanicOrOopsEvent</h4>
+<p>Triggers when the kernel hits a <code>panic()</code> or <code>oops()</code> address. Configurable behaviour: halt simulation, print warning, or dump dmesg buffer. Controlled by <code>KernelPanicOopsBehaviour</code> enum.</p>
+</div>
+<div class="card">
+<h4>📝 DebugPrintk</h4>
+<p>Template class that intercepts kernel <code>printk()</code> calls, extracting the format string and arguments from simulated memory for console output during boot.</p>
+</div>
+<div class="card">
+<h4>📋 dumpDmesg</h4>
+<p>Helper function that reads the kernel log ring buffer (<code>__log_buf</code>) from simulated memory using <code>SETranslatingPortProxy</code>. Essential for diagnosing boot failures.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2 id="events-deep-dive">Deep Dive: Kernel Events</h2>
+<h3 id="skipfunc">Function Skipping</h3>
+<p><code>SkipFuncBase</code> enables the simulator to skip expensive or problematic kernel functions during full-system simulation. When the PC matches a registered address, the event handler manipulates the thread context to return from the function immediately:</p>
+<div class="diagram-container" data-diagram="skipfunc">
+<pre class="mermaid">sequenceDiagram
+    participant CPU as CPU Core
+    participant PC as PCEvent System
+    participant SF as SkipFuncBase
+
+    CPU->>PC: PC matches registered address
+    PC->>SF: process(ThreadContext*)
+    SF->>SF: Capture return address
+    SF->>SF: Set PC = return address
+    SF->>CPU: Continue execution (function skipped)
+</pre>
+</div>
+<p>This mechanism is used to skip slow initialization routines, hardware probes, and other functions that would take millions of simulated cycles without contributing useful information.</p>
+
+<h3 id="panic-handling">Panic/Oops Handling</h3>
+<p>The <code>PanicOrOopsEvent</code> class responds to kernel panics with configurable actions:</p>
+<table>
+<thead><tr><th>Behaviour</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>PanicOnOops</code></td><td>Halt simulation immediately, dump dmesg</td></tr>
+<tr><td><code>WarnOnOops</code></td><td>Print warning, dump dmesg, continue simulation</td></tr>
+<tr><td><code>IgnoreOnOops</code></td><td>Silently continue execution</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="type-mapping">Type Mapping Tables</h2>
+<h3 id="stat-comparison">stat Structure Comparison</h3>
+<table>
+<thead><tr><th>Field</th><th>Linux</th><th>FreeBSD</th><th>Solaris</th></tr></thead>
+<tbody>
+<tr><td><code>st_dev</code></td><td>uint64_t</td><td>uint64_t</td><td>uint64_t</td></tr>
+<tr><td><code>st_ino</code></td><td>uint64_t</td><td>uint64_t</td><td>uint64_t</td></tr>
+<tr><td><code>st_mode</code></td><td>uint32_t</td><td>uint16_t</td><td>uint32_t</td></tr>
+<tr><td><code>st_nlink</code></td><td>uint64_t</td><td>uint64_t</td><td>uint32_t</td></tr>
+<tr><td><code>st_uid</code></td><td>uint32_t</td><td>uint32_t</td><td>uint32_t</td></tr>
+<tr><td><code>st_gid</code></td><td>uint32_t</td><td>uint32_t</td><td>uint32_t</td></tr>
+<tr><td><code>st_size</code></td><td>int64_t</td><td>int64_t</td><td>int64_t</td></tr>
+<tr><td><code>st_atime</code></td><td>uint64_t</td><td>int64_t</td><td>int64_t</td></tr>
+</tbody>
+</table>
+
+<h3 id="ioctl-freebsd">FreeBSD ioctl Codes</h3>
+<table>
+<thead><tr><th>Constant</th><th>Value</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>TIOCGETA</code></td><td>platform-specific</td><td>Get terminal attributes</td></tr>
+<tr><td><code>TIOCSETA</code></td><td>platform-specific</td><td>Set terminal attributes</td></tr>
+<tr><td><code>FIONREAD</code></td><td>platform-specific</td><td>Get bytes available to read</td></tr>
+</tbody>
+</table>
+<p>The <code>FreeBSD::isTtyReq()</code> method validates whether an ioctl code is a recognized TTY request, returning <code>true</code> for the supported set.</p>
+</section>
+
+<section>
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<thead><tr><th>Dependency</th><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Syscall emulation</td><td><code>sim/syscall_emul</code></td><td>Uses OS type definitions for syscall data marshalling</td></tr>
+<tr><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Process</a> model</td><td><code>sim/process</code></td><td>Process objects are templated on OS type</td></tr>
+<tr><td>Thread context</td><td><code>cpu</code></td><td>PCEvent system hooks into CPU execution</td></tr>
+<tr><td><a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> proxy</td><td><code>mem</code></td><td>SETranslatingPortProxy for kernel memory access</td></tr>
+<tr><td>Base utilities</td><td><code>base</code></td><td>Types, random, trace, compiler attributes</td></tr>
+<tr><td><a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../arch_doc/index.html">Arch</a>-specific</td><td><code>arch/*/linux</code></td><td>Architecture-specific stat struct variants</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-tree">
+src/kern/
+├── <strong>Base Layer</strong>
+│   ├── operatingsystem.hh/cc    — OperatingSystem abstract base class
+│   └── system_events.hh/cc      — SkipFuncBase (PC-triggered function skip)
+├── <strong>linux/</strong> — Linux kernel support
+│   ├── linux.hh/cc              — Linux type defs, stat structs, constants
+│   ├── events.hh/cc             — PanicOrOopsEvent, DebugPrintk
+│   ├── helpers.hh/cc            — dumpDmesg() kernel log extraction
+│   ├── printk.hh/cc             — printk format string parsing
+│   └── flag_tables.hh           — Open/mmap flag translation tables
+├── <strong>freebsd/</strong> — FreeBSD kernel support
+│   ├── freebsd.hh               — FreeBSD types, ioctl codes
+│   └── events.hh/cc             — FreeBSD-specific kernel events
+└── <strong>solaris/</strong> — Solaris kernel support
+    └── solaris.hh               — Solaris/SunOS type definitions
+</div>
+</section>
+
+<section>
+<h2 id="config-table">Configuration &amp; Usage</h2>
+<h3 id="se-mode">Syscall Emulation Mode</h3>
+<p>In SE mode, the kern module is used implicitly — when you create a <code>Process</code> with a Linux binary, the syscall emulation layer automatically uses the <code>Linux</code> class for structure marshalling. No explicit configuration is needed.</p>
+<h3 id="fs-mode">Full-System Mode</h3>
+<p>In FS mode, kernel event handlers are registered at boot time. Key configuration points:</p>
+<table>
+<thead><tr><th>Parameter</th><th>Location</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>panic_on_oops</code></td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> config</td><td>Enable PanicOrOopsEvent at kernel panic address</td></tr>
+<tr><td><code>kernel_panic_oops_behaviour</code></td><td>System config</td><td>Action on panic: halt, warn, or ignore</td></tr>
+<tr><td><code>skip_functions</code></td><td>System config</td><td>List of kernel functions to skip during boot</td></tr>
+<tr><td><code>kernel_addr_check</code></td><td>Boot <a title="Reads ELF, a.out, and raw binary files into memory images, extracts symbol tables, and determines architecture and entry points for simulated workloads." href="../base_doc/loader/index.html">loader</a></td><td>Verify kernel symbol addresses for event registration</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-os-type">OS Type Definitions</h3>
+<pre><code class="language-cpp">// kern/linux/linux.hh — Linux target type definitions
+class Linux : public OperatingSystem
+{
+  public:
+    using size_t  = uint64_t;
+    using off_t   = int64_t;
+    using time_t  = int64_t;
+    using clock_t = int64_t;
+    using uid_t   = uint32_t;
+    using gid_t   = uint32_t;
+
+    struct tgt_stat64 {
+        uint64_t st_dev;
+        uint64_t st_ino;
+        uint64_t st_nlink;
+        uint32_t st_mode;
+        uint32_t st_uid;
+        uint32_t st_gid;
+        uint64_t st_rdev;
+        int64_t  st_size;
+        int64_t  st_blksize;
+        int64_t  st_blocks;
+        uint64_t st_atimeX;
+        uint64_t st_atime_nsec;
+        uint64_t st_mtimeX;
+        uint64_t st_mtime_nsec;
+        uint64_t st_ctimeX;
+        uint64_t st_ctime_nsec;
+    };
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-skip">Function Skip Event</h3>
+<pre><code class="language-cpp">// kern/system_events.hh — Skip a kernel function
+class SkipFuncBase : public PCEvent
+{
+  public:
+    SkipFuncBase(PCEventScope *s, const std::string &amp;desc, Addr addr)
+        : PCEvent(s, desc, addr) {}
+
+    void process(ThreadContext *tc) override
+    {
+        // Architecture-specific: set PC to return address
+        returnFromFuncIn(tc);
+    }
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-dmesg">Kernel dmesg Dump</h3>
+<pre><code class="language-cpp">// kern/linux/helpers.cc — Extract kernel log buffer
+namespace gem5::linux {
+
+void dumpDmesg(ThreadContext *tc, std::ostream &amp;os)
+{
+    // Use SETranslatingPortProxy to read kernel memory
+    auto proxy = tc-&gt;getVirtProxy();
+
+    // Locate __log_buf symbol in kernel
+    Addr log_buf_addr = /* resolved from kernel symbols */;
+    Addr log_buf_len  = /* resolved from kernel symbols */;
+
+    // Read ring buffer contents
+    std::vector&lt;uint8_t&gt; buf(log_buf_len);
+    proxy.readBlob(log_buf_addr, buf.data(), log_buf_len);
+
+    // Parse and output log entries
+    os &lt;&lt; "=== Kernel dmesg ===" &lt;&lt; std::endl;
+    // ... parse ring buffer format ...
+}
+
+} // namespace gem5::linux</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-freebsd-ioctl">FreeBSD ioctl Check</h3>
+<pre><code class="language-cpp">// kern/freebsd/freebsd.hh
+class FreeBSD : public OperatingSystem
+{
+  public:
+    static bool isTtyReq(unsigned req)
+    {
+        switch (req) {
+          case TIOCGETA:
+          case TIOCSETA:
+          case FIONREAD:
+            return true;
+          default:
+            return false;
+        }
+    }
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay">
+<div class="overlay-inner">
+<button class="overlay-close" id="overlayClose" aria-label="Close overlay">&times;</button>
+<div id="overlayContent"></div>
+</div>
+</div>
+
+<footer>
+<p>gem5 kern module wiki — auto-generated 2026-03-25 — source rev 7a2b0e413d</p>
+</footer>
+
+<script>
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('neutra-ip-theme',t)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('neutra-ip-theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}})();
+window.addEventListener('scroll',function(){document.getElementById('backToTop').style.display=window.scrollY>400?'flex':'none'});
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    const code=this.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},2000)});
+  });
+});
+(function(){
+  const toc=document.querySelector('.toc');if(!toc)return;
+  const links=toc.querySelectorAll('a[href^="#"]');
+  const obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){
+      links.forEach(function(l){l.style.fontWeight=l.getAttribute('href')==='#'+e.target.id?'700':'400'});
+    }});
+  },{rootMargin:'-20% 0px -70% 0px'});
+  links.forEach(function(l){const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t)});
+})();
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  const sections=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  if(!sections.length)return;
+  let cur=0;const y=window.scrollY+100;
+  for(let i=sections.length-1;i>=0;i--){if(sections[i].offsetTop<=y){cur=i;break}}
+  if(e.key==='j'&&cur<sections.length-1)sections[cur+1].scrollIntoView({behavior:'smooth'});
+  if(e.key==='k'&&cur>0)sections[cur-1].scrollIntoView({behavior:'smooth'});
+});
+document.querySelectorAll('.diagram-container').forEach(function(d){
+  d.addEventListener('click',function(){
+    var m=d.querySelector('.mermaid');if(!m)return;
+    var ov=document.getElementById('diagramOverlay'),oc=document.getElementById('overlayContent');
+    oc.innerHTML='';var clone=m.cloneNode(true);clone.removeAttribute('data-processed');
+    oc.appendChild(clone);ov.classList.add('active');
+    if(window.mermaid)mermaid.run({nodes:[clone]});
+  });
+});
+document.getElementById('overlayClose').addEventListener('click',function(){document.getElementById('diagramOverlay').classList.remove('active')});
+document.getElementById('diagramOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')});
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.mermaid').forEach(function(el){el.setAttribute('data-source',el.textContent)});
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'default',securityLevel:'loose'});
+function renderMermaid(){
+  document.querySelectorAll('.mermaid').forEach(function(el){
+    if(el.getAttribute('data-processed'))return;
+    var src=el.getAttribute('data-source')||el.textContent;
+    el.textContent=src;el.removeAttribute('data-processed');
+  });
+  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+}
+renderMermaid();
+var obs=new MutationObserver(function(){
+  document.querySelectorAll('.mermaid[data-processed]').forEach(function(el){
+    var src=el.getAttribute('data-source');if(src){el.textContent=src;el.removeAttribute('data-processed');}
+  });
+  setTimeout(renderMermaid,50);
+});
+obs.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme:light)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme:dark)">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/sim/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>sim — Simulation Engine | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:20px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;transition:border-color .2s}.card:hover{border-color:var(--accent)}.card h3{margin-top:0;margin-bottom:8px}.card p{color:var(--text-muted);font-size:14px;margin-bottom:0}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}.card-grid{grid-template-columns:1fr}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; sim</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>sim — Simulation Engine</h1>
+    <p class="subtitle">The discrete-event simulation core that drives gem5's timing model, managing object lifecycles, event scheduling, and system-level coordination.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The <code>sim</code> module is like the engine of a car. While other modules (<a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a>, memory, caches) are the wheels, seats, and body, the <code>sim</code> module provides the crankshaft (EventQueue), the chassis (<a href="../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a> hierarchy), and the control computer (System) that makes everything run together in lockstep.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The <code>sim</code> module forms the foundation of gem5's discrete-event simulation framework. It provides three pillars: <strong>SimObject</strong> — the universal <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">base</a> class for all simulated components, <strong>EventQueue</strong> — the priority-driven scheduling engine, and <strong>System</strong> — the top-level container binding CPUs, memory, and workloads together.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    SimObject["SimObject\n(base class)"]
+    ClockedObject["ClockedObject\n(clock domain aware)"]
+    System["System\n(top-level container)"]
+    Process["Process\n(SE mode)"]
+    EventQueue["EventQueue\n(scheduling)"]
+    Event["Event\n(scheduled action)"]
+    Workload["Workload\n(FS/SE)"]
+    PowerState["PowerState"]
+    VoltageDomain["VoltageDomain"]
+
+    SimObject --> ClockedObject
+    SimObject --> Workload
+    SimObject --> Process
+    ClockedObject --> System
+    Workload --> KernelWorkload["KernelWorkload"]
+    Workload --> SEWorkload["SEWorkload"]
+    EventQueue --> Event
+    System --> VoltageDomain
+    ClockedObject --> PowerState
+    </pre>
+  </div>
+
+  <h2 id="simobject-hierarchy">SimObject Hierarchy</h2>
+  <p>Every component in gem5 — CPUs, caches, buses, memories — inherits from <code>SimObject</code>. This base class provides a uniform interface for construction (via <a title="Configuration System and Standard Library — the control plane of gem5" href="../python/index.html">Python</a>-generated <code>Params</code>), initialization, serialization (checkpointing), and statistics registration.</p>
+
+  <h3 id="simobject-lifecycle">SimObject Lifecycle</h3>
+  <p>SimObjects follow a strict initialization protocol:</p>
+  <ol>
+    <li><strong>Construction</strong> — Python creates Params structs, C++ constructors receive them</li>
+    <li><strong><code>init()</code></strong> — Post-construction setup, resolve cross-object references</li>
+    <li><strong><code>regStats()</code></strong> — Register statistics counters</li>
+    <li><strong><code>regProbePoints()</code></strong> — Register <a title="An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code." href="probe/index.html">probe</a> points for instrumentation</li>
+    <li><strong><code>startup()</code></strong> — <a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Schedule</a> initial events, final setup</li>
+  </ol>
+
+  <pre><code class="language-cpp">class SimObject : public EventManager, public Serializable, public Drainable, public statistics::Group
+{
+  public:
+    typedef SimObjectParams Params;
+    const Params &amp;params() const;
+
+    SimObject(const Params &amp;p);
+    virtual ~SimObject();
+
+    virtual void init();
+    virtual void startup();
+    virtual void regStats();
+    virtual void regProbePoints();
+    virtual void regProbeListeners();
+
+    // Serialization for checkpointing
+    void serializeSection(CheckpointOut &amp;cp, const char *name) const;
+    void unserializeSection(CheckpointIn &amp;cp, const char *name);
+
+    // Find SimObject by name
+    static SimObject *find(const char *name);
+};</code></pre>
+
+  <h3 id="clocked-object">ClockedObject</h3>
+  <p><code>ClockedObject</code> extends SimObject with clock domain awareness. It associates each object with a <code>ClockDomain</code>, enabling cycle-accurate timing. Components use <code>clockEdge()</code> to align operations to clock boundaries and <code>cyclesToTicks()</code> for time conversion.</p>
+
+  <pre><code class="language-cpp">class ClockedObject : public SimObject
+{
+    ClockDomain &amp;clockDomain;
+    Tick tick;
+    Cycles cycle;
+
+  public:
+    Tick clockEdge(Cycles cycles = Cycles(0)) const;
+    Tick cyclesToTicks(Cycles c) const;
+    Tick clockPeriod() const;
+    double voltage() const;
+    Cycles ticksToCycles(Tick t) const;
+    PowerState *powerState;
+};</code></pre>
+
+  <h2 id="event-system">Event System</h2>
+  <p>gem5 uses a discrete-event simulation model where the <code>EventQueue</code> maintains a time-ordered queue of <code>Event</code> objects. The simulation loop repeatedly dequeues the earliest event, advances simulation time, and invokes the event's <code>process()</code> method.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">sequenceDiagram
+    participant Main as simulate()
+    participant EQ as EventQueue
+    participant Ev as Event
+    participant Obj as SimObject
+
+    Main->>EQ: serviceOne()
+    EQ->>EQ: dequeue head event
+    EQ->>Ev: process()
+    Ev->>Obj: execute action
+    Obj->>EQ: schedule(newEvent, when)
+    EQ->>EQ: insert sorted by time+priority
+    Main->>EQ: serviceOne() [next iteration]
+    </pre>
+  </div>
+
+  <h3 id="event-priorities">Event Priorities</h3>
+  <p>Events at the same tick are ordered by priority. gem5 defines several standard priorities to ensure correct execution order within a single simulation tick:</p>
+  <table>
+    <thead><tr><th>Priority</th><th>Value</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>Minimum_Pri</td><td>-128</td><td>Earliest possible within a tick</td></tr>
+      <tr><td>Debug_Enable_Pri</td><td>-101</td><td>Debug flag enable/disable</td></tr>
+      <tr><td>Debug_Break_Pri</td><td>-100</td><td>Debugger breakpoints</td></tr>
+      <tr><td>CPU_Tick_Pri</td><td>0</td><td>Default CPU tick events</td></tr>
+      <tr><td>DVFS_Update_Pri</td><td>31</td><td>DVFS transitions</td></tr>
+      <tr><td>Serialize_Pri</td><td>32</td><td>Checkpoint serialization</td></tr>
+      <tr><td>CPU_Exit_Pri</td><td>64</td><td>CPU exit events</td></tr>
+      <tr><td>Stat_Event_Pri</td><td>90</td><td><a href="../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar <a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> — gem5 Wiki" class="xref">Statistics</a> dumping</td></tr>
+      <tr><td>Sim_Exit_Pri</td><td>100</td><td>Simulation exit</td></tr>
+      <tr><td>Maximum_Pri</td><td>127</td><td>Latest possible within a tick</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="event-class">Event Class</h3>
+  <pre><code class="language-cpp">class Event : public Serializable
+{
+  public:
+    typedef int8_t Priority;
+
+    Event(Priority p = Default_Pri, Flags f = AutoDelete);
+    virtual ~Event();
+
+    virtual void process() = 0;  // Override to define action
+    virtual const char *description() const;
+
+    bool scheduled() const;
+    Tick when() const;
+    Priority priority() const;
+
+    void squash() { flags.set(Squashed); }
+    bool squashed() const { return flags.isSet(Squashed); }
+};</code></pre>
+
+  <h2 id="system-and-workloads">System and Workloads</h2>
+  <p>The <code>System</code> class is the top-level container that binds all components together. It manages the physical memory address map, tracks all CPUs, provides access to the workload, and coordinates full-system vs. syscall-emulation modes.</p>
+
+  <h3 id="system-class">System Class</h3>
+  <pre><code class="language-cpp">class System : public SimObject
+{
+  public:
+    std::vector&lt;BaseRemoteGDB *&gt; remoteGDB;
+    std::vector&lt;ThreadContext *&gt; threads;
+
+    Workload *workload;
+    PhysicalMemory physmem;
+
+    Enums::MemoryMode memoryMode;
+    AddrRangeList shadowRomRanges;
+
+    // Memory access
+    bool isMemAddr(Addr addr) const;
+    PortProxy &amp;getPhysMem();
+    Addr memSize() const;
+
+    // Thread context management
+    void registerThreadContext(ThreadContext *tc);
+    int numContexts() const;
+    ThreadContext *threads[int id];
+};</code></pre>
+
+  <h3 id="workload-hierarchy">Workload Hierarchy</h3>
+  <p>The workload abstraction decouples the simulated system from the software being run:</p>
+  <ul>
+    <li><strong>Workload</strong> — Abstract base managing object files, symbol tables, entry points</li>
+    <li><strong>KernelWorkload</strong> — Loads kernel images for full-system simulation, handles kernel symbols and command lines</li>
+    <li><strong>SEWorkload</strong> — Manages syscall-emulation processes, maps system calls to host OS</li>
+  </ul>
+
+  <h2 id="process-and-se-mode">Process &amp; Syscall Emulation</h2>
+  <p>The <code>Process</code> class models a user-space process in syscall emulation (SE) mode. It provides virtual memory (<code>MemState</code>), file descriptor tracking (<code>FDArray</code>), and system call dispatching without requiring a full OS kernel.</p>
+
+  <pre><code class="language-cpp">class Process : public SimObject
+{
+  public:
+    System *system;
+    std::shared_ptr&lt;MemState&gt; memState;
+    std::shared_ptr&lt;FDArray&gt; fds;
+
+    Addr brk_point;      // Current brk() address
+    Addr stack_base;     // Stack base address
+    Addr mmap_end;       // mmap region boundary
+
+    ObjectFile *objFile; // Loaded binary
+    SymbolTable *symtab; // Symbol table
+
+    virtual void initState();
+    virtual void syscall(ThreadContext *tc);
+
+    // VMA management
+    void allocateMem(Addr vaddr, int64_t size, bool clobber = false);
+    bool mmapGrowsDown() const;
+};</code></pre>
+
+  <h2 id="simulation-control">Simulation Control</h2>
+  <p>The <code>simulate()</code> function is the main simulation loop entry point. It processes events from the <code>EventQueue</code> until a simulation exit event fires or the maximum tick count is reached.</p>
+
+  <pre><code class="language-cpp">// Core simulation entry — returns when exit event is triggered
+GlobalSimLoopExitEvent *simulate(Tick num_cycles = MaxTick);
+
+// Exit events for terminating simulation
+class GlobalSimLoopExitEvent : public GlobalEvent
+{
+    std::string cause;
+    int code;
+  public:
+    const std::string getCause() const { return cause; }
+    int getCode() const { return code; }
+};</code></pre>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Simulation Startup &amp; Event Cycle</h3>
+    <ol>
+      <li><strong>Python Configuration</strong> — User writes a Python script instantiating SimObjects (CPU, <a title="cache — Classic <a href="../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../mem_doc/cache/index.html">cache</a>, memory, bus). The Python layer generates <code>Params</code> structs for each.</li>
+      <li><strong>C++ Construction</strong> — <code>m5.instantiate()</code> creates all C++ SimObjects from their Params. Each constructor registers with the global SimObject list.</li>
+      <li><strong>Initialization Phase</strong> — <code>init()</code> called on all objects (resolve ports, connect wires). Then <code>regStats()</code> registers statistics counters.</li>
+      <li><strong>Startup Phase</strong> — <code>startup()</code> called on all objects. CPUs schedule their first tick events. <a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> controllers initialize their state machines.</li>
+      <li><strong>Event Loop</strong> — <code>simulate()</code> enters the main loop. Each iteration calls <code>eventq->serviceOne()</code>, which dequeues the earliest event and calls <code>process()</code>.</li>
+      <li><strong>Event Cascade</strong> — A CPU tick event might generate a cache access event, which generates a memory request event, creating a chain of events across the simulated timeline.</li>
+      <li><strong>Exit</strong> — When a <code>SimLoopExitEvent</code> fires (e.g., max instructions reached), control returns to Python with the exit cause string.</li>
+    </ol>
+  </div>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Purpose</th><th>Category</th></tr></thead>
+    <tbody>
+      <tr><td><code>SimObject</code></td><td>sim_object.hh</td><td>Universal base class for all simulated components</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>EventQueue</code></td><td>eventq.hh</td><td>Time-ordered priority queue for discrete events</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>Event</code></td><td>eventq.hh</td><td>Schedulable action with time and priority</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>System</code></td><td>system.hh</td><td>Top-level container binding all components</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>ClockedObject</code></td><td>clocked_object.hh</td><td>SimObject with clock domain support</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>Process</code></td><td>process.hh</td><td>User-space process for SE mode</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>Workload</code></td><td>workload.hh</td><td>Abstract workload base class</td><td><span class="badge badge-config">Config</span></td></tr>
+      <tr><td><code>KernelWorkload</code></td><td>kernel_workload.hh</td><td>Full-system kernel image loading</td><td><span class="badge badge-config">Config</span></td></tr>
+      <tr><td><code>SEWorkload</code></td><td>se_workload.hh</td><td>Syscall-emulation workload manager</td><td><span class="badge badge-config">Config</span></td></tr>
+      <tr><td><code>VoltageDomain</code></td><td>voltage_domain.hh</td><td>Voltage domain for DVFS</td><td><span class="badge badge-util"><a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="power/index.html">Power</a></span></td></tr>
+      <tr><td><code>DVFSHandler</code></td><td>dvfs_handler.hh</td><td>Dynamic voltage/frequency scaling controller</td><td><span class="badge badge-util">Power</span></td></tr>
+      <tr><td><code>PowerDomain</code></td><td>power_domain.hh</td><td>Hierarchical power domain management</td><td><span class="badge badge-util">Power</span></td></tr>
+      <tr><td><code>TickedObject</code></td><td>ticked_object.hh</td><td>SimObject with periodic tick events</td><td><span class="badge badge-util">Util</span></td></tr>
+      <tr><td><code>GlobalEvent</code></td><td>global_event.hh</td><td>Events synchronized across all event queues</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>FaultBase</code></td><td>faults.hh</td><td>Base class for architectural faults/exceptions</td><td><span class="badge badge-core">Core</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="sub-modules">Sub-Modules</h2>
+  <div class="card-grid">
+    <a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="power/index.html" class="card" style="text-decoration:none;color:inherit">
+      <h3>⚡ power</h3>
+      <p>Power state modeling, thermal simulation, DVFS control, and energy estimation for simulated components.</p>
+      <span class="badge badge-util">5 classes</span>
+    </a>
+    <a title="An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code." href="probe/index.html" class="card" style="text-decoration:none;color:inherit">
+      <h3>🔬 probe</h3>
+      <p>Non-intrusive instrumentation framework using ProbePoints and ProbeListeners for runtime monitoring.</p>
+      <span class="badge badge-util">4 classes</span>
+    </a>
+  </div>
+
+  <h2 id="cross-module-connections">Cross-Module Connections</h2>
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph LR
+    sim["sim\n(SimObject, EventQueue)"]
+    base["base\n(types, stats, debug)"]
+    cpu["cpu\n(BaseCPU)"]
+    mem["mem\n(MemObject)"]
+    arch["arch\n(ISA)"]
+    dev["dev\n(devices)"]
+
+    base -->|"Tick, Addr types"| sim
+    sim -->|"SimObject base"| cpu
+    sim -->|"SimObject base"| mem
+    sim -->|"SimObject base"| dev
+    sim -->|"System, Workload"| arch
+    </pre>
+  </div>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tick</strong></td><td>The fundamental time unit in gem5 (typically 1 ps = 10<sup>-12</sup> s)</td></tr>
+      <tr><td><strong>SE Mode</strong></td><td>Syscall Emulation — runs user binaries by trapping syscalls to the host OS</td></tr>
+      <tr><td><strong>FS Mode</strong></td><td>Full System — boots a real OS kernel on simulated hardware</td></tr>
+      <tr><td><strong>Drain</strong></td><td>Mechanism to quiesce all components before checkpointing or switching CPU models</td></tr>
+      <tr><td><strong>Checkpoint</strong></td><td>Serialized snapshot of entire simulation state for resume</td></tr>
+      <tr><td><strong>DVFS</strong></td><td>Dynamic Voltage and Frequency Scaling — runtime power management</td></tr>
+      <tr><td><strong>Probe Point</strong></td><td>Named instrumentation hook for non-intrusive monitoring</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  // Theme
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  // Mermaid
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el, i){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  // Highlight.js
+  hljs.highlightAll();
+
+  // Copy buttons
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  // TOC generation
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  // Reading time
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  // Back to top
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  // j/k keyboard nav
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  // Diagram overlay with scroll zoom
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/dev/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>dev — Device Models | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:3rem;margin:1rem 0;counter-increment:step}
+.walkthrough .step::before{content:counter(step);position:absolute;left:0;top:0;width:2rem;height:2rem;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.6rem;margin:1.5rem 0}
+.toc h3{margin-top:0;color:var(--accent);font-size:1.1rem}
+.toc ul{list-style:none;padding-left:0;margin:.5rem 0 0}
+.toc li{margin:.3rem 0;font-size:.9rem}
+.toc li::before{content:"›";color:var(--accent);margin-right:.5rem;font-weight:700}
+.reading-time{color:var(--text-muted);font-size:.85rem;margin-bottom:1rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.stat-row{flex-direction:column}}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.toc{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb"><a title="gem5 — Full-<a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> Computer Architecture <a href="../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">Simulator</a>" href="../index.html">gem5</a> &rsaquo; dev</nav>
+<h1>dev — Device Models</h1>
+<div class="reading-time" id="readingTime"></div>
+
+<div class="hero">
+  <div class="subtitle">Hardware Peripheral Simulation Framework</div>
+  <p>The <code>dev</code> module provides device models that connect to gem5's memory system through PIO and DMA ports. It implements <a title="pci — PCI Bus and Device Framework | gem5 Wiki" href="pci/index.html">PCI</a> bus infrastructure, Ethernet NICs, <a title="storage — Storage Device Models | gem5 Wiki" href="storage/index.html">storage</a> controllers, <a title="virtio — <a href="virtio/index.html" title="virtio — VirtIO Device Framework | gem5 Wiki" class="xref">VirtIO</a> Device Framework | gem5 Wiki" href="virtio/index.html">VirtIO</a> paravirtualized devices, <a title="Comprehensive ARM architecture support including <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../arch_doc/arm/index.html">ARM</a> interrupt controllers, serial ports, and platform-specific peripherals needed for full-system simulation.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">PCI Bus</span>
+    <span class="badge green">Ethernet NICs</span>
+    <span class="badge yellow">ARM GIC</span>
+    <span class="badge red">VirtIO</span>
+    <span class="badge blue">Storage</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">16</div><div class="label">Sub-Modules</div></div>
+  <div class="stat-box"><div class="num">418</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">PIO+DMA</div><div class="label">Port Model</div></div>
+  <div class="stat-box"><div class="num">C++</div><div class="label">Language</div></div>
+</div>
+
+<div class="toc">
+<h3>&#128220; Table of Contents</h3>
+<ul id="toc-list"></ul>
+</div>
+
+<h2 id="overview">Module Overview</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The <code>dev</code> module is gem5's hardware peripheral layer. In a real computer, the <a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> communicates with devices (network cards, disks, GPUs) through memory-mapped I/O (MMIO) and DMA. The <code>dev</code> module models these interactions so that a full operating system can boot, discover hardware, load drivers, and run I/O workloads inside the simulator.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the <code>dev</code> module as a collection of <strong>virtual appliances</strong> plugged into a simulated motherboard. Just as your physical PC has a network card in a PCIe slot, a SATA disk, and a USB controller — each with its own registers and DMA engine — gem5's device models present the same register interfaces and transfer mechanisms. The OS running inside gem5 sees "real" hardware and uses its normal drivers, even though everything is happening in software.</p>
+</details>
+</div>
+
+<h2 id="architecture">Device Architecture</h2>
+<p>All devices in gem5 inherit from a hierarchy rooted in <code>ClockedObject</code>. The <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">base</a> device classes provide the port infrastructure to communicate with the memory bus:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph BaseClasses["Base Device Classes"]
+    CO["ClockedObject"]
+    PIO["PioDevice\n&lt;i&gt;PioPort for MMIO&lt;/i&gt;"]
+    BPIO["BasicPioDevice\n&lt;i&gt;fixed addr + size&lt;/i&gt;"]
+    DMA["DmaDevice\n&lt;i&gt;+ DmaPort for DMA&lt;/i&gt;"]
+  end
+
+  subgraph PCIStack["PCI Stack"]
+    PCID["PciDevice\n&lt;i&gt;config space, BARs&lt;/i&gt;"]
+    PCIE["PciEndpoint\n&lt;i&gt;Type 0 header&lt;/i&gt;"]
+    PCIB["PciType1Device\n&lt;i&gt;Bridge / Type 1&lt;/i&gt;"]
+    HOST["PciHost\n&lt;i&gt;root complex&lt;/i&gt;"]
+    BUS["PciBus\n&lt;i&gt;non-coherent xbar&lt;/i&gt;"]
+  end
+
+  subgraph NetDevices["Network"]
+    ELINK["EtherLink\n&lt;i&gt;point-to-point&lt;/i&gt;"]
+    EBUS["EtherBus\n&lt;i&gt;shared medium&lt;/i&gt;"]
+    ESWITCH["EtherSwitch"]
+    NIC["NsGigE / IGbE / Sinic"]
+  end
+
+  subgraph StorageDevices["Storage"]
+    IDEC["IdeController"]
+    IDED["IdeDisk"]
+    DIMG["DiskImage"]
+  end
+
+  subgraph VirtIODevices["VirtIO"]
+    VDB["VirtIODeviceBase"]
+    VQ["VirtQueue"]
+    VBK["VirtIOBlock"]
+    VCN["VirtIOConsole"]
+  end
+
+  subgraph Platform["Platform &amp; Interrupts"]
+    PLAT["Platform\n&lt;i&gt;interrupt routing&lt;/i&gt;"]
+  end
+
+  CO --> PIO
+  PIO --> BPIO
+  PIO --> DMA
+  DMA --> PCID
+  PCID --> PCIE
+  PCID --> PCIB
+  HOST --> BUS
+  PCIE --> NIC
+  BPIO --> IDEC
+  PLAT --> HOST
+  DMA -.->|"DmaPort"| MEMBUS["Memory Bus"]
+  PIO -.->|"PioPort"| MEMBUS
+  NIC --> ELINK
+  ELINK --> EBUS
+  IDEC --> IDED
+  IDED --> DIMG
+  VDB --> VQ
+  VDB --> VBK
+  VDB --> VCN
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>Devices communicate with the CPU and memory through two fundamental mechanisms: Programmed I/O (PIO) and Direct <a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> Access (DMA).</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant CPU as CPU Core
+    participant BUS as Memory Bus
+    participant NIC as NIC Device
+    participant DMAPORT as DMA Port
+    participant RAM as System Memory
+
+    Note over CPU,RAM: PIO Read — CPU reads a device register
+    CPU->>BUS: ReadReq (device MMIO addr)
+    BUS->>NIC: PioPort.recvAtomic(pkt)
+    NIC->>NIC: read(pkt) — decode register
+    NIC-->>BUS: Response with data
+    BUS-->>CPU: Data returned
+
+    Note over CPU,RAM: DMA Write — Device writes to host memory
+    NIC->>DMAPORT: dmaWrite(addr, size, data)
+    DMAPORT->>DMAPORT: ChunkGenerator splits request
+    DMAPORT->>BUS: WriteReq (chunk 1)
+    BUS->>RAM: Store data
+    RAM-->>BUS: WriteResp
+    BUS-->>DMAPORT: Response
+    DMAPORT->>BUS: WriteReq (chunk 2)
+    BUS->>RAM: Store data
+    RAM-->>DMAPORT: Response
+    DMAPORT->>NIC: completionEvent fired
+
+    Note over CPU,RAM: Interrupt — Device signals CPU
+    NIC->>NIC: intrPost()
+    NIC-->>CPU: Interrupt delivered via Platform
+</pre>
+</div>
+
+<h2 id="walkthrough">Narrated Walkthrough: Network Packet Reception</h2>
+<p>Follow the journey of an Ethernet frame arriving at a simulated NIC, being DMA'd to memory, and triggering an interrupt for the guest OS to process:</p>
+<div class="walkthrough">
+  <div class="step"><strong><a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">Packet</a> arrives at EtherLink.</strong> The <code>EtherLink::Link</code> models a fixed-bandwidth wire. The packet is queued with a propagation delay calculated from <code>ticksPerByte * pkt.length + linkDelay</code>.</div>
+  <div class="step"><strong><a href="net/index.html" title="net — <a href="../mem_doc/ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">Network</a> Device Models | gem5 Wiki" class="xref">EtherInt</a> delivers to NIC.</strong> The <code>EtherInt</code> interface calls <code>recvPacket()</code> on the NIC model (e.g., <code>IGbE</code> or <code>NsGigE</code>). The NIC stores the packet in an internal FIFO.</div>
+  <div class="step"><strong>NIC checks receive descriptor ring.</strong> The NIC reads the guest OS's receive descriptor ring from memory via DMA to find the next available buffer address.</div>
+  <div class="step"><strong>DMA read of descriptor.</strong> <code>DmaPort::dmaAction(ReadReq, descAddr, ...)</code> issues a memory read. The <code>ChunkGenerator</code> splits the request into <a title="cache — Classic <a href="../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../mem_doc/cache/index.html">cache</a>-line-sized chunks.</div>
+  <div class="step"><strong>Descriptor parsed.</strong> The NIC decodes the descriptor to obtain the host memory buffer address and length where the packet data should be placed.</div>
+  <div class="step"><strong>DMA write of packet data.</strong> <code>dmaWrite(bufferAddr, pkt.length, data)</code> initiates a DMA transfer. Each chunk travels through the memory bus to DRAM.</div>
+  <div class="step"><strong>Completion event fires.</strong> When all DMA chunks are acknowledged, the <code>completionEvent</code> fires, telling the NIC the transfer is done.</div>
+  <div class="step"><strong>NIC updates descriptor status.</strong> The NIC writes back the descriptor status (packet length, checksum flags) to the descriptor ring via another DMA write.</div>
+  <div class="step"><strong>Interrupt posted.</strong> The NIC calls <code>intrPost()</code> which routes through the PCI host and <code>Platform</code> to deliver an interrupt to the CPU model.</div>
+  <div class="step"><strong>Guest OS processes interrupt.</strong> The CPU's interrupt handler runs the NIC driver, which reads the completed descriptor, passes the packet up the network stack, and replenishes the receive ring.</div>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>Class</th><th>Header</th><th>Role</th></tr>
+<tr><td><code>PioDevice</code></td><td><code>dev/io_device.hh</code></td><td>Base class for all programmed I/O devices; provides PioPort</td></tr>
+<tr><td><code>BasicPioDevice</code></td><td><code>dev/io_device.hh</code></td><td>Simplified PioDevice with fixed address and size parameters</td></tr>
+<tr><td><code>DmaDevice</code></td><td><code>dev/dma_device.hh</code></td><td>Extends PioDevice with DmaPort for DMA read/write capability</td></tr>
+<tr><td><code>DmaPort</code></td><td><code>dev/dma_device.hh</code></td><td><a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">Request</a> port that manages chunked DMA transfers with completion events</td></tr>
+<tr><td><code>DmaReadFifo</code></td><td><code>dev/dma_device.hh</code></td><td>Buffered DMA engine helper with FIFO for streaming reads</td></tr>
+<tr><td><code>Platform</code></td><td><code>dev/platform.hh</code></td><td>System-level I/O controller; routes PCI and console interrupts</td></tr>
+<tr><td><code>PciDevice</code></td><td><code>dev/pci/device.hh</code></td><td>Base PCI device with config space, BARs, MSI/MSI-X support</td></tr>
+<tr><td><code>PciHost</code></td><td><code>dev/pci/host.hh</code></td><td>PCI host bridge; maps config/IO/memory spaces and routes interrupts</td></tr>
+<tr><td><code>PciBus</code></td><td><code>dev/pci/bus.hh</code></td><td>Non-coherent crossbar implementing PCI bus topology</td></tr>
+<tr><td><code>EtherLink</code></td><td><code>dev/net/etherlink.hh</code></td><td>Fixed-bandwidth full-duplex Ethernet link model</td></tr>
+<tr><td><code>NsGigE</code></td><td><code>dev/net/ns_gige.hh</code></td><td>National Semiconductor DP83820 Gigabit Ethernet NIC model</td></tr>
+<tr><td><code>IGbE</code></td><td><code>dev/net/i8254xGBe.hh</code></td><td>Intel 8254x Gigabit Ethernet NIC model</td></tr>
+<tr><td><code>IdeDisk</code></td><td><code>dev/storage/ide_disk.hh</code></td><td>IDE disk device with PIO/DMA transfer modes and state machine</td></tr>
+<tr><td><code>IdeController</code></td><td><code>dev/storage/ide_ctrl.hh</code></td><td>IDE controller managing up to two disk channels</td></tr>
+<tr><td><code>VirtIODeviceBase</code></td><td><code>dev/virtio/base.hh</code></td><td>Base class for VirtIO paravirtualized devices with <a href="virtio/index.html" title="virtio — VirtIO Device Framework | gem5 Wiki" class="xref">VirtQueue</a> support</td></tr>
+</table>
+
+<h2 id="sub-modules">Sub-Module Deep Dives</h2>
+<p class="section-label">Core Device Infrastructure</p>
+<div class="module-grid">
+  <a title="pci — PCI Bus and Device Framework | gem5 Wiki" href="pci/index.html" class="module-card">
+    <h3>pci</h3>
+    <div class="tagline">PCI Bus and Device Framework</div>
+    <p>Complete PCI subsystem: host bridge with CAM/ECAM config space, PCI bus crossbar, BAR management (IO/Memory/64-bit), MSI/MSI-X interrupts, and the PciEndpoint/PciType1Device hierarchy for endpoint and bridge devices.</p>
+    <div class="stats"><span>17 files</span><span>PciDevice</span><span>PciHost</span><span>PciBus</span></div>
+  </a>
+  <a title="net — Network Device Models | gem5 Wiki" href="net/index.html" class="module-card">
+    <h3>net</h3>
+    <div class="tagline">Network Device Models</div>
+    <p>Ethernet simulation layer: NIC models (NsGigE, IGbE, Sinic), link/bus/switch topologies, packet FIFOs, distributed simulation interfaces, and EtherDump packet capture. Supports both local and multi-process simulation.</p>
+    <div class="stats"><span>31 files</span><span>3 NIC models</span><span>EtherLink</span><span>EtherSwitch</span></div>
+  </a>
+  <a title="storage — Storage Device Models | gem5 Wiki" href="storage/index.html" class="module-card">
+    <h3>storage</h3>
+    <div class="tagline">Storage Device Models</div>
+    <p>IDE disk controller and disk models with full ATA command set, PIO/DMA transfer modes, and disk image backends (raw and copy-on-write). Provides block-level storage for full-system simulation.</p>
+    <div class="stats"><span>14 files</span><span>IdeDisk</span><span>IdeController</span><span>DiskImage</span></div>
+  </a>
+  <a title="virtio — VirtIO Device Framework | gem5 Wiki" href="virtio/index.html" class="module-card">
+    <h3>virtio</h3>
+    <div class="tagline">VirtIO Device Framework</div>
+    <p>Paravirtualized device framework using VirtQueues for efficient guest-host communication. Includes block device, serial console, RNG, and 9P filesystem sharing — all usable with standard VirtIO guest drivers.</p>
+    <div class="stats"><span>17 files</span><span>VirtIODeviceBase</span><span>VirtQueue</span><span>5 device types</span></div>
+  </a>
+</div>
+
+<p class="section-label">Architecture-Specific Devices</p>
+<div class="module-grid">
+  <div class="card">
+    <h4>arm</h4>
+    <p>ARM-specific devices: GIC (<a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../arch_doc/generic/index.html">Generic</a> Interrupt Controller) v2/v3/v4, GPU (NoMali), timers, SMMU v3, AMBA bus, HDLcd display, RealView/VExpress platforms, flash memory, energy controllers.</p>
+    <div class="stats" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem"><span>80+ files</span><span>GICv2/v3/v4</span><span>SMMUv3</span></div>
+  </div>
+  <div class="card">
+    <h4><a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../arch_doc/x86/index.html">x86</a></h4>
+    <p>x86 platform devices: i8254 PIT, i8259 PIC, i82094 IOAPIC, ACPI PM timer, SMBios, Intel 8237 DMA, i8042 keyboard controller, speaker, CMOS, South/North bridge stubs.</p>
+    <div class="stats" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem"><span>30+ files</span><span>APIC</span><span>IOAPIC</span></div>
+  </div>
+  <div class="card">
+    <h4><a title="Modular RISC-V instruction set support with standard extensions (M/A/F/D/C/V), privilege modes, PMP/PMA security, and compressed instruction decoding." href="../arch_doc/riscv/index.html">riscv</a></h4>
+    <p>RISC-V devices: PLIC (Platform Level Interrupt Controller), CLINT (Core Local Interruptor), HiFive platform, RTC.</p>
+    <div class="stats" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem"><span>12 files</span><span>PLIC</span><span>CLINT</span></div>
+  </div>
+  <div class="card">
+    <h4>serial</h4>
+    <p>UART and terminal models: UART8250 (16550A-compatible), <a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">simple</a> UART, terminal emulation for console I/O.</p>
+    <div class="stats" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem"><span>10 files</span><span>Uart8250</span><span>Terminal</span></div>
+  </div>
+</div>
+
+<p class="section-label">Other Sub-Modules</p>
+<div class="card-grid">
+  <div class="card"><h4>amdgpu</h4><p>AMD GPU device models for HSA and ROCm support.</p></div>
+  <div class="card"><h4>hsa</h4><p>HSA (Heterogeneous System Architecture) packet processor and signal handling.</p></div>
+  <div class="card"><h4>i2c</h4><p>I2C bus and device models for low-speed peripheral communication.</p></div>
+  <div class="card"><h4>lupio</h4><p>LupIO educational devices for RISC-V: timer, PIC, block, console, RNG, IPI, TTY, system.</p></div>
+  <div class="card"><h4>mips</h4><p>MIPS-specific platform devices: Malta board, interrupt controller.</p></div>
+  <div class="card"><h4>sparc</h4><p>SPARC T1000 platform: IOB, DTOD, memory-mapped disk.</p></div>
+  <div class="card"><h4>ps2</h4><p>PS/2 keyboard and mouse interface models.</p></div>
+  <div class="card"><h4>qemu</h4><p>QEMU firmware configuration (fw_cfg) device for passing boot parameters.</p></div>
+</div>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/dev/
+├── io_device.hh/cc         ← PioDevice, BasicPioDevice, PioPort
+├── dma_device.hh/cc        ← DmaDevice, DmaPort, DmaReadFifo, DmaCallback
+├── platform.hh/cc          ← Platform base — interrupt routing
+├── baddev.hh/cc            ← BadDevice — catches invalid accesses
+├── isa_fake.hh/cc          ← IsaFake — stub device for unmapped ranges
+├── intel_8254_timer.hh/cc  ← Intel 8254 PIT timer model
+├── mc146818.hh/cc          ← MC146818 RTC (real-time clock) model
+├── pixelpump.hh/cc         ← Pixel pump for display timing
+├── reg_bank.hh             ← Register bank template for device registers
+├── intpin.hh               ← Interrupt pin interface
+├── pci/                    ← PCI host, bus, device, BARs, copy engine
+├── net/                    ← Ethernet NICs, links, switches, dist. sim
+├── storage/                ← IDE controller, disk, disk images
+├── virtio/                 ← VirtIO base, block, console, RNG, 9P
+├── arm/                    ← ARM GIC, SMMU, timers, AMBA, platforms
+├── x86/                    ← x86 PIC, PIT, IOAPIC, ACPI devices
+├── riscv/                  ← RISC-V PLIC, CLINT, HiFive board
+├── serial/                 ← UART, terminal models
+├── amdgpu/                 ← AMD GPU device models
+├── hsa/                    ← HSA packet processor
+├── i2c/                    ← I2C bus and device
+├── lupio/                  ← LupIO educational RISC-V devices
+├── mips/                   ← MIPS Malta platform
+├── sparc/                  ← SPARC T1000 platform
+├── ps2/                    ← PS/2 keyboard and mouse
+└── qemu/                   ← QEMU fw_cfg device
+</code></pre>
+</details>
+
+<h2 id="config">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th><a title="Configuration System and Standard Library — the control plane of gem5" href="../python/index.html">Python</a> Class</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>pio_addr</code></td><td><code>BasicPioDevice</code></td><td><code>0x0</code></td><td>Base address for the device's PIO range in physical memory</td></tr>
+<tr><td><code>pio_latency</code></td><td><code>BasicPioDevice</code></td><td><code>'100ns'</code></td><td>Latency for PIO accesses to the device</td></tr>
+<tr><td><code>system</code></td><td><code>PioDevice</code></td><td>—</td><td>Reference to the System object (required for all devices)</td></tr>
+<tr><td><code>pci_bus</code></td><td><code>PciDevice</code></td><td><code>0</code></td><td>PCI bus number</td></tr>
+<tr><td><code>pci_dev</code></td><td><code>PciDevice</code></td><td><code>0</code></td><td>PCI device number</td></tr>
+<tr><td><code>pci_func</code></td><td><code>PciDevice</code></td><td><code>0</code></td><td>PCI function number</td></tr>
+<tr><td><code>InterruptLine</code></td><td><code>PciDevice</code></td><td><code>0x1f</code></td><td>PCI interrupt line (legacy INTx)</td></tr>
+<tr><td><code>speed</code></td><td><code>EtherLink</code></td><td><code>'1Gbps'</code></td><td>Link bandwidth</td></tr>
+<tr><td><code>delay</code></td><td><code>EtherLink</code></td><td><code>'0us'</code></td><td>Propagation delay</td></tr>
+<tr><td><code>image</code></td><td><code>IdeDisk</code></td><td>—</td><td><a href="storage/index.html" title="storage — Storage Device Models | gem5 Wiki" class="xref">DiskImage</a> object backing the IDE disk</td></tr>
+</table>
+
+<h2 id="cross-module">Cross-Module Connections</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph dev["dev Module"]
+    PIO["PioDevice"]
+    DMA["DmaDevice"]
+    PLAT["Platform"]
+  end
+  subgraph mem["mem Module"]
+    MBUS["MemBus / CoherentXBar"]
+    PORT["Port (Request/Response)"]
+    DRAM["DRAM Controller"]
+  end
+  subgraph cpu["cpu Module"]
+    CPUCORE["CPU Core"]
+    INT["Interrupt Handler"]
+  end
+  subgraph sim["sim Module"]
+    SYS["System"]
+    EVTQ["EventQueue"]
+  end
+
+  PIO -->|"PioPort"| PORT
+  DMA -->|"DmaPort"| PORT
+  PORT --> MBUS
+  MBUS --> DRAM
+  PLAT -->|"postInt / clearInt"| INT
+  INT --> CPUCORE
+  SYS -->|"owns"| PIO
+  SYS -->|"owns"| DMA
+  EVTQ -->|"schedules"| DMA
+</pre>
+</div>
+<blockquote>
+<strong>Key insight:</strong> The <code>dev</code> module depends on <code>mem</code> for its port infrastructure (<code>SimpleTimingPort</code>, <code>RequestPort</code>), on <code>sim</code> for <code>ClockedObject</code> and event scheduling, and on <code>cpu</code>/<code>arch</code> for interrupt delivery. Device models never directly access CPU state — all communication is through the memory bus and interrupt lines.
+</blockquote>
+
+<h2 id="glossary">Glossary</h2>
+<table>
+<tr><th>Term</th><th>Definition</th></tr>
+<tr><td><strong>PIO</strong></td><td>Programmed I/O — CPU directly reads/writes device registers via memory-mapped addresses</td></tr>
+<tr><td><strong>DMA</strong></td><td>Direct Memory Access — device reads/writes system memory without CPU intervention</td></tr>
+<tr><td><strong>BAR</strong></td><td>Base Address Register — PCI config space register that maps a device's memory/IO region</td></tr>
+<tr><td><strong>MSI/MSI-X</strong></td><td>Message Signaled <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">Interrupts</a> — PCI interrupt mechanism using memory writes instead of dedicated lines</td></tr>
+<tr><td><strong>VirtQueue</strong></td><td>Shared memory ring buffer used by VirtIO for guest-host data exchange</td></tr>
+<tr><td><strong>MMIO</strong></td><td>Memory-Mapped I/O — device registers accessible at physical memory addresses</td></tr>
+<tr><td><strong>ECAM</strong></td><td>Enhanced Configuration Access Mechanism — PCIe standard for config space addressing</td></tr>
+</table>
+
+<div class="footer">gem5 Wiki &mdash; dev Module &mdash; Generated 2026-03-25</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+/* Save mermaid sources */
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+/* Theme toggle */
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    if(hljsLink){
+      hljsLink.href=(t==='light')
+        ?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+        :'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+    }
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+/* Diagram overlay */
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+/* Back to top */
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+/* TOC generation */
+(function(){var toc=document.getElementById('toc-list');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');headings.forEach(function(h){var li=document.createElement('li');if(h.tagName==='H3')li.style.paddingLeft='1rem';var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;a.style.color='var(--text)';li.appendChild(a);toc.appendChild(li);});})();
+/* Reading time */
+(function(){var el=document.getElementById('readingTime');if(!el)return;var text=document.querySelector('main').textContent;var words=text.trim().split(/\s+/).length;var mins=Math.ceil(words/200);el.textContent='\u231A '+mins+' min read \u00B7 '+words+' words';})();
+/* Highlight.js */
+(function(){if(window.hljs){document.querySelectorAll('pre code[class*="language-"]').forEach(function(block){hljs.highlightElement(block);});}})();
+/* j/k keyboard navigation */
+(function(){var headings=Array.from(document.querySelectorAll('h2[id],h3[id]'));document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var key=e.key;if(key!=='j'&&key!=='k')return;var scrollY=window.scrollY+100;var idx=-1;for(var i=0;i<headings.length;i++){if(headings[i].offsetTop<=scrollY)idx=i;}if(key==='j')idx=Math.min(idx+1,headings.length-1);else idx=Math.max(idx-1,0);if(idx>=0)headings[idx].scrollIntoView({behavior:'smooth',block:'start'});});})();
+</script>
+</body></html>

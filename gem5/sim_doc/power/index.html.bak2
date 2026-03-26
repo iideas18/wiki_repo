@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/sim/power/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>power — Power and Thermal Modeling | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="The discrete-event simulation core that drives gem5's timing model, managing object lifecycles, event scheduling, and system-level coordination." href="../index.html">sim</a> &rsaquo; power</nav>
+  <button class="theme-toggle" aria-label="Toggle dark/light theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>power — Power and Thermal Modeling</h1>
+    <p class="subtitle">Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <strong>💡 Think of it like a power grid…</strong>
+    <p class="analogy">Imagine a city's electrical grid. <code>VoltageDomain</code> is a substation providing power at a specific voltage. <code>PowerDomain</code> is a city block with its own breaker panel controlling which buildings (components) are powered. <code>DVFSHandler</code> is the grid operator who adjusts voltage and frequency based on demand. <code>PowerModel</code> is the meter on each building tracking consumption, and <code>ThermalDomain</code> monitors temperature to prevent overheating — like a thermostat for the entire neighborhood.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The power sub-module models hardware power management features found in modern SoCs. It provides a layered approach: <code>VoltageDomain</code> defines voltage levels, <code>PowerDomain</code> groups components into power islands, <code>PowerState</code> tracks per-component power states (ON/CLK_GATED/OFF), and <code>PowerModel</code> computes dynamic and static power consumption.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    DVFSHandler["DVFSHandler\n(voltage/frequency controller)"]
+    VoltageDomain["VoltageDomain\n(voltage level)"]
+    ClockDomain["ClockDomain\n(frequency)"]
+    PowerDomain["PowerDomain\n(power island)"]
+    PowerState["PowerState\n(per-component)"]
+    PowerModel["PowerModel\n(energy estimation)"]
+    ThermalDomain["ThermalDomain\n(heat zone)"]
+    ThermalModel["ThermalModel\n(thermal simulation)"]
+    ThermalNode["ThermalNode\n(temperature point)"]
+
+    DVFSHandler --> VoltageDomain
+    DVFSHandler --> ClockDomain
+    VoltageDomain --> ClockDomain
+    PowerDomain --> PowerState
+    PowerState --> PowerModel
+    PowerModel --> ThermalDomain
+    ThermalDomain --> ThermalNode
+    ThermalModel --> ThermalNode
+    </pre>
+  </div>
+
+  <h2 id="power-state-machine">Power State Machine</h2>
+  <p>Each <code>ClockedObject</code> has an associated <code>PowerState</code> that tracks its current power mode. The state machine follows ACPI-inspired power states, enabling detailed power-aware simulation.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">stateDiagram-v2
+    [*] --> ON
+    ON --> CLK_GATED : Clock gating
+    CLK_GATED --> ON : Resume
+    ON --> SRAM_RETENTION : Deep idle
+    SRAM_RETENTION --> ON : Wake
+    CLK_GATED --> SRAM_RETENTION : Deeper sleep
+    SRAM_RETENTION --> OFF : Full shutdown
+    ON --> OFF : Power off
+    OFF --> ON : Power on
+    </pre>
+  </div>
+
+  <h3 id="power-state-class">PowerState Class</h3>
+  <pre><code class="language-cpp">class PowerState : public SimObject
+{
+  public:
+    enum State {
+        ON,              // Fully operational
+        CLK_GATED,       // Clock stopped, state retained
+        SRAM_RETENTION,  // Minimal power, SRAM preserved
+        OFF              // Powered off, state lost
+    };
+
+    PowerState(const Params &amp;p);
+
+    void set(State s);
+    State get() const { return _currState; }
+
+    // Time tracking for statistics
+    Tick getTimeInState(State s) const;
+    double getPercentInState(State s) const;
+
+    // Power domain membership
+    void setControlledDomain(PowerDomain *d);
+
+  private:
+    State _currState;
+    std::vector&lt;Tick&gt; stateResidencyTicks;
+    std::vector&lt;statistics::Scalar *&gt; ticksInState;
+};</code></pre>
+
+  <h2 id="voltage-domain">Voltage Domain</h2>
+  <p><code>VoltageDomain</code> represents a voltage rail shared by one or more clock domains. The DVFS handler adjusts the voltage when changing operating points. Each voltage domain maintains a list of supported voltage levels.</p>
+
+  <pre><code class="language-cpp">class VoltageDomain : public SimObject
+{
+  public:
+    VoltageDomain(const Params &amp;p);
+
+    double voltage() const { return _voltages[perfLevel]; }
+    void voltage(double v);
+
+    // Performance level (maps to voltage/frequency pair)
+    uint32_t perfLevel() const { return _perfLevel; }
+    void perfLevel(uint32_t level);
+    uint32_t numPerfLevels() const { return _voltages.size(); }
+
+  private:
+    std::vector&lt;double&gt; _voltages;  // Voltage per perf level (V)
+    uint32_t _perfLevel;              // Current performance level
+};</code></pre>
+
+  <h2 id="dvfs-handler">DVFS Handler</h2>
+  <p>The <code>DVFSHandler</code> coordinates dynamic voltage and frequency scaling across domains. It provides an interface for software (e.g., the simulated OS governor) to request performance level changes, then orchestrates the voltage and clock transitions with appropriate latency.</p>
+
+  <pre><code class="language-cpp">class DVFSHandler : public SimObject
+{
+  public:
+    DVFSHandler(const Params &amp;p);
+
+    // Check if DVFS is enabled
+    bool isEnabled() const { return enableHandler; }
+
+    // Get/set performance level for a domain
+    bool perfLevel(DomainID domain_id, PerfLevel perf_level);
+    PerfLevel perfLevel(DomainID domain_id) const;
+
+    // Transition latency
+    Tick transLatency() const { return _transLatency; }
+
+    // Get available domains
+    uint32_t numDomains() const;
+    std::vector&lt;DomainID&gt; domainIds() const;
+
+    // Frequency/voltage for a perf level
+    Tick clkPeriodAtPerfLevel(DomainID id, PerfLevel level) const;
+    double voltageAtPerfLevel(DomainID id, PerfLevel level) const;
+
+  private:
+    bool enableHandler;
+    Tick _transLatency;
+    std::unordered_map&lt;DomainID, ClockDomain *&gt; domains;
+};</code></pre>
+
+  <h2 id="power-model">Power Model</h2>
+  <p>The <code>PowerModel</code> estimates energy consumption based on component activity, voltage, and frequency. It separates power into dynamic (activity-dependent) and static (leakage) components.</p>
+
+  <h3 id="power-model-interface">PowerModel Interface</h3>
+  <pre><code class="language-cpp">class PowerModel : public SimObject
+{
+  public:
+    // Total power = dynamic + static
+    double getDynamicPower() const;
+    double getStaticPower() const;
+    double getTotalPower() const {
+        return getDynamicPower() + getStaticPower();
+    }
+
+    // Temperature-dependent leakage
+    void setTemperature(double temp);
+
+    // Associate with a ClockedObject
+    void setClockedObject(ClockedObject *obj);
+
+  private:
+    std::vector&lt;PowerModelState *&gt; states;
+    ClockedObject *clkObj;
+    double dynamicPower;
+    double staticPower;
+};</code></pre>
+
+  <h3 id="power-model-state">PowerModelState</h3>
+  <pre><code class="language-cpp">class PowerModelState : public SimObject
+{
+  public:
+    virtual double getDynamicPower() const = 0;
+    virtual double getStaticPower() const = 0;
+    virtual void setTemperature(double temp) = 0;
+
+    ClockedObject *clkObj;
+    double temperature;  // Current temperature in Celsius
+};</code></pre>
+
+  <h2 id="thermal-modeling">Thermal Modeling</h2>
+  <p>The thermal subsystem models heat generation and dissipation. <code>ThermalDomain</code> represents a physical area that generates heat (from its <code>PowerModel</code>), while <code>ThermalNode</code> tracks temperature at a point, and <code>ThermalModel</code> solves the thermal network equations.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph LR
+    CPU["CPU Core\n(PowerModel)"]
+    Cache["L2 Cache\n(PowerModel)"]
+    TD1["ThermalDomain\n(CPU zone)"]
+    TD2["ThermalDomain\n(Cache zone)"]
+    TN1["ThermalNode\n(junction temp)"]
+    TN2["ThermalNode\n(ambient)"]
+    TM["ThermalModel\n(RC network solver)"]
+
+    CPU --> TD1
+    Cache --> TD2
+    TD1 --> TN1
+    TD2 --> TN1
+    TN1 --> TM
+    TN2 --> TM
+    TM --> TN1
+    </pre>
+  </div>
+
+  <h3 id="thermal-domain-class">ThermalDomain Class</h3>
+  <pre><code class="language-cpp">class ThermalDomain : public SimObject
+{
+  public:
+    ThermalDomain(const Params &amp;p);
+
+    // Get total power dissipated in this domain
+    double getPower() const;
+
+    // Temperature feedback from thermal model
+    void setTemperature(double temp);
+    double getTemperature() const { return _temperature; }
+
+    // Power models contributing to this domain
+    void addPowerModel(PowerModel *pm);
+
+  private:
+    std::vector&lt;PowerModel *&gt; powerModels;
+    double _temperature;
+};</code></pre>
+
+  <h3 id="thermal-model-class">ThermalModel Class</h3>
+  <pre><code class="language-cpp">class ThermalModel : public ClockedObject
+{
+  public:
+    ThermalModel(const Params &amp;p);
+
+    // Solve thermal network using linear solver
+    void doStep();
+
+    // Node and domain management
+    void addDomain(ThermalDomain *d);
+    void addNode(ThermalNode *n);
+    void addReference(ThermalNode *n);  // Ambient node
+
+  private:
+    std::vector&lt;ThermalDomain *&gt; domains;
+    std::vector&lt;ThermalNode *&gt; nodes;
+    ThermalNode *ambient;
+    LinearSystem *solver;
+};</code></pre>
+
+  <h2 id="power-domain">Power Domain</h2>
+  <p><code>PowerDomain</code> groups multiple <code>PowerState</code>-enabled objects into a power island. When a domain transitions to a lower power state, all its members transition together. It enforces hierarchical constraints — a domain can only be as awake as its most-awake member.</p>
+
+  <pre><code class="language-cpp">class PowerDomain : public PowerState
+{
+  public:
+    PowerDomain(const Params &amp;p);
+
+    // Add/remove members
+    void addFollower(PowerState *ps);
+
+    // Calculate effective domain state
+    State calculateState() const;
+
+    // Apply state to all members
+    void pwrStateChangeCallback(State old_state, State new_state);
+
+  private:
+    std::vector&lt;PowerState *&gt; followers;
+    // Domain is ON if ANY member is ON
+    // Domain is OFF only if ALL members are OFF
+};</code></pre>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: DVFS Transition</h3>
+    <ol>
+      <li><strong>Governor Request</strong> — The simulated OS power governor (or a user script) requests a performance level change via <code>DVFSHandler::perfLevel(domainId, newLevel)</code>.</li>
+      <li><strong>Validation</strong> — The handler verifies the requested level is valid for the target domain and that DVFS is enabled.</li>
+      <li><strong>Voltage Transition</strong> — If frequency is decreasing, the voltage is lowered first via <code>VoltageDomain::perfLevel()</code>. The new voltage takes effect immediately.</li>
+      <li><strong>Frequency Transition</strong> — The <code>ClockDomain</code> frequency is updated. A transition latency event is scheduled to model the PLL lock time.</li>
+      <li><strong>Power Update</strong> — Once the transition completes, <code>PowerModel</code> recalculates dynamic power using the new V² × f formula. Static power is also updated based on the new voltage.</li>
+      <li><strong>Thermal Feedback</strong> — On the next thermal model step, the new power values feed into <code>ThermalDomain</code>, which updates the temperature. If temperature exceeds a threshold, the governor may throttle back.</li>
+    </ol>
+  </div>
+
+  <h2 id="configuration-example">Configuration Example</h2>
+  <pre><code class="language-cpp">// Python configuration for DVFS-enabled system
+voltage_domain = VoltageDomain(
+    voltage=['1.0V', '0.9V', '0.8V']  # 3 perf levels
+)
+
+clock_domain = SrcClockDomain(
+    clock=['1GHz', '800MHz', '600MHz'],
+    voltage_domain=voltage_domain
+)
+
+dvfs_handler = DVFSHandler(
+    domains=[clock_domain],
+    enable=True,
+    transition_latency='10us'
+)
+
+# Thermal setup
+thermal_domain = ThermalDomain()
+thermal_node = ThermalNode(temperature=25.0)  # 25°C ambient
+thermal_model = ThermalModel(step_size='1ms')</code></pre>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>PowerState</code></td><td>power_state.hh</td><td>Per-component power state tracking (ON/CLK_GATED/SRAM_RETENTION/OFF)</td></tr>
+      <tr><td><code>PowerDomain</code></td><td>power_domain.hh</td><td>Hierarchical grouping of power states into islands</td></tr>
+      <tr><td><code>VoltageDomain</code></td><td>voltage_domain.hh</td><td>Voltage rail with multiple performance levels</td></tr>
+      <tr><td><code>DVFSHandler</code></td><td>dvfs_handler.hh</td><td>DVFS transition coordination and latency modeling</td></tr>
+      <tr><td><code>PowerModel</code></td><td>power_model.hh</td><td>Dynamic + static power estimation</td></tr>
+      <tr><td><code>PowerModelState</code></td><td>power_model.hh</td><td>Abstract per-state power calculation</td></tr>
+      <tr><td><code>ThermalDomain</code></td><td>thermal_domain.hh</td><td>Heat-generating zone with temperature tracking</td></tr>
+      <tr><td><code>ThermalModel</code></td><td>thermal_model.hh</td><td>Thermal network solver (RC equivalent circuit)</td></tr>
+      <tr><td><code>ThermalNode</code></td><td>thermal_node.hh</td><td>Temperature point in thermal network</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>DVFS</strong></td><td>Dynamic Voltage and Frequency Scaling — adjusting voltage and clock speed at runtime for power savings</td></tr>
+      <tr><td><strong>Power Island</strong></td><td>Group of components sharing a single power switch, enabling collective power gating</td></tr>
+      <tr><td><strong>Clock Gating</strong></td><td>Stopping the clock to a component to eliminate dynamic power while retaining state</td></tr>
+      <tr><td><strong>Leakage Power</strong></td><td>Static power consumed due to transistor leakage currents, even when not switching</td></tr>
+      <tr><td><strong>Dynamic Power</strong></td><td>Power consumed during switching activity, proportional to C×V²×f</td></tr>
+      <tr><td><strong>Thermal Throttling</strong></td><td>Reducing performance to prevent exceeding safe temperature limits</td></tr>
+      <tr><td><strong>Performance Level</strong></td><td>A voltage/frequency operating point — higher levels = more performance, more power</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="overlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="overlay-content" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('overlay');
+  var overlayContent = document.getElementById('overlay-content');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

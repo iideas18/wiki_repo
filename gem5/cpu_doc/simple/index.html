@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/cpu/simple/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>simple — Atomic and Timing Simple CPUs — gem5 Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1.5rem 0}
+.toc h3{margin:0 0 .6rem;color:var(--accent);font-size:1rem}
+.toc ul{list-style:none;padding-left:0}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+.toc ul ul{padding-left:1rem}
+.reading-time{color:var(--text-muted);font-size:.85rem;margin:.5rem 0}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:2px 8px;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.collapsible-table summary{cursor:pointer;color:var(--accent2);font-weight:600;margin:.5rem 0}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn,.toc{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb" aria-label="Breadcrumb"><a title="gem5 — Full-<a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> Computer Architecture <a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">Simulator</a>" href="../../index.html">gem5</a> &rsaquo; <a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">cpu</a> &rsaquo; simple</nav>
+
+<h1>simple</h1>
+<div class="hero">
+  <div class="subtitle">simple &mdash; <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs</div>
+  <p>The Simple <a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">CPU</a> models are gem5&rsquo;s fastest and simplest processor implementations, executing one instruction at a time without pipelining. <code>AtomicSimpleCPU</code> uses instantaneous memory accesses for maximum simulation speed, while <code>TimingSimpleCPU</code> models realistic <a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a> port timing. Together, they are the workhorses for functional validation, fast-forward phases, and memory system research.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">&#9881; One-at-a-Time</span>
+    <span class="badge green">&#128296; Atomic <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a></span>
+    <span class="badge yellow">&#128640; Timing Memory</span>
+    <span class="badge red">&#127919; Fastest Simulation</span>
+  </p>
+</div>
+
+<div class="reading-time" id="readingTime"></div>
+
+<div class="intro-box">
+<h3>&#128218; What is this module?</h3>
+<p>The <code>simple/</code> directory provides CPU models that execute instructions one at a time in a simple fetch&ndash;execute loop with no pipeline stages. These are not designed to model real processor microarchitecture but instead to provide <strong>functional correctness</strong> at <strong>maximum simulation speed</strong>. They are typically used for fast-forwarding to a region of interest (then switching to O3/Minor), for warming up caches, or for studies where only the memory system matters and CPU pipeline detail is irrelevant.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy: Calculator vs Computer</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">If the O3 CPU is a modern multi-lane superscalar processor and <a title="minor — In-Order Pipelined CPU — gem5 Wiki" href="../minor/index.html">Minor</a> is a simple pipelined processor, then the Simple CPUs are like a basic calculator. You enter one calculation at a time, get the result, then enter the next one. <strong><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">AtomicSimpleCPU</a></strong> is like a calculator with instant memory &mdash; press the button and the answer appears immediately (no cache delay). <strong><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">TimingSimpleCPU</a></strong> is like a calculator connected to a filing cabinet &mdash; it still does one calculation at a time, but it has to wait for the filing cabinet (cache/memory) to deliver the data before proceeding. This makes Timing useful for studying how memory latency affects program execution.</p>
+</details>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">3</div><div class="label">CPU Variants</div></div>
+  <div class="stat-box"><div class="num">18</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">4K</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">No <a href="../minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a></div><div class="label">Execution Model</div></div>
+</div>
+
+<nav class="toc" id="toc"><h3>&#128214; Table of Contents</h3></nav>
+
+<h2 id="architecture">Class Hierarchy</h2>
+<p>All simple CPU variants inherit from <code>BaseSimpleCPU</code>, which provides the common fetch&ndash;execute loop infrastructure. Each variant overrides the memory access methods to implement different timing models.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+    BCPU["BaseCPU\ncpu/base.hh"]
+    BSC["BaseSimpleCPU\nsimple/base.hh"]
+    ASC["AtomicSimpleCPU\nsimple/atomic.hh"]
+    TSC["TimingSimpleCPU\nsimple/timing.hh"]
+    NCSC["NonCachingSimpleCPU\nsimple/noncaching.hh"]
+    SEC["SimpleExecContext\nsimple/exec_context.hh"]
+
+    BCPU --> BSC
+    BSC --> ASC
+    BSC --> TSC
+    ASC --> NCSC
+    BSC -.->|"creates"| SEC
+</pre>
+</div>
+
+<h2 id="variants">CPU Variants</h2>
+
+<h3 id="atomic">AtomicSimpleCPU</h3>
+<p><code>AtomicSimpleCPU</code> (<code>simple/atomic.hh</code>) is the fastest CPU model in gem5. It uses <strong>atomic memory accesses</strong> &mdash; each load or store completes instantaneously in a single function call, returning the access latency as a value that the CPU uses to advance the simulation clock. No cache timing ports are used; instead, the CPU calls <code>sendAtomic()</code> which bypasses the normal cache request/response protocol.</p>
+<p>This makes AtomicSimpleCPU ideal for:</p>
+<ul>
+<li>Fast-forwarding billions of instructions to reach a region of interest</li>
+<li>Functional validation of ISA implementations</li>
+<li>Boot-up phases in full-system simulation before switching to a detailed model</li>
+<li><a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimPoint</a> checkpoint generation</li>
+</ul>
+
+<h3 id="timing">TimingSimpleCPU</h3>
+<p><code>TimingSimpleCPU</code> (<code>simple/timing.hh</code>) uses <strong>timing memory accesses</strong> through standard cache request/response ports. Each memory operation sends a timing request to the L1 cache and must wait for the response callback before the instruction can complete. This models realistic cache hit/miss latencies while keeping the CPU model itself minimal.</p>
+<p>Use TimingSimpleCPU when you need:</p>
+<ul>
+<li>Memory system studies where pipeline detail is irrelevant</li>
+<li>A simple CPU to drive cache/DRAM timing simulations</li>
+<li>Baseline performance numbers with realistic memory timing</li>
+</ul>
+
+<h3 id="noncaching">NonCachingSimpleCPU</h3>
+<p><code>NonCachingSimpleCPU</code> (<code>simple/noncaching.hh</code>) extends AtomicSimpleCPU by connecting directly to the memory bus without any caches. Every memory access goes straight to main memory. This is used for minimal configurations and testing.</p>
+
+<h2 id="execution-loop">Execution Loop</h2>
+<p>Both Atomic and Timing share the same basic execution loop defined in <code>BaseSimpleCPU</code>:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+    START["tick()"] --> PREFETCH["preExecute()\nFetch instruction at PC"]
+    PREFETCH --> DECODE["Decode: create StaticInst"]
+    DECODE --> EXEC["Execute: call StaticInst::execute()\nvia SimpleExecContext"]
+    EXEC --> MEM{"Memory\ninstruction?"}
+    MEM -->|"Yes, Atomic"| AMEM["sendAtomic()\nInstant response + latency"]
+    MEM -->|"Yes, Timing"| TMEM["sendTimingReq()\nWait for callback"]
+    MEM -->|"No"| POST["postExecute()\nUpdate PC, stats"]
+    AMEM --> POST
+    TMEM --> WAIT["Suspend until\nrecvTimingResp()"]
+    WAIT --> POST
+    POST --> ADVANCE["advancePC()\nSchedule next tick()"]
+    ADVANCE --> START
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<tr><th>Class</th><th>Header</th><th>Responsibility</th></tr>
+<tr><td><code>BaseSimpleCPU</code></td><td><code>simple/base.hh</code></td><td><a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">Base</a> class with common fetch&ndash;execute loop, branch prediction, tracing, and thread management. Not instantiated directly.</td></tr>
+<tr><td><code>AtomicSimpleCPU</code></td><td><code>simple/atomic.hh</code></td><td>Atomic memory model. Overrides <code>readMem()</code> and <code>writeMem()</code> with <code>sendAtomic()</code> calls. Advances clock by access latency.</td></tr>
+<tr><td><code>TimingSimpleCPU</code></td><td><code>simple/timing.hh</code></td><td>Timing memory model. Uses <code>sendTimingReq()</code> and <code>recvTimingResp()</code> callbacks. Suspends CPU until memory response.</td></tr>
+<tr><td><code>NonCachingSimpleCPU</code></td><td><code>simple/noncaching.hh</code></td><td>AtomicSimpleCPU variant that bypasses caches, connecting directly to memory bus.</td></tr>
+<tr><td><code>SimpleExecContext</code></td><td><code>simple/exec_context.hh</code></td><td><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">ExecContext</a> implementation for Simple CPUs. Provides register read/write and memory access methods to <code>StaticInst::execute()</code>.</td></tr>
+<tr><td><code>SimpleThread</code></td><td><code>cpu/simple_thread.hh</code></td><td>Per-thread architectural state: register file, PC, and miscellaneous registers. Used by all Simple (and Minor) CPU models.</td></tr>
+<tr><td><code>BPredUnit</code></td><td><code>cpu/pred/bpred_unit.hh</code></td><td>Optional branch predictor. <a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">BaseSimpleCPU</a> supports an attached predictor for branch prediction accuracy studies.</td></tr>
+</table>
+
+<h2 id="data-flow">Data Flow: Atomic vs Timing</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant CPU as SimpleExecContext
+    participant BSC as BaseSimpleCPU
+    participant MEM as Memory System
+
+    rect rgb(30, 40, 55)
+    Note over CPU,MEM: AtomicSimpleCPU path
+    BSC->>BSC: preExecute() - fetch &amp; decode
+    BSC->>CPU: StaticInst::execute(xc)
+    CPU->>MEM: sendAtomic(pkt)
+    MEM-->>CPU: latency = 3 cycles (instant)
+    CPU-->>BSC: execution complete
+    BSC->>BSC: advancePC, schedule tick(+latency)
+    end
+
+    rect rgb(30, 50, 40)
+    Note over CPU,MEM: TimingSimpleCPU path
+    BSC->>BSC: preExecute() - fetch &amp; decode
+    BSC->>CPU: StaticInst::execute(xc)
+    CPU->>MEM: sendTimingReq(pkt)
+    Note over BSC: CPU suspended, no tick scheduled
+    MEM-->>CPU: recvTimingResp(pkt) after 3-200 cycles
+    CPU-->>BSC: completeDataAccess()
+    BSC->>BSC: postExecute, advancePC, schedule tick(+1)
+    end
+</pre>
+</div>
+
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<tr><th>Interaction</th><th>Simple Component</th><th>External Module</th><th>Mechanism</th></tr>
+<tr><td>Atomic memory access</td><td>AtomicSimpleCPU</td><td>Cache/Memory (<a title="mem — Memory System | gem5 Wiki" href="../../mem_doc/index.html">mem</a>/)</td><td><code>sendAtomic()</code> &mdash; synchronous, returns latency</td></tr>
+<tr><td>Timing memory access</td><td>TimingSimpleCPU</td><td>Cache (mem/)</td><td><code>sendTimingReq()</code> / <code>recvTimingResp()</code> callback</td></tr>
+<tr><td>Instruction decode</td><td>BaseSimpleCPU</td><td><a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">Decoder</a> (<a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../../arch_doc/index.html">arch</a>/)</td><td><code>InstDecoder::decode()</code> → <a href="../../arch_doc/generic/index.html" title="generic — ISA-Independent Base Classes | gem5 Wiki" class="xref">StaticInst</a></td></tr>
+<tr><td>TLB translation</td><td>BaseSimpleCPU</td><td>MMU (arch/)</td><td><code>MMU::translateAtomic()</code> or <code>translateTiming()</code></td></tr>
+<tr><td>Branch prediction</td><td>BaseSimpleCPU</td><td><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">BPredUnit</a> (<a title="pred — Branch Prediction — gem5 Wiki" href="../pred/index.html">pred</a>/)</td><td>Optional predictor for accuracy <a title="A comprehensive framework for declaring, collecting, and outputting performance counters, distributions, histograms, and derived formulas across all gem5 components." href="../../base_doc/stats/index.html">stats</a></td></tr>
+<tr><td>Execution tracing</td><td>BaseSimpleCPU</td><td>ExeTracer (cpu/)</td><td><code>InstRecord</code> for instruction-level trace output</td></tr>
+<tr><td>System call emulation</td><td>SimpleExecContext</td><td><a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Process</a> (<a title="The discrete-event simulation core that drives gem5's timing model, managing object lifecycles, event scheduling, and system-level coordination." href="../../sim_doc/index.html">sim</a>/)</td><td>SE-mode syscall handler invoked on trap instructions</td></tr>
+<tr><td>CPU switching</td><td>AtomicSimpleCPU</td><td><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">BaseCPU</a></td><td><code>switchOut()</code> / <code>takeOverFrom()</code> for CPU model switching</td></tr>
+</table>
+
+<h2 id="comparison">Variant Comparison</h2>
+<table>
+<tr><th>Feature</th><th>AtomicSimpleCPU</th><th>TimingSimpleCPU</th><th>NonCachingSimpleCPU</th></tr>
+<tr><td>Memory model</td><td>Atomic (instant)</td><td>Timing (async)</td><td>Atomic (no cache)</td></tr>
+<tr><td>Cache interaction</td><td>sendAtomic &mdash; bypasses timing</td><td>sendTimingReq &mdash; full cache timing</td><td>Direct to memory bus</td></tr>
+<tr><td>Simulation speed</td><td>Fastest (~10 MIPS)</td><td>~3&times; slower than Atomic</td><td>Similar to Atomic</td></tr>
+<tr><td>Memory timing accuracy</td><td>None (uses access latency estimate)</td><td>Cycle-accurate cache behavior</td><td>None</td></tr>
+<tr><td>Typical use</td><td>Fast-forward, checkpoint gen, warmup</td><td>Memory system studies</td><td>Minimal test configs</td></tr>
+<tr><td>Supports CPU switching</td><td>Yes (common fast-forward target)</td><td>Yes</td><td>Yes</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">simple/ source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>simple/
+├── base.hh / base.cc             ← BaseSimpleCPU: common fetch-execute loop
+├── atomic.hh / atomic.cc         ← AtomicSimpleCPU: instant memory model
+├── timing.hh / timing.cc         ← TimingSimpleCPU: cache-timed memory
+├── noncaching.hh / noncaching.cc ← NonCachingSimpleCPU: no cache, direct memory
+├── exec_context.hh               ← SimpleExecContext: register/memory access
+├── probes/                       ← Profiling probes
+│   ├── simpoint.hh               ← SimPoint basic block vector profiling
+│   └── looppoint_analysis.hh     ← LoopPoint region detection
+├── BaseSimpleCPU.py              ← Python parameter base class
+├── AtomicSimpleCPU.py            ← Python Atomic config
+├── BaseAtomicSimpleCPU.py        ← Python Atomic base params
+├── TimingSimpleCPU.py            ← Python Timing config
+├── BaseTimingSimpleCPU.py        ← Python Timing base params
+├── NonCachingSimpleCPU.py        ← Python NonCaching config
+├── BaseNonCachingSimpleCPU.py    ← Python NonCaching base params
+└── SConscript                    ← Build definitions
+</code></pre>
+</details>
+
+<h2 id="configuration">Configuration Parameters</h2>
+<table>
+<tr><th>Parameter</th><th>Class</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>clock</code></td><td>All</td><td>&ldquo;1GHz&rdquo;</td><td>CPU clock frequency</td></tr>
+<tr><td><code>system</code></td><td>All</td><td>(required)</td><td>Parent System object</td></tr>
+<tr><td><code>branchPred</code></td><td>BaseSimpleCPU</td><td>NULL</td><td>Optional branch predictor for accuracy studies</td></tr>
+<tr><td><code>numThreads</code></td><td>All</td><td>1</td><td>Number of threads (typically 1 for Simple)</td></tr>
+<tr><td><code>checker</code></td><td>BaseSimpleCPU</td><td>NULL</td><td>Optional functional checker CPU</td></tr>
+<tr><td><code>simulate_data_stalls</code></td><td>AtomicSimpleCPU</td><td>false</td><td>Add data access latency to tick advancement</td></tr>
+<tr><td><code>simulate_inst_stalls</code></td><td>AtomicSimpleCPU</td><td>false</td><td>Add instruction fetch latency to tick advancement</td></tr>
+</table>
+
+<h3 id="code-atomic">Code Example: AtomicSimpleCPU Tick</h3>
+<pre><code class="language-cpp">// Simplified view of AtomicSimpleCPU::tick() from simple/atomic.cc
+void AtomicSimpleCPU::tick()
+{
+    SimpleExecContext &amp;t_info = *threadInfo[curThread];
+    SimpleThread *thread = t_info.thread;
+
+    // Fetch: read instruction bytes at current PC
+    Tick icache_latency = fetchInstMem();
+
+    // Decode: create StaticInst from fetched bytes
+    preExecute();
+
+    // Execute: call StaticInst::execute()
+    Fault fault = curStaticInst-&gt;execute(&amp;t_info, traceData);
+
+    // Memory ops use sendAtomic() — completes instantly
+    // returning access latency for clock advancement
+
+    postExecute();
+
+    // Advance simulation clock by the greater of
+    // instruction latency and memory latency
+    Tick stall_ticks = 0;
+    if (simulate_data_stalls)
+        stall_ticks = t_info.dcache_latency;
+
+    advanceInst(stall_ticks + icache_latency);
+}</code></pre>
+
+<h3 id="code-timing">Code Example: TimingSimpleCPU Memory Response</h3>
+<pre><code class="language-cpp">// Simplified view of TimingSimpleCPU::completeDataAccess()
+bool TimingSimpleCPU::DcachePort::recvTimingResp(PacketPtr pkt)
+{
+    // Called by cache when load/store response arrives
+    cpu-&gt;completeDataAccess(pkt);
+    return true;
+}
+
+void TimingSimpleCPU::completeDataAccess(PacketPtr pkt)
+{
+    SimpleExecContext &amp;t_info = *threadInfo[curThread];
+
+    // Complete the memory operation
+    t_info.thread-&gt;setMem(pkt);
+
+    // Resume execution: finish instruction, advance PC
+    postExecute();
+    advanceInst(Tick(1));
+
+    // Schedule next tick — CPU was suspended until now
+    schedule(tickEvent, curTick() + cyclesToTicks(Cycles(1)));
+}</code></pre>
+
+<h2 id="cpu-switching">CPU Model Switching</h2>
+<p>A common gem5 pattern is to use AtomicSimpleCPU for fast-forward, then switch to O3CPU for detailed simulation:</p>
+<blockquote>
+<strong>Typical workflow:</strong> Boot the OS with AtomicSimpleCPU (fast), take a checkpoint, then restore with O3CPU for detailed analysis. The <code>switchOut()</code> and <code>takeOverFrom()</code> methods in BaseCPU transfer thread state between models seamlessly.
+</blockquote>
+
+<div class="footer">
+<a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">&#8592; Back to cpu</a> &nbsp;|&nbsp;
+simple Sub-Module Wiki &mdash; Generated 2026-03-25
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  if(!headings.length)return;
+  var ul=document.createElement('ul');
+  headings.forEach(function(h){
+    var li=document.createElement('li');
+    if(h.tagName==='H3'){li.style.paddingLeft='1rem';}
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[\u{1F4D6}\u{1F4CB}#]+\s*/u,'');
+    li.appendChild(a);ul.appendChild(li);
+  });
+  toc.appendChild(ul);
+})();
+(function(){
+  var el=document.getElementById('readingTime');if(!el)return;
+  var text=document.querySelector('main').textContent||'';
+  var words=text.trim().split(/\s+/).length;
+  var mins=Math.max(1,Math.round(words/220));
+  el.textContent='\u{1F4D6} '+mins+' min read \u00B7 '+words+' words';
+})();
+document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';
+  btn.addEventListener('click',function(){
+    var code=pre.querySelector('code');
+    navigator.clipboard.writeText(code?code.textContent:pre.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});
+  });
+  pre.appendChild(btn);
+});
+(function(){
+  var headings=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='j'||e.key==='k'){
+      var scrollY=window.scrollY+100;
+      var idx=-1;
+      for(var i=0;i<headings.length;i++){if(headings[i].offsetTop>scrollY){idx=i;break;}}
+      if(e.key==='k'){idx=idx<=0?0:idx-1;}else{if(idx<0)idx=headings.length-1;}
+      if(headings[idx])headings[idx].scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  });
+})();
+if(window.hljs){hljs.highlightAll();}
+</script>
+</body></html>

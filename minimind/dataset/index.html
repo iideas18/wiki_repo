@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-generated" content="2026-03-26">
+<meta name="wiki-source-rev" content="83e52f6">
+<title>Dataset Pipeline — MiniMind Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76;--shadow:0 2px 8px rgba(0,0,0,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:var(--radius);z-index:1000;font-weight:600}.skip-link:focus{top:1rem}
+.container{max-width:960px;margin:0 auto;padding:0 1.5rem}
+/* Breadcrumb */
+.breadcrumb{padding:1rem 0;font-size:.875rem;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}.breadcrumb span{margin:0 .35rem}
+/* Hero */
+.hero{text-align:center;padding:2.5rem 0 1.5rem}.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:.4rem}.hero .subtitle{font-size:1.1rem;color:var(--text-muted)}
+.reading-time{text-align:center;font-size:.8rem;color:var(--text-muted);margin-bottom:1.5rem}
+/* Stats */
+.stats{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1.2rem 0}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.7rem 1.3rem;text-align:center;min-width:120px}.stat-card .num{font-size:1.5rem;font-weight:700;color:var(--accent)}.stat-card .lbl{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+/* Badges */
+.badges{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:1rem 0}.badge{padding:.35rem .8rem;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid var(--border)}.badge-blue{color:var(--accent);border-color:var(--accent)}.badge-green{color:var(--accent2);border-color:var(--accent2)}.badge-yellow{color:var(--accent3);border-color:var(--accent3)}.badge-red{color:var(--accent4);border-color:var(--accent4)}
+/* Sections */
+section{margin:2rem 0}h2{font-size:1.5rem;color:var(--heading);border-bottom:2px solid var(--border);padding-bottom:.4rem;margin-bottom:1rem}h3{font-size:1.15rem;color:var(--heading);margin:1rem 0 .5rem}
+/* Intro box */
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:var(--radius);padding:1.2rem 1.5rem;margin:1.5rem 0;font-size:.95rem}.intro-box .analogy-title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:1rem}
+/* TOC */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;margin:1.5rem 0}.toc-title{font-weight:700;color:var(--heading);margin-bottom:.5rem}.toc ol{padding-left:1.3rem}.toc li{margin:.25rem 0;font-size:.9rem}.toc a{color:var(--accent)}
+/* Mermaid */
+.mermaid-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin:1rem 0;overflow-x:auto;cursor:pointer;position:relative}.mermaid-wrapper:hover::after{content:'🔍 Click to zoom';position:absolute;top:.5rem;right:.5rem;background:var(--accent);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:4px}
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem}th,td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:hover{background:var(--surface)}
+/* Code */
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative;font-size:.85rem;line-height:1.5}code{font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:.85em}
+.code-header{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:.4rem .8rem;font-size:.78rem;color:var(--text-muted)}.code-header+pre{border-top-left-radius:0;border-top-right-radius:0;margin-top:0}
+.copy-btn{background:var(--border);color:var(--text);border:none;border-radius:4px;padding:.2rem .6rem;cursor:pointer;font-size:.75rem}.copy-btn:hover{background:var(--accent);color:#fff}
+/* Hub cards */
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin:1rem 0}.hub-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;transition:border-color .2s}.hub-card:hover{border-color:var(--accent)}.hub-card h4{color:var(--heading);margin-bottom:.3rem;font-size:1rem}.hub-card p{font-size:.85rem;color:var(--text-muted)}
+/* Dir map */
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;font-family:monospace;font-size:.85rem;line-height:1.6}
+/* Theme toggle */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:999;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:var(--shadow);transition:transform .2s}.theme-toggle:hover{transform:scale(1.1)}
+/* Back to top */
+.back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:42px;height:42px;font-size:1.2rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:998;transition:opacity .3s}.back-to-top.visible{display:flex}
+/* Footer */
+footer{border-top:1px solid var(--border);margin-top:3rem;padding:1.5rem 0;text-align:center;font-size:.82rem;color:var(--text-muted)}footer a{color:var(--accent)}
+/* Zoom overlay */
+.zoom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:2rem}.zoom-overlay.active{display:flex}.zoom-overlay .zoom-content{max-width:95vw;max-height:95vh;overflow:auto;background:var(--surface);border-radius:var(--radius);padding:2rem}
+/* Print */
+@media print{.theme-toggle,.back-to-top,.skip-link,.zoom-overlay{display:none!important}body{background:#fff;color:#000}.hero h1{color:#000}pre{border:1px solid #ccc}table{font-size:.8rem}}
+@media(max-width:640px){.stats{flex-direction:column;align-items:center}.hub-grid{grid-template-columns:1fr}.hero h1{font-size:1.6rem}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hl-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light theme">🌙</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">↑</button>
+<div class="zoom-overlay" id="zoomOverlay"><div class="zoom-content" id="zoomContent"></div></div>
+
+<div class="container" id="main">
+<!-- Breadcrumb -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">MiniMind</a> <span>›</span> <strong>Dataset Pipeline</strong>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>📦 Dataset Pipeline</h1>
+  <p class="subtitle">Data Loading and Preprocessing for All Training Stages</p>
+</header>
+<p class="reading-time" id="readingTime"></p>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card"><div class="num">2</div><div class="lbl">Files</div></div>
+  <div class="stat-card"><div class="num">4</div><div class="lbl">Dataset Classes</div></div>
+  <div class="stat-card"><div class="num">~218</div><div class="lbl">Lines</div></div>
+  <div class="stat-card"><div class="num">🐍</div><div class="lbl">Python</div></div>
+</div>
+
+<!-- Badges -->
+<div class="badges">
+  <span class="badge badge-blue">🔵 Pretrain</span>
+  <span class="badge badge-green">🟢 SFT · Chat Template</span>
+  <span class="badge badge-yellow">🟡 DPO · Preference</span>
+  <span class="badge badge-red">🔴 RLAIF · RL</span>
+</div>
+
+<!-- Intro -->
+<div class="intro-box">
+  <div class="analogy-title">🍳 Kitchen Analogy</div>
+  <p>Think of the dataset module as <strong>ingredient preparation stations</strong> in a professional kitchen. Each station (Dataset class) takes raw ingredients (JSONL data) and prepares them differently depending on the dish being made — the Pretrain station washes and chops text into uniform pieces, the SFT station marinates conversations into chat templates, the DPO station carefully selects the best and worst preparations for comparison, and the RLAIF station stages prompts for the chef (RL agent) to improvise with. Every station outputs precisely formatted batches, ready for the training "oven."</p>
+</div>
+
+<!-- TOC -->
+<nav class="toc" aria-label="Table of contents">
+  <div class="toc-title">📑 Table of Contents</div>
+  <ol id="tocList"></ol>
+</nav>
+
+<!-- Architecture Diagram -->
+<section id="architecture">
+  <h2>Architecture Overview</h2>
+  <div class="mermaid-wrapper" data-source="arch">
+    <pre class="mermaid">
+classDiagram
+    class Dataset {
+        &lt;&lt;PyTorch&gt;&gt;
+        +__len__()
+        +__getitem__(index)
+    }
+    class PretrainDataset {
+        -data: List
+        -max_length: int
+        +__init__(data_path, tokenizer, max_length)
+        +__getitem__(index) → (X, Y, loss_mask)
+    }
+    class SFTDataset {
+        -data: List
+        +create_chat_prompt(conversations)
+        +generate_labels(input_ids)
+        +__getitem__(index) → (X, Y, loss_mask)
+    }
+    class DPODataset {
+        -data: List
+        +__getitem__(index) → (x_cho, y_cho, m_cho, x_rej, y_rej, m_rej)
+    }
+    class RLAIFDataset {
+        -data: List
+        +create_chat_prompt(conversations)
+        +__getitem__(index) → (prompt, answer)
+    }
+    Dataset <|-- PretrainDataset
+    Dataset <|-- SFTDataset
+    Dataset <|-- DPODataset
+    Dataset <|-- RLAIFDataset
+    </pre>
+  </div>
+</section>
+
+<!-- Key Classes Table -->
+<section id="key-classes">
+  <h2>Key Classes &amp; Functions</h2>
+  <table>
+    <thead><tr><th>Name</th><th>Type</th><th>File</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>PretrainDataset</code></td><td>Class</td><td>lm_dataset.py</td><td>Loads JSONL, tokenizes with BOS/EOS, pads to max_length; labels=-100 for padding tokens</td></tr>
+      <tr><td><code>SFTDataset</code></td><td>Class</td><td>lm_dataset.py</td><td>Applies chat template via <code>apply_chat_template()</code>, computes loss only on assistant turns</td></tr>
+      <tr><td><code>DPODataset</code></td><td>Class</td><td>lm_dataset.py</td><td>Pairs chosen/rejected conversations with corresponding loss masks</td></tr>
+      <tr><td><code>RLAIFDataset</code></td><td>Class</td><td>lm_dataset.py</td><td>Builds prompts with <code>add_generation_prompt=True</code> for PPO/GRPO/SPO training</td></tr>
+      <tr><td><code>pre_processing_chat</code></td><td>Function</td><td>lm_dataset.py</td><td>Randomly injects system prompts (10 bilingual options, 20% chance) via <code>add_system_ratio</code></td></tr>
+      <tr><td><code>post_processing_chat</code></td><td>Function</td><td>lm_dataset.py</td><td>Strips empty <code>&lt;think&gt;&lt;/think&gt;</code> tags with 95% probability</td></tr>
+      <tr><td><code>create_chat_prompt</code></td><td>Method</td><td>lm_dataset.py</td><td>Handles tool calling by injecting function schemas into the system message</td></tr>
+      <tr><td><code>generate_labels</code></td><td>Method</td><td>lm_dataset.py</td><td>Masks non-assistant tokens to -100; loss only between <code>bos_id</code> and <code>eos_id</code> markers</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Data Flow Diagram -->
+<section id="data-flow">
+  <h2>Data Flow</h2>
+  <div class="mermaid-wrapper" data-source="flow">
+    <pre class="mermaid">
+sequenceDiagram
+    participant JSONL as JSONL Files
+    participant HF as HuggingFace Loader
+    participant DS as Dataset Class
+    participant TK as Tokenizer
+    participant DL as DataLoader
+    participant TR as Trainer
+
+    JSONL->>HF: load_dataset("json")
+    HF->>DS: raw samples
+    DS->>TK: tokenize text/chat
+    TK-->>DS: input_ids, attention_mask
+    DS->>DS: generate_labels / loss_mask
+    DS->>DL: (X, Y, loss_mask) batches
+    DL->>TR: collated mini-batches
+    TR->>TR: compute loss (masked)
+    </pre>
+  </div>
+</section>
+
+<!-- Interactions -->
+<section id="interactions">
+  <h2>Interactions &amp; Dependencies</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Depends On</th><th>Interaction</th></tr></thead>
+    <tbody>
+      <tr><td><code>PretrainDataset</code></td><td>HuggingFace datasets, tokenizer</td><td>Loads JSONL, tokenizes raw text to fixed-length sequences</td></tr>
+      <tr><td><code>SFTDataset</code></td><td>tokenizer.apply_chat_template</td><td>Formats multi-turn conversations using the model's chat template</td></tr>
+      <tr><td><code>SFTDataset</code></td><td>pre_processing_chat</td><td>Randomly adds system prompt before tokenization</td></tr>
+      <tr><td><code>SFTDataset</code></td><td>post_processing_chat</td><td>Strips empty think tags to control reasoning format</td></tr>
+      <tr><td><code>DPODataset</code></td><td>SFTDataset logic</td><td>Reuses chat template + labeling for chosen/rejected pairs</td></tr>
+      <tr><td><code>RLAIFDataset</code></td><td>tokenizer, reward model</td><td>Produces prompts; answers used downstream for reward computation</td></tr>
+      <tr><td>All Datasets</td><td>PyTorch DataLoader</td><td>Consumed by DataLoader with custom collate or default batching</td></tr>
+      <tr><td><code>generate_labels</code></td><td>bos_id / eos_id tokens</td><td>Scans token IDs to create loss masks targeting assistant segments</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Deep-Dive Cards -->
+<section id="deep-dives">
+  <h2>Deep-Dive Topics</h2>
+  <div class="hub-grid">
+    <div class="hub-card">
+      <h4>💬 Chat Template Processing</h4>
+      <p>How <code>apply_chat_template()</code> converts multi-turn conversations into token sequences, handling system messages, tool calls, and role markers for proper formatting.</p>
+    </div>
+    <div class="hub-card">
+      <h4>🎯 Loss Mask Generation</h4>
+      <p>The logic behind <code>generate_labels()</code>: scanning for bos/eos markers to compute loss only on assistant responses, avoiding training on user prompts or padding.</p>
+    </div>
+    <div class="hub-card">
+      <h4>⚖️ DPO Data Format</h4>
+      <p>How chosen/rejected conversation pairs are structured, tokenized in parallel, and returned with separate loss masks for Direct Preference Optimization training.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Directory Map -->
+<section id="directory-map">
+  <h2>Directory Map</h2>
+  <div class="dir-map">
+dataset/<br>
+├── __init__.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Package init<br>
+└── lm_dataset.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# ~218 lines — All dataset classes &amp; helpers<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── pre_processing_chat() &nbsp;# System prompt injection<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── post_processing_chat() # Think-tag cleanup<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── PretrainDataset &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Raw text tokenization<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── SFTDataset &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Chat template + loss masking<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── DPODataset &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Preference pair formatting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── RLAIFDataset &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# RL prompt generation
+  </div>
+</section>
+
+<!-- Configuration -->
+<section id="configuration">
+  <h2>Configuration Reference</h2>
+  <table>
+    <thead><tr><th>Parameter</th><th>Location</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>max_length</code></td><td>PretrainDataset / SFTDataset</td><td>512</td><td>Maximum sequence length; shorter sequences are padded, longer truncated</td></tr>
+      <tr><td><code>add_system_ratio</code></td><td>pre_processing_chat</td><td>0.2</td><td>Probability of injecting a random system prompt (20%)</td></tr>
+      <tr><td><code>empty_think_ratio</code></td><td>post_processing_chat</td><td>0.05</td><td>Probability of keeping empty think tags (5% keep, 95% strip)</td></tr>
+      <tr><td><code>data_path</code></td><td>All Dataset classes</td><td>—</td><td>Path to JSONL training data file</td></tr>
+      <tr><td><code>tokenizer</code></td><td>All Dataset classes</td><td>—</td><td>HuggingFace tokenizer instance with chat template</td></tr>
+      <tr><td><code>bos_id</code></td><td>SFTDataset.generate_labels</td><td>tokenizer.bos_id</td><td>Begin-of-sequence marker for assistant response boundaries</td></tr>
+      <tr><td><code>eos_id</code></td><td>SFTDataset.generate_labels</td><td>tokenizer.eos_id</td><td>End-of-sequence marker for assistant response boundaries</td></tr>
+      <tr><td><code>add_generation_prompt</code></td><td>RLAIFDataset</td><td>True</td><td>Appends generation prompt token for RL inference</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Code Examples -->
+<section id="code-examples">
+  <h2>Code Examples</h2>
+
+  <h3>Loading an SFT Dataset</h3>
+  <div class="code-header"><span>Python — SFT dataset initialization</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code class="language-python">from dataset.lm_dataset import SFTDataset
+from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("MiniMind2")
+dataset = SFTDataset(
+    data_path="data/sft_train.jsonl",
+    tokenizer=tokenizer,
+    max_length=512
+)
+
+# Each item: (input_ids, labels, loss_mask)
+X, Y, loss_mask = dataset[0]
+print(f"Sequence length: {len(X)}")
+print(f"Active loss tokens: {loss_mask.sum().item()}")</code></pre>
+
+  <h3>DPO Preference Pair Access</h3>
+  <div class="code-header"><span>Python — DPO dataset usage</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code class="language-python">from dataset.lm_dataset import DPODataset
+from torch.utils.data import DataLoader
+
+dpo_dataset = DPODataset(
+    data_path="data/dpo_train.jsonl",
+    tokenizer=tokenizer,
+    max_length=512
+)
+
+loader = DataLoader(dpo_dataset, batch_size=4, shuffle=True)
+
+for batch in loader:
+    x_chosen, y_chosen, mask_chosen, \
+    x_rejected, y_rejected, mask_rejected = batch
+    # Feed to DPO trainer for preference optimization
+    break</code></pre>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p><a href="../index.html">← Back to MiniMind Wiki</a></p>
+  <p>Generated on 2026-03-26 · Source revision <code>83e52f6</code> · Language: Python</p>
+  <p>MiniMind Internal Wiki — Dataset Pipeline L2 Deep-Dive</p>
+</footer>
+</div><!-- /.container -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark' });
+
+document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+  const pre = wrapper.querySelector('pre.mermaid');
+  if (pre) wrapper.setAttribute('data-source', pre.textContent);
+});
+
+async function renderDiagrams() {
+  const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+  mermaid.initialize({ startOnLoad: false, theme });
+  document.querySelectorAll('.mermaid-wrapper').forEach(async (wrapper, i) => {
+    const src = wrapper.getAttribute('data-source');
+    if (!src) return;
+    try {
+      const { svg } = await mermaid.render(`mermaid-${i}-${Date.now()}`, src);
+      wrapper.innerHTML = svg;
+      wrapper.setAttribute('data-source', src);
+    } catch(e) { console.warn('Mermaid render error:', e); }
+  });
+}
+await renderDiagrams();
+
+// Theme toggle
+const THEME_KEY = 'neutra-ip-theme';
+const toggle = document.getElementById('themeToggle');
+const hlTheme = document.getElementById('hl-theme');
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '🌙' : '☀️';
+  hlTheme.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  localStorage.setItem(THEME_KEY, t);
+  renderDiagrams();
+}
+
+const saved = localStorage.getItem(THEME_KEY);
+if (saved) applyTheme(saved);
+
+toggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// Highlight.js
+hljs.highlightAll();
+
+// TOC generation
+const tocList = document.getElementById('tocList');
+document.querySelectorAll('section[id] > h2').forEach((h, i) => {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = `#${h.parentElement.id}`;
+  a.textContent = h.textContent;
+  li.appendChild(a);
+  tocList.appendChild(li);
+});
+
+// Back to top
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+});
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Reading time
+const text = document.getElementById('main').textContent;
+const words = text.trim().split(/\s+/).length;
+document.getElementById('readingTime').textContent = `📖 ${Math.ceil(words / 200)} min read`;
+
+// Copy button
+window.copyCode = function(btn) {
+  const code = btn.closest('.code-header').nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(code.textContent).then(() => {
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  });
+};
+
+// Zoom overlay
+const overlay = document.getElementById('zoomOverlay');
+const zoomContent = document.getElementById('zoomContent');
+document.querySelectorAll('.mermaid-wrapper').forEach(w => {
+  w.addEventListener('click', () => {
+    zoomContent.innerHTML = w.innerHTML;
+    overlay.classList.add('active');
+  });
+});
+overlay.addEventListener('click', () => overlay.classList.remove('active'));
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') overlay.classList.remove('active');
+  if (e.key === 't' && !e.ctrlKey && !e.metaKey && document.activeElement === document.body) {
+    toggle.click();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-26">
+<meta name="wiki-source" content="minimind/model">
+<meta name="wiki-source-rev" content="83e52f6">
+<title>Model Architecture — MiniMind Internal Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76;--shadow:0 2px 8px rgba(0,0,0,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;transition:background .25s,color .25s}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:8px;background:var(--accent);color:#fff;padding:6px 16px;border-radius:var(--radius);z-index:999;font-weight:600}
+.skip-link:focus{top:8px}
+.wrapper{max-width:960px;margin:0 auto;padding:0 24px 64px}
+/* Breadcrumb */
+.breadcrumb{padding:18px 0 8px;font-size:.85rem;color:var(--text-muted)}
+.breadcrumb a{color:var(--accent)}
+/* Hero */
+.hero{padding:32px 0 24px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:6px;letter-spacing:-.02em}
+.hero .subtitle{font-size:1.05rem;color:var(--text-muted);margin-bottom:16px}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--text-muted)}
+.meta-row span{background:var(--surface);border:1px solid var(--border);padding:3px 10px;border-radius:20px}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-card .num{font-size:1.6rem;font-weight:700;color:var(--heading)}
+.stat-card .label{font-size:.78rem;color:var(--text-muted);margin-top:2px}
+/* Badges */
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.badge{padding:5px 14px;border-radius:20px;font-size:.82rem;font-weight:600;border:1px solid var(--border);background:var(--surface)}
+.badge.blue{border-color:var(--accent);color:var(--accent)}
+.badge.green{border-color:var(--accent2);color:var(--accent2)}
+.badge.yellow{border-color:var(--accent3);color:var(--accent3)}
+.badge.red{border-color:var(--accent4);color:var(--accent4)}
+/* Intro box */
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:20px 24px;margin:0 0 32px;font-size:.95rem}
+.intro-box strong{color:var(--heading)}
+/* TOC */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 28px;margin:0 0 36px}
+.toc h2{font-size:1rem;color:var(--heading);margin-bottom:10px}
+.toc ol{padding-left:20px}.toc li{margin:4px 0;font-size:.9rem}
+/* Sections */
+section{margin:40px 0}
+section>h2{font-size:1.45rem;color:var(--heading);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+section>h3{font-size:1.1rem;color:var(--heading);margin:20px 0 10px}
+/* Tables */
+.tbl-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+th{background:var(--surface);color:var(--heading);font-weight:600;white-space:nowrap}
+tr:hover td{background:var(--surface)}
+code{font-family:"SFMono-Regular",Consolas,monospace;font-size:.88em;background:var(--code-bg);padding:2px 6px;border-radius:4px}
+/* Mermaid */
+.diagram-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:18px 0;text-align:center;position:relative;cursor:pointer}
+.diagram-wrap .zoom-hint{position:absolute;top:8px;right:12px;font-size:.7rem;color:var(--text-muted);opacity:.7}
+/* Zoom overlay */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;justify-content:center;align-items:center;padding:32px;cursor:zoom-out}
+.overlay.active{display:flex}
+.overlay .overlay-inner{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:95vw;max-height:95vh;overflow:auto}
+/* Code blocks */
+.code-block{position:relative;margin:16px 0}
+.code-block pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;font-size:.85rem;line-height:1.55}
+.code-block .copy-btn{position:absolute;top:8px;right:10px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;font-size:.72rem;cursor:pointer}
+.code-block .copy-btn:hover{color:var(--heading);border-color:var(--accent)}
+/* Cards grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin:18px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card .card-icon{font-size:1.5rem;margin-bottom:8px}
+.card h4{font-size:.95rem;color:var(--heading);margin-bottom:4px}
+.card p{font-size:.8rem;color:var(--text-muted);line-height:1.45}
+/* Dir map */
+.dir-map{font-family:monospace;font-size:.85rem;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;line-height:1.7;white-space:pre}
+/* Theme toggle */
+.theme-toggle{position:fixed;top:16px;right:20px;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:background .2s}
+.theme-toggle:hover{border-color:var(--accent)}
+/* Back to top */
+.btt{position:fixed;bottom:24px;right:20px;z-index:100;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.btt.visible{display:flex}
+/* Reading time */
+.reading-time{font-size:.78rem;color:var(--text-muted);margin-top:4px}
+/* Footer */
+footer{margin-top:56px;padding:24px 0;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+footer a{color:var(--accent)}
+/* Print */
+@media print{.theme-toggle,.btt,.skip-link,.zoom-hint,.copy-btn{display:none!important}body{background:#fff;color:#000}.wrapper{max-width:100%}section{break-inside:avoid}}
+/* Responsive */
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.card-grid{grid-template-columns:1fr}.hero h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle theme (T)" aria-label="Toggle theme">🌙</button>
+<button class="btt" id="btt" title="Back to top" aria-label="Back to top">↑</button>
+
+<!-- Zoom overlay -->
+<div class="overlay" id="overlay" role="dialog" aria-label="Diagram zoom"><div class="overlay-inner" id="overlayInner"></div></div>
+
+<div class="wrapper" id="main">
+
+<!-- Breadcrumb -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">MiniMind</a> &rsaquo; <strong>Model Architecture</strong>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>Model Architecture</h1>
+  <p class="subtitle">Transformer, MoE, and LoRA Implementation</p>
+  <div class="meta-row">
+    <span>📦 model/</span>
+    <span>🐍 Python</span>
+    <span>🔖 <code>83e52f6</code></span>
+    <span>📅 2026-03-26</span>
+  </div>
+  <p class="reading-time">⏱ Estimated reading time: 8 min</p>
+</header>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card"><div class="num">3</div><div class="label">Files</div></div>
+  <div class="stat-card"><div class="num">12</div><div class="label">Classes / Functions</div></div>
+  <div class="stat-card"><div class="num">~520</div><div class="label">Lines of Code</div></div>
+  <div class="stat-card"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- Badges -->
+<div class="badges">
+  <span class="badge blue">🔵 Transformer · GQA</span>
+  <span class="badge green">🟢 RoPE · YaRN</span>
+  <span class="badge yellow">🟡 MoE · Top-K Gating</span>
+  <span class="badge red">🔴 LoRA · Low-Rank</span>
+</div>
+
+<!-- Intro Box -->
+<div class="intro-box">
+  <strong>🏭 Think of it like a factory assembly line.</strong>
+  The <code>model/</code> directory is the blueprint for MiniMind's neural "factory." Raw token IDs enter the conveyor belt (<code>embed_tokens</code>), pass through a series of identical processing stations (<code>MiniMindBlock</code>), each of which inspects context (Attention) and refines features (FeedForward). At the end of the line, a quality-control head (<code>lm_head</code>) stamps out the next-token prediction. The MoE option swaps a single FFN station for a team of specialist workers, each activated only when their expertise is needed. LoRA lets you fine-tune the factory by clipping small adapter jigs onto existing machinery — no need to retool the whole line.
+</div>
+
+<!-- TOC -->
+<nav class="toc" aria-label="Table of contents">
+  <h2>📑 Table of Contents</h2>
+  <ol>
+    <li><a href="#architecture">Architecture Overview</a></li>
+    <li><a href="#classes">Key Classes &amp; Functions</a></li>
+    <li><a href="#dataflow">Forward-Pass Data Flow</a></li>
+    <li><a href="#interactions">Module Interactions</a></li>
+    <li><a href="#deepdive">Deep-Dive Hub</a></li>
+    <li><a href="#dirmap">Directory Map</a></li>
+    <li><a href="#config">Configuration Reference</a></li>
+    <li><a href="#code">Code Examples</a></li>
+  </ol>
+</nav>
+
+<!-- ===== 1. Architecture Overview ===== -->
+<section id="architecture">
+  <h2>1 &middot; Architecture Overview</h2>
+  <p>MiniMind follows a decoder-only Transformer design compatible with Hugging Face's <code>PreTrainedModel</code>. The class hierarchy reflects clean separation of concerns: configuration lives in <code>MiniMindConfig</code>, the backbone in <code>MiniMindModel</code>, and the language-modelling head in <code>MiniMindForCausalLM</code>.</p>
+  <div class="diagram-wrap" data-diagram="arch">
+    <span class="zoom-hint">🔍 Click to zoom</span>
+    <pre class="mermaid" data-source="arch-diagram">
+classDiagram
+    class MiniMindForCausalLM {
+        +model: MiniMindModel
+        +lm_head: Linear
+        +forward(input_ids, labels)
+        +weight tying
+    }
+    class MiniMindModel {
+        +embed_tokens: Embedding
+        +layers: List~MiniMindBlock~
+        +norm: RMSNorm
+        +freqs_cos, freqs_sin
+    }
+    class MiniMindBlock {
+        +attention: Attention
+        +feed_forward: FFN or MoE
+        +attention_norm: RMSNorm
+        +ffn_norm: RMSNorm
+    }
+    class Attention {
+        +q_proj, k_proj, v_proj, o_proj
+        +GQA: num_kv_heads=2
+        +flash_attn support
+        +KV cache
+    }
+    class FeedForward {
+        +gate_proj: Linear
+        +up_proj: Linear
+        +down_proj: Linear
+        +SwiGLU activation
+    }
+    class MOEFeedForward {
+        +gate: MoEGate
+        +experts: List~FeedForward~
+        +shared_experts: FeedForward
+    }
+    class MoEGate {
+        +weight: Linear
+        +topk scoring
+        +aux_loss
+    }
+    class RMSNorm {
+        +weight: Parameter
+        +eps: float
+    }
+    class MiniMindConfig {
+        +hidden_size, num_layers
+        +use_moe, n_routed_experts
+        +rope_theta, flash_attn
+    }
+    class LoRA {
+        +A: Linear (rank)
+        +B: Linear (rank)
+    }
+    MiniMindForCausalLM --> MiniMindModel
+    MiniMindModel --> MiniMindBlock
+    MiniMindBlock --> Attention
+    MiniMindBlock --> FeedForward
+    MiniMindBlock --> MOEFeedForward
+    MOEFeedForward --> MoEGate
+    MOEFeedForward --> FeedForward : experts
+    MiniMindBlock --> RMSNorm
+    MiniMindForCausalLM ..> MiniMindConfig
+    LoRA ..> Attention : adapts projections
+    </pre>
+  </div>
+</section>
+
+<!-- ===== 2. Key Classes & Functions ===== -->
+<section id="classes">
+  <h2>2 &middot; Key Classes &amp; Functions</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>File</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>MiniMindConfig</code></td><td>model_minimind.py</td><td>Dataclass holding all hyperparameters; inherits <code>PretrainedConfig</code>.</td></tr>
+        <tr><td>2</td><td><code>RMSNorm</code></td><td>model_minimind.py</td><td>Root-mean-square layer normalisation with learnable scale.</td></tr>
+        <tr><td>3</td><td><code>precompute_freqs_cis</code></td><td>model_minimind.py</td><td>Builds cosine/sine tables for RoPE; supports YaRN scaling.</td></tr>
+        <tr><td>4</td><td><code>apply_rotary_pos_emb</code></td><td>model_minimind.py</td><td>Rotates Q/K tensors using precomputed frequencies.</td></tr>
+        <tr><td>5</td><td><code>repeat_kv</code></td><td>model_minimind.py</td><td>Repeats K/V heads to match Q head count in GQA.</td></tr>
+        <tr><td>6</td><td><code>Attention</code></td><td>model_minimind.py</td><td>Multi-head attention with grouped-query support and KV cache.</td></tr>
+        <tr><td>7</td><td><code>FeedForward</code></td><td>model_minimind.py</td><td>SwiGLU feed-forward network with auto-computed hidden dim.</td></tr>
+        <tr><td>8</td><td><code>MoEGate</code></td><td>model_minimind.py</td><td>Top-K softmax gating with auxiliary load-balancing loss.</td></tr>
+        <tr><td>9</td><td><code>MOEFeedForward</code></td><td>model_minimind.py</td><td>Mixture-of-Experts FFN with routed + shared experts.</td></tr>
+        <tr><td>10</td><td><code>MiniMindBlock</code></td><td>model_minimind.py</td><td>One Transformer layer: pre-norm → attention → FFN with residuals.</td></tr>
+        <tr><td>11</td><td><code>MiniMindModel</code></td><td>model_minimind.py</td><td>Full decoder backbone: embedding + N blocks + final norm.</td></tr>
+        <tr><td>12</td><td><code>MiniMindForCausalLM</code></td><td>model_minimind.py</td><td>Causal LM wrapper: backbone + lm_head + loss + generation.</td></tr>
+        <tr><td>13</td><td><code>LoRA</code></td><td>model_lora.py</td><td>Low-rank adapter module (A·B decomposition).</td></tr>
+        <tr><td>14</td><td><code>apply_lora</code></td><td>model_lora.py</td><td>Injects LoRA adapters into all square Linear layers.</td></tr>
+        <tr><td>15</td><td><code>load_lora / save_lora</code></td><td>model_lora.py</td><td>Serialization helpers for LoRA-only checkpoints.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 3. Data-Flow Sequence ===== -->
+<section id="dataflow">
+  <h2>3 &middot; Forward-Pass Data Flow</h2>
+  <p>The following diagram traces a single forward pass through <code>MiniMindForCausalLM</code>, from raw token IDs to cross-entropy loss.</p>
+  <div class="diagram-wrap" data-diagram="flow">
+    <span class="zoom-hint">🔍 Click to zoom</span>
+    <pre class="mermaid" data-source="flow-diagram">
+sequenceDiagram
+    participant Caller as Trainer / generate()
+    participant CLM as MiniMindForCausalLM
+    participant Model as MiniMindModel
+    participant Embed as embed_tokens
+    participant Block as MiniMindBlock ×N
+    participant Attn as Attention (GQA)
+    participant FFN as FeedForward / MoE
+    participant Norm as RMSNorm (final)
+    participant Head as lm_head
+
+    Caller->>CLM: input_ids, labels, past_kv
+    CLM->>Model: input_ids, attention_mask, past_kv
+    Model->>Embed: input_ids
+    Embed-->>Model: hidden_states (B,T,D)
+    loop For each layer i = 0..N-1
+        Model->>Block: hidden_states, freqs, mask, kv_cache[i]
+        Block->>Attn: RMSNorm(hidden_states)
+        Attn-->>Block: attn_out, updated kv_cache
+        Block->>Block: hidden_states += attn_out
+        Block->>FFN: RMSNorm(hidden_states)
+        FFN-->>Block: ffn_out [+ aux_loss if MoE]
+        Block-->>Model: hidden_states += ffn_out
+    end
+    Model->>Norm: hidden_states
+    Norm-->>Model: normed_states
+    Model-->>CLM: normed_states, kv_caches, aux_loss
+    CLM->>Head: normed_states[:, -logits_to_keep:]
+    Head-->>CLM: logits (B,T,V)
+    CLM->>CLM: CrossEntropyLoss + aux_loss
+    CLM-->>Caller: CausalLMOutputWithPast
+    </pre>
+  </div>
+</section>
+
+<!-- ===== 4. Interactions ===== -->
+<section id="interactions">
+  <h2>4 &middot; Module Interactions</h2>
+  <p>How <code>model/</code> connects with the rest of the MiniMind project:</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>External Module</th><th>Direction</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>train_pretrain.py</code></td><td>→ model</td><td>Instantiates <code>MiniMindForCausalLM</code>, calls <code>forward()</code>, reads loss + aux_loss.</td></tr>
+        <tr><td><code>train_full_sft.py</code></td><td>→ model</td><td>Fine-tunes full model weights; same forward path as pre-training.</td></tr>
+        <tr><td><code>train_lora.py</code></td><td>→ model, lora</td><td>Calls <code>apply_lora(model)</code>, trains only LoRA params, uses <code>save_lora()</code>.</td></tr>
+        <tr><td><code>train_grpo.py</code></td><td>→ model</td><td>Uses <code>logits_to_keep</code> param for memory-efficient GRPO training.</td></tr>
+        <tr><td><code>dataset.py</code></td><td>← model</td><td>Provides tokenized <code>input_ids</code> and <code>labels</code> consumed by the model.</td></tr>
+        <tr><td><code>eval_model.py</code></td><td>→ model</td><td>Loads checkpoint, calls <code>model.generate()</code> via <code>GenerationMixin</code>.</td></tr>
+        <tr><td>Hugging Face Hub</td><td>↔ model</td><td>Config + weights saved/loaded via <code>PreTrainedModel</code> API.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 5. Deep-Dive Hub ===== -->
+<section id="deepdive">
+  <h2>5 &middot; Deep-Dive Hub</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🔵</div>
+      <h4>Attention Mechanism</h4>
+      <p>Grouped-Query Attention with 8 Q-heads and 2 KV-heads. Supports Flash Attention via <code>scaled_dot_product_attention</code> and autoregressive KV caching for fast generation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🟡</div>
+      <h4>MoE Routing</h4>
+      <p>Top-2 gating over 4 routed experts plus 1 shared expert. Softmax scoring with Kaiming-uniform init. Auxiliary load-balancing loss at token or sequence level keeps experts evenly utilised.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🟢</div>
+      <h4>RoPE &amp; YaRN</h4>
+      <p>Rotary position embeddings with <code>θ=1e6</code> and max 32768 positions. YaRN scaling (factor 16, β_fast=32, β_slow=1) for long-context extrapolation: <code>f'(i) = f(i)·((1−γ) + γ/s)</code>.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔴</div>
+      <h4>LoRA Adapter</h4>
+      <p>Rank-<em>r</em> decomposition injected into all square projection layers. A-matrix Gaussian-init, B-matrix zero-init ensures no change at start. Only ~0.5% extra parameters.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. Directory Map ===== -->
+<section id="dirmap">
+  <h2>6 &middot; Directory Map</h2>
+  <div class="dir-map">model/
+├── __init__.py              # Package init (empty)
+├── model_minimind.py        # Core transformer (~464 lines)
+│   ├── MiniMindConfig       #   Configuration dataclass
+│   ├── RMSNorm              #   Layer normalization
+│   ├── precompute_freqs_cis #   RoPE frequency tables
+│   ├── apply_rotary_pos_emb #   Rotary embedding application
+│   ├── repeat_kv            #   GQA key/value repetition
+│   ├── Attention             #   Multi-head GQA attention
+│   ├── FeedForward           #   SwiGLU FFN
+│   ├── MoEGate              #   Top-K expert gating
+│   ├── MOEFeedForward       #   MoE layer
+│   ├── MiniMindBlock        #   Transformer block
+│   ├── MiniMindModel        #   Full decoder backbone
+│   └── MiniMindForCausalLM  #   Causal LM head + loss
+└── model_lora.py            # LoRA adapters (~54 lines)
+    ├── LoRA                 #   Low-rank module
+    ├── apply_lora           #   Injection helper
+    ├── load_lora            #   Weight loading
+    └── save_lora            #   Weight saving</div>
+</section>
+
+<!-- ===== 7. Configuration Reference ===== -->
+<section id="config">
+  <h2>7 &middot; Configuration Reference</h2>
+  <p>All knobs live in <code>MiniMindConfig(PretrainedConfig)</code>. Values shown are the defaults.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>hidden_size</code></td><td>512 / 640 / 768</td><td>Embedding dimension (varies by model size).</td></tr>
+        <tr><td><code>num_hidden_layers</code></td><td>8 / 16</td><td>Number of Transformer blocks.</td></tr>
+        <tr><td><code>num_attention_heads</code></td><td>8</td><td>Number of query heads per layer.</td></tr>
+        <tr><td><code>num_key_value_heads</code></td><td>2</td><td>Number of KV heads (grouped-query attention).</td></tr>
+        <tr><td><code>vocab_size</code></td><td>6400</td><td>Vocabulary size used by the tokenizer.</td></tr>
+        <tr><td><code>max_position_embeddings</code></td><td>32768</td><td>Maximum sequence length supported.</td></tr>
+        <tr><td><code>rope_theta</code></td><td>1e6</td><td>Base frequency for rotary position embeddings.</td></tr>
+        <tr><td><code>use_moe</code></td><td>False</td><td>Enable Mixture-of-Experts feed-forward layers.</td></tr>
+        <tr><td><code>num_experts_per_tok</code></td><td>2</td><td>Top-K experts activated per token.</td></tr>
+        <tr><td><code>n_routed_experts</code></td><td>4</td><td>Total number of routed expert FFNs.</td></tr>
+        <tr><td><code>n_shared_experts</code></td><td>1</td><td>Number of always-active shared experts.</td></tr>
+        <tr><td><code>scoring_func</code></td><td>"softmax"</td><td>Gating score function for MoE routing.</td></tr>
+        <tr><td><code>aux_loss_alpha</code></td><td>0.01</td><td>Weight of auxiliary load-balancing loss.</td></tr>
+        <tr><td><code>flash_attn</code></td><td>True</td><td>Use PyTorch <code>scaled_dot_product_attention</code>.</td></tr>
+        <tr><td><code>dropout</code></td><td>0.0</td><td>Dropout probability (disabled by default).</td></tr>
+        <tr><td><code>rms_norm_eps</code></td><td>1e-5</td><td>Epsilon for RMSNorm numerical stability.</td></tr>
+        <tr><td><code>hidden_act</code></td><td>"silu"</td><td>Activation function (<code>ACT2FN</code> lookup).</td></tr>
+        <tr><td><code>inference_rope_scaling</code></td><td>YaRN dict</td><td>YaRN config: factor=16, beta_fast=32, beta_slow=1.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 8. Code Examples ===== -->
+<section id="code">
+  <h2>8 &middot; Code Examples</h2>
+
+  <h3>8.1 &middot; SwiGLU Feed-Forward (from <code>model_minimind.py</code>)</h3>
+  <div class="code-block">
+    <button class="copy-btn" data-target="code1">Copy</button>
+    <pre><code class="language-python" id="code1">class FeedForward(nn.Module):
+    def __init__(self, config: MiniMindConfig):
+        super().__init__()
+        hidden_dim = int(config.hidden_size * 8 / 3)
+        hidden_dim = 64 * ((hidden_dim + 63) // 64)  # round to 64
+        self.gate_proj = nn.Linear(config.hidden_size, hidden_dim, bias=False)
+        self.up_proj   = nn.Linear(config.hidden_size, hidden_dim, bias=False)
+        self.down_proj = nn.Linear(hidden_dim, config.hidden_size, bias=False)
+        self.act_fn    = ACT2FN[config.hidden_act]
+
+    def forward(self, x):
+        return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))</code></pre>
+  </div>
+
+  <h3>8.2 &middot; LoRA Injection (from <code>model_lora.py</code>)</h3>
+  <div class="code-block">
+    <button class="copy-btn" data-target="code2">Copy</button>
+    <pre><code class="language-python" id="code2">class LoRA(nn.Module):
+    def __init__(self, in_features, out_features, rank=8):
+        super().__init__()
+        self.A = nn.Linear(in_features, rank, bias=False)
+        self.B = nn.Linear(rank, out_features, bias=False)
+        nn.init.normal_(self.A.weight, std=1/rank)
+        nn.init.zeros_(self.B.weight)
+
+    def forward(self, x):
+        return self.B(self.A(x))
+
+def apply_lora(model, rank=8):
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Linear) and module.in_features == module.out_features:
+            lora = LoRA(module.in_features, module.out_features, rank)
+            setattr(module, 'lora', lora)
+            original_forward = module.forward
+            module.forward = lambda x, of=original_forward, l=lora: of(x) + l(x)</code></pre>
+  </div>
+
+  <h3>8.3 &middot; YaRN-scaled RoPE Frequency Computation (from <code>model_minimind.py</code>)</h3>
+  <div class="code-block">
+    <button class="copy-btn" data-target="code3">Copy</button>
+    <pre><code class="language-python" id="code3">def precompute_freqs_cis(dim, end, theta=1e6, scaling_config=None):
+    freqs = 1.0 / (theta ** (torch.arange(0, dim, 2).float() / dim))
+    if scaling_config is not None:
+        # YaRN: f'(i) = f(i) * ((1 - gamma) + gamma / scale)
+        factor    = scaling_config["factor"]        # 16
+        beta_fast = scaling_config["beta_fast"]      # 32
+        beta_slow = scaling_config["beta_slow"]      # 1
+        # Compute linear ramp gamma ∈ [0, 1]
+        low  = math.floor(dim * math.log(end / (beta_fast * 2 * math.pi)) / (2 * math.log(theta)))
+        high = math.ceil(dim * math.log(end / (beta_slow * 2 * math.pi)) / (2 * math.log(theta)))
+        gamma = (torch.arange(0, dim // 2).float() - low) / (high - low)
+        gamma = gamma.clamp(0, 1)
+        freqs = freqs * ((1 - gamma) + gamma / factor)
+    t = torch.arange(end, dtype=torch.float32)
+    freqs = torch.outer(t, freqs)
+    return torch.cos(freqs), torch.sin(freqs)</code></pre>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <span>&larr; <a href="../index.html">Back to MiniMind Overview</a></span>
+  <span>Generated 2026-03-26 &middot; rev <code>83e52f6</code> &middot; MiniMind Internal Wiki</span>
+</footer>
+
+</div><!-- /.wrapper -->
+
+<!-- Mermaid 10.x -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- highlight.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script>
+(function(){
+  /* ---- Theme ---- */
+  const THEME_KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const hljsLink = document.getElementById('hljs-theme');
+
+  function applyTheme(t){
+    root.setAttribute('data-theme', t);
+    toggle.textContent = t === 'dark' ? '🌙' : '☀️';
+    hljsLink.href = t === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  const saved = localStorage.getItem(THEME_KEY) || 'dark';
+  applyTheme(saved);
+
+  toggle.addEventListener('click', function(){
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+
+  /* ---- Keyboard shortcut T for theme ---- */
+  document.addEventListener('keydown', function(e){
+    if(e.key === 't' || e.key === 'T'){
+      if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      toggle.click();
+    }
+  });
+
+  /* ---- Back to top ---- */
+  const btt = document.getElementById('btt');
+  window.addEventListener('scroll', function(){
+    btt.classList.toggle('visible', window.scrollY > 400);
+  });
+  btt.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+
+  /* ---- Mermaid ---- */
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+  mermaid.run({ querySelector: '.mermaid' });
+
+  /* ---- Diagram zoom overlay ---- */
+  const overlay = document.getElementById('overlay');
+  const overlayInner = document.getElementById('overlayInner');
+  document.querySelectorAll('.diagram-wrap').forEach(function(wrap){
+    wrap.addEventListener('click', function(){
+      const svg = wrap.querySelector('svg');
+      if(!svg) return;
+      overlayInner.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    });
+  });
+  overlay.addEventListener('click', function(){ overlay.classList.remove('active'); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') overlay.classList.remove('active');
+  });
+
+  /* ---- Copy buttons ---- */
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = document.getElementById(btn.getAttribute('data-target'));
+      if(!target) return;
+      navigator.clipboard.writeText(target.textContent).then(function(){
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = 'Copy'; }, 1800);
+      });
+    });
+  });
+
+  /* ---- highlight.js ---- */
+  hljs.highlightAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/cpu/minor/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>minor — In-Order Pipelined CPU — gem5 Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1.5rem 0}
+.toc h3{margin:0 0 .6rem;color:var(--accent);font-size:1rem}
+.toc ul{list-style:none;padding-left:0}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+.toc ul ul{padding-left:1rem}
+.reading-time{color:var(--text-muted);font-size:.85rem;margin:.5rem 0}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:2px 8px;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.collapsible-table summary{cursor:pointer;color:var(--accent2);font-weight:600;margin:.5rem 0}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn,.toc{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb" aria-label="Breadcrumb"><a title="gem5 — Full-<a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> Computer Architecture <a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">Simulator</a>" href="../../index.html">gem5</a> &rsaquo; <a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">cpu</a> &rsaquo; minor</nav>
+
+<h1>minor</h1>
+<div class="hero">
+  <div class="subtitle">minor &mdash; In-Order Pipelined <a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">CPU</a></div>
+  <p><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">MinorCPU</a> is gem5&rsquo;s in-order pipelined processor model with four fixed pipeline stages: Fetch1, Fetch2, Decode, and Execute. It provides a balance between simulation speed and timing accuracy, making it ideal for studying in-order processor designs such as <a title="Comprehensive ARM architecture support including <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../../arch_doc/arm/index.html">ARM</a> Cortex-A5/A7 class cores, embedded processors, and pipeline hazard behavior.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">&#9881; 4-Stage Pipeline</span>
+    <span class="badge green">&#128296; Scoreboard Hazards</span>
+    <span class="badge yellow">&#128640; Configurable FUs</span>
+    <span class="badge red">&#127919; In-Order Execution</span>
+  </p>
+</div>
+
+<div class="reading-time" id="readingTime"></div>
+
+<div class="intro-box">
+<h3>&#128218; What is this module?</h3>
+<p>The <code>minor/</code> directory implements an in-order CPU where instructions flow through the pipeline strictly in program order. Unlike the O3 model, Minor does not reorder instructions &mdash; if an instruction stalls (e.g., waiting for a <a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a> miss), all subsequent instructions are blocked behind it. This accurately models simpler processor designs where hardware complexity is traded for <a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="../../sim_doc/power/index.html">power</a> efficiency.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy: Assembly Line</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of MinorCPU like a factory assembly line with four stations. Each product (instruction) moves from station 1 (Fetch1: get raw materials from warehouse) to station 2 (Fetch2: cut materials to size) to station 3 (Decode: read the blueprint) to station 4 (Execute: assemble the product). Products move through strictly in order &mdash; if station 4 is slow on one product (e.g., a cache miss takes extra time), all products behind it on the line must wait. The <strong>Scoreboard</strong> acts like a foreman checking whether the tools (register values) needed at each station are ready before letting work proceed.</p>
+</details>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">4</div><div class="label">Pipeline Stages</div></div>
+  <div class="stat-box"><div class="num">26</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">8K</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">In-Order</div><div class="label">Execution Model</div></div>
+</div>
+
+<nav class="toc" id="toc"><h3>&#128214; Table of Contents</h3></nav>
+
+<h2 id="architecture">Pipeline Architecture</h2>
+<p>The MinorCPU pipeline is contained in the <code>Pipeline</code> class (<code>minor/pipeline.hh</code>), which owns the four stages and the <code>MinorBuffer</code> FIFO queues between them. The <code>MinorCPU</code> class (<code>minor/cpu.hh</code>) inherits from <code>BaseCPU</code> and owns the <code>Pipeline</code> instance, the activity recorder, and per-thread state.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+    subgraph Pipeline["minor::Pipeline"]
+        F1["Fetch1\nfetch1.hh"]
+        F2["Fetch2\nfetch2.hh"]
+        DEC["Decode\ndecode.hh"]
+        EXE["Execute\nexecute.hh"]
+    end
+    subgraph Support["Support Structures"]
+        SB["Scoreboard\nscoreboard.hh"]
+        LSQ["LSQ\nlsq.hh"]
+        FU["FuncUnit\nfunc_unit.hh"]
+        DI["MinorDynInst\ndyn_inst.hh"]
+    end
+    subgraph Memory["Memory System"]
+        IC["ICache Port"]
+        DC["DCache Port"]
+    end
+
+    F1 -->|"LineBuffer"| F2
+    F2 -->|"InstBundle"| DEC
+    DEC -->|"InstBundle"| EXE
+    F1 -->|"fetch request"| IC
+    EXE -->|"load/store"| LSQ
+    LSQ -->|"memory request"| DC
+    EXE --- SB
+    EXE --- FU
+    F2 --- DI
+</pre>
+</div>
+
+<h2 id="stages">Pipeline Stages in Detail</h2>
+
+<h3 id="fetch1">Fetch1 — Line Fetch</h3>
+<p><code>Fetch1</code> (<code>minor/fetch1.hh</code>) is responsible for fetching raw cache lines from the instruction cache. It generates fetch requests based on the current PC, handles ITLB misses by initiating page walks, and manages the fetch buffer. When the branch predictor redirects the PC, Fetch1 discards in-flight fetch requests and starts fetching from the new target.</p>
+
+<h3 id="fetch2">Fetch2 — Line Decomposition</h3>
+<p><code>Fetch2</code> (<code>minor/fetch2.hh</code>) takes the raw cache line bytes from Fetch1 and uses the ISA decoder to decompose them into individual <code>MinorDynInst</code> objects. It handles variable-length instruction sets (like <a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../../arch_doc/x86/index.html">x86</a>) by tracking the decode position within the line. Branch prediction also happens here &mdash; Fetch2 consults the branch predictor for each control-flow instruction and updates the fetch PC accordingly.</p>
+
+<h3 id="decode-stage">Decode — Micro-op Expansion</h3>
+<p><code>Decode</code> (<code>minor/decode.hh</code>) expands macro-ops into micro-ops for ISAs that require it (e.g., x86 complex instructions). For RISC ISAs like ARM or RISC-V where most instructions are already single micro-ops, this stage is largely a pass-through. The decode stage also classifies instructions by type for the Execute stage.</p>
+
+<h3 id="execute-stage">Execute — Scoreboard &amp; Functional Units</h3>
+<p><code>Execute</code> (<code>minor/execute.hh</code>) is the most complex stage. It performs hazard checking using the <code>Scoreboard</code>, dispatches instructions to <code>FuncUnit</code> pipelines, handles memory operations through the <code>LSQ</code>, and manages instruction completion. The Execute stage stalls the pipeline when a data hazard is detected (read-after-write on a register not yet produced) or when a structural hazard occurs (no available functional unit).</p>
+
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<tr><th>Class</th><th>Header</th><th>Responsibility</th></tr>
+<tr><td><code>MinorCPU</code></td><td><code>minor/cpu.hh</code></td><td>Top-level CPU class inheriting <a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">BaseCPU</a>. Owns Pipeline, activity recorder, thread state.</td></tr>
+<tr><td><code>Pipeline</code></td><td><code>minor/pipeline.hh</code></td><td>Container for the four stages and inter-stage buffers. Drives <code>evaluate()</code> each cycle.</td></tr>
+<tr><td><code>Fetch1</code></td><td><code>minor/fetch1.hh</code></td><td>Fetches cache lines from ICache port. Handles ITLB translation and fetch buffering.</td></tr>
+<tr><td><code>Fetch2</code></td><td><code>minor/fetch2.hh</code></td><td>Decodes cache line bytes into instructions. Consults branch predictor.</td></tr>
+<tr><td><code>Decode</code></td><td><code>minor/decode.hh</code></td><td>Expands macro-ops to micro-ops. Pass-through for RISC ISAs.</td></tr>
+<tr><td><code>Execute</code></td><td><code>minor/execute.hh</code></td><td>Hazard check, FU dispatch, memory operations, instruction commit.</td></tr>
+<tr><td><code>Scoreboard</code></td><td><code>minor/scoreboard.hh</code></td><td>Tracks register write completion to detect RAW hazards.</td></tr>
+<tr><td><code>LSQ</code></td><td><code>minor/lsq.hh</code></td><td>Load/Store Queue for memory operation management.</td></tr>
+<tr><td><code>FuncUnit</code></td><td><code>minor/func_unit.hh</code></td><td>Configurable functional unit with operation latency and pipelining.</td></tr>
+<tr><td><code>MinorDynInst</code></td><td><code>minor/dyn_inst.hh</code></td><td>Dynamic instruction carrying PC, static inst pointer, and execution state.</td></tr>
+<tr><td><code>MinorBuffer</code></td><td><code>minor/buffers.hh</code></td><td><a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../../arch_doc/generic/index.html">Generic</a> FIFO buffer template for inter-stage communication.</td></tr>
+<tr><td><code>PipeData</code></td><td><code>minor/pipe_data.hh</code></td><td>Data types passed between stages: ForwardLineData, ForwardInstData.</td></tr>
+<tr><td><code>ExecContext</code></td><td><code>minor/exec_context.hh</code></td><td>Minor-specific <a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">ExecContext</a> for instruction register/memory access.</td></tr>
+<tr><td><code>MinorActivityRecorder</code></td><td><code>minor/activity.hh</code></td><td>Tracks stage activity to enable CPU idling when no work is available.</td></tr>
+<tr><td><code>MinorStats</code></td><td><code>minor/stats.hh</code></td><td>Pipeline-wide statistics collection (committed insts, cycles, bubbles).</td></tr>
+</table>
+
+<h2 id="data-flow">Data Flow Diagram</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant IC as ICache
+    participant F1 as Fetch1
+    participant F2 as Fetch2
+    participant DEC as Decode
+    participant EXE as Execute
+    participant SB as Scoreboard
+    participant DC as DCache
+
+    F1->>IC: sendTimingReq(PC)
+    IC-->>F1: cache line response
+    F1->>F2: ForwardLineData (raw bytes)
+    F2->>F2: ISA decode: bytes → instructions
+    F2->>F2: branch predict each control inst
+    F2->>DEC: ForwardInstData (inst bundle)
+    DEC->>DEC: macro-op → micro-op expansion
+    DEC->>EXE: ForwardInstData (micro-ops)
+    EXE->>SB: check source register readiness
+    alt RAW hazard detected
+        SB-->>EXE: stall (source not ready)
+        Note over EXE: pipeline bubbles until ready
+    else all sources ready
+        EXE->>EXE: dispatch to FuncUnit
+        EXE->>EXE: execute (1+ cycles)
+        alt memory instruction
+            EXE->>DC: sendTimingReq(addr)
+            DC-->>EXE: data response
+        end
+        EXE->>SB: mark dest register ready
+        EXE->>EXE: commit instruction
+    end
+</pre>
+</div>
+
+<h2 id="hazards">Pipeline Hazards</h2>
+<p>MinorCPU handles three types of hazards through stalling and forwarding:</p>
+<table>
+<tr><th>Hazard Type</th><th>Detection</th><th>Resolution</th></tr>
+<tr><td><strong>RAW (Read After Write)</strong></td><td>Scoreboard check in Execute: source register not yet marked ready</td><td>Stall pipeline until producing instruction completes and marks the register ready</td></tr>
+<tr><td><strong>Structural</strong></td><td>No available <a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">FuncUnit</a> for the instruction&rsquo;s opclass</td><td>Stall until a functional unit becomes free</td></tr>
+<tr><td><strong>Control</strong></td><td>Branch misprediction detected at Execute</td><td>Flush younger instructions from all stages, redirect Fetch1 to correct target</td></tr>
+<tr><td><strong><a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> stall</strong></td><td>DCache miss or DTLB miss</td><td>Block Execute stage (and all upstream stages) until memory response arrives</td></tr>
+</table>
+<blockquote>
+<strong>Key difference from O3:</strong> MinorCPU does not rename registers or reorder instructions. WAR and WAW hazards cannot occur because instructions execute strictly in program order. Only RAW, structural, and control hazards need handling.
+</blockquote>
+
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<tr><th>Interaction</th><th>Minor Component</th><th>External Module</th><th>Mechanism</th></tr>
+<tr><td>Instruction fetch</td><td>Fetch1</td><td>ICache (<a title="mem — Memory System | gem5 Wiki" href="../../mem_doc/index.html">mem</a>/)</td><td><code>RequestPort::sendTimingReq()</code></td></tr>
+<tr><td>Branch prediction</td><td>Fetch2</td><td><a href="../index.html" title="cpu — CPU Timing Models — gem5 Wiki" class="xref">BPredUnit</a> (<a title="pred — Branch Prediction — gem5 Wiki" href="../pred/index.html">pred</a>/)</td><td><code>predict()</code> / <code>update()</code></td></tr>
+<tr><td>Instruction decode</td><td>Fetch2</td><td><a href="../../arch_doc/generic/index.html" title="generic — ISA-Independent Base Classes | gem5 Wiki" class="xref">InstDecoder</a> (<a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../../arch_doc/index.html">arch</a>/)</td><td><code>decode()</code> → <a href="../../arch_doc/generic/index.html" title="generic — ISA-Independent Base Classes | gem5 Wiki" class="xref">StaticInst</a></td></tr>
+<tr><td>TLB translation</td><td>Fetch1, LSQ</td><td>MMU (arch/)</td><td><code>translateTiming()</code></td></tr>
+<tr><td>Data memory access</td><td>LSQ in Execute</td><td>DCache (mem/)</td><td><code>RequestPort::sendTimingReq()</code></td></tr>
+<tr><td>Interrupt check</td><td>Execute (commit)</td><td><a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">Interrupts</a> (arch/)</td><td>Poll at commit point, redirect fetch on interrupt</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">minor/ source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>minor/
+├── cpu.hh / cpu.cc               ← MinorCPU: top-level CPU class
+├── pipeline.hh / pipeline.cc     ← Pipeline: stage container, evaluate() driver
+├── fetch1.hh / fetch1.cc         ← Fetch1: cache line fetch, ITLB
+├── fetch2.hh / fetch2.cc         ← Fetch2: instruction decode, branch predict
+├── decode.hh / decode.cc         ← Decode: macro → micro-op expansion
+├── execute.hh / execute.cc       ← Execute: hazard check, dispatch, commit
+├── scoreboard.hh / scoreboard.cc ← Scoreboard: register readiness tracking
+├── lsq.hh / lsq.cc              ← LSQ: memory operation management
+├── func_unit.hh / func_unit.cc   ← FuncUnit: configurable execution units
+├── dyn_inst.hh / dyn_inst.cc     ← MinorDynInst: dynamic instruction
+├── buffers.hh                    ← MinorBuffer: inter-stage FIFO template
+├── pipe_data.hh / pipe_data.cc   ← ForwardLineData, ForwardInstData
+├── exec_context.hh               ← Minor ExecContext for register/memory I/O
+├── activity.hh / activity.cc     ← Activity recorder for CPU idling
+├── stats.hh / stats.cc           ← Pipeline statistics
+├── trace.hh                      ← Debug tracing helpers
+├── BaseMinorCPU.py               ← Python parameter class
+├── MinorCPU.py                   ← Python CPU configuration
+└── SConscript                    ← Build definitions
+</code></pre>
+</details>
+
+<h2 id="configuration">Configuration Parameters</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>fetch1LineSnapWidth</code></td><td>0</td><td><a href="../o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Fetch</a> line snap width (0 = cache line size)</td></tr>
+<tr><td><code>fetch1FetchLimit</code></td><td>1</td><td>Max outstanding fetch requests</td></tr>
+<tr><td><code>fetch2InputBufferSize</code></td><td>2</td><td>Buffer between Fetch1 and Fetch2</td></tr>
+<tr><td><code>decodeInputBufferSize</code></td><td>3</td><td>Buffer between Fetch2 and Decode</td></tr>
+<tr><td><code>executeInputBufferSize</code></td><td>7</td><td>Buffer between Decode and Execute</td></tr>
+<tr><td><code>executeMaxAccessesInMemory</code></td><td>2</td><td>Max outstanding memory accesses</td></tr>
+<tr><td><code>executeLSQMaxStoreBufferStoresPerCycle</code></td><td>2</td><td>Max stores committed per cycle</td></tr>
+<tr><td><code>executeBranchDelay</code></td><td>1</td><td>Branch resolution delay in cycles</td></tr>
+<tr><td><code>executeFuncUnits</code></td><td>(configured)</td><td>List of functional unit types with latencies</td></tr>
+<tr><td><code>executeIssueLimit</code></td><td>2</td><td>Max instructions issued per cycle</td></tr>
+<tr><td><code>executeCommitLimit</code></td><td>2</td><td>Max instructions committed per cycle</td></tr>
+</table>
+
+<h3 id="code-example">Code Example: Execute Stage Evaluate</h3>
+<pre><code class="language-cpp">// Simplified view of Execute::evaluate() from minor/execute.cc
+void Execute::evaluate()
+{
+    // Try to commit completed instructions at head of pipeline
+    for (int i = 0; i &lt; commitLimit; ++i) {
+        MinorDynInstPtr inst = getInput();
+        if (!inst) break;
+
+        // Check scoreboard for RAW hazards
+        if (!scoreboard.canInstIssue(inst)) {
+            // Stall: source operand not ready
+            break;
+        }
+
+        // Find available functional unit
+        FuncUnit *fu = findFuncUnit(inst-&gt;staticInst-&gt;opClass());
+        if (!fu || fu-&gt;isBusy()) {
+            // Structural hazard: no FU available
+            break;
+        }
+
+        // Dispatch to functional unit
+        fu-&gt;issue(inst);
+
+        // For memory ops, send to LSQ
+        if (inst-&gt;isMemRef()) {
+            lsq.pushRequest(inst);
+        }
+    }
+
+    // Process FU completions and mark registers ready
+    for (auto &amp;fu : funcUnits) {
+        if (auto inst = fu-&gt;getCompletedInst()) {
+            scoreboard.markRegReady(inst-&gt;destReg());
+        }
+    }
+}</code></pre>
+
+<h2 id="comparison">Minor vs O3 Comparison</h2>
+<table>
+<tr><th>Feature</th><th>MinorCPU</th><th>O3CPU</th></tr>
+<tr><td>Execution order</td><td>Strict in-order</td><td>Out-of-order</td></tr>
+<tr><td>Register renaming</td><td>No</td><td>Yes (RenameMap + <a href="../o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">FreeList</a>)</td></tr>
+<tr><td>Pipeline stages</td><td>4 (Fetch1, Fetch2, Decode, Execute)</td><td>5 (Fetch, Decode, <a href="../o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Rename</a>, IEW, <a href="../o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Commit</a>)</td></tr>
+<tr><td>ROB</td><td>No</td><td>Yes (circular buffer)</td></tr>
+<tr><td>Speculation</td><td>Branch prediction only</td><td>Full speculative execution + memory dep pred</td></tr>
+<tr><td>Simulation speed</td><td>~3&times; faster than O3</td><td>Most detailed, slowest</td></tr>
+<tr><td>Target processors</td><td>ARM Cortex-A5/A7, embedded</td><td>ARM Cortex-A76, Intel Skylake</td></tr>
+<tr><td>Hazard handling</td><td>Stall</td><td>Rename (WAR/WAW), forward (RAW), speculate</td></tr>
+</table>
+
+<div class="footer">
+<a title="cpu — CPU Timing Models — gem5 Wiki" href="../index.html">&#8592; Back to cpu</a> &nbsp;|&nbsp;
+minor Sub-Module Wiki &mdash; Generated 2026-03-25
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  if(!headings.length)return;
+  var ul=document.createElement('ul');
+  headings.forEach(function(h){
+    var li=document.createElement('li');
+    if(h.tagName==='H3'){li.style.paddingLeft='1rem';}
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[\u{1F4D6}\u{1F4CB}#]+\s*/u,'');
+    li.appendChild(a);ul.appendChild(li);
+  });
+  toc.appendChild(ul);
+})();
+(function(){
+  var el=document.getElementById('readingTime');if(!el)return;
+  var text=document.querySelector('main').textContent||'';
+  var words=text.trim().split(/\s+/).length;
+  var mins=Math.max(1,Math.round(words/220));
+  el.textContent='\u{1F4D6} '+mins+' min read \u00B7 '+words+' words';
+})();
+document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';
+  btn.addEventListener('click',function(){
+    var code=pre.querySelector('code');
+    navigator.clipboard.writeText(code?code.textContent:pre.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});
+  });
+  pre.appendChild(btn);
+});
+(function(){
+  var headings=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='j'||e.key==='k'){
+      var scrollY=window.scrollY+100;
+      var idx=-1;
+      for(var i=0;i<headings.length;i++){if(headings[i].offsetTop>scrollY){idx=i;break;}}
+      if(e.key==='k'){idx=idx<=0?0:idx-1;}else{if(idx<0)idx=headings.length-1;}
+      if(headings[idx])headings[idx].scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  });
+})();
+if(window.hljs){hljs.highlightAll();}
+</script>
+</body></html>

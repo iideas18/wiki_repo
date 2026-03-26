@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/base/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>base — Core Utility Library | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:20px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;transition:border-color .2s}.card:hover{border-color:var(--accent)}.card h3{margin-top:0;margin-bottom:8px}.card p{color:var(--text-muted);font-size:14px;margin-bottom:0}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}.card-grid{grid-template-columns:1fr}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; base</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>base — Core Utility Library</h1>
+    <p class="subtitle">Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The <code>base</code> module is like a well-stocked workshop toolbox. Before you can build a house (simulate a processor), you need reliable measuring tapes (<code>Addr</code>, <code>Tick</code> types), screwdrivers (<code>BitUnion</code> for bit manipulation), logbooks (<code>trace</code>/<code>debug</code>), and quality meters (<code>stats</code>). Every other gem5 module reaches into this toolbox daily.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The <code>base</code> module provides the shared infrastructure that every gem5 component relies upon. It encompasses fundamental type definitions, address range management, statistics collection, binary loading, debug tracing, and <a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../arch_doc/generic/index.html">generic</a> data structures. Unlike <code>sim</code> (which manages simulation control) or <code>arch</code> (which defines ISAs), <code>base</code> is entirely ISA-agnostic and simulation-model-agnostic.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Types &amp; Primitives"
+      types["types.hh\nAddr, Tick, MicroPC"]
+      bitunion["bitunion.hh\nBitUnion templates"]
+      flags["flags.hh\nFlags&lt;T&gt;"]
+    end
+
+    subgraph "Debug &amp; Trace"
+      debug["debug.hh\nSimpleFlag, CompoundFlag"]
+      trace["trace.hh\nDPRINTF, OstreamLogger"]
+    end
+
+    subgraph "Data Structures"
+      addrrange["addr_range.hh\nAddrRange"]
+      circq["circular_queue.hh\nCircularQueue"]
+      satcnt["sat_counter.hh\nSatCounter"]
+      refcnt["refcnt.hh\nRefCountingPtr"]
+      trie["trie.hh\nTrie"]
+    end
+
+    subgraph "I/O &amp; Config"
+      inifile["inifile.hh\nINI parser"]
+      cprintf["cprintf.hh\nFormatted output"]
+      str["str.hh\nString utilities"]
+    end
+
+    subgraph "Sub-Modules"
+      loader["loader/\nBinary loading"]
+      stats["stats/\nStatistics framework"]
+    end
+
+    types --> addrrange
+    types --> bitunion
+    debug --> trace
+    </pre>
+  </div>
+
+  <h2 id="fundamental-types">Fundamental Types</h2>
+  <p>The <code>types.hh</code> header defines the core numeric types used throughout gem5. These provide a consistent, portable foundation for address representation, time tracking, and microarchitectural indexing.</p>
+
+  <pre><code class="language-cpp">namespace gem5 {
+
+// Address type — typically 64-bit unsigned
+typedef uint64_t Addr;
+const Addr MaxAddr = (Addr)-1;
+
+// Simulation time unit (1 Tick = 1 ps by default)
+typedef uint64_t Tick;
+const Tick MaxTick = (Tick)-1;
+const Tick curTick();  // Current simulation time
+
+// Microcode program counter
+typedef uint16_t MicroPC;
+const MicroPC MicroPCRomBit = 1 &lt;&lt; 15;
+
+// RegIndex for register file access
+typedef uint16_t RegIndex;
+
+} // namespace gem5</code></pre>
+
+  <h2 id="address-range">Address Range Management</h2>
+  <p><code>AddrRange</code> is a versatile class representing contiguous or interleaved address ranges. It supports hashed interleaving for multi-channel memory controllers and provides efficient containment testing.</p>
+
+  <pre><code class="language-cpp">class AddrRange
+{
+    Addr _start;
+    Addr _end;
+    std::vector&lt;Addr&gt; masks;    // Interleaving masks
+    uint8_t intlvMatch;          // Interleave match value
+
+  public:
+    AddrRange(Addr start, Addr end);
+    AddrRange(Addr start, Addr end, const std::vector&lt;Addr&gt; &amp;masks,
+              uint8_t intlv_match);
+
+    Addr start() const { return _start; }
+    Addr end() const { return _end; }
+    Addr size() const;
+
+    bool contains(Addr a) const;
+    bool intersects(const AddrRange &amp;r) const;
+    bool isSubset(const AddrRange &amp;r) const;
+
+    // Remove interleaving bits to get offset
+    Addr removeIntlvBits(Addr a) const;
+    Addr addIntlvBits(Addr a) const;
+
+    // Merge contiguous/overlapping ranges
+    bool mergesWith(const AddrRange &amp;r) const;
+};</code></pre>
+
+  <h2 id="debug-and-tracing">Debug and Tracing</h2>
+  <p>gem5's debug system uses compile-time flags and the <code>DPRINTF</code> macro family for conditional tracing. Debug flags are organized into <code>SimpleFlag</code> (individual) and <code>CompoundFlag</code> (groups) categories, controllable at runtime via command-line options.</p>
+
+  <h3 id="debug-flags">Debug Flags</h3>
+  <pre><code class="language-cpp">namespace debug {
+
+class Flag
+{
+  public:
+    Flag(const char *name, const char *desc);
+    const char *name() const;
+    virtual void enable() = 0;
+    virtual void disable() = 0;
+    virtual bool tracing() const = 0;
+};
+
+class SimpleFlag : public Flag
+{
+    bool _tracing = false;
+  public:
+    void enable() override { _tracing = true; }
+    void disable() override { _tracing = false; }
+    bool tracing() const override { return _tracing; }
+};
+
+class CompoundFlag : public Flag
+{
+    std::vector&lt;Flag *&gt; _kids;
+  public:
+    void enable() override;   // Enables all children
+    void disable() override;  // Disables all children
+};
+
+} // namespace debug</code></pre>
+
+  <h3 id="trace-system">Trace System</h3>
+  <pre><code class="language-cpp">// Usage pattern in gem5 source code:
+DPRINTF(CacheTags, "Looking up addr %#x in set %d\n", addr, set);
+DPRINTFR(Fetch, "Fetching instruction at PC %s\n", pc);
+
+// Trace output logger
+namespace trace {
+class OstreamLogger : public Logger
+{
+  public:
+    OstreamLogger(std::ostream &amp;os);
+    void logMessage(Tick when, const std::string &amp;name,
+                    const std::string &amp;flag,
+                    const std::string &amp;message) override;
+};
+} // namespace trace</code></pre>
+
+  <h2 id="bit-manipulation">Bit Manipulation</h2>
+  <p>The <code>BitUnion</code> template system provides type-safe access to bit fields within machine words. It's essential for decoding instruction encodings, register fields, and hardware status registers.</p>
+
+  <pre><code class="language-cpp">// Define a bit union for an x86 page table entry
+BitUnion64(PageTableEntry)
+    Bitfield&lt;63&gt;    nx;      // No-execute
+    Bitfield&lt;51, 12&gt; ppn;   // Physical page number
+    Bitfield&lt;7&gt;     ps;      // Page size
+    Bitfield&lt;5&gt;     accessed;
+    Bitfield&lt;2&gt;     user;
+    Bitfield&lt;1&gt;     write;
+    Bitfield&lt;0&gt;     present;
+EndBitUnion(PageTableEntry)
+
+// Usage
+PageTableEntry pte = readMemory(addr);
+if (pte.present &amp;&amp; pte.user) {
+    Addr physAddr = pte.ppn &lt;&lt; 12;
+}</code></pre>
+
+  <h2 id="data-structures">Data Structures</h2>
+
+  <h3 id="circular-queue">CircularQueue</h3>
+  <p>A fixed-size circular buffer used in <a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> pipeline implementations (e.g., reorder buffers, load/store queues). Supports random access with automatic wrap-around and iterator-based traversal.</p>
+
+  <pre><code class="language-cpp">template&lt;typename T&gt;
+class CircularQueue
+{
+    std::vector&lt;T&gt; data;
+    uint32_t head, tail, capacity;
+
+  public:
+    CircularQueue(uint32_t size);
+    T&amp; front();
+    T&amp; back();
+    void push_back(const T &amp;val);
+    void pop_front();
+    bool empty() const;
+    bool full() const;
+    uint32_t size() const;
+    T&amp; operator[](uint32_t idx);  // Wrapping access
+};</code></pre>
+
+  <h3 id="saturating-counter">Saturating Counter</h3>
+  <p>Used extensively in branch predictors. A counter that clamps at min/max instead of wrapping around.</p>
+
+  <pre><code class="language-cpp">class SatCounter8
+{
+    uint8_t counter;
+    uint8_t maxVal;
+    uint8_t initialVal;
+
+  public:
+    SatCounter8(unsigned bits, uint8_t initial = 0);
+    void increment() { if(counter &lt; maxVal) ++counter; }
+    void decrement() { if(counter &gt; 0) --counter; }
+    operator uint8_t() const { return counter; }
+    void reset() { counter = initialVal; }
+};</code></pre>
+
+  <h3 id="refcounting-ptr">Reference Counting Pointer</h3>
+  <p><code>RefCountingPtr</code> provides intrusive reference counting for objects inheriting from <code>RefCounted</code>. Used for managing shared ownership of fault objects, requests, and packets.</p>
+
+  <pre><code class="language-cpp">class RefCounted
+{
+    mutable int count = 0;
+    friend class RefCountingPtr;
+  public:
+    virtual ~RefCounted() {}
+};
+
+template&lt;class T&gt;
+class RefCountingPtr
+{
+    T *data;
+  public:
+    RefCountingPtr(T *p = nullptr);
+    RefCountingPtr(const RefCountingPtr &amp;r);
+    ~RefCountingPtr();
+    T *operator-&gt;() const { return data; }
+    T &amp;operator*() const { return *data; }
+    operator bool() const { return data != nullptr; }
+};</code></pre>
+
+  <h2 id="io-and-config">I/O and Configuration</h2>
+
+  <h3 id="inifile-parser">INI File Parser</h3>
+  <p>Parses the <code>config.ini</code> file generated by <a title="Configuration <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> and Standard Library — the control plane of gem5" href="../python/index.html">Python</a> configuration scripts. Each section maps to a <a href="../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a>, with key-value pairs defining parameter values.</p>
+
+  <pre><code class="language-cpp">class IniFile
+{
+  public:
+    bool load(const std::string &amp;file);
+    bool find(const std::string &amp;section, const std::string &amp;entry,
+              std::string &amp;value) const;
+    bool sectionExists(const std::string &amp;section) const;
+    void getSectionNames(std::vector&lt;std::string&gt; &amp;list) const;
+    bool printUnreferenced() const;  // Warn about unused params
+};</code></pre>
+
+  <h3 id="formatted-output">Formatted Output (cprintf)</h3>
+  <p>Type-safe printf-style formatting that works with C++ streams. Used throughout gem5 for consistent output formatting.</p>
+
+  <pre><code class="language-cpp">// cprintf — print to stdout
+cprintf("Address: %#x, Size: %d bytes\n", addr, size);
+
+// csprintf — return as string
+std::string msg = csprintf("CPU%d: PC=%#x", cpuId, pc);
+
+// ccprintf — print to arbitrary stream
+ccprintf(std::cerr, "Error at tick %d: %s\n", curTick(), err);</code></pre>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Purpose</th><th>Category</th></tr></thead>
+    <tbody>
+      <tr><td><code>Addr</code>, <code>Tick</code></td><td>types.hh</td><td>Fundamental address and time types</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>AddrRange</code></td><td>addr_range.hh</td><td>Address range with interleaving support</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>BitUnion</code></td><td>bitunion.hh</td><td>Type-safe bit field access templates</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>Flags&lt;T&gt;</code></td><td>flags.hh</td><td>Typesafe flags/bitmask container</td><td><span class="badge badge-core">Core</span></td></tr>
+      <tr><td><code>SimpleFlag</code></td><td>debug.hh</td><td>Individual debug trace flag</td><td><span class="badge badge-util">Debug</span></td></tr>
+      <tr><td><code>CompoundFlag</code></td><td>debug.hh</td><td><a href="stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Group</a> of debug flags</td><td><span class="badge badge-util">Debug</span></td></tr>
+      <tr><td><code>OstreamLogger</code></td><td>trace.hh</td><td>Trace output to streams</td><td><span class="badge badge-util">Debug</span></td></tr>
+      <tr><td><code>CircularQueue</code></td><td>circular_queue.hh</td><td>Fixed-size circular buffer</td><td><span class="badge badge-config">Data</span></td></tr>
+      <tr><td><code>SatCounter8</code></td><td>sat_counter.hh</td><td>Saturating counter for predictors</td><td><span class="badge badge-config">Data</span></td></tr>
+      <tr><td><code>RefCountingPtr</code></td><td>refcnt.hh</td><td>Intrusive reference counting</td><td><span class="badge badge-config">Data</span></td></tr>
+      <tr><td><code>Trie</code></td><td>trie.hh</td><td>Trie for fast address lookup</td><td><span class="badge badge-config">Data</span></td></tr>
+      <tr><td><code>IniFile</code></td><td>inifile.hh</td><td>Configuration file parser</td><td><span class="badge badge-util">Config</span></td></tr>
+      <tr><td><code>cprintf</code></td><td>cprintf.hh</td><td>Type-safe formatted printing</td><td><span class="badge badge-util">I/O</span></td></tr>
+      <tr><td><code>Callback</code></td><td>callback.hh</td><td>Callback list management</td><td><span class="badge badge-util">Util</span></td></tr>
+      <tr><td><code>Coroutine</code></td><td>coroutine.hh</td><td>Cooperative coroutine support</td><td><span class="badge badge-util">Util</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="sub-modules">Sub-Modules</h2>
+  <div class="card-grid">
+    <a title="Reads ELF, a.out, and raw binary files into memory images, extracts symbol tables, and determines architecture and entry points for simulated workloads." href="loader/index.html" class="card" style="text-decoration:none;color:inherit">
+      <h3>📦 loader</h3>
+      <p>Binary file loading subsystem — reads ELF, a.out, and raw image files, constructs memory images, and manages symbol tables for simulated workloads.</p>
+      <span class="badge badge-core">6 classes</span>
+    </a>
+    <a title="A comprehensive framework for declaring, collecting, and outputting performance counters, distributions, histograms, and derived formulas across all gem5 components." href="stats/index.html" class="card" style="text-decoration:none;color:inherit">
+      <h3>📊 stats</h3>
+      <p>Statistics collection framework — scalar counters, vectors, distributions, histograms, and formulas for performance analysis and validation.</p>
+      <span class="badge badge-core">12+ classes</span>
+    </a>
+  </div>
+
+  <h2 id="cross-module-connections">Cross-Module Connections</h2>
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph LR
+    base["base\n(types, debug, data structures)"]
+    sim["sim\n(SimObject, Event)"]
+    cpu["cpu\n(BaseCPU, pipelines)"]
+    mem["mem\n(packets, ports)"]
+    arch["arch\n(ISA decoders)"]
+
+    base -->|"Addr, Tick, Flags"| sim
+    base -->|"BitUnion, CircularQueue"| cpu
+    base -->|"AddrRange, RefCntPtr"| mem
+    base -->|"BitUnion, types"| arch
+    base -->|"stats, trace"| sim
+    </pre>
+  </div>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: How Debug Tracing Works</h3>
+    <ol>
+      <li><strong>Flag Definition</strong> — Each module declares debug flags in its SConscript (e.g., <code>DebugFlag('CacheTags')</code>). The build system generates flag registration code.</li>
+      <li><strong>DPRINTF Macro</strong> — Source code uses <code>DPRINTF(CacheTags, "msg %x", val)</code>. At compile time, this checks if the flag is enabled before formatting the string.</li>
+      <li><strong>Runtime Activation</strong> — User passes <code>--debug-flags=CacheTags</code> on the command line. The <code>SimpleFlag::enable()</code> method sets the tracing boolean.</li>
+      <li><strong><a href="stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Output</a> Routing</strong> — When tracing is active, <code>OstreamLogger::logMessage()</code> formats the output with timestamp, object name, and flag name, then writes to the trace file.</li>
+      <li><strong>Compound Flags</strong> — Flags like <code>MemoryAccess</code> are compound flags that enable multiple <a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">simple</a> flags (e.g., <code>CachePort</code>, <code>Bus</code>, <code>DRAM</code>) simultaneously.</li>
+    </ol>
+  </div>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Addr</strong></td><td>64-bit unsigned integer representing a physical or virtual memory address</td></tr>
+      <tr><td><strong>Tick</strong></td><td>Fundamental simulation time unit, default resolution is 1 picosecond</td></tr>
+      <tr><td><strong>BitUnion</strong></td><td>Template system for type-safe access to individual bits and bit ranges within integers</td></tr>
+      <tr><td><strong>DPRINTF</strong></td><td>Debug printf macro — conditionally prints trace output when the specified flag is enabled</td></tr>
+      <tr><td><strong>AddrRange</strong></td><td>Represents a memory address range, possibly with interleaving for multi-channel memory</td></tr>
+      <tr><td><strong>SatCounter</strong></td><td><a href="stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Counter</a> that clamps at maximum/minimum instead of wrapping — used in branch predictors</td></tr>
+      <tr><td><strong>RefCountingPtr</strong></td><td>Smart pointer using intrusive reference counting for shared object ownership</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

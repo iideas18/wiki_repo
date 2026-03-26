@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-generated" content="2026-03-26">
+<title>Search — MiniMind Wiki</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f0f2f4;--text-muted:#59636e}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:100;border-radius:0 0 4px 0}
+.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+header nav{display:flex;align-items:center;gap:16px}
+header nav a{font-weight:600;color:var(--heading)}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);cursor:pointer;padding:6px 10px;border-radius:6px;font-size:14px}
+.theme-toggle:hover{border-color:var(--accent)}
+main{max-width:780px;margin:0 auto;padding:32px 24px}
+h1{color:var(--heading);font-size:1.75rem;margin-bottom:8px}
+.subtitle{color:var(--text-muted);margin-bottom:24px;font-size:.9rem}
+.search-box{position:relative;margin-bottom:28px}
+.search-box input{width:100%;padding:12px 16px 12px 42px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+.kbd-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:12px;color:var(--text-muted);font-family:monospace}
+.results-count{color:var(--text-muted);font-size:.85rem;margin-bottom:16px}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:12px;transition:border-color .2s}
+.result-card:hover{border-color:var(--accent)}
+.result-card h2{font-size:1.05rem;margin-bottom:4px}
+.result-card h2 a{color:var(--heading)}
+.result-card .path{font-size:.8rem;color:var(--accent2);font-family:monospace;margin-bottom:6px}
+.result-card .section-badge{display:inline-block;font-size:.7rem;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:1px 8px;color:var(--accent3);margin-left:8px;vertical-align:middle}
+.result-card .excerpt{font-size:.88rem;color:var(--text-muted);line-height:1.5}
+.result-card .excerpt mark{background:rgba(88,166,255,.2);color:var(--accent);border-radius:2px;padding:0 2px}
+.no-results{text-align:center;padding:48px 0;color:var(--text-muted)}
+.no-results .icon{font-size:2.5rem;margin-bottom:12px}
+#back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+footer{text-align:center;padding:24px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:48px}
+@media print{header,#back-to-top,.kbd-hint,.theme-toggle,.skip-link{display:none!important}body{background:#fff;color:#000}.result-card{border:1px solid #ccc;break-inside:avoid}}
+@media(max-width:600px){main{padding:20px 16px}h1{font-size:1.4rem}}
+</style>
+</head>
+<body>
+<a href="#search-input" class="skip-link">Skip to search</a>
+<header>
+  <nav><a href="index.html">← MiniMind Wiki</a></nav>
+  <button class="theme-toggle" id="theme-btn" title="Toggle theme">🌓</button>
+</header>
+<main>
+  <h1>Search the Wiki</h1>
+  <p class="subtitle">Find pages, classes, functions, and concepts across the MiniMind documentation.</p>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="search-input" placeholder="Search docs…" autocomplete="off" autofocus>
+    <span class="kbd-hint">/</span>
+  </div>
+  <div id="results-count" class="results-count"></div>
+  <div id="results"></div>
+</main>
+<button id="back-to-top" title="Back to top">↑</button>
+<footer>MiniMind Wiki — Generated 2026-03-26</footer>
+<script>
+(function(){
+  const html=document.documentElement;
+  const THEME_KEY='neutra-ip-theme';
+  const btn=document.getElementById('theme-btn');
+  function applyTheme(t){html.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t)}
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+  btn.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+  const input=document.getElementById('search-input');
+  const resultsDiv=document.getElementById('results');
+  const countDiv=document.getElementById('results-count');
+  let index=[];
+
+  fetch('search-index.json').then(r=>r.json()).then(data=>{index=data;
+    const params=new URLSearchParams(location.search);
+    if(params.get('q')){input.value=params.get('q');doSearch()}
+  }).catch(()=>{resultsDiv.innerHTML='<div class="no-results"><div class="icon">⚠️</div>Could not load search index.</div>'});
+
+  input.addEventListener('input',doSearch);
+  document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==input){e.preventDefault();input.focus()}});
+
+  function doSearch(){
+    const q=input.value.trim().toLowerCase();
+    if(!q){resultsDiv.innerHTML='';countDiv.textContent='';return}
+    const terms=q.split(/\s+/);
+    const matches=index.map(entry=>{
+      const hay=(entry.title+' '+entry.content+' '+entry.section).toLowerCase();
+      let score=0;
+      for(const t of terms){if(hay.includes(t))score++}
+      return{entry,score};
+    }).filter(m=>m.score>0).sort((a,b)=>b.score-a.score);
+
+    countDiv.textContent=matches.length+' result'+(matches.length!==1?'s':'')+' for "'+input.value.trim()+'"';
+    if(!matches.length){resultsDiv.innerHTML='<div class="no-results"><div class="icon">📭</div>No results found. Try different keywords.</div>';return}
+    resultsDiv.innerHTML=matches.map(m=>{
+      const e=m.entry;
+      let excerpt=buildExcerpt(e.content,terms);
+      return `<div class="result-card"><h2><a href="${e.path}">${hl(e.title,terms)}</a><span class="section-badge">${e.section}</span></h2><div class="path">${e.path}</div><div class="excerpt">${excerpt}</div></div>`;
+    }).join('');
+  }
+
+  function buildExcerpt(text,terms){
+    const words=text.split(/\s+/);let best=0,bestScore=0;
+    for(let i=0;i<words.length;i++){let s=0;for(let j=i;j<Math.min(i+18,words.length);j++){for(const t of terms)if(words[j].toLowerCase().includes(t))s++}if(s>bestScore){bestScore=s;best=i}}
+    const slice=words.slice(best,best+18);
+    let str=(best>0?'… ':'')+slice.join(' ')+(best+18<words.length?' …':'');
+    return hl(str,terms);
+  }
+
+  function hl(str,terms){
+    for(const t of terms){if(!t)continue;str=str.replace(new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>')}
+    return str;
+  }
+
+  const btt=document.getElementById('back-to-top');
+  window.addEventListener('scroll',()=>{btt.style.display=window.scrollY>300?'flex':'none'});
+  btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+})();
+</script>
+</body>
+</html>

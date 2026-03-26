@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="plugins/">
+<meta name="wiki-source-rev" content="6aadfbd">
+<title>Plugins — Extensible Plugin Ecosystem</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.deep-dive-grid .card .focus-meta{margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box,.module-card{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"} .footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Claude Code</a> &rsaquo; <span>Plugins</span></nav>
+<main id="main">
+<h1>Plugins &mdash; Extensible Plugin Ecosystem</h1>
+<div class="hero">
+  <p class="subtitle">13 Official Plugins for Every Development Workflow</p>
+  <p>The Claude Code plugin system extends the CLI with custom slash commands, specialized agents, reusable skills, event-driven hooks, and MCP server integrations. Each plugin follows a standard structure with a <code>.claude-plugin/plugin.json</code> manifest and auto-discovered components.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">13</div><div class="label">Plugins</div></div>
+  <div class="stat-box"><div class="num">20+</div><div class="label">Commands</div></div>
+  <div class="stat-box"><div class="num">18</div><div class="label">Agents</div></div>
+  <div class="stat-box"><div class="num">Multi</div><div class="label">Languages</div></div>
+</div>
+<p>
+  <span class="badge blue">&#128268; Plugin System</span>
+  <span class="badge green">&#129302; Multi-Agent</span>
+  <span class="badge yellow">&#128274; Hook Engine</span>
+  <span class="badge red">&#128736;&#65039; MCP Integration</span>
+</p>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The plugin ecosystem is the extensibility layer of Claude Code. Instead of building every feature into the core CLI, plugins provide modular capabilities that can be installed, combined, and customized. Each plugin can contribute slash commands (user-triggered), agents (AI specialists), skills (auto-invoked knowledge), and hooks (event interceptors).</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of Claude Code as a smartphone and plugins as apps. The phone has basic capabilities (calling, texting), but apps add specialized functions (navigation, banking, photo editing). Similarly, the core CLI handles file operations and bash commands, while plugins add specialized workflows like code review, feature development, and security scanning. Just as apps can communicate with each other, plugins can invoke agents from other plugins.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Plugin Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+    subgraph PluginSystem["Plugin System"]
+        Manifest["plugin.json<br/>Manifest"]
+        Commands["commands/<br/>Slash Commands"]
+        Agents["agents/<br/>AI Specialists"]
+        Skills["skills/<br/>Auto-Invoked"]
+        Hooks["hooks/<br/>Event Handlers"]
+        MCPSrv["MCP Servers"]
+    end
+
+    subgraph Triggers["Activation"]
+        UserCmd["/slash-command"]
+        AutoTrig["Auto-detect"]
+        Events["PreToolUse<br/>PostToolUse<br/>Stop<br/>SessionStart"]
+    end
+
+    subgraph Core["Claude Code Core"]
+        CLI["CLI Engine"]
+        Tools["Tool System"]
+        Session["Session Manager"]
+    end
+
+    UserCmd -->|invokes| Commands
+    AutoTrig -->|activates| Skills
+    Events -->|fires| Hooks
+    Commands -->|orchestrates| Agents
+    Agents -->|uses| Tools
+    Skills -->|enhances| CLI
+    Hooks -->|intercepts| Tools
+    MCPSrv -->|extends| Tools
+    Manifest -->|registers| Commands
+    Manifest -->|registers| MCPSrv
+</pre>
+</div>
+
+<h2 id="data-flow">Plugin Lifecycle</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant CLI as Claude Code
+    participant Manifest as plugin.json
+    participant Hook as Hook Engine
+    participant Cmd as Command Handler
+    participant Agent as Agent Runtime
+    participant Skill as Skill Loader
+
+    User->>CLI: Start session
+    CLI->>Manifest: Discover plugins
+    Manifest-->>CLI: Register commands, hooks, MCP
+    CLI->>Hook: Fire SessionStart hooks
+    Hook-->>CLI: Inject context
+
+    User->>CLI: /code-review
+    CLI->>Cmd: Resolve command
+    Cmd->>Agent: Launch 4 review agents (parallel)
+    Agent->>CLI: Use Read, Grep, Bash tools
+    Note over Hook,CLI: PreToolUse hooks validate each tool call
+    Agent-->>Cmd: Review findings
+    Cmd-->>User: Filtered results (confidence >= 80)
+
+    User->>CLI: Write code
+    CLI->>Skill: Auto-detect frontend-design skill
+    Skill-->>CLI: Inject design guidance
+    CLI->>Hook: PreToolUse: security check
+    Hook-->>CLI: Allow/warn/block
+</pre>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step: Feature Development Workflow</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a <strong>/feature-dev "add user authentication"</strong> command through the plugin system:</p>
+<ol style="line-height:2;">
+<li><strong>Command Resolution</strong> &mdash; CLI finds <code>feature-dev/commands/feature-dev.md</code> and loads the command definition.</li>
+<li><strong>Discovery Phase</strong> &mdash; The command asks clarifying questions about the feature requirements.</li>
+<li><strong>Parallel Exploration</strong> &mdash; 2-3 <code>code-explorer</code> agents launch simultaneously, each analyzing different aspects of the codebase.</li>
+<li><strong>File Reading</strong> &mdash; Agents use Read, Grep, and Glob tools to find relevant code. PreToolUse hooks validate each operation.</li>
+<li><strong>Architecture Design</strong> &mdash; 2-3 <code>code-architect</code> agents propose different approaches (minimal, clean, pragmatic).</li>
+<li><strong>User Decision</strong> &mdash; User selects preferred architecture from presented options.</li>
+<li><strong>Implementation</strong> &mdash; Agents write code using Edit/Write tools. Security hooks check for credentials and dangerous patterns.</li>
+<li><strong>Quality Review</strong> &mdash; 3 <code>code-reviewer</code> agents scan for bugs, style issues, and convention violations in parallel.</li>
+<li><strong>Confidence Filtering</strong> &mdash; Only issues scoring &ge;80 confidence are reported, eliminating false positives.</li>
+<li><strong>Summary</strong> &mdash; Plugin produces a summary of changes, files modified, and suggested next steps.</li>
+</ol>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>Component</th><th>File Pattern</th><th>Role</th></tr>
+<tr><td><code>plugin.json</code></td><td><code>.claude-plugin/plugin.json</code></td><td>Plugin manifest with name, version, description, author, MCP servers</td></tr>
+<tr><td>Commands</td><td><code>commands/*.md</code></td><td>Markdown-defined slash commands with YAML frontmatter and execution instructions</td></tr>
+<tr><td>Agents</td><td><code>agents/*.md</code></td><td>Specialized AI agents with model/color/tools configuration and system prompts</td></tr>
+<tr><td>Skills</td><td><code>skills/*/SKILL.md</code></td><td>Auto-invoked knowledge with progressive disclosure (SKILL.md + references/ + examples/)</td></tr>
+<tr><td>Hooks</td><td><code>hooks/hooks.json</code></td><td>Event handlers (PreToolUse, PostToolUse, Stop, SessionStart) with Python/Shell scripts</td></tr>
+<tr><td>MCP Servers</td><td><code>plugin.json mcpServers</code></td><td>External tool integrations via stdio, SSE, HTTP, or WebSocket protocols</td></tr>
+<tr><td>Settings</td><td><code>.claude/plugin.local.md</code></td><td>Per-project YAML frontmatter configuration with local overrides</td></tr>
+<tr><td>Scripts</td><td><code>scripts/*.sh</code></td><td>Utility scripts for hook validation, setup, and testing</td></tr>
+<tr><td>References</td><td><code>skills/*/references/*.md</code></td><td>Detailed reference documentation loaded on-demand by skills</td></tr>
+<tr><td>Examples</td><td><code>skills/*/examples/*.md</code></td><td>Working code examples for skill features and patterns</td></tr>
+</table>
+
+<h2 id="plugins">Plugin Catalog</h2>
+<p class="section-label">Development Workflow Plugins</p>
+<div class="card-grid">
+  <a class="card" href="plugin-dev/index.html"><h4>&#128736;&#65039; plugin-dev</h4><p>Comprehensive plugin development toolkit with 7 skills, 3 agents, and guided 8-phase creation workflow.</p><ul><li>58 files &middot; 7 skills &middot; 3 agents</li><li>Plugin structure, hooks, MCP, settings</li></ul></a>
+  <a class="card" href="feature-dev/index.html"><h4>&#127919; feature-dev</h4><p>7-phase structured feature development with parallel code exploration, architecture design, and quality review.</p><ul><li>6 files &middot; 3 agents &middot; 1 command</li><li>Explorer &middot; Architect &middot; Reviewer</li></ul></a>
+  <a class="card" href="agent-sdk-dev/index.html"><h4>&#129302; agent-sdk-dev</h4><p>Agent SDK scaffolding and verification for Python and TypeScript applications.</p><ul><li>5 files &middot; 2 agents &middot; 1 command</li><li>Project setup &middot; Best practices</li></ul></a>
+  <a class="card" href="commit-commands/index.html"><h4>&#128230; commit-commands</h4><p>Git workflow automation with style-aware commits, branch management, and PR creation.</p><ul><li>5 files &middot; 3 commands</li><li>/commit &middot; /commit-push-pr &middot; /clean_gone</li></ul></a>
+</div>
+
+<p class="section-label">Code Quality &amp; Review Plugins</p>
+<div class="card-grid">
+  <a class="card" href="pr-review-toolkit/index.html"><h4>&#128269; pr-review-toolkit</h4><p>6 specialized review agents for PR analysis: comments, tests, errors, types, code quality, and simplification.</p><ul><li>9 files &middot; 6 agents &middot; 1 command</li><li>Confidence scoring &ge;80 threshold</li></ul></a>
+  <a class="card" href="code-review/index.html"><h4>&#9989; code-review</h4><p>Automated multi-agent PR review with parallel compliance, bug, and history analysis.</p><ul><li>3 files &middot; 4+ agents &middot; 1 command</li><li>CLAUDE.md compliance &middot; Bug detection</li></ul></a>
+</div>
+
+<p class="section-label">Security &amp; Safety Plugins</p>
+<div class="card-grid">
+  <a class="card" href="hookify/index.html"><h4>&#128272; hookify</h4><p>Python rule engine for custom event-driven hooks. Create validation rules in markdown with YAML frontmatter.</p><ul><li>24 files &middot; Python core &middot; 4 hook types</li><li>Pattern matching &middot; Regex &middot; Conditions</li></ul></a>
+  <a class="card" href="security-guidance/index.html"><h4>&#128737;&#65039; security-guidance</h4><p>PreToolUse hook monitoring 9 vulnerability patterns: command injection, XSS, unsafe deserialization.</p><ul><li>3 files &middot; Python hook</li><li>9 security patterns &middot; Context-aware</li></ul></a>
+</div>
+
+<p class="section-label">Style, Learning &amp; Migration Plugins</p>
+<div class="card-grid">
+  <a class="card" href="frontend-design/index.html"><h4>&#127912; frontend-design</h4><p>Bold, distinctive frontend design guidance that avoids generic AI aesthetics.</p><ul><li>3 files &middot; 1 skill</li><li>Typography &middot; Color &middot; Motion &middot; Layout</li></ul></a>
+  <a class="card" href="claude-opus-4-5-migration/index.html"><h4>&#128260; claude-opus-4-5-migration</h4><p>Automated migration from Claude 4.x to Opus 4.5 across Anthropic, AWS, GCP, Azure.</p><ul><li>5 files &middot; 1 skill</li><li>Model strings &middot; Prompt adjustments</li></ul></a>
+  <a class="card" href="explanatory-output-style/index.html"><h4>&#128161; explanatory-output-style</h4><p>Educational insights about implementation choices injected at session start.</p><ul><li>4 files &middot; SessionStart hook</li></ul></a>
+  <a class="card" href="learning-output-style/index.html"><h4>&#127891; learning-output-style</h4><p>Interactive learning mode with code contribution requests at decision points.</p><ul><li>4 files &middot; SessionStart hook</li></ul></a>
+  <a class="card" href="ralph-wiggum/index.html"><h4>&#128260; ralph-wiggum</h4><p>Continuous self-referential AI loops. Claude works iteratively on a task, reading its own previous output.</p><ul><li>8 files &middot; Stop hook &middot; 3 commands</li><li>Autonomous iteration &middot; Completion promises</li></ul></a>
+</div>
+
+<h2 id="interactions">Cross-Plugin Interactions</h2>
+<table>
+<tr><th>Plugin A</th><th>Interface</th><th>Plugin B</th><th>Data Exchanged</th></tr>
+<tr><td>feature-dev</td><td>Agent invocation</td><td>(internal agents)</td><td>code-explorer, code-architect, code-reviewer agents used in 7-phase workflow</td></tr>
+<tr><td>hookify</td><td>PreToolUse hook</td><td>All plugins</td><td>Validates every tool call against user-defined rules before execution</td></tr>
+<tr><td>security-guidance</td><td>PreToolUse hook</td><td>All plugins</td><td>Scans file edits for 9 vulnerability patterns, emits warnings</td></tr>
+<tr><td>code-review</td><td>GitHub CLI</td><td>commit-commands</td><td>Reviews PRs created by commit-push-pr workflow</td></tr>
+<tr><td>plugin-dev</td><td>Skill knowledge</td><td>All plugins</td><td>Provides structure/hook/MCP guidance used when building any plugin</td></tr>
+<tr><td>explanatory-output-style</td><td>SessionStart hook</td><td>All sessions</td><td>Injects educational context at start of every session</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for Plugins</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>plugins/
+&#9500;&#9472;&#9472; README.md                      &#8592; Role: Plugin ecosystem overview
+&#9500;&#9472;&#9472; plugin-dev/                    &#8592; Role: Plugin development toolkit (58 files)
+&#9474;   &#9500;&#9472;&#9472; commands/create-plugin.md  &#8592; Role: 8-phase guided creation
+&#9474;   &#9500;&#9472;&#9472; agents/                    &#8592; Role: 3 specialized agents
+&#9474;   &#9492;&#9472;&#9472; skills/ (7 skills)         &#8592; Role: Progressive-disclosure knowledge
+&#9500;&#9472;&#9472; pr-review-toolkit/             &#8592; Role: 6-agent PR review
+&#9500;&#9472;&#9472; hookify/                       &#8592; Role: Python rule engine
+&#9474;   &#9500;&#9472;&#9472; core/                      &#8592; Role: config_loader.py, rule_engine.py
+&#9474;   &#9500;&#9472;&#9472; hooks/                     &#8592; Role: Event handler scripts
+&#9474;   &#9492;&#9472;&#9472; matchers/                  &#8592; Role: Pattern matching utils
+&#9500;&#9472;&#9472; feature-dev/                   &#8592; Role: 7-phase feature workflow
+&#9500;&#9472;&#9472; code-review/                   &#8592; Role: Multi-agent code review
+&#9500;&#9472;&#9472; commit-commands/               &#8592; Role: Git workflow automation
+&#9500;&#9472;&#9472; agent-sdk-dev/                 &#8592; Role: SDK scaffolding
+&#9500;&#9472;&#9472; ralph-wiggum/                  &#8592; Role: Autonomous loop runner
+&#9500;&#9472;&#9472; frontend-design/               &#8592; Role: Design guidance skill
+&#9500;&#9472;&#9472; claude-opus-4-5-migration/     &#8592; Role: Model migration
+&#9500;&#9472;&#9472; explanatory-output-style/      &#8592; Role: Educational insights hook
+&#9500;&#9472;&#9472; learning-output-style/         &#8592; Role: Interactive learning hook
+&#9492;&#9472;&#9472; security-guidance/             &#8592; Role: Security pattern detection
+</code></pre>
+</details>
+
+<h2 id="configuration">Plugin Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>plugin.json name</code></td><td>(required)</td><td>Plugin identifier used for registration and command namespacing</td></tr>
+<tr><td><code>plugin.json version</code></td><td>"1.0.0"</td><td>Semantic version of the plugin</td></tr>
+<tr><td><code>plugin.json mcpServers</code></td><td>{}</td><td>MCP server definitions (stdio, SSE, HTTP, WebSocket)</td></tr>
+<tr><td><code>agent.model</code></td><td>inherit</td><td>AI model: inherit, sonnet, opus, haiku</td></tr>
+<tr><td><code>agent.tools</code></td><td>all</td><td>Allowed tools: Read, Grep, Bash, Edit, Write, WebFetch, etc.</td></tr>
+<tr><td><code>hook.type</code></td><td>command</td><td>Hook type: command (shell/python) or prompt (inline)</td></tr>
+<tr><td><code>hook.matcher</code></td><td>*</td><td>Tool name regex matcher for PreToolUse/PostToolUse hooks</td></tr>
+<tr><td><code>skill.description</code></td><td>(required)</td><td>Trigger phrase description for auto-invocation matching</td></tr>
+<tr><td><code>settings bypass</code></td><td>true</td><td>Allow/disallow bypass mode for permissions</td></tr>
+<tr><td><code>settings sandbox</code></td><td>false</td><td>Enable bash sandboxing with network isolation</td></tr>
+</table>
+
+<div class="footer">
+  <p><a href="../index.html">&larr; Back to Claude Code</a> &nbsp;|&nbsp; <a href="../search.html">&#128269; Search</a> &nbsp;|&nbsp; Plugins Wiki &mdash; Generated 2026-03-25</p>
+</div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){
+  var toc=document.getElementById('toc');if(toc){
+  var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;
+  headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);}
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body></html>

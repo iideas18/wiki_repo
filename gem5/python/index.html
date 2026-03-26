@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/python">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>python — Configuration System &amp; Standard Library · gem5 Wiki</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a2e;--card:#f8f9fa;--card-border:#e0e0e0;--accent:#0969da;--accent2:#6f42c1;--hero-bg:linear-gradient(135deg,#1a472a 0%,#2d6a4f 50%,#40916c 100%);--hero-fg:#fff;--code-bg:#f6f8fa;--table-stripe:#f8f9fa;--badge-bg:#ddf4ff;--badge-fg:#0969da;--toc-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.12);--focus:#2188ff;--print-hide:block}
+[data-theme=dark]{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--card-border:#30363d;--accent:#58a6ff;--accent2:#bc8cff;--hero-bg:linear-gradient(135deg,#0d1117 0%,#112211 50%,#1a331a 100%);--hero-fg:#f0f6fc;--code-bg:#161b22;--table-stripe:#161b22;--badge-bg:#1f3044;--badge-fg:#58a6ff;--toc-bg:#161b22;--shadow:0 1px 3px rgba(0,0,0,.5)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--hero-bg);color:var(--hero-fg);padding:2.5rem 2rem 2rem;position:relative}
+.breadcrumb{font-size:.9rem;margin-bottom:1rem;opacity:.85}
+.breadcrumb a{color:var(--hero-fg);opacity:.8}.breadcrumb a:hover{opacity:1}
+h1{margin:0 0 .5rem;font-size:2rem;font-weight:700}
+.subtitle{font-size:1.1rem;opacity:.85;margin-bottom:1.5rem}
+.stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat-item{background:rgba(255,255,255,.12);padding:.4rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.badge{background:var(--badge-bg);color:var(--badge-fg);padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600}
+.theme-toggle{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:var(--hero-fg);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.theme-toggle:hover{background:rgba(255,255,255,.25)}
+.reading-time{font-size:.8rem;opacity:.7;margin-top:.5rem}
+main{max-width:960px;margin:0 auto;padding:1.5rem}
+.intro-box{background:var(--badge-bg);border-left:4px solid var(--accent);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin:1.5rem 0;font-size:.95rem}
+.intro-box strong{color:var(--accent)}
+.toc{background:var(--toc-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.toc summary{font-weight:700;cursor:pointer;font-size:1rem}
+.toc ul{margin:.5rem 0 0;padding-left:1.5rem}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+section{margin:2rem 0}
+h2{font-size:1.5rem;border-bottom:2px solid var(--card-border);padding-bottom:.3rem;margin:2rem 0 1rem}
+h3{font-size:1.2rem;margin:1.5rem 0 .75rem;color:var(--accent2)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{text-align:left;padding:.6rem .75rem;border:1px solid var(--card-border)}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even) td{background:var(--table-stripe)}
+.diagram-container{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1.25rem;margin:1rem 0;cursor:pointer;position:relative}
+.diagram-container:hover{box-shadow:var(--shadow)}
+.diagram-container::after{content:'⛶';position:absolute;top:.5rem;right:.75rem;font-size:1.1rem;opacity:.5}
+pre{background:var(--code-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0;color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--card);border:1px solid var(--card-border);color:var(--fg);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.25rem}
+.card h4{margin:0 0 .5rem;color:var(--accent)}
+.card p{margin:0;font-size:.9rem;opacity:.85}
+.dir-tree{font-family:monospace;font-size:.85rem;background:var(--code-bg);padding:1rem;border-radius:8px;border:1px solid var(--card-border);line-height:1.8}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:99}
+footer{text-align:center;padding:2rem;font-size:.8rem;opacity:.6;border-top:1px solid var(--card-border);margin-top:3rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:2rem}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border-radius:12px;padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:.5rem;right:1rem;font-size:1.5rem;cursor:pointer;background:none;border:none;color:var(--fg)}
+@media print{.theme-toggle,.back-to-top,.skip-link,.copy-btn,.overlay{display:none!important}header{background:#1a472a!important;-webkit-print-color-adjust:exact}body{font-size:11pt}}
+@media(max-width:768px){main{padding:1rem}.stat-row{gap:.75rem}.card-grid{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+<nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; python</nav>
+<h1>python</h1>
+<p class="subtitle">Configuration System and Standard Library — the control plane of gem5</p>
+<div class="stat-row">
+<span class="stat-item">📁 236 files</span>
+<span class="stat-item">📏 40K LOC</span>
+<span class="stat-item">📚 stdlib</span>
+<span class="stat-item">🔗 PyBind11</span>
+<span class="stat-item">🐍 Python</span>
+</div>
+<div class="badge-row">
+<span class="badge">SimObject</span>
+<span class="badge">Standard Library</span>
+<span class="badge">Components</span>
+<span class="badge">Configuration</span>
+<span class="badge">Resource Management</span>
+</div>
+<div class="reading-time">~10 min read</div>
+</header>
+<main id="main">
+<div class="intro-box">
+<strong>🎛️ Analogy:</strong> The Python module is like the <em>control panel</em> of an elaborate model railway. You don't build the engines or tracks in Python — those exist in C++. Instead, you use Python to wire together boards, processors, caches, and memory into a complete system, set every knob and dial, then press "run." The <code>m5</code> package provides the raw wiring, while the <code>gem5</code> standard library gives you pre-assembled modules you can snap together.
+</div>
+
+<details class="toc" open>
+<summary>Table of Contents</summary>
+<ul>
+<li><a href="#architecture">Architecture Overview</a></li>
+<li><a href="#m5-package">m5 Package — Core Bindings</a></li>
+<li><a href="#gem5-stdlib">gem5 Standard Library</a></li>
+<li><a href="#key-classes">Key Classes</a></li>
+<li><a href="#simobject-deep-dive">Deep Dive: SimObject System</a></li>
+<li><a href="#components-deep-dive">Deep Dive: Component Model</a></li>
+<li><a href="#simulation-flow">Simulation Flow</a></li>
+<li><a href="#interactions">Cross-Module Interactions</a></li>
+<li><a href="#directory-map">Directory Map</a></li>
+<li><a href="#config-table">Configuration Patterns</a></li>
+<li><a href="#code-examples">Code Examples</a></li>
+</ul>
+</details>
+
+<section>
+<h2 id="architecture">Architecture Overview</h2>
+<p>The Python module is divided into two major packages: the low-level <code>m5</code> infrastructure that provides PyBind11 bindings to C++ simulator objects, and the high-level <code>gem5</code> standard library that offers composable board/processor/memory abstractions. Together they enable full system configuration from Python scripts.</p>
+<div class="diagram-container" data-diagram="arch">
+<pre class="mermaid">flowchart TD
+    User["User Config Script"]
+    Sim["gem5.simulate.Simulator"]
+    Board["gem5.components.boards"]
+    Proc["gem5.components.processors"]
+    Mem["gem5.components.memory"]
+    Cache["gem5.components.cachehierarchies"]
+    Res["gem5.resources"]
+    M5["m5.SimObject"]
+    Params["m5.params"]
+    Simulate["m5.simulate"]
+    Bind["_m5 (PyBind11 C++)"]
+    CPP["C++ Simulator Core"]
+
+    User --> Sim
+    Sim --> Board
+    Board --> Proc
+    Board --> Mem
+    Board --> Cache
+    Sim --> Res
+    Board --> M5
+    M5 --> Params
+    M5 --> Simulate
+    Simulate --> Bind
+    Bind --> CPP
+</pre>
+</div>
+<p>The architecture follows a layered design: user scripts interact with <code>Simulator</code>, which orchestrates <code>AbstractBoard</code> subclasses. Boards compose processors, caches, and memory modules. At the bottom, <code>m5.SimObject</code> and its metaclass system create C++ objects via the <code>_m5</code> PyBind11 bridge.</p>
+</section>
+
+<section>
+<h2 id="m5-package">m5 Package — Core Bindings</h2>
+<p>The <code>m5</code> package provides the foundational infrastructure that bridges Python configuration to C++ simulation objects. Key submodules:</p>
+<table>
+<thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>m5.SimObject</code></td><td><a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">Base</a> class for all configurable objects; metaclass-driven parameter system</td></tr>
+<tr><td><code>m5.simulate</code></td><td>Simulation execution: <code>instantiate()</code>, <code>simulate()</code>, <code>drain()</code>, <code>checkpoint()</code></td></tr>
+<tr><td><code>m5.params</code></td><td>Parameter descriptors: <code>ParamDesc</code>, <code>VectorParamDesc</code>, <code>Port</code></td></tr>
+<tr><td><code>m5.proxy</code></td><td>Dynamic parameter resolution: <code>Self</code>, <code>Parent</code> proxies</td></tr>
+<tr><td><code>m5.event</code></td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Event</a> scheduling interface to C++ <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">EventQueue</a></td></tr>
+<tr><td><code>m5.stats</code></td><td><a href="../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar <a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> — gem5 Wiki" class="xref">Statistics</a> collection and output formatting</td></tr>
+<tr><td><code>m5.core</code></td><td>Tick management, debugging, build info</td></tr>
+<tr><td><code>m5.ticks</code></td><td>Time-to-tick conversion utilities</td></tr>
+<tr><td><code>m5.trace</code></td><td>Debug trace flag management</td></tr>
+<tr><td><code>m5.objects</code></td><td>Auto-generated SimObject subclass registry</td></tr>
+</tbody>
+</table>
+<h3 id="metaclass-system">MetaSimObject Metaclass</h3>
+<p>The <code>MetaSimObject</code> metaclass intercepts class creation for every <code>SimObject</code> subclass. It collects parameter declarations, builds parameter descriptors, resolves inheritance, and registers the class in the global SimObject type registry. This allows the declarative Python style to automatically generate C++ parameter structs.</p>
+</section>
+
+<section>
+<h2 id="gem5-stdlib">gem5 Standard Library</h2>
+<p>The modern <code>gem5</code> standard library provides a component-based API for building simulation systems without deep knowledge of m5 internals.</p>
+<div class="card-grid">
+<div class="card">
+<h4>📋 boards</h4>
+<p>AbstractBoard connects processor, <a title="cache — Classic <a href="../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../mem_doc/cache/index.html">cache</a> hierarchy, and memory into a complete system. Implementations: SimpleBoard, X86Board, ArmBoard, RiscvBoard.</p>
+</div>
+<div class="card">
+<h4>⚙️ processors</h4>
+<p>AbstractProcessor wraps <a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> cores. Implementations: SimpleProcessor (timing/atomic/O3), SwitchableProcessor for CPU switching.</p>
+</div>
+<div class="card">
+<h4>💾 memory</h4>
+<p>AbstractMemorySystem for DRAM configuration. SingleChannelDDR4, DualChannelDDR4, HBM2Stack.</p>
+</div>
+<div class="card">
+<h4>🔄 cachehierarchies</h4>
+<p>Cache system abstraction. Classic (PrivateL1/SharedL2), <a title="ruby — Coherence Protocol Simulation | gem5 Wiki" href="../mem_doc/ruby/index.html">Ruby</a> (MESI, MOESI, CHI protocols).</p>
+</div>
+<div class="card">
+<h4>📦 resources</h4>
+<p>WorkloadResource, BinaryResource, DiskImageResource — automatic download and caching from gem5-resources repository.</p>
+</div>
+<div class="card">
+<h4>🏗️ prebuilt</h4>
+<p>Ready-to-use configurations: demo boards (<a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../arch_doc/x86/index.html">X86</a>/ARM/RISC-V), Viper GPU board, RiscvMatched SiFive board.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<thead><tr><th>Class</th><th>Package</th><th>Parent</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>MetaSimObject</code></td><td>m5</td><td>type</td><td>Metaclass that intercepts SimObject class creation; collects params</td></tr>
+<tr><td><code>SimObject</code></td><td>m5</td><td>—</td><td>Base for all configurable objects; parameter declaration and C++ binding</td></tr>
+<tr><td><code>SimObjectCliWrapper</code></td><td>m5</td><td>—</td><td>CLI parameter override interface for SimObjects</td></tr>
+<tr><td><code>Simulator</code></td><td>gem5.simulate</td><td>—</td><td>Top-level simulation runner; manages board, exit events, run loop</td></tr>
+<tr><td><code>AbstractBoard</code></td><td>gem5.components</td><td>SubSystem</td><td>Connects processor + cache + memory; handles clocking and ranges</td></tr>
+<tr><td><code>AbstractProcessor</code></td><td>gem5.components</td><td>SubSystem</td><td>CPU abstraction; exposes cores, ISA, switching interface</td></tr>
+<tr><td><code>AbstractMemorySystem</code></td><td>gem5.components</td><td>SubSystem</td><td><a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> controller configuration and range management</td></tr>
+<tr><td><code>AbstractCacheHierarchy</code></td><td>gem5.components</td><td>SubSystem</td><td>Cache topology abstraction; classic and Ruby implementations</td></tr>
+<tr><td><code>WorkloadResource</code></td><td>gem5.resources</td><td>—</td><td>Downloadable workload binaries with metadata</td></tr>
+<tr><td><code>obtain_resource</code></td><td>gem5.resources</td><td>function</td><td>Fetches and caches resources from gem5-resources repository</td></tr>
+<tr><td><code>SimPoint</code></td><td>gem5.utils</td><td>—</td><td>SimPoint analysis utility for sampling-based simulation</td></tr>
+<tr><td><code>requires</code></td><td>gem5.utils</td><td>function</td><td>Runtime ISA/protocol compatibility checks</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="simobject-deep-dive">Deep Dive: SimObject System</h2>
+<h3 id="param-lifecycle">Parameter Lifecycle</h3>
+<div class="diagram-container" data-diagram="param">
+<pre class="mermaid">sequenceDiagram
+    participant U as User Script
+    participant Meta as MetaSimObject
+    participant SO as SimObject
+    participant Inst as m5.simulate
+    participant CPP as C++ Object
+
+    U->>Meta: class MyObj(SimObject): type='MyObj' ...
+    Meta->>Meta: Collect params, build descriptors
+    U->>SO: obj = MyObj(param1=val)
+    SO->>SO: Store params in _values dict
+    U->>Inst: instantiate(root)
+    Inst->>SO: adoptOrphanParams()
+    Inst->>SO: unproxyParams() (resolve Self/Parent)
+    Inst->>CPP: _create_cpp_objects()
+    Inst->>CPP: connectPorts()
+    Inst->>CPP: init() / startup()
+</pre>
+</div>
+<p>The instantiation sequence resolves all proxy parameters (<code>Self.attr</code>, <code>Parent.attr</code>), creates the C++ objects in dependency order, connects ports, and calls <code>init()</code> and <code>startup()</code> on each object. The configuration can be dumped in INI, JSON, or DOT format for debugging.</p>
+
+<h3 id="param-types">Parameter Types</h3>
+<table>
+<thead><tr><th>Descriptor</th><th>Usage</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>Param.Int</code></td><td>Single integer</td><td><code>cache_size = Param.MemorySize('64kB')</code></td></tr>
+<tr><td><code>VectorParam</code></td><td>List of values</td><td><code>port = VectorRequestPort('mem ports')</code></td></tr>
+<tr><td><code>DictParamDesc</code></td><td>Key-value mapping</td><td>Dictionary-style parameters</td></tr>
+<tr><td><code>Proxy.Self</code></td><td>Late binding</td><td><code>clk_domain = Self.clk_domain</code></td></tr>
+<tr><td><code>Port</code></td><td>Connection point</td><td><code>mem_side = RequestPort('to memory')</code></td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="components-deep-dive">Deep Dive: Component Model</h2>
+<div class="diagram-container" data-diagram="components">
+<pre class="mermaid">flowchart TD
+    AB["AbstractBoard"]
+    AP["AbstractProcessor"]
+    AM["AbstractMemorySystem"]
+    AC["AbstractCacheHierarchy"]
+
+    AB -->|"has-a"| AP
+    AB -->|"has-a"| AM
+    AB -->|"has-a"| AC
+
+    AP --> SP["SimpleProcessor"]
+    AP --> SWP["SwitchableProcessor"]
+    AM --> SC["SingleChannelDDR4"]
+    AM --> DC["DualChannelDDR4"]
+    AC --> CL["ClassicCacheHierarchy"]
+    AC --> RB["RubyCacheHierarchy"]
+
+    AB --> SB["SimpleBoard"]
+    AB --> X86["X86Board"]
+    AB --> ARM["ArmBoard"]
+</pre>
+</div>
+<p>The component model follows an abstract factory pattern. Each board implements <code>_pre_instantiate()</code> to wire components and <code>get_memory_ranges()</code> to define the address map. The <code>connect_things()</code> method links processor ports to cache hierarchy ports and cache to memory controller ports.</p>
+</section>
+
+<section>
+<h2 id="simulation-flow">Simulation Flow</h2>
+<div class="diagram-container" data-diagram="simflow">
+<pre class="mermaid">flowchart LR
+    A["Create Board"] --> B["Set Workload"]
+    B --> C["Create Simulator"]
+    C --> D["simulator.run()"]
+    D --> E["instantiate()"]
+    E --> F["simulate()"]
+    F --> G{Exit Event?}
+    G -->|"handler"| H["On-exit handler"]
+    H --> F
+    G -->|"done"| I["Stats dump & cleanup"]
+</pre>
+</div>
+<h3 id="runtime-ops">Runtime Operations</h3>
+<p>The simulation engine supports runtime control operations through the <code>m5.simulate</code> module:</p>
+<ul>
+<li><code>switchCpus()</code> — hot-swap CPU models (e.g., atomic → O3) during simulation</li>
+<li><code>drain()</code> — drain all SimObjects for safe state transitions</li>
+<li><code>memWriteback()</code> — flush dirty cache lines to memory</li>
+<li><code>checkpoint()</code> — write simulation state for later restoration</li>
+<li><code>scheduleTickExitFromCurrent()</code> — schedule simulation exit at specific tick</li>
+</ul>
+</section>
+
+<section>
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<thead><tr><th>Dependency</th><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>C++ bindings</td><td><code>_m5</code> (PyBind11)</td><td>Core simulation engine, object creation, event scheduling</td></tr>
+<tr><td>Parameter structs</td><td>all <code>src/</code> modules</td><td>Every C++ SimObject has auto-generated Python params</td></tr>
+<tr><td>gem5-resources</td><td>external</td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Workload</a> binaries, disk images, checkpoints</td></tr>
+<tr><td>ISA definitions</td><td><code>arch/*</code></td><td>ISA-specific board and processor configurations</td></tr>
+<tr><td>Memory system</td><td><code>mem</code></td><td><a href="../mem_doc/index.html" title="mem — Memory <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> | gem5 Wiki" class="xref">MemCtrl</a>, DRAM interface parameter wrappers</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-tree">
+src/python/
+├── <strong>m5/</strong> — Core infrastructure package
+│   ├── SimObject.py              — MetaSimObject + SimObject base class
+│   ├── simulate.py               — instantiate(), simulate(), drain()
+│   ├── params.py                 — Parameter descriptor system
+│   ├── proxy.py                  — Self/Parent proxy resolution
+│   ├── core.py                   — Tick management, build info
+│   ├── event.py                  — EventQueue Python interface
+│   ├── debug.py                  — Debug flag management
+│   ├── trace.py                  — Trace output control
+│   ├── ticks.py                  — Time conversion utilities
+│   ├── params/                   — Auto-generated param classes
+│   ├── objects/                  — Auto-generated SimObject wrappers
+│   ├── <a title="A comprehensive framework for declaring, collecting, and outputting performance counters, distributions, histograms, and derived formulas across all gem5 components." href="../base_doc/stats/index.html">stats</a>/                    — Statistics output formatters
+│   └── ext/                      — Third-party extensions
+├── <strong>gem5/</strong> — Standard library
+│   ├── simulate/
+│   │   └── simulator.py          — Simulator orchestrator class
+│   ├── components/
+│   │   ├── boards/               — AbstractBoard + implementations
+│   │   ├── processors/           — AbstractProcessor + implementations
+│   │   ├── memory/               — AbstractMemorySystem + DDR configs
+│   │   ├── cachehierarchies/     — Classic + Ruby cache hierarchies
+│   │   └── devices/              — I/O and peripheral components
+│   ├── resources/                — Resource download and caching
+│   ├── utils/
+│   │   ├── requires.py           — ISA/protocol compatibility checks
+│   │   ├── simpoint.py           — SimPoint analysis utility
+│   │   ├── override.py           — Method override decorator
+│   │   └── multisim/             — Multi-simulation orchestration
+│   └── prebuilt/
+│       ├── demo/                 — Demo boards (x86, <a title="Comprehensive ARM architecture support including <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../arch_doc/arm/index.html">ARM</a>, RISC-V)
+│       ├── viper/                — AMD Viper GPU board
+│       └── riscvmatched/         — SiFive Unmatched board
+└── importer.py                   — Custom Python import machinery
+</div>
+</section>
+
+<section>
+<h2 id="config-table">Configuration Patterns</h2>
+<table>
+<thead><tr><th>Pattern</th><th>API</th><th>Use Case</th></tr></thead>
+<tbody>
+<tr><td><a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">Simple</a> SE mode</td><td><code>SimpleBoard + SimpleProcessor + SingleChannelDDR4</code></td><td>Quick syscall emulation experiments</td></tr>
+<tr><td>Full System</td><td><code>X86Board + SwitchableProcessor + DualChannelDDR4</code></td><td>Full OS boot with CPU switching</td></tr>
+<tr><td>GPU compute</td><td><code>prebuilt.viper.Board</code></td><td>AMD GPU + CPU heterogeneous system</td></tr>
+<tr><td>Custom</td><td>Subclass <code>AbstractBoard</code> + override <code>connect_things()</code></td><td>Bespoke system topologies</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-simple">Simple SE-mode Simulation</h3>
+<pre><code class="language-python">from gem5.components.boards.simple_board import SimpleBoard
+from gem5.components.processors.simple_processor import SimpleProcessor
+from gem5.components.memory.single_channel import SingleChannelDDR4_2400
+from gem5.components.cachehierarchies.classic.private_l1_shared_l2 import (
+    PrivateL1SharedL2CacheHierarchy,
+)
+from gem5.isas import ISA
+from gem5.resources.resource import obtain_resource
+from gem5.simulate.simulator import Simulator
+
+# Build system components
+processor = SimpleProcessor(cpu_type="timing", isa=ISA.X86, num_cores=1)
+cache = PrivateL1SharedL2CacheHierarchy(l1d_size="32kB", l1i_size="32kB",
+                                          l2_size="256kB")
+memory = SingleChannelDDR4_2400(size="2GiB")
+
+# Assemble board
+board = SimpleBoard(processor=processor, cache_hierarchy=cache,
+                     memory=memory, clk_freq="3GHz")
+board.set_se_binary_workload(obtain_resource("x86-hello64-static"))
+
+# Run simulation
+sim = Simulator(board=board)
+sim.run()</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-simobject">Custom SimObject Declaration</h3>
+<pre><code class="language-python">from m5.SimObject import SimObject
+from m5.params import Param, VectorParam
+
+class MyAccelerator(SimObject):
+    """Custom accelerator SimObject with configurable parameters."""
+    type = 'MyAccelerator'
+    cxx_header = 'my_module/accelerator.hh'
+    cxx_class = 'gem5::MyAccelerator'
+
+    num_engines = Param.Int(4, "Number of compute engines")
+    queue_depth = Param.Int(16, "Command queue depth")
+    clock_freq = Param.Clock('1GHz', "Operating frequency")
+    mem_ports = VectorRequestPort("Memory-side ports")</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-switching">CPU Switching at Runtime</h3>
+<pre><code class="language-python">from gem5.components.processors.switchable_processor import SwitchableProcessor
+
+processor = SwitchableProcessor(
+    starting_core_type="atomic",
+    switch_core_type="o3",
+    isa=ISA.ARM,
+    num_cores=4,
+)
+
+# In exit event handler:
+def switch_handler():
+    processor.switch()  # Drains and swaps CPU models
+    yield False         # Continue simulation</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay">
+<div class="overlay-inner">
+<button class="overlay-close" id="overlayClose" aria-label="Close overlay">&times;</button>
+<div id="overlayContent"></div>
+</div>
+</div>
+
+<footer>
+<p>gem5 python module wiki — auto-generated 2026-03-25 — source rev 7a2b0e413d</p>
+</footer>
+
+<script>
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('neutra-ip-theme',t)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('neutra-ip-theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}})();
+window.addEventListener('scroll',function(){document.getElementById('backToTop').style.display=window.scrollY>400?'flex':'none'});
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    const code=this.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},2000)});
+  });
+});
+(function(){
+  const toc=document.querySelector('.toc');if(!toc)return;
+  const links=toc.querySelectorAll('a[href^="#"]');
+  const obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){
+      links.forEach(function(l){l.style.fontWeight=l.getAttribute('href')==='#'+e.target.id?'700':'400'});
+    }});
+  },{rootMargin:'-20% 0px -70% 0px'});
+  links.forEach(function(l){const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t)});
+})();
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  const sections=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  if(!sections.length)return;
+  let cur=0;const y=window.scrollY+100;
+  for(let i=sections.length-1;i>=0;i--){if(sections[i].offsetTop<=y){cur=i;break}}
+  if(e.key==='j'&&cur<sections.length-1)sections[cur+1].scrollIntoView({behavior:'smooth'});
+  if(e.key==='k'&&cur>0)sections[cur-1].scrollIntoView({behavior:'smooth'});
+});
+document.querySelectorAll('.diagram-container').forEach(function(d){
+  d.addEventListener('click',function(){
+    var m=d.querySelector('.mermaid');if(!m)return;
+    var ov=document.getElementById('diagramOverlay'),oc=document.getElementById('overlayContent');
+    oc.innerHTML='';var clone=m.cloneNode(true);clone.removeAttribute('data-processed');
+    oc.appendChild(clone);ov.classList.add('active');
+    if(window.mermaid)mermaid.run({nodes:[clone]});
+  });
+});
+document.getElementById('overlayClose').addEventListener('click',function(){document.getElementById('diagramOverlay').classList.remove('active')});
+document.getElementById('diagramOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')});
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.mermaid').forEach(function(el){el.setAttribute('data-source',el.textContent)});
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'default',securityLevel:'loose'});
+function renderMermaid(){
+  document.querySelectorAll('.mermaid').forEach(function(el){
+    if(el.getAttribute('data-processed'))return;
+    var src=el.getAttribute('data-source')||el.textContent;
+    el.textContent=src;el.removeAttribute('data-processed');
+  });
+  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+}
+renderMermaid();
+var obs=new MutationObserver(function(){
+  document.querySelectorAll('.mermaid[data-processed]').forEach(function(el){
+    var src=el.getAttribute('data-source');if(src){el.textContent=src;el.removeAttribute('data-processed');}
+  });
+  setTimeout(renderMermaid,50);
+});
+obs.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme:light)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme:dark)">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

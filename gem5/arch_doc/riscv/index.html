@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/arch/riscv/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>riscv — RISC-V ISA Implementation | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../index.html">arch</a> &rsaquo; riscv</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>riscv — RISC-V ISA Implementation</h1>
+    <p class="subtitle">Modular RISC-V instruction set support with standard extensions (M/A/F/D/C/V), privilege modes, PMP/PMA security, and compressed instruction decoding.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">RISC-V is like a LEGO set. The <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> integer ISA (RV64I) is the starter kit — <a title="simple — Atomic and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a>, clean, and complete on its own. Each extension snaps on like an expansion pack: M (multiply/divide), A (atomic ops), F/D (floating point), C (compressed instructions for code density), and V (vector processing). gem5 assembles whatever combination you configure, with the decoder automatically handling 16-bit compressed and 32-bit standard instructions.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>gem5's RISC-V implementation supports the full RV64GC profile (I+M+A+F+D+C) plus the V (vector) extension. The clean, modular RISC-V design results in a relatively simple decoder compared to <a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../x86/index.html">x86</a> or <a title="Comprehensive ARM architecture support including <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../arm/index.html">ARM</a>, making it an excellent ISA for architecture research.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Decoder"
+      RvDec["RiscvISA::Decoder"]
+      C16["Compressed (16-bit)\nC extension"]
+      Std32["Standard (32-bit)\nRV64I base"]
+    end
+
+    subgraph "Extensions"
+      M["M: Multiply/Divide"]
+      A["A: Atomics (LR/SC, AMO)"]
+      F["F: Single-Precision FP"]
+      D["D: Double-Precision FP"]
+      V["V: Vector Processing"]
+    end
+
+    subgraph "Privilege"
+      U["U-mode (User)"]
+      S["S-mode (Supervisor)"]
+      Machine["M-mode (Machine)"]
+      PMP["PMP (Physical Memory Protection)"]
+      PMA["PMA (Physical Memory Attributes)"]
+    end
+
+    RvDec --> C16
+    RvDec --> Std32
+    Std32 --> M
+    Std32 --> A
+    Std32 --> F
+    Std32 --> D
+    Std32 --> V
+    Machine --> S --> U
+    Machine --> PMP
+    Machine --> PMA
+    </pre>
+  </div>
+
+  <h2 id="decoder">Instruction Decoder</h2>
+  <p>The RISC-V decoder is comparatively simple — instructions are either 16-bit (compressed) or 32-bit (standard). The two lowest bits of the instruction determine the length: <code>00</code>, <code>01</code>, or <code>10</code> = compressed (16-bit); <code>11</code> = standard (32-bit).</p>
+
+  <pre><code class="language-cpp">namespace RiscvISA {
+
+class Decoder : public InstDecoder
+{
+  public:
+    void moreBytes(const PCStateBase &amp;pc, Addr fetchPC) override;
+    bool instReady() const override;
+    StaticInstPtr decode(PCStateBase &amp;nextPC) override;
+
+  private:
+    bool aligned;       // Instruction alignment state
+    MachInst machInst;  // Current raw instruction
+
+    // Determine instruction length from first 2 bits
+    bool isCompressed(MachInst inst) const {
+        return (inst &amp; 0x3) != 0x3;
+    }
+
+    // Expand compressed instruction to 32-bit equivalent
+    MachInst expandCompressed(MachInst inst) const;
+
+    // Decode 32-bit instruction by major opcode
+    StaticInstPtr decodeInst(MachInst mach_inst);
+};</code></pre>
+
+  <h2 id="extensions">Standard Extensions</h2>
+  <table>
+    <thead><tr><th>Extension</th><th>Letter</th><th>Description</th><th>Key Instructions</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Integer</strong></td><td>I</td><td>Base integer operations (always present)</td><td>ADD, SUB, AND, OR, SLT, BEQ, JAL, LW, SW</td></tr>
+      <tr><td><strong>Multiply</strong></td><td>M</td><td>Integer multiply and divide</td><td>MUL, MULH, DIV, DIVU, REM</td></tr>
+      <tr><td><strong>Atomic</strong></td><td>A</td><td>Atomic memory operations</td><td>LR.W/D, SC.W/D, AMOSWAP, AMOADD, AMOAND</td></tr>
+      <tr><td><strong>Float (single)</strong></td><td>F</td><td>Single-precision floating point</td><td>FADD.S, FMUL.S, FLW, FSW, FCVT</td></tr>
+      <tr><td><strong>Float (double)</strong></td><td>D</td><td>Double-precision floating point</td><td>FADD.D, FMUL.D, FLD, FSD, FCVT</td></tr>
+      <tr><td><strong>Compressed</strong></td><td>C</td><td>16-bit instruction encoding</td><td>C.ADD, C.LW, C.SW, C.BEQZ, C.JAL</td></tr>
+      <tr><td><strong>Vector</strong></td><td>V</td><td>SIMD vector operations</td><td>VADD, VMUL, VLE, VSE, VFADD</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="privilege-modes">Privilege Modes</h2>
+  <p>RISC-V defines three privilege modes, each with increasing levels of access to the hardware:</p>
+
+  <h3 id="machine-mode">Machine Mode (M-mode)</h3>
+  <p>The most privileged mode — always present. Handles hardware initialization, interrupt routing, and provides the foundation for all other modes. Has direct access to all CSRs and physical memory.</p>
+
+  <h3 id="supervisor-mode">Supervisor Mode (S-mode)</h3>
+  <p>Operating system kernel mode. Manages virtual memory (Sv39/Sv48 page tables), handles page faults, and provides system call interface for user mode.</p>
+
+  <h3 id="user-mode">User Mode (U-mode)</h3>
+  <p>Unprivileged application mode. Cannot access M/S-mode CSRs or execute privileged instructions. <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> access is controlled by S-mode page tables.</p>
+
+  <pre><code class="language-cpp">namespace RiscvISA {
+
+// Privilege levels
+enum PrivilegeMode : uint8_t {
+    PRV_U = 0,  // User
+    PRV_S = 1,  // Supervisor
+    PRV_M = 3   // Machine
+};
+
+// Key CSRs (Control and Status Registers)
+enum CSRIndex {
+    // Machine-level
+    CSR_MSTATUS    = 0x300,
+    CSR_MISA       = 0x301,  // ISA extensions present
+    CSR_MEDELEG    = 0x302,  // Exception delegation
+    CSR_MIDELEG    = 0x303,  // Interrupt delegation
+    CSR_MIE        = 0x304,  // Interrupt enable
+    CSR_MTVEC      = 0x305,  // Trap vector base
+    CSR_MEPC       = 0x341,  // Exception PC
+    CSR_MCAUSE     = 0x342,  // Exception cause
+    CSR_MTVAL      = 0x343,  // Trap value
+
+    // Supervisor-level
+    CSR_SSTATUS    = 0x100,
+    CSR_SATP       = 0x180,  // Page table base (Sv39/Sv48)
+
+    // Performance counters
+    CSR_CYCLE      = 0xC00,
+    CSR_INSTRET    = 0xC02,
+};
+
+} // namespace RiscvISA</code></pre>
+
+  <h2 id="pmp-pma">PMP and PMA</h2>
+  <p>RISC-V provides two hardware security mechanisms for memory protection:</p>
+
+  <h3 id="pmp">Physical Memory Protection (PMP)</h3>
+  <p>PMP allows M-mode to restrict physical memory access for S/U modes. Up to 16 PMP entries define address regions with read/write/execute permissions.</p>
+
+  <pre><code class="language-cpp">// PMP configuration
+struct PMPEntry {
+    enum AddrMatch { OFF, TOR, NA4, NAPOT };
+    AddrMatch addressMatching;
+    bool locked;
+    bool readable;
+    bool writable;
+    bool executable;
+    Addr address;
+};
+
+class PMP : public SimObject
+{
+  public:
+    static const int MAX_PMP_ENTRIES = 16;
+
+    // Check access permission
+    Fault checkAccess(Addr addr, int size,
+                      BaseMMU::Mode mode,
+                      PrivilegeMode priv) const;
+
+  private:
+    PMPEntry entries[MAX_PMP_ENTRIES];
+};</code></pre>
+
+  <h3 id="pma">Physical Memory Attributes (PMA)</h3>
+  <p>PMA defines hardware attributes for memory regions — cacheability, atomicity support, and memory ordering. This ensures correct behavior for MMIO regions vs. normal memory.</p>
+
+  <h2 id="fault-handling">Fault Handling</h2>
+  <pre><code class="language-cpp">namespace RiscvISA {
+
+class RiscvFault : public FaultBase
+{
+  protected:
+    ExceptionCode _code;  // mcause value
+    Addr _trapValue;      // mtval value
+
+  public:
+    void invoke(ThreadContext *tc, const StaticInstPtr &amp;inst) override;
+
+    // Determine trap handler: M-mode or S-mode?
+    PrivilegeMode targetMode(ThreadContext *tc) const;
+};
+
+// Exception codes (mcause values)
+enum ExceptionCode {
+    INST_ADDR_MISALIGNED  = 0,
+    INST_ACCESS_FAULT     = 1,
+    ILLEGAL_INST          = 2,
+    BREAKPOINT            = 3,
+    LOAD_ADDR_MISALIGNED  = 4,
+    LOAD_ACCESS_FAULT     = 5,
+    STORE_ADDR_MISALIGNED = 6,
+    STORE_ACCESS_FAULT    = 7,
+    ECALL_FROM_U          = 8,
+    ECALL_FROM_S          = 9,
+    ECALL_FROM_M          = 11,
+    INST_PAGE_FAULT       = 12,
+    LOAD_PAGE_FAULT       = 13,
+    STORE_PAGE_FAULT      = 15,
+};
+
+} // namespace RiscvISA</code></pre>
+
+  <h2 id="register-file">Register File</h2>
+  <table>
+    <thead><tr><th>Category</th><th>Registers</th><th>Count</th><th>Width</th></tr></thead>
+    <tbody>
+      <tr><td>Integer (GPR)</td><td>x0 (zero), x1 (ra), x2 (sp), ... x31</td><td>32</td><td>64-bit (RV64)</td></tr>
+      <tr><td>Floating Point</td><td>f0-f31</td><td>32</td><td>64-bit (D ext)</td></tr>
+      <tr><td>Vector</td><td>v0-v31</td><td>32</td><td>VLEN bits</td></tr>
+      <tr><td>CSR</td><td>mstatus, misa, satp, cycle, etc.</td><td>~4096 space</td><td>64-bit</td></tr>
+      <tr><td>Program <a href="../../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Counter</a></td><td>pc</td><td>1</td><td>64-bit</td></tr>
+    </tbody>
+  </table>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Handling a Page Fault</h3>
+    <ol>
+      <li><strong>Access</strong> — A load instruction in U-mode accesses virtual address <code>0x1000_0000</code>. The MMU walks the Sv39 page table starting from <code>satp.ppn</code>.</li>
+      <li><strong>TLB <a href="../../sim_doc/probe/index.html" title="probe — Non-Intrusive Instrumentation | gem5 Wiki" class="xref">Miss</a></strong> — The TLB doesn't have a translation. The page table walker reads the 3-level page table from memory.</li>
+      <li><strong>Fault Detection</strong> — The PTE's Valid bit is 0. This triggers a Load Page Fault (cause = 13).</li>
+      <li><strong>Delegation Check</strong> — M-mode checks <code>medeleg</code>. If bit 13 is set, the fault is delegated to S-mode. Otherwise, M-mode handles it.</li>
+      <li><strong>Trap Entry</strong> — The processor saves <code>pc</code> → <code>sepc</code>, <code>cause</code> → <code>scause</code> (13), faulting address → <code>stval</code> (<code>0x1000_0000</code>).</li>
+      <li><strong>Handler Jump</strong> — PC is set to <code>stvec</code> (S-mode trap vector). The OS page fault handler allocates a physical page, updates the page table, and executes <code>SRET</code> to resume.</li>
+    </ol>
+  </div>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Decoder</code></td><td>decoder.hh</td><td>16/32-bit instruction decoder with C-extension support</td></tr>
+      <tr><td><code>RiscvISA::ISA</code></td><td>isa.hh</td><td>CSR register file and privilege mode state</td></tr>
+      <tr><td><code>RiscvMMU</code></td><td>RiscvMMU.py</td><td>Sv39/Sv48 page table walker</td></tr>
+      <tr><td><code>RiscvFault</code></td><td>faults.hh</td><td>Exception hierarchy with mcause/mtval</td></tr>
+      <tr><td><code>Interrupts</code></td><td>interrupts.hh</td><td>PLIC/CLINT interrupt controller interface</td></tr>
+      <tr><td><code>PMP</code></td><td>PMP.py</td><td>Physical Memory Protection (16 entries)</td></tr>
+      <tr><td><code>PMAChecker</code></td><td>PMAChecker.py</td><td>Physical Memory Attributes checker</td></tr>
+      <tr><td><code>RiscvSystem</code></td><td>RiscvSystem.py</td><td>RISC-V system configuration</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>RV64GC</strong></td><td>RISC-V 64-bit with General extensions (I+M+A+F+D) and Compressed (C)</td></tr>
+      <tr><td><strong>CSR</strong></td><td><a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Control</a> and Status Register — RISC-V's mechanism for system configuration</td></tr>
+      <tr><td><strong>PMP</strong></td><td>Physical Memory Protection — M-mode configurable memory access control</td></tr>
+      <tr><td><strong>Sv39/Sv48</strong></td><td>39-bit/48-bit virtual address space page table schemes</td></tr>
+      <tr><td><strong>ECALL</strong></td><td>Environment Call — instruction for system calls (traps to higher privilege)</td></tr>
+      <tr><td><strong>PLIC</strong></td><td><a href="../../dev_doc/index.html" title="dev — Device Models | gem5 Wiki" class="xref">Platform</a>-Level Interrupt Controller — routes external interrupts to harts</td></tr>
+      <tr><td><strong>CLINT</strong></td><td>Core-Local Interruptor — timer and software interrupt controller per hart</td></tr>
+      <tr><td><strong>Hart</strong></td><td>Hardware Thread — RISC-V term for a hardware execution context</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

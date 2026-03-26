@@ -1,0 +1,162 @@
+{
+  "label": "gem5",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "arch",
+      "path": "arch_doc/index.html",
+      "children": [
+        {
+          "label": "arm",
+          "path": "arch_doc/arm/index.html",
+          "children": []
+        },
+        {
+          "label": "generic",
+          "path": "arch_doc/generic/index.html",
+          "children": []
+        },
+        {
+          "label": "riscv",
+          "path": "arch_doc/riscv/index.html",
+          "children": []
+        },
+        {
+          "label": "x86",
+          "path": "arch_doc/x86/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "base",
+      "path": "base_doc/index.html",
+      "children": [
+        {
+          "label": "loader",
+          "path": "base_doc/loader/index.html",
+          "children": []
+        },
+        {
+          "label": "stats",
+          "path": "base_doc/stats/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "cpu",
+      "path": "cpu_doc/index.html",
+      "children": [
+        {
+          "label": "minor",
+          "path": "cpu_doc/minor/index.html",
+          "children": []
+        },
+        {
+          "label": "o3",
+          "path": "cpu_doc/o3/index.html",
+          "children": []
+        },
+        {
+          "label": "pred",
+          "path": "cpu_doc/pred/index.html",
+          "children": []
+        },
+        {
+          "label": "simple",
+          "path": "cpu_doc/simple/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "dev",
+      "path": "dev_doc/index.html",
+      "children": [
+        {
+          "label": "net",
+          "path": "dev_doc/net/index.html",
+          "children": []
+        },
+        {
+          "label": "pci",
+          "path": "dev_doc/pci/index.html",
+          "children": []
+        },
+        {
+          "label": "storage",
+          "path": "dev_doc/storage/index.html",
+          "children": []
+        },
+        {
+          "label": "virtio",
+          "path": "dev_doc/virtio/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "gpu-compute",
+      "path": "gpu-compute/index.html",
+      "children": []
+    },
+    {
+      "label": "kern",
+      "path": "kern/index.html",
+      "children": []
+    },
+    {
+      "label": "mem",
+      "path": "mem_doc/index.html",
+      "children": [
+        {
+          "label": "cache",
+          "path": "mem_doc/cache/index.html",
+          "children": []
+        },
+        {
+          "label": "qos",
+          "path": "mem_doc/qos/index.html",
+          "children": []
+        },
+        {
+          "label": "ruby",
+          "path": "mem_doc/ruby/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "python",
+      "path": "python/index.html",
+      "children": []
+    },
+    {
+      "label": "sim",
+      "path": "sim_doc/index.html",
+      "children": [
+        {
+          "label": "power",
+          "path": "sim_doc/power/index.html",
+          "children": []
+        },
+        {
+          "label": "probe",
+          "path": "sim_doc/probe/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "systemc",
+      "path": "systemc/index.html",
+      "children": []
+    },
+    {
+      "label": "Search",
+      "path": "search.html",
+      "children": []
+    }
+  ]
+}

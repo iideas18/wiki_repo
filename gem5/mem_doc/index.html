@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="gem5/src/mem">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>mem — Memory System | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;
+--hero-bg:#161b22;--code-bg:#1c2128;--toc-bg:#161b22;--hover:#21262d;--muted:#8b949e;
+--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.4);--radius:8px;
+--link:#58a6ff;--link-hover:#79c0ff;--kbd-bg:#21262d}
+[data-theme="light"]{--bg:#ffffff;--fg:#1f2328;--card:#f6f8fa;--border:#d0d7de;--accent:#0969da;
+--accent2:#1a7f37;--hero-bg:#f6f8fa;--code-bg:#f6f8fa;--toc-bg:#f6f8fa;--hover:#eaeef2;
+--muted:#656d76;--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.1);
+--link:#0969da;--link-hover:#0550ae;--kbd-bg:#eaeef2}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+background:var(--bg);color:var(--fg);line-height:1.6;overflow-x:hidden}
+a{color:var(--link);text-decoration:none}a:hover{color:var(--link-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;
+z-index:1000;border-radius:0 0 var(--radius) 0;font-weight:600}
+.skip-link:focus{top:0}
+header{background:var(--hero-bg);border-bottom:1px solid var(--border);padding:12px 24px;
+display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.breadcrumb{font-size:14px;color:var(--muted)}
+.breadcrumb a{color:var(--link)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle{background:var(--kbd-bg);border:1px solid var(--border);color:var(--fg);
+padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:14px}
+.theme-toggle:hover{background:var(--hover)}
+.container{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+.hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:32px;margin-bottom:24px;text-align:center}
+.hero h1{margin:0 0 8px;font-size:28px;color:var(--fg)}
+.hero p{margin:0;color:var(--muted);font-size:16px}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:10px 20px;text-align:center}
+.stat .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase}
+.reading-time{font-size:13px;color:var(--muted);margin:8px 0 20px;text-align:right}
+.toc-panel{background:var(--toc-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px 20px;margin-bottom:24px}
+.toc-panel summary{font-weight:600;cursor:pointer;font-size:15px}
+.toc-panel ul{list-style:none;padding-left:16px;margin:8px 0 0}
+.toc-panel li{margin:4px 0}
+.toc-panel a{font-size:14px}
+section{margin-bottom:32px}
+h2{font-size:22px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-top:32px}
+h3{font-size:18px;margin-top:24px}
+.intro-box{background:var(--card);border-left:4px solid var(--accent);border-radius:var(--radius);
+padding:16px 20px;margin:16px 0}
+.intro-box .label{font-weight:700;color:var(--accent);font-size:13px;text-transform:uppercase;margin-bottom:4px}
+.diagram-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;margin:16px 0;overflow-x:auto;cursor:pointer;position:relative}
+.diagram-wrap .expand-hint{position:absolute;top:8px;right:12px;font-size:11px;color:var(--muted);
+opacity:0.7}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even){background:var(--table-stripe)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:20px;transition:box-shadow .2s,border-color .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h3 a{color:var(--fg)}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.card .meta{margin-top:8px;font-size:12px;color:var(--muted)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+code{background:var(--kbd-bg);padding:2px 6px;border-radius:4px;font-size:13px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--kbd-bg);border:1px solid var(--border);
+color:var(--fg);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--hover)}
+.code-block{position:relative}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;
+border:none;padding:10px 14px;border-radius:50%;cursor:pointer;font-size:18px;
+display:none;z-index:50;box-shadow:var(--shadow)}
+.back-to-top:hover{opacity:0.9}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);z-index:200;justify-content:center;align-items:center;padding:24px}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:24px;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--fg);
+font-size:24px;cursor:pointer}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:48px;margin:12px 0}
+.walkthrough .step::before{counter-increment:step;content:counter(step);position:absolute;
+left:0;top:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;
+display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;font-family:monospace;font-size:13px;line-height:1.7;overflow-x:auto}
+.glossary dt{font-weight:600;color:var(--accent);margin-top:8px}
+.glossary dd{margin:0 0 8px 16px;color:var(--muted)}
+@media(max-width:768px){.card-grid{grid-template-columns:1fr}.container{padding:16px}
+.hero{padding:20px}.stat-row{flex-direction:column;align-items:center}}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.overlay,.copy-btn,.expand-hint{display:none!important}
+body{background:#fff;color:#000}.container{max-width:100%}
+.hero,.card,.toc-panel,.intro-box,.diagram-wrap,.stat{border-color:#ccc;background:#f9f9f9}
+a{color:#000;text-decoration:underline}.dir-map,pre{background:#f5f5f5;border-color:#ccc}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; mem</nav>
+  <div class="header-actions">
+    <span class="reading-time" id="readTime"></span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">🌓</button>
+  </div>
+</header>
+
+<main id="main">
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>mem — Memory System</h1>
+  <p>The complete memory subsystem of gem5: ports, packets, caches, coherence protocols, DRAM controllers, and <a title="qos — Quality of Service <a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> Policies | gem5 Wiki" href="qos/index.html">QoS</a> policies.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">6</div><div class="lbl">Sub-modules</div></div>
+    <div class="stat"><div class="num">750</div><div class="lbl">Files</div></div>
+    <div class="stat"><div class="num">Classic + <a title="ruby — Coherence Protocol Simulation | gem5 Wiki" href="ruby/index.html">Ruby</a></div><div class="lbl"><a title="cache — Classic <a href="cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="cache/index.html">Cache</a> Models</div></div>
+    <div class="stat"><div class="num">C++</div><div class="lbl">Language</div></div>
+    <div class="stat"><div class="num">12+</div><div class="lbl">Replacement Policies</div></div>
+    <div class="stat"><div class="num">14+</div><div class="lbl">Prefetchers</div></div>
+  </div>
+</div>
+
+<!-- TOC -->
+<details class="toc-panel" open>
+  <summary>Table of Contents</summary>
+  <ul id="toc"></ul>
+</details>
+
+<!-- Overview -->
+<section>
+<h2 id="overview">Overview</h2>
+<div class="intro-box">
+  <div class="label">Analogy</div>
+  <p>Think of the gem5 memory system as a <strong>postal service</strong>. A <a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> generates a <em>Packet</em> (letter), which travels through <em>Ports</em> (mailboxes). The letter may be intercepted by a <em>Cache</em> (a local post office that keeps copies of popular items), or it may travel all the way to <em>DRAM</em> (the central warehouse). The <em>Ruby</em> system adds a full coherence protocol network — like a fleet of delivery trucks following traffic rules to prevent duplicate deliveries.</p>
+</div>
+
+<p>The <code>src/mem/</code> directory contains all memory-related simulation models in gem5. It spans from the low-level <strong>Packet</strong> and <strong>Port</strong> abstractions through full cache hierarchies (Classic and Ruby), DRAM/NVM controllers, QoS policies, and memory probes.</p>
+</section>
+
+<!-- Architecture Diagram -->
+<section>
+<h2 id="architecture">Architecture Diagram</h2>
+<div class="diagram-wrap" data-diagram="arch">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart LR
+    CPU["CPU Core"]
+    ICache["L1 ICache"]
+    DCache["L1 DCache"]
+    L2["L2 Cache"]
+    Bus["Coherent XBar"]
+    MC["Memory Controller"]
+    DRAM["DRAM / HBM"]
+    Ruby["Ruby Network"]
+    Dir["Directory Controller"]
+    QoS["QoS Policy"]
+
+    CPU -->|"RequestPort"| ICache
+    CPU -->|"RequestPort"| DCache
+    ICache -->|"ResponsePort"| L2
+    DCache -->|"ResponsePort"| L2
+    L2 -->|"RequestPort"| Bus
+    Bus -->|"ResponsePort"| MC
+    MC --> QoS
+    QoS --> DRAM
+
+    CPU -.->|"Alternative"| Ruby
+    Ruby --> Dir
+    Dir --> DRAM
+  </pre>
+</div>
+</section>
+
+<!-- Data Flow -->
+<section>
+<h2 id="dataflow">Data Flow: Memory Request Lifecycle</h2>
+<div class="diagram-wrap" data-diagram="dataflow">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">sequenceDiagram
+    participant CPU
+    participant L1 as L1 DCache
+    participant L2 as L2 Cache
+    participant XBar as Coherent XBar
+    participant MC as MemCtrl
+    participant DRAM
+
+    CPU->>L1: sendReq(ReadReq pkt)
+    L1->>L1: Tag lookup
+    alt Cache Hit
+        L1-->>CPU: sendResp(ReadResp)
+    else Cache Miss
+        L1->>L2: sendReq(ReadReq)
+        L2->>L2: Tag lookup
+        alt L2 Hit
+            L2-->>L1: sendResp(ReadResp)
+            L1->>L1: Allocate block
+            L1-->>CPU: sendResp(ReadResp)
+        else L2 Miss
+            L2->>XBar: sendReq(ReadReq)
+            XBar->>MC: forward(ReadReq)
+            MC->>DRAM: access()
+            DRAM-->>MC: data
+            MC-->>XBar: sendResp(ReadResp)
+            XBar-->>L2: sendResp(ReadResp)
+            L2->>L2: Allocate block
+            L2-->>L1: sendResp(ReadResp)
+            L1->>L1: Allocate block
+            L1-->>CPU: sendResp(ReadResp)
+        end
+    end
+  </pre>
+</div>
+</section>
+
+<!-- Narrated Walkthrough -->
+<section>
+<h2 id="walkthrough">Narrated Walkthrough: Cache Miss Request</h2>
+<p>Follow a <code>ReadReq</code> packet from the CPU through to DRAM and back:</p>
+<div class="walkthrough">
+  <div class="step"><strong>CPU issues load</strong> — The CPU pipeline creates a <code>Packet</code> with command <code>ReadReq</code> and calls <code>sendTimingReq()</code> on its data port.</div>
+  <div class="step"><strong>L1 DCache receives request</strong> — The <code>CpuSidePort::recvTimingReq()</code> handler in <code>BaseCache</code> begins processing.</div>
+  <div class="step"><strong>Tag lookup</strong> — The cache checks its tag array. The <code>CacheBlk</code> is looked up via the indexing policy (e.g., set-associative).</div>
+  <div class="step"><strong><a href="../sim_doc/probe/index.html" title="probe — Non-Intrusive Instrumentation | gem5 Wiki" class="xref">Miss</a> detected</strong> — No valid block found. The cache allocates an <code>MSHR</code> (Miss Status Holding Register) to track the outstanding request.</div>
+  <div class="step"><strong>Forward to L2</strong> — The L1 sends the request downstream via its <code>MemSidePort</code> using <code>sendTimingReq()</code>.</div>
+  <div class="step"><strong>L2 tag lookup</strong> — Same process repeats. If the L2 also misses, another MSHR is allocated.</div>
+  <div class="step"><strong>Coherent XBar routing</strong> — The crossbar receives the request and routes it to the appropriate memory controller based on address ranges.</div>
+  <div class="step"><strong>Memory controller queuing</strong> — The <code>MemCtrl</code> places the request in its read queue. QoS policies may reorder requests based on priority.</div>
+  <div class="step"><strong>DRAM access</strong> — The controller issues the DRAM command sequence: activate row, read column, precharge. Timing is modeled cycle-accurately.</div>
+  <div class="step"><strong>Response propagation</strong> — Data travels back: DRAM → MemCtrl → XBar → L2 → L1, each level filling its cache block.</div>
+  <div class="step"><strong>MSHR deallocation</strong> — As each cache level receives the response, it deallocates its MSHR and unblocks any waiting requests for the same block.</div>
+  <div class="step"><strong>CPU receives data</strong> — The L1 sends the <code>ReadResp</code> back to the CPU via <code>sendTimingResp()</code>, completing the memory access.</div>
+</div>
+</section>
+
+<!-- Key Components -->
+<section>
+<h2 id="components">Key Components</h2>
+<table>
+  <thead><tr><th>Class / File</th><th>Header</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>Packet</code></td><td>packet.hh</td><td>Core data transfer unit carrying command, address, data, and flags across the memory system.</td></tr>
+    <tr><td><code>MemCmd</code></td><td>packet.hh</td><td>Enumeration of all memory commands: ReadReq, WriteReq, WritebackDirty, Snoop*, etc.</td></tr>
+    <tr><td><code>Request</code></td><td>request.hh</td><td>Encapsulates the original CPU request with virtual/physical addresses and flags.</td></tr>
+    <tr><td><code>RequestPort</code></td><td>port.hh</td><td>Initiator-side port that sends requests and receives responses.</td></tr>
+    <tr><td><code>ResponsePort</code></td><td>port.hh</td><td>Target-side port that receives requests and sends responses.</td></tr>
+    <tr><td><code>BaseCache</code></td><td>cache/base.hh</td><td>Abstract <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">base</a> for all classic caches; manages tags, MSHRs, write buffers.</td></tr>
+    <tr><td><code>Cache</code></td><td>cache/cache.hh</td><td>Coherent cache supporting snooping, invalidation, and flexible topologies.</td></tr>
+    <tr><td><code>NoncoherentCache</code></td><td>cache/noncoherent_cache.hh</td><td>Simplified cache without coherence protocol — used for instruction caches or accelerators.</td></tr>
+    <tr><td><code>MSHR</code></td><td>cache/mshr.hh</td><td>Miss Status Holding Register — tracks pending cache misses and coalesces duplicate requests.</td></tr>
+    <tr><td><code>AbstractMemory</code></td><td>abstract_mem.hh</td><td>Base class for all memory backends (SimpleMemory, DRAM, NVM).</td></tr>
+    <tr><td><code>MemCtrl</code></td><td>mem_ctrl.hh</td><td>Main memory controller with read/write queuing, scheduling, and timing.</td></tr>
+    <tr><td><code>DRAMInterface</code></td><td>dram_interface.hh</td><td>Cycle-accurate DRAM timing model for DDR3/DDR4/DDR5/LPDDR/HBM.</td></tr>
+    <tr><td><code>HBMCtrl</code></td><td>hbm_ctrl.hh</td><td>Dual-channel HBM controller leveraging pseudo-channel architecture.</td></tr>
+    <tr><td><code>CommMonitor</code></td><td>comm_monitor.hh</td><td>Transparent <a title="An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code." href="../sim_doc/probe/index.html">probe</a> inserted between ports to gather statistics.</td></tr>
+    <tr><td><code>PacketQueue</code></td><td>packet_queue.hh</td><td>Queue of packets with scheduling logic for deferred sends.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Sub-module Cards -->
+<section>
+<h2 id="submodules">Sub-module Deep Dives</h2>
+<div class="card-grid">
+
+  <div class="card">
+    <h3><a title="cache — Classic Cache Hierarchy | gem5 Wiki" href="cache/index.html">cache</a></h3>
+    <p>Classic cache hierarchy: <a href="cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">BaseCache</a>, Cache, <a href="cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">NoncoherentCache</a>, MSHR, write buffers, replacement policies (LRU, BIP, BRRIP, SHiP, TreePLRU, …), prefetchers (Stride, BOP, AMPM, SPP, …), compressors, and tag organizations.</p>
+    <div class="meta">26 files · 4 sub-dirs (tags, replacement_policies, prefetch, compressors)</div>
+  </div>
+
+  <div class="card">
+    <h3><a title="ruby — Coherence Protocol Simulation | gem5 Wiki" href="ruby/index.html">ruby</a></h3>
+    <p>Protocol-driven coherence simulation using SLICC. Includes network models (<a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">simple</a>, Garnet), sequencers, directory controllers, message buffers, GPU coalescer, and HTM support.</p>
+    <div class="meta">5 sub-dirs (system, network, structures, slicc_interface, protocol)</div>
+  </div>
+
+  <div class="card">
+    <h3><a title="qos — Quality of Service Memory Policies | gem5 Wiki" href="qos/index.html">qos</a></h3>
+    <p>Quality of Service policies for memory controllers: fixed-priority, proportional-fair scheduling, turnaround policies, and queue management for multi-tenant workloads.</p>
+    <div class="meta">21 files · FixedPrio + PF policies</div>
+  </div>
+
+  <div class="card">
+    <h3>probes</h3>
+    <p>Memory probe infrastructure: <code>MemTraceProbe</code> for trace generation, <code>StackDistProbe</code> for reuse-distance analysis, <code>MemFootprintProbe</code> for working-set tracking.</p>
+    <div class="meta">4 headers · Plugs into any Port</div>
+  </div>
+
+  <div class="card">
+    <h3>protocol</h3>
+    <p>Low-level protocol definitions: <code>atomic.hh</code>, <code>functional.hh</code>, <code>timing.hh</code> — the three transport interfaces that ports implement for different simulation modes.</p>
+    <div class="meta">3 headers</div>
+  </div>
+
+  <div class="card">
+    <h3>Controllers &amp; Interfaces</h3>
+    <p>DRAM controllers (<code>MemCtrl</code>, <code>HBMCtrl</code>, <code>HeteroMemCtrl</code>), external interfaces (<code>DRAMSim2</code>, <code>DRAMSim3</code>, <code>DRAMSys</code>), serial links, and the XBar system bridges.</p>
+    <div class="meta">15+ files · DDR3 / DDR4 / DDR5 / HBM / NVM</div>
+  </div>
+
+</div>
+</section>
+
+<!-- Directory Map -->
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">
+src/mem/
+├── packet.hh / packet.cc          # Packet &amp; MemCmd
+├── port.hh / port.cc              # RequestPort, ResponsePort
+├── request.hh                     # Request class
+├── abstract_mem.hh / .cc          # AbstractMemory base
+├── mem_ctrl.hh / .cc              # Main memory controller
+├── dram_interface.hh / .cc        # DRAM timing model
+├── hbm_ctrl.hh / .cc              # HBM controller
+├── hetero_mem_ctrl.hh / .cc       # Heterogeneous memory
+├── comm_monitor.hh / .cc          # Communication monitor
+├── packet_queue.hh / .cc          # Packet queuing
+├── cache/                         # Classic cache hierarchy
+│   ├── base.hh, cache.hh          # BaseCache, Cache
+│   ├── mshr.hh, write_queue.hh    # Miss handling
+│   ├── replacement_policies/      # LRU, FIFO, BIP, BRRIP, …
+│   ├── prefetch/                  # Stride, BOP, AMPM, SPP, …
+│   ├── tags/                      # Set-assoc, FA-LRU, sector
+│   └── compressors/               # BDI, C-Pack, FPC, FPCD, …
+├── ruby/                          # Ruby coherence
+│   ├── system/                    # <a href="ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">Sequencer</a>, <a href="ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">RubySystem</a>
+│   ├── network/                   # Simple, Garnet networks
+│   ├── structures/                # <a href="ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">CacheMemory</a>, <a href="ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">DirectoryMemory</a>
+│   ├── slicc_interface/           # SLICC controllers
+│   └── protocol/                  # Protocol definitions
+├── qos/                           # Quality of Service
+│   ├── mem_ctrl.hh                # QoS MemCtrl
+│   ├── policy.hh                  # Policy base
+│   └── policy_fixed_prio.hh      # Fixed-priority
+└── probes/                        # Memory probes
+    ├── mem_trace.hh               # Trace probe
+    └── stack_dist.hh              # Stack distance
+</div>
+</section>
+
+<!-- Configuration -->
+<section>
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+  <thead><tr><th>Parameter</th><th><a href="../python/index.html" title="python — Configuration <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a></th><th>Description</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td><code>size</code></td><td>Cache</td><td>Total cache capacity</td><td>64kB (L1), 2MB (L2)</td></tr>
+    <tr><td><code>assoc</code></td><td>Cache</td><td>Set associativity</td><td>2 (L1), 8 (L2)</td></tr>
+    <tr><td><code>tag_latency</code></td><td>Cache</td><td>Tag array access cycles</td><td>2</td></tr>
+    <tr><td><code>data_latency</code></td><td>Cache</td><td>Data array access cycles</td><td>2</td></tr>
+    <tr><td><code>response_latency</code></td><td>Cache</td><td>Extra response delay</td><td>2</td></tr>
+    <tr><td><code>mshrs</code></td><td>Cache</td><td>Number of MSHRs</td><td>4</td></tr>
+    <tr><td><code>write_buffers</code></td><td>Cache</td><td>Write buffer entries</td><td>8</td></tr>
+    <tr><td><code>replacement_policy</code></td><td>Cache</td><td>Replacement policy object</td><td>LRURP</td></tr>
+    <tr><td><code>prefetcher</code></td><td>Cache</td><td>Prefetcher object</td><td>None</td></tr>
+    <tr><td><code>mem_ranges</code></td><td>AbstractMemory</td><td>Address ranges served</td><td>—</td></tr>
+    <tr><td><code>device_size</code></td><td>DRAMInterface</td><td>Per-device capacity</td><td>Varies by config</td></tr>
+    <tr><td><code>tCK</code></td><td>DRAMInterface</td><td>Clock period</td><td>Technology-dependent</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Glossary -->
+<section>
+<h2 id="glossary">Glossary</h2>
+<dl class="glossary">
+  <dt>MSHR</dt><dd>Miss Status Holding Register — tracks outstanding cache misses and coalesces duplicate requests to the same block.</dd>
+  <dt>Snooping</dt><dd>A coherence mechanism where caches monitor (snoop) bus transactions to maintain data consistency.</dd>
+  <dt>SLICC</dt><dd>Specification Language for Implementing Cache Coherence — a domain-specific language used by Ruby to define protocols.</dd>
+  <dt>Garnet</dt><dd>A detailed on-chip network model within Ruby that models routers, links, and virtual channels.</dd>
+  <dt>XBar</dt><dd>Crossbar interconnect that routes packets between multiple ports based on address ranges.</dd>
+  <dt>QoS</dt><dd>Quality of Service — policies that prioritize or schedule memory requests based on requestor identity or priority.</dd>
+  <dt>Clusivity</dt><dd>Describes cache inclusion policy: inclusive (all L1 data in L2), exclusive (no duplication), or mostly-inclusive.</dd>
+</dl>
+</section>
+
+</div><!-- container -->
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Diagram Overlay -->
+<div class="overlay" id="diagramOverlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" id="overlayClose" aria-label="Close overlay">✕</button>
+    <div id="overlayContent"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getTheme() { return localStorage.getItem(THEME_KEY) || 'dark'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  const hljsLink = document.getElementById('hljs-theme');
+  hljsLink.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+}
+
+setTheme(getTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  renderMermaid();
+});
+
+// Mermaid
+mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+
+async function renderMermaid() {
+  mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+  document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+    const pre = wrap.querySelector('pre.mermaid');
+    if (!pre) return;
+    if (!pre.dataset.original) pre.dataset.original = pre.textContent;
+    pre.textContent = pre.dataset.original;
+    pre.removeAttribute('data-processed');
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+}
+renderMermaid();
+
+// TOC generation
+const toc = document.getElementById('toc');
+document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+  const li = document.createElement('li');
+  li.style.paddingLeft = h.tagName === 'H3' ? '16px' : '0';
+  const a = document.createElement('a');
+  a.href = '#' + h.id;
+  a.textContent = h.textContent;
+  li.appendChild(a);
+  toc.appendChild(li);
+});
+
+// Reading time
+const text = document.querySelector('.container').textContent;
+const words = text.trim().split(/\s+/).length;
+document.getElementById('readTime').textContent = Math.ceil(words / 200) + ' min read';
+
+// Back to top
+const btn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btn.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Highlight.js
+hljs.highlightAll();
+
+// Copy buttons
+document.querySelectorAll('.code-block').forEach(block => {
+  const btn = block.querySelector('.copy-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const code = block.querySelector('code');
+    navigator.clipboard.writeText(code.textContent);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+});
+
+// Diagram overlay
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('overlayContent');
+document.getElementById('overlayClose').addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+
+document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    const svg = wrap.querySelector('svg');
+    if (svg) {
+      overlayContent.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    }
+  });
+});
+
+// Keyboard navigation (j/k)
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const sections = [...document.querySelectorAll('h2[id], h3[id]')];
+  const current = sections.findIndex(s => s.getBoundingClientRect().top > 10);
+  if (e.key === 'j' && current < sections.length) {
+    sections[current >= 0 ? current : sections.length - 1].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'k' && current > 0) {
+    sections[Math.max(0, current - 2)].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'Escape') {
+    overlay.classList.remove('active');
+  }
+});
+</script>
+</body>
+</html>

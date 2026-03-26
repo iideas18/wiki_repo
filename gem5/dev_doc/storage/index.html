@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/dev/storage/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>storage — Storage Device Models | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.6rem;margin:1.5rem 0}
+.toc h3{margin-top:0;color:var(--accent);font-size:1.1rem}
+.toc ul{list-style:none;padding-left:0;margin:.5rem 0 0}
+.toc li{margin:.3rem 0;font-size:.9rem}
+.toc li::before{content:"›";color:var(--accent);margin-right:.5rem;font-weight:700}
+.reading-time{color:var(--text-muted);font-size:.85rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.75rem;color:var(--text-muted);cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:3rem;margin:1rem 0;counter-increment:step}
+.walkthrough .step::before{content:counter(step);position:absolute;left:0;top:0;width:2rem;height:2rem;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.stat-row{flex-direction:column}}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.toc,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb"><a title="gem5 — Full-<a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> Computer Architecture <a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">Simulator</a>" href="../../index.html">gem5</a> &rsaquo; <a title="dev — Device Models | gem5 Wiki" href="../index.html">dev</a> &rsaquo; storage</nav>
+<h1>storage — Storage Device Models</h1>
+<div class="reading-time" id="readingTime"></div>
+
+<div class="hero">
+  <div class="subtitle">IDE Disk Controller and Disk Image Subsystem</div>
+  <p>The <code>storage</code> sub-module provides block storage device models for gem5 full-system simulation: an IDE (ATA) disk controller, IDE disk device with full state machine, and flexible disk image backends supporting raw and copy-on-write formats.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">IDE Controller</span>
+    <span class="badge green">IDE Disk</span>
+    <span class="badge yellow">Disk Images</span>
+    <span class="badge red">PIO + DMA</span>
+  </p>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1rem 0;">
+<h3 id="what-is-this" style="margin-top:0;color:var(--accent);">&#128218; What is this?</h3>
+<p>The <code>storage</code> module simulates IDE (Integrated Drive Electronics) hard disks so a guest OS can boot from and read/write to virtual disk images. It models the full ATA command protocol, PIO and DMA transfer modes, and the controller-disk interface — allowing standard IDE drivers in <a href="../../kern/index.html" title="kern — OS Kernel Support · gem5 Wiki" class="xref">Linux</a> or other operating systems to work without modification inside gem5.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Analogy: A Filing Cabinet</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the storage sub-module as a <strong>filing cabinet system</strong>. The <strong><a href="../index.html" title="dev — Device Models | gem5 Wiki" class="xref">IdeDisk</a></strong> is an individual filing cabinet drawer — it holds data organized in numbered sectors (like numbered folders). The <strong><a href="../index.html" title="dev — Device Models | gem5 Wiki" class="xref">IdeController</a></strong> is the desk clerk who accepts requests from the <a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a> ("Please get me folder #1234") and manages the physical retrieval. The clerk can work in two modes: <strong>PIO</strong> (manual mode — the CPU carries each folder personally) or <strong>DMA</strong> (courier mode — the data is delivered directly to your desk without the CPU waiting). The <strong>DiskImage</strong> is the actual paper stored in the filing cabinet — it can be a real image file or a "copy-on-write" overlay that records changes without modifying the original.</p>
+</details>
+</div>
+
+<div class="toc">
+<h3>&#128220; Table of Contents</h3>
+<ul id="toc-list"></ul>
+</div>
+
+<h2 id="architecture">Storage Architecture</h2>
+<p>The storage subsystem connects the <a title="pci — PCI Bus and Device Framework | gem5 Wiki" href="../pci/index.html">PCI</a> bus (via the IDE controller) to disk images through a layered architecture:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph CPU_Side["CPU / Memory Bus"]
+    CPU["CPU Core"]
+    BUS["Memory Bus"]
+  end
+
+  subgraph Controller["IDE Controller (PCI Device)"]
+    CTRL["IdeController\n(BasicPioDevice)"]
+    CH0["Channel 0\n(Primary)"]
+    CH1["Channel 1\n(Secondary)"]
+  end
+
+  subgraph Disks["IDE Disks"]
+    DISK0["IdeDisk 0\n(Master)"]
+    DISK1["IdeDisk 1\n(Slave)"]
+    DISK2["IdeDisk 2\n(Master)"]
+    DISK3["IdeDisk 3\n(Slave)"]
+  end
+
+  subgraph Images["Disk Image Backends"]
+    RAW["RawDiskImage\n(.img file)"]
+    COW["CowDiskImage\n(copy-on-write overlay)"]
+    PARENT["Parent Image\n(read-only base)"]
+  end
+
+  CPU -->|"PIO/DMA"| BUS
+  BUS -->|"BAR0/BAR1 regs"| CTRL
+  CTRL --> CH0
+  CTRL --> CH1
+  CH0 --> DISK0
+  CH0 --> DISK1
+  CH1 --> DISK2
+  CH1 --> DISK3
+  DISK0 --> RAW
+  DISK1 --> COW
+  COW -->|"reads fall through"| PARENT
+</pre>
+</div>
+
+<h2 id="ide-controller">IDE Controller</h2>
+<p><code>IdeController</code> is a PCI device (inheriting from <code>BasicPioDevice</code>) that implements the standard IDE/ATA controller interface. It manages two channels (primary and secondary), each supporting up to two drives (master and slave).</p>
+
+<h3 id="ctrl-registers">Controller Registers</h3>
+<p>The controller exposes its registers through PCI BARs:</p>
+<table>
+<tr><th>BAR</th><th>Space</th><th>Contents</th></tr>
+<tr><td>BAR0</td><td>Primary Command Block</td><td>Data, Error/Features, Sector Count, LBA registers, Status/Command</td></tr>
+<tr><td>BAR1</td><td>Primary <a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Control</a> Block</td><td>Alternate Status, Device Control</td></tr>
+<tr><td>BAR2</td><td>Secondary Command Block</td><td>Same as BAR0 for secondary channel</td></tr>
+<tr><td>BAR3</td><td>Secondary Control Block</td><td>Same as BAR1 for secondary channel</td></tr>
+<tr><td>BAR4</td><td>Bus Master IDE</td><td>DMA command, status, and PRD table address registers</td></tr>
+</table>
+
+<h3 id="ctrl-operation">Controller Operation</h3>
+<p>When the guest OS writes to a command register, the controller dispatches the operation to the selected disk on the appropriate channel. For DMA operations, it manages the Physical Region Descriptor (PRD) table that maps scatter-gather DMA transfers.</p>
+
+<pre><code class="language-cpp">// IdeController channel structure
+class IdeController::Channel {
+    IdeController *controller();
+    IdeDisk *device(int index);  // 0=master, 1=slave
+
+    // Register access from PCI BAR
+    void accessCommand(Addr offset, int size,
+                       uint8_t *data, bool read);
+    void accessControl(Addr offset, int size,
+                       uint8_t *data, bool read);
+    void accessBMI(Addr offset, int size,
+                   uint8_t *data, bool read);
+};
+</code></pre>
+
+<h2 id="ide-disk">IDE Disk</h2>
+<p><code>IdeDisk</code> models a single IDE hard drive with a complete ATA state machine. It handles ATA commands (read, write, identify), manages PIO and DMA transfers, and interfaces with a <code>DiskImage</code> backend for persistent storage.</p>
+
+<h3 id="state-machine">Disk State Machine</h3>
+<p>The IDE disk operates through a detailed state machine handling the ATA protocol:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Device_Idle_S : Power on / Reset
+
+    Device_Idle_S --> Command_Execution : Non-data command
+    Device_Idle_S --> Prepare_Data_In : PIO read command
+    Device_Idle_S --> Prepare_Data_Out : PIO write command
+    Device_Idle_S --> Prepare_Data_Dma : DMA command
+    Device_Idle_S --> Device_Srst : Software reset
+
+    Command_Execution --> Device_Idle_S : Command complete
+
+    Prepare_Data_In --> Data_Ready_INTRQ_In : Data loaded
+    Data_Ready_INTRQ_In --> Transfer_Data_In : Host reads data
+    Transfer_Data_In --> Data_Ready_INTRQ_In : More sectors
+    Transfer_Data_In --> Device_Idle_S : All sectors done
+
+    Prepare_Data_Out --> Data_Ready_INTRQ_Out : Ready for data
+    Data_Ready_INTRQ_Out --> Transfer_Data_Out : Host writes data
+    Transfer_Data_Out --> Data_Ready_INTRQ_Out : More sectors
+    Transfer_Data_Out --> Device_Idle_S : All sectors done
+
+    Prepare_Data_Dma --> Transfer_Data_Dma : DMA engine started
+    Transfer_Data_Dma --> Device_Idle_S : DMA complete
+    Transfer_Data_Dma --> Device_Dma_Abort : DMA error
+
+    Device_Srst --> Device_Idle_S : Reset complete
+    Device_Dma_Abort --> Device_Idle_S : Abort handled
+</pre>
+</div>
+
+<h3 id="ata-commands">Supported ATA Commands</h3>
+<table>
+<tr><th>Command</th><th>Transfer Mode</th><th>Description</th></tr>
+<tr><td><code>WIN_READ</code></td><td>PIO</td><td>Read sectors using PIO transfer</td></tr>
+<tr><td><code>WIN_WRITE</code></td><td>PIO</td><td>Write sectors using PIO transfer</td></tr>
+<tr><td><code>WIN_READDMA</code></td><td>DMA</td><td>Read sectors using DMA transfer</td></tr>
+<tr><td><code>WIN_WRITEDMA</code></td><td>DMA</td><td>Write sectors using DMA transfer</td></tr>
+<tr><td><code>WIN_IDENTIFY</code></td><td>PIO</td><td>Return drive identification data (model, capacity, features)</td></tr>
+<tr><td><code>WIN_SETMULT</code></td><td>Non-data</td><td>Set multiple sector count for PIO multi-sector transfers</td></tr>
+<tr><td><code>WIN_SRST</code></td><td>Non-data</td><td>Software reset of the drive</td></tr>
+<tr><td><code>WIN_SEEK</code></td><td>Non-data</td><td>Seek to a specific LBA sector</td></tr>
+</table>
+
+<h3 id="dma-transfer">DMA Transfer Flow</h3>
+<p>DMA transfers use a Physical Region Descriptor (PRD) table in host memory. The controller reads PRD entries to build a scatter-gather list for the DMA engine:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant OS as Guest OS Driver
+    participant CTRL as IdeController
+    participant DISK as IdeDisk
+    participant DMA as DMA Engine
+    participant MEM as System Memory
+
+    OS->>CTRL: Write LBA, sector count to command regs
+    OS->>CTRL: Write PRD table base to BMI BAR
+    OS->>CTRL: Write DMA Read command to BMI
+    CTRL->>DISK: startDma(prdTableBase)
+    DISK->>DMA: Read PRD entry from memory
+    DMA->>MEM: dmaRead(prdAddr)
+    MEM-->>DMA: PRD entry (baseAddr, byteCount, EOT)
+    DISK->>DISK: readDisk(sector, dataBuffer)
+    DISK->>DMA: dmaWrite(prdBaseAddr, data)
+    DMA->>MEM: Write sector data to host buffer
+    MEM-->>DMA: Write complete
+    Note over DISK: Check EOT flag in PRD entry
+    DISK->>DISK: If more PRDs, repeat
+    DISK->>CTRL: Transfer complete
+    CTRL->>OS: Post interrupt (DMA done)
+</pre>
+</div>
+
+<h3 id="prd-table">PRD Table Structure</h3>
+<pre><code class="language-cpp">// Physical Region Descriptor entry
+struct PrdEntry_t {
+    uint32_t baseAddr;   // Physical address of buffer (bit 0 must be 0)
+    uint16_t byteCount;  // Byte count (0 = 64KB)
+    uint16_t endOfTable; // Bit 15 = End of Table flag
+};
+
+// Constants
+#define PRD_BASE_MASK   0xfffffffe  // Mask for base address
+#define PRD_COUNT_MASK  0xfffe      // Mask for byte count
+#define PRD_EOT_MASK    0x8000      // End-of-table bit
+#define MAX_DMA_SIZE    0x20000     // 128KB max DMA per transfer
+#define MAX_SINGLE_DMA_SIZE 0x10000 // 64KB max per PRD entry
+</code></pre>
+
+<h2 id="disk-images">Disk Image Backends</h2>
+<p>The <code>DiskImage</code> hierarchy provides the actual storage backing for IDE disks:</p>
+
+<h3 id="raw-image">RawDiskImage</h3>
+<p>A <a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> image backed by a raw binary file. Every sector maps directly to a file offset. Supports both read-only and read-write modes.</p>
+
+<pre><code class="language-cpp">// Python configuration
+raw_image = RawDiskImage(
+    image_file='disk.img',
+    read_only=False
+)
+</code></pre>
+
+<h3 id="cow-image">CowDiskImage (Copy-on-Write)</h3>
+<p><code>CowDiskImage</code> layers a write overlay on top of a parent image. Reads fall through to the parent; writes are captured in the overlay. This enables multiple simulations to share one <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> image without modification:</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  READ["Read sector N"] --> CHECK{Sector N in COW table?}
+  CHECK -->|"Yes"| COW_DATA["Return data from COW overlay"]
+  CHECK -->|"No"| PARENT["Read from parent image"]
+  PARENT --> RETURN["Return data"]
+  COW_DATA --> RETURN
+
+  WRITE["Write sector N"] --> COW_WRITE["Store in COW overlay table"]
+  COW_WRITE --> DONE["Write complete\n(parent unchanged)"]
+</pre>
+</div>
+
+<pre><code class="language-cpp">// Python configuration for copy-on-write
+base_image = RawDiskImage(image_file='base.img', read_only=True)
+cow_image = CowDiskImage(
+    child=base_image,
+    table_size='16MiB',   // Hash table size for COW sector tracking
+    image_file=''         // Empty = no persistence; or path to save overlay
+)
+</code></pre>
+
+<h3 id="simple-disk">SimpleDisk</h3>
+<p><code>SimpleDisk</code> is a lightweight disk interface that bypasses the full IDE controller. It provides direct disk access for simple full-system configurations where full ATA emulation is not needed.</p>
+
+<h2 id="key-classes">Key Classes Reference</h2>
+<table>
+<tr><th>Class</th><th>File</th><th>Inherits</th><th>Role</th></tr>
+<tr><td><code>IdeController</code></td><td><code>ide_ctrl.hh</code></td><td><code>BasicPioDevice</code></td><td>PCI IDE controller with two channels, DMA bus master</td></tr>
+<tr><td><code>IdeController::Channel</code></td><td><code>ide_ctrl.hh</code></td><td>—</td><td>Single IDE channel managing master/slave disks</td></tr>
+<tr><td><code>IdeDisk</code></td><td><code>ide_disk.hh</code></td><td><code>SimObject</code></td><td>IDE disk device with ATA state machine, PIO/DMA transfers</td></tr>
+<tr><td><code>DiskImage</code></td><td><code>disk_image.hh</code></td><td><code>SimObject</code></td><td>Abstract base class for disk image backends</td></tr>
+<tr><td><code>RawDiskImage</code></td><td><code>disk_image.hh</code></td><td><code>DiskImage</code></td><td>Raw binary file-backed disk image</td></tr>
+<tr><td><code>CowDiskImage</code></td><td><code>disk_image.hh</code></td><td><code>DiskImage</code></td><td>Copy-on-write overlay disk image</td></tr>
+<tr><td><code>SimpleDisk</code></td><td><code>simple_disk.hh</code></td><td><code>SimObject</code></td><td>Simplified direct-access disk (no controller emulation)</td></tr>
+<tr><td><code>PrdTableEntry</code></td><td><code>ide_disk.hh</code></td><td>—</td><td>Physical Region Descriptor for DMA scatter-gather</td></tr>
+</table>
+
+<h2 id="disk-statistics">Disk Statistics</h2>
+<p><code>IdeDisk</code> tracks detailed I/O statistics for performance analysis:</p>
+<table>
+<tr><th>Statistic</th><th>Description</th></tr>
+<tr><td><code>dmaReadFullPages</code></td><td>Number of full-page DMA reads</td></tr>
+<tr><td><code>dmaReadBytes</code></td><td>Total bytes read via DMA</td></tr>
+<tr><td><code>dmaReadTxs</code></td><td>Number of DMA read transactions</td></tr>
+<tr><td><code>dmaWriteFullPages</code></td><td>Number of full-page DMA writes</td></tr>
+<tr><td><code>dmaWriteBytes</code></td><td>Total bytes written via DMA</td></tr>
+<tr><td><code>dmaWriteTxs</code></td><td>Number of DMA write transactions</td></tr>
+</table>
+
+<h2 id="config-reference">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th><a title="Configuration System and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> Class</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>image</code></td><td><code>IdeDisk</code></td><td>—</td><td>DiskImage object providing the storage backend</td></tr>
+<tr><td><code>driveID</code></td><td><code>IdeDisk</code></td><td><code>'device0'</code></td><td>Drive identifier: <code>device0</code> (master) or <code>device1</code> (slave)</td></tr>
+<tr><td><code>delay</code></td><td><code>IdeDisk</code></td><td><code>'1us'</code></td><td>Disk access latency (simulated seek/rotation time)</td></tr>
+<tr><td><code>image_file</code></td><td><code>RawDiskImage</code></td><td>—</td><td>Path to the raw disk image file</td></tr>
+<tr><td><code>read_only</code></td><td><code>RawDiskImage</code></td><td><code>False</code></td><td>Whether the image is read-only</td></tr>
+<tr><td><code>child</code></td><td><code>CowDiskImage</code></td><td>—</td><td>Parent DiskImage for read fall-through</td></tr>
+<tr><td><code>table_size</code></td><td><code>CowDiskImage</code></td><td><code>65536</code></td><td>Number of entries in the COW hash table</td></tr>
+<tr><td><code>image_file</code></td><td><code>CowDiskImage</code></td><td><code>''</code></td><td>Optional file path to persist the COW overlay</td></tr>
+<tr><td><code>pci_bus</code></td><td><code>IdeController</code></td><td><code>0</code></td><td>PCI bus number</td></tr>
+<tr><td><code>pci_dev</code></td><td><code>IdeController</code></td><td><code>0</code></td><td>PCI device number</td></tr>
+<tr><td><code>disks</code></td><td><code>IdeController</code></td><td><code>[]</code></td><td>List of IdeDisk objects (up to 4: 2 per channel)</td></tr>
+</table>
+
+<h2 id="example-config">Example Configuration</h2>
+<p>A typical IDE disk setup for full-system simulation:</p>
+
+<pre><code class="language-cpp">// Python config — IDE disk with copy-on-write image
+base = RawDiskImage(image_file='ubuntu-22.04.img', read_only=True)
+disk_image = CowDiskImage(child=base)
+
+disk0 = IdeDisk(driveID='device0', image=disk_image, delay='1us')
+disk1 = IdeDisk(driveID='device1',
+                image=RawDiskImage(image_file='data.img'))
+
+ide = IdeController(
+    disks=[disk0, disk1],  // Channel 0: master + slave
+    pci_bus=0, pci_dev=1, pci_func=0,
+    InterruptLine=14
+)
+system.pci_host.attach(ide)
+</code></pre>
+
+<h2 id="walkthrough">Walkthrough: Reading a Disk Sector</h2>
+<div class="walkthrough">
+  <div class="step"><strong>Guest OS driver writes LBA address.</strong> The driver writes the target sector number to the LBA Low/Mid/High registers in the IDE controller's command block (BAR0 offsets 3–5).</div>
+  <div class="step"><strong>Driver issues READ DMA command.</strong> Writing <code>0xC8</code> (WIN_READDMA) to the Command register triggers the IdeDisk state machine to transition from <code>Device_Idle_S</code> to <code>Prepare_Data_Dma</code>.</div>
+  <div class="step"><strong>Driver sets up PRD table and starts DMA.</strong> The driver writes the PRD table base address to the Bus Master IDE register (BAR4) and sets the Start bit.</div>
+  <div class="step"><strong>IdeDisk reads PRD entries.</strong> The disk reads the first PRD entry via DMA to get the target buffer address in host memory.</div>
+  <div class="step"><strong>IdeDisk reads from disk image.</strong> <code>readDisk(sector, dataBuffer)</code> calls <code>DiskImage::read()</code> — either hitting the raw file or the COW overlay.</div>
+  <div class="step"><strong>DMA write to host memory.</strong> The disk writes sector data to the address specified by the PRD entry, splitting into <a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a>-line-sized chunks.</div>
+  <div class="step"><strong>Interrupt posted.</strong> On completion, the IdeDisk transitions to <code>Device_Idle_S</code> and posts an interrupt to the CPU through the IDE controller.</div>
+</div>
+
+<h2 id="file-map">File Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">storage/ directory structure</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/dev/storage/
+├── ide_ctrl.hh / ide_ctrl.cc     ← IdeController (PCI IDE controller with channels)
+├── ide_disk.hh / ide_disk.cc     ← IdeDisk (ATA disk state machine + DMA)
+├── ide_atareg.h                  ← ATA register definitions and ataparams struct
+├── ide_wdcreg.h                  ← WDC (Western Digital) register constants
+├── disk_image.hh / disk_image.cc ← DiskImage, RawDiskImage, CowDiskImage
+├── simple_disk.hh / simple_disk.cc ← SimpleDisk (lightweight direct access)
+├── Ide.py                        ← Python config for IdeController, IdeDisk
+├── DiskImage.py                  ← Python config for RawDiskImage, CowDiskImage
+├── SimpleDisk.py                 ← Python config for SimpleDisk
+└── SConscript                    ← Build definitions
+</code></pre>
+</details>
+
+<h2 id="glossary">Glossary</h2>
+<table>
+<tr><th>Term</th><th>Definition</th></tr>
+<tr><td><strong>ATA</strong></td><td>AT Attachment — standard interface for connecting storage devices to PCs</td></tr>
+<tr><td><strong>IDE</strong></td><td>Integrated Drive Electronics — the disk has its own controller on-board</td></tr>
+<tr><td><strong>PIO</strong></td><td>Programmed I/O — CPU directly reads/writes data through I/O registers</td></tr>
+<tr><td><strong>DMA</strong></td><td>Direct <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> Access — disk transfers data to/from memory without CPU</td></tr>
+<tr><td><strong>PRD</strong></td><td>Physical Region Descriptor — scatter-gather entry for DMA transfers</td></tr>
+<tr><td><strong>LBA</strong></td><td>Logical Block Addressing — sector addressing scheme (vs. CHS)</td></tr>
+<tr><td><strong>COW</strong></td><td>Copy-on-Write — overlay layer capturing writes, reads fall through to base</td></tr>
+<tr><td><strong>BMI</strong></td><td>Bus Master IDE — DMA controller registers in the IDE controller</td></tr>
+</table>
+
+<div class="footer">gem5 Wiki &mdash; <a title="dev — Device Models | gem5 Wiki" href="../index.html">dev</a>/storage Module &mdash; Generated 2026-03-25</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    if(hljsLink){
+      hljsLink.href=(t==='light')
+        ?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+        :'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+    }
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc-list');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');headings.forEach(function(h){var li=document.createElement('li');if(h.tagName==='H3')li.style.paddingLeft='1rem';var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;a.style.color='var(--text)';li.appendChild(a);toc.appendChild(li);});})();
+(function(){var el=document.getElementById('readingTime');if(!el)return;var text=document.querySelector('main').textContent;var words=text.trim().split(/\s+/).length;var mins=Math.ceil(words/200);el.textContent='\u231A '+mins+' min read \u00B7 '+words+' words';})();
+(function(){if(window.hljs){document.querySelectorAll('pre code[class*="language-"]').forEach(function(block){hljs.highlightElement(block);});}})();
+(function(){document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});pre.appendChild(btn);});})();
+(function(){var headings=Array.from(document.querySelectorAll('h2[id],h3[id]'));document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var key=e.key;if(key!=='j'&&key!=='k')return;var scrollY=window.scrollY+100;var idx=-1;for(var i=0;i<headings.length;i++){if(headings[i].offsetTop<=scrollY)idx=i;}if(key==='j')idx=Math.min(idx+1,headings.length-1);else idx=Math.max(idx-1,0);if(idx>=0)headings[idx].scrollIntoView({behavior:'smooth',block:'start'});});})();
+</script>
+</body></html>

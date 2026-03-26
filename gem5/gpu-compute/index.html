@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/gpu-compute">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a2e;--card:#f8f9fa;--card-border:#e0e0e0;--accent:#0969da;--accent2:#6f42c1;--hero-bg:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);--hero-fg:#fff;--code-bg:#f6f8fa;--table-stripe:#f8f9fa;--badge-bg:#ddf4ff;--badge-fg:#0969da;--toc-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.12);--focus:#2188ff;--print-hide:block}
+[data-theme=dark]{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--card-border:#30363d;--accent:#58a6ff;--accent2:#bc8cff;--hero-bg:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#1c2333 100%);--hero-fg:#f0f6fc;--code-bg:#161b22;--table-stripe:#161b22;--badge-bg:#1f3044;--badge-fg:#58a6ff;--toc-bg:#161b22;--shadow:0 1px 3px rgba(0,0,0,.5)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--hero-bg);color:var(--hero-fg);padding:2.5rem 2rem 2rem;position:relative}
+.breadcrumb{font-size:.9rem;margin-bottom:1rem;opacity:.85}
+.breadcrumb a{color:var(--hero-fg);opacity:.8}.breadcrumb a:hover{opacity:1}
+h1{margin:0 0 .5rem;font-size:2rem;font-weight:700}
+.subtitle{font-size:1.1rem;opacity:.85;margin-bottom:1.5rem}
+.stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat-item{background:rgba(255,255,255,.12);padding:.4rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.badge{background:var(--badge-bg);color:var(--badge-fg);padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600}
+.theme-toggle{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:var(--hero-fg);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.theme-toggle:hover{background:rgba(255,255,255,.25)}
+.reading-time{font-size:.8rem;opacity:.7;margin-top:.5rem}
+main{max-width:960px;margin:0 auto;padding:1.5rem}
+.intro-box{background:var(--badge-bg);border-left:4px solid var(--accent);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin:1.5rem 0;font-size:.95rem}
+.intro-box strong{color:var(--accent)}
+.toc{background:var(--toc-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.toc summary{font-weight:700;cursor:pointer;font-size:1rem}
+.toc ul{margin:.5rem 0 0;padding-left:1.5rem}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+section{margin:2rem 0}
+h2{font-size:1.5rem;border-bottom:2px solid var(--card-border);padding-bottom:.3rem;margin:2rem 0 1rem}
+h3{font-size:1.2rem;margin:1.5rem 0 .75rem;color:var(--accent2)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{text-align:left;padding:.6rem .75rem;border:1px solid var(--card-border)}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even) td{background:var(--table-stripe)}
+.diagram-container{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1.25rem;margin:1rem 0;cursor:pointer;position:relative}
+.diagram-container:hover{box-shadow:var(--shadow)}
+.diagram-container::after{content:'⛶';position:absolute;top:.5rem;right:.75rem;font-size:1.1rem;opacity:.5}
+pre{background:var(--code-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0;color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--card);border:1px solid var(--card-border);color:var(--fg);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.25rem}
+.card h4{margin:0 0 .5rem;color:var(--accent)}
+.card p{margin:0;font-size:.9rem;opacity:.85}
+.dir-tree{font-family:monospace;font-size:.85rem;background:var(--code-bg);padding:1rem;border-radius:8px;border:1px solid var(--card-border);line-height:1.8}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:99}
+footer{text-align:center;padding:2rem;font-size:.8rem;opacity:.6;border-top:1px solid var(--card-border);margin-top:3rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:2rem}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border-radius:12px;padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:.5rem;right:1rem;font-size:1.5rem;cursor:pointer;background:none;border:none;color:var(--fg)}
+@media print{.theme-toggle,.back-to-top,.skip-link,.copy-btn,.overlay{display:none!important}header{background:#1a1a2e!important;-webkit-print-color-adjust:exact}body{font-size:11pt}}
+@media(max-width:768px){main{padding:1rem}.stat-row{gap:.75rem}.card-grid{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+<nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; gpu-compute</nav>
+<h1>gpu-compute</h1>
+<p class="subtitle">AMD GCN GPU Compute Model — wavefront-based SIMD execution engine</p>
+<div class="stat-row">
+<span class="stat-item">📁 68 files</span>
+<span class="stat-item">📏 22K LOC</span>
+<span class="stat-item">🏗️ AMD GCN</span>
+<span class="stat-item">💻 C++</span>
+</div>
+<div class="badge-row">
+<span class="badge">Compute Units</span>
+<span class="badge">Wavefront Scheduling</span>
+<span class="badge">SIMD Execution</span>
+<span class="badge">HSA Runtime</span>
+<span class="badge">Register Management</span>
+</div>
+<div class="reading-time">~12 min read</div>
+</header>
+<main id="main">
+<div class="intro-box">
+<strong>🏭 Analogy:</strong> GPU compute is like a massive factory floor with thousands of workers (wavefronts) that can all do <a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">simple</a> tasks simultaneously. A <em>Shader</em> is the factory, each <em>ComputeUnit</em> is a production line, and the <em>GPUDispatcher</em> is the foreman assigning work orders (kernels) to available lines. Each line has multiple SIMD lanes executing instructions in lockstep across 64 work-items.
+</div>
+
+<details class="toc" open>
+<summary>Table of Contents</summary>
+<ul>
+<li><a href="#architecture">Architecture Overview</a></li>
+<li><a href="#pipeline">Pipeline Stages</a></li>
+<li><a href="#dispatch-flow">Kernel Dispatch Flow</a></li>
+<li><a href="#key-classes">Key Classes</a></li>
+<li><a href="#wavefront-lifecycle">Deep Dive: Wavefront Lifecycle</a></li>
+<li><a href="#register-management">Deep Dive: Register Management</a></li>
+<li><a href="#memory-pipelines">Deep Dive: Memory Pipelines</a></li>
+<li><a href="#interactions">Cross-Module Interactions</a></li>
+<li><a href="#directory-map">Directory Map</a></li>
+<li><a href="#config">Configuration Parameters</a></li>
+<li><a href="#code-examples">Code Examples</a></li>
+</ul>
+</details>
+
+<section>
+<h2 id="architecture">Architecture Overview</h2>
+<p>The <code>gpu-compute</code> module implements a cycle-level model of AMD GCN-class GPU compute units, including wavefront scheduling, SIMD execution, and HSA-compatible kernel dispatch. The module models the full pipeline from AQL packet submission through GPUCommandProcessor, dispatch via GPUDispatcher, and execution within ComputeUnits containing multiple SIMD lanes.</p>
+<div class="diagram-container" data-diagram="arch">
+<pre class="mermaid">flowchart TD
+    HSA["HSA Runtime / AQL Packets"]
+    CmdProc["GPUCommandProcessor"]
+    Shader["Shader (GPU Top-Level)"]
+    Disp["GPUDispatcher"]
+    CU1["ComputeUnit 0"]
+    CU2["ComputeUnit 1"]
+    CUN["ComputeUnit N"]
+    FS["FetchStage"]
+    SB["ScoreboardCheckStage"]
+    SS["ScheduleStage"]
+    ES["ExecStage"]
+    GMP["GlobalMemPipeline"]
+    LMP["LocalMemPipeline"]
+    SMP["ScalarMemPipeline"]
+    VRF["VectorRegisterFile"]
+    SRF["ScalarRegisterFile"]
+
+    HSA --> CmdProc
+    CmdProc --> Shader
+    Shader --> Disp
+    Disp --> CU1
+    Disp --> CU2
+    Disp --> CUN
+    CU1 --> FS
+    FS --> SB
+    SB --> SS
+    SS --> ES
+    ES --> GMP
+    ES --> LMP
+    ES --> SMP
+    SS --> VRF
+    SS --> SRF
+</pre>
+</div>
+<p>The <strong>Shader</strong> object owns all compute units and manages GPU-wide state like aperture registers and active CU tracking. The <strong>GPUCommandProcessor</strong> receives AQL dispatch packets from the HSA packet processor, reads kernel metadata via DMA, and hands tasks to the dispatcher for workgroup-level scheduling across compute units.</p>
+</section>
+
+<section>
+<h2 id="pipeline">Pipeline Stages</h2>
+<p>Each ComputeUnit contains a five-stage pipeline that processes wavefronts every cycle:</p>
+<div class="diagram-container" data-diagram="pipeline">
+<pre class="mermaid">flowchart LR
+    F["FetchStage\n(I-Cache Access)"] --> SC["ScoreboardCheckStage\n(Hazard Detection)"]
+    SC --> S["ScheduleStage\n(Resource Arbitration)"]
+    S --> E["ExecStage\n(ALU / Mem Issue)"]
+    E --> M["Memory Pipelines\n(Global / Local / Scalar)"]
+</pre>
+</div>
+<table>
+<thead><tr><th>Stage</th><th>Class</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><strong><a href="../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Fetch</a></strong></td><td><code>FetchStage</code></td><td>Selects eligible wavefronts, issues I-<a title="cache — Classic <a href="../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../mem_doc/cache/index.html">cache</a> requests via per-SIMD <code>FetchUnit</code> instances</td></tr>
+<tr><td><strong><a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Scoreboard</a></strong></td><td><code>ScoreboardCheckStage</code></td><td>Checks data and structural hazards; classifies wavefront readiness (NRDY_VGPR_NRDY, NRDY_WAIT_CNT, etc.)</td></tr>
+<tr><td><strong>Schedule</strong></td><td><code>ScheduleStage</code></td><td>Arbitrates execution resources, reads register operands, manages scheduling state machine (RFBUSY → RFREADY)</td></tr>
+<tr><td><strong><a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Execute</a></strong></td><td><code>ExecStage</code></td><td>Issues instructions to ALUs or memory pipelines; tracks utilization statistics</td></tr>
+<tr><td><strong>Memory</strong></td><td><code>Global/Local/ScalarMemPipeline</code></td><td>Handles TLB lookups, cache access, ordered response retirement</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="dispatch-flow">Kernel Dispatch Flow</h2>
+<div class="diagram-container" data-diagram="dispatch">
+<pre class="mermaid">sequenceDiagram
+    participant App as HSA Application
+    participant CP as GPUCommandProcessor
+    participant SH as Shader
+    participant DI as GPUDispatcher
+    participant CU as ComputeUnit
+    participant WF as Wavefront
+
+    App->>CP: Submit AQL Dispatch Packet
+    CP->>CP: DMA read kernel metadata (MQD)
+    CP->>SH: dispatchKernelObject()
+    SH->>DI: dispatch(HSAQueueEntry)
+    DI->>DI: scheduleDispatch()
+    loop For each workgroup
+        DI->>CU: Allocate WG resources
+        CU->>WF: Create wavefronts (64 work-items each)
+    end
+    loop Per cycle
+        WF->>CU: FetchStage → ScoreboardCheck → Schedule → Execute
+        CU->>CU: Memory pipeline access
+    end
+    WF->>DI: notifyWgCompl()
+    DI->>CP: sendCompletionSignal()
+    CP->>App: Update HSA signal
+</pre>
+</div>
+<p>The dispatch path begins when the HSA runtime enqueues an AQL packet. The <code>GPUCommandProcessor</code> reads kernel metadata via DMA, then the <code>GPUDispatcher</code> maps workgroups to compute units with available resources. Each workgroup is split into wavefronts of 64 work-items that execute in SIMD lockstep through the pipeline stages.</p>
+</section>
+
+<section>
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<thead><tr><th>Class</th><th>Parent</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>Shader</code></td><td><code>ClockedObject</code></td><td>shader.hh</td><td>GPU top-level; owns CUs, manages aperture registers, tracks active units</td></tr>
+<tr><td><code>GPUCommandProcessor</code></td><td><code>DmaVirtDevice</code></td><td>gpu_command_processor.hh</td><td>HSA command processor; receives AQL packets, dispatches kernels</td></tr>
+<tr><td><code>GPUDispatcher</code></td><td><code>SimObject</code></td><td>dispatcher.hh</td><td>Workgroup dispatcher; maps WGs to CUs, tracks kernel completion</td></tr>
+<tr><td><code>ComputeUnit</code></td><td><code>ClockedObject</code></td><td>compute_unit.hh</td><td>Single CU with SIMD lanes, pipeline stages, register files, LDS</td></tr>
+<tr><td><code>Wavefront</code></td><td><code>SimObject</code></td><td>wavefront.hh</td><td>64 work-items executing in lockstep; holds instruction buffer and state</td></tr>
+<tr><td><code>FetchStage</code></td><td>—</td><td>fetch_stage.hh</td><td>Per-SIMD instruction fetch via FetchUnit; I-cache interface</td></tr>
+<tr><td><code>ScoreboardCheckStage</code></td><td>—</td><td>scoreboard_check_stage.hh</td><td>Hazard detection; classifies wavefront readiness with enum codes</td></tr>
+<tr><td><code>ScheduleStage</code></td><td>—</td><td>schedule_stage.hh</td><td>Resource arbitration; reads operands, manages schedule lists</td></tr>
+<tr><td><code>ExecStage</code></td><td>—</td><td>exec_stage.hh</td><td>ALU/memory issue; tracks idle duration and utilization</td></tr>
+<tr><td><code>GlobalMemPipeline</code></td><td>—</td><td>global_memory_pipeline.hh</td><td>Off-chip memory: TLB → cache; ordered response buffer</td></tr>
+<tr><td><code>LocalMemPipeline</code></td><td>—</td><td>local_memory_pipeline.hh</td><td>LDS access: shared data within workgroup</td></tr>
+<tr><td><code>VectorRegisterFile</code></td><td><code>RegisterFile</code></td><td>vector_register_file.hh</td><td>VGPRs — per-lane vector register <a title="storage — Storage Device Models | gem5 Wiki" href="../dev_doc/storage/index.html">storage</a></td></tr>
+<tr><td><code>ScalarRegisterFile</code></td><td><code>RegisterFile</code></td><td>scalar_register_file.hh</td><td>SGPRs — uniform scalar registers shared across wavefront</td></tr>
+<tr><td><code>GPUStaticInst</code></td><td><code>GPUStaticInstFlags</code></td><td>gpu_static_inst.hh</td><td>ISA instruction definition; operand info, disassembly</td></tr>
+<tr><td><code>GPUDynInst</code></td><td>—</td><td>gpu_dyn_inst.hh</td><td>Dynamic instruction instance with execution context and atomics</td></tr>
+<tr><td><code>WFBarrier</code></td><td>—</td><td>compute_unit.hh</td><td>Workgroup barrier synchronization tracker</td></tr>
+<tr><td><code>LdsChunk</code></td><td>—</td><td>lds_state.hh</td><td>Per-workgroup slice of Local Data Store memory</td></tr>
+<tr><td><code>RegisterManagerPolicy</code></td><td>—</td><td>register_manager_policy.hh</td><td>Abstract register allocation/mapping interface</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="wavefront-lifecycle">Deep Dive: Wavefront Lifecycle</h2>
+<h3 id="wf-states">Wavefront States</h3>
+<p>A wavefront transitions through several states during its lifetime, managed by the <code>status</code> field:</p>
+<div class="diagram-container" data-diagram="wf-states">
+<pre class="mermaid">stateDiagram-v2
+    [*] --> S_STOPPED: Created
+    S_STOPPED --> S_RUNNING: Resources allocated
+    S_RUNNING --> S_STALLED: Structural hazard
+    S_STALLED --> S_RUNNING: Hazard cleared
+    S_RUNNING --> S_WAITCNT: waitcnt instruction
+    S_WAITCNT --> S_RUNNING: Counters reach zero
+    S_RUNNING --> S_BARRIER_WAIT: Barrier instruction
+    S_BARRIER_WAIT --> S_RUNNING: All WFs arrive
+    S_RUNNING --> S_RETURNING: Last instruction
+    S_RETURNING --> [*]: Resources freed
+</pre>
+</div>
+<h3 id="wf-instruction-buffer">Instruction Buffer</h3>
+<p>Each wavefront maintains an instruction buffer (<code>deque&lt;GPUDynInstPtr&gt;</code>) that is populated by the FetchStage. The scoreboard checks the oldest instruction for data hazards before allowing it to proceed to scheduling. Key classification methods:</p>
+<ul>
+<li><code>isGmInstruction()</code> — global memory operation → routed to GlobalMemPipeline</li>
+<li><code>isLmInstruction()</code> — local memory (LDS) operation → routed to LocalMemPipeline</li>
+<li><code>isOldestInstWaitcnt()</code> — wait counter instruction, stalls until pending operations complete</li>
+</ul>
+</section>
+
+<section>
+<h2 id="register-management">Deep Dive: Register Management</h2>
+<p>The GPU register system has two distinct file types, managed by a pluggable <code>RegisterManagerPolicy</code>:</p>
+<table>
+<thead><tr><th>Register Type</th><th>Class</th><th>Scope</th><th>Width</th></tr></thead>
+<tbody>
+<tr><td><a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Vector</a> (VGPR)</td><td><code>VectorRegisterFile</code></td><td>Per-lane (×64 work-items)</td><td>32-bit per lane</td></tr>
+<tr><td><a href="../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Scalar</a> (SGPR)</td><td><code>ScalarRegisterFile</code></td><td>Shared across wavefront</td><td>32-bit</td></tr>
+</tbody>
+</table>
+<p>The <code>RegisterManagerPolicy</code> interface provides virtual methods for allocation checking (<code>canAllocateVgprs</code>, <code>canAllocateSgprs</code>), mapping (<code>mapVgpr</code>, <code>mapSgpr</code>), and freeing. The concrete <code>StaticRegisterManagerPolicy</code> partitions the physical register files statically among wavefront slots.</p>
+<p>Each register file supports operand readiness tracking — the ScheduleStage queries <code>operandsReady()</code> before issuing an instruction, and calls <code>scheduleWriteOperands()</code> to reserve write-back slots after execution.</p>
+</section>
+
+<section>
+<h2 id="memory-pipelines">Deep Dive: Memory Pipelines</h2>
+<h3 id="global-mem">Global Memory Pipeline</h3>
+<p>Handles off-chip memory requests through the GPU TLB and cache hierarchy. Maintains an ordered response buffer (<code>gmOrderedRespBuffer</code>) keyed by sequence number to ensure in-order retirement. Tracks inflight loads and stores separately, with configurable queue depths.</p>
+<h3 id="local-mem">Local Memory Pipeline</h3>
+<p>Provides access to the Local Data Store (LDS), a per-workgroup scratchpad memory. The <code>LdsChunk</code> class represents the allocated memory region with templated <code>read&lt;T&gt;</code>/<code>write&lt;T&gt;</code> access. The pipeline tracks bank conflict cycles for performance analysis.</p>
+<div class="diagram-container" data-diagram="memflow">
+<pre class="mermaid">flowchart LR
+    EX["ExecStage"] --> G["GlobalMemPipeline"]
+    EX --> L["LocalMemPipeline"]
+    EX --> S["ScalarMemPipeline"]
+    G --> TLB["GPU TLB"]
+    TLB --> Cache["L1 Data Cache"]
+    Cache --> L2["L2 Cache / Memory"]
+    L --> LDS["LDS (Shared Memory)"]
+    S --> STLB["Scalar TLB"]
+    STLB --> SC["Scalar Cache"]
+</pre>
+</div>
+</section>
+
+<section>
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<thead><tr><th>Dependency</th><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>ISA decoding</td><td><code>arch/amdgpu</code></td><td>GCN instruction set definitions and decoder</td></tr>
+<tr><td>Memory system</td><td><code>mem</code></td><td><a href="../mem_doc/index.html" title="mem — Memory <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> | gem5 Wiki" class="xref">Packet</a>, <a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">Request</a>, TLB, Cache interfaces</td></tr>
+<tr><td>HSA runtime</td><td><code>dev/hsa</code></td><td>HSA packet processor, queue entries, signals</td></tr>
+<tr><td>Simulation core</td><td><code>sim</code></td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">ClockedObject</a>, <a href="../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a>, <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">EventQueue</a></td></tr>
+<tr><td>GPU device</td><td><code>dev/amdgpu</code></td><td>AMDGPUDevice, MMIO, interrupt controller</td></tr>
+<tr><td><a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">Base</a> utilities</td><td><code>base</code></td><td>Types, statistics, trace, logging</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-tree">
+src/gpu-compute/
+├── <strong>Top-level</strong>
+│   ├── shader.hh/cc                  — GPU top-level object
+│   ├── compute_unit.hh/cc            — Individual compute unit
+│   └── gpu_command_processor.hh/cc   — HSA command processor
+├── <strong>Dispatch</strong>
+│   ├── dispatcher.hh/cc              — Workgroup dispatch engine
+│   ├── gpu_compute_driver.hh/cc      — KFD-compatible driver
+│   └── kernel_code.hh               — Kernel metadata structures
+├── <strong><a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> Stages</strong>
+│   ├── fetch_stage.hh/cc             — Instruction fetch
+│   ├── fetch_unit.hh/cc              — Per-SIMD fetch unit
+│   ├── scoreboard_check_stage.hh/cc  — Hazard detection
+│   ├── schedule_stage.hh/cc          — Resource scheduling
+│   ├── scheduler.hh/cc              — Scheduling policy
+│   └── exec_stage.hh/cc              — Execution issue
+├── <strong>Memory Pipelines</strong>
+│   ├── global_memory_pipeline.hh/cc  — Off-chip memory access
+│   ├── local_memory_pipeline.hh/cc   — LDS access
+│   └── lds_state.hh/cc              — Local data store
+├── <strong>Register Files</strong>
+│   ├── register_file.hh/cc           — Base register file
+│   ├── vector_register_file.hh/cc    — VGPRs
+│   ├── scalar_register_file.hh/cc    — SGPRs
+│   ├── register_manager_policy.hh    — Allocation interface
+│   ├── static_register_manager_policy.hh/cc
+│   ├── pool_manager.hh/cc           — Register pool tracking
+│   └── dyn_pool_manager.hh/cc       — Dynamic pool management
+├── <strong>Instructions</strong>
+│   ├── gpu_static_inst.hh/cc         — Static instruction
+│   ├── gpu_dyn_inst.hh/cc           — Dynamic instruction
+│   ├── gpu_exec_context.hh/cc       — Execution context
+│   └── operand_info.hh              — Operand descriptors
+├── <strong>Wavefront</strong>
+│   ├── wavefront.hh/cc              — Wavefront state machine
+│   └── comm.hh                      — Inter-stage communication
+└── <strong>Misc</strong>
+    ├── misc.hh                       — Shared enums/typedefs
+    └── of_scheduling_policy.hh       — Oldest-first policy
+</div>
+</section>
+
+<section>
+<h2 id="config">Configuration Parameters</h2>
+<table>
+<thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>num_SIMDs</code></td><td>4</td><td>Number of SIMD units per compute unit</td></tr>
+<tr><td><code>wf_size</code></td><td>64</td><td>Work-items per wavefront</td></tr>
+<tr><td><code>simd_width</code></td><td>16</td><td>SIMD lanes executing per cycle</td></tr>
+<tr><td><code>num_scalar_regs</code></td><td>2048</td><td>Physical SGPRs per SIMD</td></tr>
+<tr><td><code>num_vector_regs</code></td><td>1024</td><td>Physical VGPRs per SIMD</td></tr>
+<tr><td><code>max_wfs_per_simd</code></td><td>10</td><td>Maximum concurrent wavefronts per SIMD</td></tr>
+<tr><td><code>lds_size</code></td><td>65536</td><td>LDS capacity in bytes per CU</td></tr>
+<tr><td><code>gm_queue_size</code></td><td>16</td><td>Global memory request queue depth</td></tr>
+<tr><td><code>lm_queue_size</code></td><td>16</td><td>Local memory request queue depth</td></tr>
+<tr><td><code>num_barrier_slots</code></td><td>16</td><td>Workgroup barrier slots per CU</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-dispatch">Kernel Dispatch Sequence</h3>
+<pre><code class="language-cpp">// GPUCommandProcessor receives AQL packet and dispatches kernel
+void GPUCommandProcessor::submitDispatchPkt(void *raw_pkt,
+                                             uint32_t queue_id,
+                                             Addr host_pkt_addr)
+{
+    auto *task = new HSAQueueEntry(aql_pkt, queue_id, host_pkt_addr);
+    // DMA read kernel object to get code and metadata
+    dispatchKernelObject(task);
+}
+
+// GPUDispatcher maps workgroups to compute units
+void GPUDispatcher::dispatch(HSAQueueEntry *task)
+{
+    hsaQueueEntries[task-&gt;dispatchId()] = task;
+    scheduleDispatch();
+}
+
+// Each ComputeUnit creates wavefronts for assigned workgroups
+void ComputeUnit::startWavefront(Wavefront *wf, int wg_id,
+                                  HSAQueueEntry *task)
+{
+    wf-&gt;kernId = task-&gt;dispatchId();
+    wf-&gt;setStatus(Wavefront::S_RUNNING);
+    wf-&gt;resizeRegFiles(task-&gt;numVgprs(), task-&gt;numSgprs());
+}</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-pipeline">Pipeline Stage Execution</h3>
+<pre><code class="language-cpp">// Each cycle: stages execute in reverse order (exec → sched → sb → fetch)
+void ComputeUnit::exec()
+{
+    // Execute stage — issue to ALUs or memory pipelines
+    execStage.exec();
+
+    // Schedule stage — arbitrate resources, read operands
+    scheduleStage.exec();
+
+    // Scoreboard — check hazards, populate ready list
+    scoreboardCheckStage.exec();
+
+    // Fetch — select wavefronts, issue I-cache requests
+    fetchStage.exec();
+
+    // Memory pipelines
+    globalMemoryPipe.exec();
+    localMemoryPipe.exec();
+}</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-barrier">Barrier Synchronization</h3>
+<pre><code class="language-cpp">// WFBarrier tracks workgroup barrier participation
+class WFBarrier {
+    int _numAtBarrier = 0;
+    int _maxBarrierCnt = 0;
+public:
+    bool allAtBarrier() const { return _numAtBarrier == _maxBarrierCnt; }
+    void incNumAtBarrier() { ++_numAtBarrier; }
+    void setMaxBarrierCnt(int cnt) { _maxBarrierCnt = cnt; }
+    void reset() { _numAtBarrier = 0; _maxBarrierCnt = 0; }
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay">
+<div class="overlay-inner">
+<button class="overlay-close" id="overlayClose" aria-label="Close overlay">&times;</button>
+<div id="overlayContent"></div>
+</div>
+</div>
+
+<footer>
+<p>gem5 gpu-compute module wiki — auto-generated 2026-03-25 — source rev 7a2b0e413d</p>
+</footer>
+
+<script>
+/* Theme toggle */
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('neutra-ip-theme',t)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('neutra-ip-theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}})();
+
+/* Back-to-top */
+window.addEventListener('scroll',function(){document.getElementById('backToTop').style.display=window.scrollY>400?'flex':'none'});
+
+/* Copy buttons */
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    const code=this.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},2000)});
+  });
+});
+
+/* TOC auto-highlight */
+(function(){
+  const toc=document.querySelector('.toc');
+  if(!toc)return;
+  const links=toc.querySelectorAll('a[href^="#"]');
+  const obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){
+      links.forEach(function(l){l.style.fontWeight=l.getAttribute('href')==='#'+e.target.id?'700':'400'});
+    }});
+  },{rootMargin:'-20% 0px -70% 0px'});
+  links.forEach(function(l){const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t)});
+})();
+
+/* j/k navigation */
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  const sections=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  if(!sections.length)return;
+  let cur=0;const y=window.scrollY+100;
+  for(let i=sections.length-1;i>=0;i--){if(sections[i].offsetTop<=y){cur=i;break}}
+  if(e.key==='j'&&cur<sections.length-1)sections[cur+1].scrollIntoView({behavior:'smooth'});
+  if(e.key==='k'&&cur>0)sections[cur-1].scrollIntoView({behavior:'smooth'});
+});
+
+/* Diagram overlay */
+document.querySelectorAll('.diagram-container').forEach(function(d){
+  d.addEventListener('click',function(){
+    var m=d.querySelector('.mermaid');
+    if(!m)return;
+    var ov=document.getElementById('diagramOverlay'),oc=document.getElementById('overlayContent');
+    oc.innerHTML='';
+    var clone=m.cloneNode(true);
+    clone.removeAttribute('data-processed');
+    oc.appendChild(clone);
+    ov.classList.add('active');
+    if(window.mermaid)mermaid.run({nodes:[clone]});
+  });
+});
+document.getElementById('overlayClose').addEventListener('click',function(){document.getElementById('diagramOverlay').classList.remove('active')});
+document.getElementById('diagramOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')});
+
+/* Mermaid + hljs */
+document.addEventListener('DOMContentLoaded',function(){
+  /* Save raw source for re-render */
+  document.querySelectorAll('.mermaid').forEach(function(el){
+    el.setAttribute('data-source',el.textContent);
+  });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'default',securityLevel:'loose'});
+function renderMermaid(){
+  document.querySelectorAll('.mermaid').forEach(function(el){
+    if(el.getAttribute('data-processed'))return;
+    var src=el.getAttribute('data-source')||el.textContent;
+    el.textContent=src;
+    el.removeAttribute('data-processed');
+  });
+  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+}
+renderMermaid();
+/* Re-render on theme change */
+var obs=new MutationObserver(function(){
+  document.querySelectorAll('.mermaid[data-processed]').forEach(function(el){
+    var src=el.getAttribute('data-source');
+    if(src){el.textContent=src;el.removeAttribute('data-processed');}
+  });
+  setTimeout(renderMermaid,50);
+});
+obs.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme:light)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme:dark)">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/systemc">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>systemc — SystemC/TLM Integration Bridge · gem5 Wiki</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a2e;--card:#f8f9fa;--card-border:#e0e0e0;--accent:#0969da;--accent2:#6f42c1;--hero-bg:linear-gradient(135deg,#0c2461 0%,#1e3799 50%,#3c6382 100%);--hero-fg:#fff;--code-bg:#f6f8fa;--table-stripe:#f8f9fa;--badge-bg:#ddf4ff;--badge-fg:#0969da;--toc-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.12);--focus:#2188ff;--print-hide:block}
+[data-theme=dark]{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--card-border:#30363d;--accent:#58a6ff;--accent2:#bc8cff;--hero-bg:linear-gradient(135deg,#0d1117 0%,#0c1a33 50%,#162447 100%);--hero-fg:#f0f6fc;--code-bg:#161b22;--table-stripe:#161b22;--badge-bg:#1f3044;--badge-fg:#58a6ff;--toc-bg:#161b22;--shadow:0 1px 3px rgba(0,0,0,.5)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+header{background:var(--hero-bg);color:var(--hero-fg);padding:2.5rem 2rem 2rem;position:relative}
+.breadcrumb{font-size:.9rem;margin-bottom:1rem;opacity:.85}
+.breadcrumb a{color:var(--hero-fg);opacity:.8}.breadcrumb a:hover{opacity:1}
+h1{margin:0 0 .5rem;font-size:2rem;font-weight:700}
+.subtitle{font-size:1.1rem;opacity:.85;margin-bottom:1.5rem}
+.stat-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat-item{background:rgba(255,255,255,.12);padding:.4rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600}
+.badge-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.badge{background:var(--badge-bg);color:var(--badge-fg);padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600}
+.theme-toggle{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:var(--hero-fg);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.theme-toggle:hover{background:rgba(255,255,255,.25)}
+.reading-time{font-size:.8rem;opacity:.7;margin-top:.5rem}
+main{max-width:960px;margin:0 auto;padding:1.5rem}
+.intro-box{background:var(--badge-bg);border-left:4px solid var(--accent);padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin:1.5rem 0;font-size:.95rem}
+.intro-box strong{color:var(--accent)}
+.toc{background:var(--toc-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0}
+.toc summary{font-weight:700;cursor:pointer;font-size:1rem}
+.toc ul{margin:.5rem 0 0;padding-left:1.5rem}.toc li{margin:.3rem 0}.toc a{font-size:.9rem}
+section{margin:2rem 0}
+h2{font-size:1.5rem;border-bottom:2px solid var(--card-border);padding-bottom:.3rem;margin:2rem 0 1rem}
+h3{font-size:1.2rem;margin:1.5rem 0 .75rem;color:var(--accent2)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th,td{text-align:left;padding:.6rem .75rem;border:1px solid var(--card-border)}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even) td{background:var(--table-stripe)}
+.diagram-container{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1.25rem;margin:1rem 0;cursor:pointer;position:relative}
+.diagram-container:hover{box-shadow:var(--shadow)}
+.diagram-container::after{content:'⛶';position:absolute;top:.5rem;right:.75rem;font-size:1.1rem;opacity:.5}
+pre{background:var(--code-bg);border:1px solid var(--card-border);border-radius:8px;padding:1rem;overflow-x:auto;position:relative;margin:1rem 0}
+pre code{background:none;padding:0;color:inherit;font-size:.85rem;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--card);border:1px solid var(--card-border);color:var(--fg);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:1rem 1.25rem}
+.card h4{margin:0 0 .5rem;color:var(--accent)}
+.card p{margin:0;font-size:.9rem;opacity:.85}
+.dir-tree{font-family:monospace;font-size:.85rem;background:var(--code-bg);padding:1rem;border-radius:8px;border:1px solid var(--card-border);line-height:1.8}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:99}
+footer{text-align:center;padding:2rem;font-size:.8rem;opacity:.6;border-top:1px solid var(--card-border);margin-top:3rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:2rem}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border-radius:12px;padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:.5rem;right:1rem;font-size:1.5rem;cursor:pointer;background:none;border:none;color:var(--fg)}
+@media print{.theme-toggle,.back-to-top,.skip-link,.copy-btn,.overlay{display:none!important}header{background:#0c2461!important;-webkit-print-color-adjust:exact}body{font-size:11pt}}
+@media(max-width:768px){main{padding:1rem}.stat-row{gap:.75rem}.card-grid{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+<nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../index.html">gem5</a> &rsaquo; systemc</nav>
+<h1>systemc</h1>
+<p class="subtitle">SystemC/TLM Integration Bridge — IEEE 1666 interoperability layer</p>
+<div class="stat-row">
+<span class="stat-item">📁 267 files</span>
+<span class="stat-item">📏 31.6K LOC</span>
+<span class="stat-item">📐 IEEE 1666</span>
+<span class="stat-item">💻 C++</span>
+</div>
+<div class="badge-row">
+<span class="badge">TLM 2.0</span>
+<span class="badge">gem5 ↔ SystemC Bridge</span>
+<span class="badge">Port Wrappers</span>
+<span class="badge">SC Kernel</span>
+<span class="badge">Channel Model</span>
+</div>
+<div class="reading-time">~11 min read</div>
+</header>
+<main id="main">
+<div class="intro-box">
+<strong>🌉 Analogy:</strong> The SystemC bridge is like a <em>universal translator</em> between two different simulation languages. gem5 speaks in "Packets" (memory read/write requests), while SystemC speaks in "TLM <a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../arch_doc/generic/index.html">Generic</a> Payloads" (abstract transactions). The <code>Gem5ToTlmBridge</code> and <code>TlmToGem5Bridge</code> perform real-time translation so components from both worlds can communicate seamlessly — like two diplomats with an interpreter between them.
+</div>
+
+<details class="toc" open>
+<summary>Table of Contents</summary>
+<ul>
+<li><a href="#architecture">Architecture Overview</a></li>
+<li><a href="#tlm-bridge">TLM Bridge Layer</a></li>
+<li><a href="#conversion-pipeline">Conversion Pipeline</a></li>
+<li><a href="#key-classes">Key Classes</a></li>
+<li><a href="#bridge-deep-dive">Deep Dive: Bridge Mechanics</a></li>
+<li><a href="#sc-kernel">Deep Dive: SystemC Kernel</a></li>
+<li><a href="#port-wrappers">Deep Dive: Port Wrappers</a></li>
+<li><a href="#interactions">Cross-Module Interactions</a></li>
+<li><a href="#directory-map">Directory Map</a></li>
+<li><a href="#config-table">Configuration Parameters</a></li>
+<li><a href="#code-examples">Code Examples</a></li>
+</ul>
+</details>
+
+<section>
+<h2 id="architecture">Architecture Overview</h2>
+<p>The <code>systemc</code> module provides a complete SystemC/TLM 2.0 integration layer for gem5, enabling mixed-language simulation. It contains three main components: the <strong>TLM bridge</strong> for bidirectional transaction translation, a <strong>SystemC kernel</strong> implementation that schedules SC processes within gem5's event-driven framework, and <strong>port wrappers</strong> that adapt gem5's port model to SystemC interfaces.</p>
+<div class="diagram-container" data-diagram="arch">
+<pre class="mermaid">flowchart LR
+    subgraph gem5["gem5 Domain"]
+        CPU["CPU / Device"]
+        RP["ResponsePort"]
+        RQP["RequestPort"]
+    end
+
+    subgraph Bridge["Translation Layer"]
+        G2T["Gem5ToTlmBridge"]
+        T2G["TlmToGem5Bridge"]
+    end
+
+    subgraph SC["SystemC Domain"]
+        IS["Initiator Socket"]
+        TS["Target Socket"]
+        SCM["SC Module"]
+    end
+
+    CPU --> RP
+    RP --> G2T
+    G2T --> IS
+    IS --> SCM
+
+    SCM --> TS
+    TS --> T2G
+    T2G --> RQP
+    RQP --> CPU
+</pre>
+</div>
+<p>The architecture enables four key use cases: (1) gem5 <a title="cpu — CPU Timing Models — gem5 Wiki" href="../cpu_doc/index.html">CPU</a> accessing SystemC memory/peripherals, (2) SystemC initiators accessing gem5 memory, (3) mixed SystemC/gem5 <a title="cache — Classic <a href="../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../mem_doc/cache/index.html">cache</a> hierarchies, and (4) co-simulation with external SystemC IP blocks.</p>
+</section>
+
+<section>
+<h2 id="tlm-bridge">TLM Bridge Layer</h2>
+<p>The TLM bridge provides bidirectional translation between gem5's packet-based memory protocol and SystemC's TLM 2.0 generic payload protocol. Two template classes handle the two directions:</p>
+<div class="diagram-container" data-diagram="bridge-detail">
+<pre class="mermaid">flowchart TD
+    subgraph G2T["Gem5ToTlmBridge&lt;BITWIDTH&gt;"]
+        BRP["BridgeResponsePort\n(gem5::ResponsePort)"]
+        Conv1["packet2payload()"]
+        SIS["simple_initiator_socket"]
+    end
+
+    subgraph T2G["TlmToGem5Bridge&lt;BITWIDTH&gt;"]
+        STS["simple_target_socket"]
+        Conv2["payload2packet()"]
+        BRQP["BridgeRequestPort\n(gem5::RequestPort)"]
+    end
+
+    PKT["gem5::PacketPtr"] --> BRP
+    BRP --> Conv1
+    Conv1 --> GP["tlm_generic_payload"]
+    GP --> SIS
+
+    GP2["tlm_generic_payload"] --> STS
+    STS --> Conv2
+    Conv2 --> PKT2["gem5::PacketPtr"]
+    PKT2 --> BRQP
+</pre>
+</div>
+<table>
+<thead><tr><th>Bridge</th><th>Direction</th><th>Input</th><th><a href="../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Output</a></th></tr></thead>
+<tbody>
+<tr><td><code>Gem5ToTlmBridge&lt;BITWIDTH&gt;</code></td><td>gem5 → SystemC</td><td>gem5 <a href="../mem_doc/index.html" title="mem — Memory <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> | gem5 Wiki" class="xref">Packet</a></td><td>TLM Generic Payload</td></tr>
+<tr><td><code>TlmToGem5Bridge&lt;BITWIDTH&gt;</code></td><td>SystemC → gem5</td><td>TLM Generic Payload</td><td>gem5 Packet</td></tr>
+</tbody>
+</table>
+<p>Both bridges are parameterized by <code>BITWIDTH</code>, which specifies the address bus width. The conversion is extensible via <code>addPacketToPayloadConversionStep()</code> and <code>addPayloadToPacketConversionStep()</code>, allowing custom address translation, command mapping, and data transformation hooks.</p>
+</section>
+
+<section>
+<h2 id="conversion-pipeline">Conversion Pipeline</h2>
+<div class="diagram-container" data-diagram="conversion">
+<pre class="mermaid">sequenceDiagram
+    participant G as gem5 CPU
+    participant BP as BridgeResponsePort
+    participant G2T as Gem5ToTlmBridge
+    participant SC as SystemC Target
+
+    G->>BP: sendTimingReq(PacketPtr)
+    BP->>G2T: recvTimingReq(PacketPtr)
+    G2T->>G2T: packet2payload(pkt)
+    Note over G2T: Map MemCmd → TLM command
+    Note over G2T: Copy address, data, size
+    Note over G2T: Run conversion steps
+    G2T->>SC: nb_transport_fw(payload, phase, delay)
+    SC-->>G2T: TLM_ACCEPTED / TLM_COMPLETED
+    G2T->>G2T: payload → response packet
+    G2T->>BP: sendTimingResp(PacketPtr)
+    BP->>G: recvTimingResp
+</pre>
+</div>
+<h3 id="command-mapping">Command Mapping</h3>
+<table>
+<thead><tr><th>gem5 <a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">MemCmd</a></th><th>TLM Command</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>ReadReq</code></td><td><code>TLM_READ_COMMAND</code></td><td>Standard read transaction</td></tr>
+<tr><td><code>WriteReq</code></td><td><code>TLM_WRITE_COMMAND</code></td><td>Standard write transaction</td></tr>
+<tr><td><code>ReadExReq</code></td><td><code>TLM_READ_COMMAND</code></td><td>Exclusive read (coherence)</td></tr>
+<tr><td><code>WritebackDirty</code></td><td><code>TLM_WRITE_COMMAND</code></td><td>Cache writeback</td></tr>
+<tr><td>Other</td><td><code>TLM_IGNORE_COMMAND</code></td><td>Unmapped commands</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="key-classes">Key Classes</h2>
+<table>
+<thead><tr><th>Class</th><th>Parent</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>Gem5ToTlmBridgeBase</code></td><td><code>sc_core::sc_module</code></td><td>tlm_bridge/gem5_to_tlm.hh</td><td><a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../base_doc/index.html">Base</a> class for gem5→TLM bridge; non-template common logic</td></tr>
+<tr><td><code>Gem5ToTlmBridge&lt;BW&gt;</code></td><td><code>Gem5ToTlmBridgeBase</code></td><td>tlm_bridge/gem5_to_tlm.hh</td><td>Template bridge: gem5 Packet → TLM payload via initiator socket</td></tr>
+<tr><td><code>TlmToGem5BridgeBase</code></td><td><code>sc_core::sc_module</code></td><td>tlm_bridge/tlm_to_gem5.hh</td><td>Base class for TLM→gem5 bridge; non-template common logic</td></tr>
+<tr><td><code>TlmToGem5Bridge&lt;BW&gt;</code></td><td><code>TlmToGem5BridgeBase</code></td><td>tlm_bridge/tlm_to_gem5.hh</td><td>Template bridge: TLM payload → gem5 Packet via request port</td></tr>
+<tr><td><code>ScPortWrapper&lt;IF&gt;</code></td><td><code>gem5::Port</code></td><td>sc_port_wrapper.hh</td><td>Wraps sc_port for gem5 port binding system</td></tr>
+<tr><td><code>ScInterfaceWrapper&lt;IF&gt;</code></td><td><code>gem5::Port</code></td><td>sc_port_wrapper.hh</td><td>Wraps SC interface for gem5 binding</td></tr>
+<tr><td><code>ScExportWrapper&lt;IF&gt;</code></td><td><code>gem5::Port</code></td><td>sc_port_wrapper.hh</td><td>Wraps SC export for bidirectional binding</td></tr>
+<tr><td><code>Process</code></td><td><code>sc_process_b</code></td><td>core/process.hh</td><td>SC process execution: threads and methods</td></tr>
+<tr><td><code>Scheduler</code></td><td>—</td><td>core/scheduler.hh</td><td>Delta-cycle scheduler coordinating SC processes and events</td></tr>
+<tr><td><code>Channel</code></td><td>—</td><td>core/channel.hh</td><td>SC value channel implementation (signals, FIFOs)</td></tr>
+<tr><td><code>sc_signal</code></td><td>—</td><td>channel/sc_signal.cc</td><td>Signal channel for inter-process communication</td></tr>
+<tr><td><code>sc_clock</code></td><td>—</td><td>channel/sc_clock.cc</td><td>Clock signal generator</td></tr>
+<tr><td><code>sc_mutex</code></td><td>—</td><td>channel/sc_mutex.cc</td><td>Mutual exclusion primitive</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="bridge-deep-dive">Deep Dive: Bridge Mechanics</h2>
+<h3 id="gem5-to-tlm">Gem5ToTlmBridge Internals</h3>
+<p>The <code>Gem5ToTlmBridge</code> contains an inner <code>BridgeResponsePort</code> that receives gem5 packets. On each timing request:</p>
+<ol>
+<li>The response port calls <code>packet2payload()</code> to convert the gem5 Packet to a TLM generic payload</li>
+<li>Address, data pointer, data length, and command are mapped to TLM equivalents</li>
+<li>Custom conversion steps are applied (registered via <code>addPacketToPayloadConversionStep()</code>)</li>
+<li>The payload is sent via <code>nb_transport_fw()</code> on the <a title="simple — <a href="../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../cpu_doc/simple/index.html">simple</a> initiator socket</li>
+<li>On response, the payload is converted back and sent via <code>sendTimingResp()</code></li>
+</ol>
+
+<h3 id="tlm-to-gem5">TlmToGem5Bridge Internals</h3>
+<p>The reverse bridge uses a <code>simple_target_socket</code> to receive TLM transactions and a <code>BridgeRequestPort</code> to inject gem5 packets:</p>
+<ol>
+<li>Incoming TLM transactions arrive at <code>nb_transport_fw()</code> callback</li>
+<li><code>payload2packet()</code> creates a gem5 Packet with proper MemCmd and data</li>
+<li>A <code>RequestorID</code> is assigned for gem5's coherence tracking</li>
+<li>The packet is sent via <code>sendTimingReq()</code> on the request port</li>
+<li>Responses trigger <code>nb_transport_bw()</code> with TLM completion phase</li>
+</ol>
+
+<h3 id="extensibility">Extensible Conversion</h3>
+<p>Both bridges support a pipeline of conversion steps, enabling custom protocol extensions:</p>
+<pre><code class="language-cpp">// Register a custom conversion step
+bridge-&gt;addPacketToPayloadConversionStep(
+    [](PacketPtr pkt, tlm_generic_payload &amp;trans) {
+        // Custom address remapping
+        trans.set_address(pkt-&gt;getAddr() - base_offset);
+        // Add extension data
+        auto *ext = new MyExtension(pkt-&gt;req-&gt;contextId());
+        trans.set_auto_extension(ext);
+    }
+);</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+<section>
+<h2 id="sc-kernel">Deep Dive: SystemC Kernel</h2>
+<p>The <code>core/</code> subdirectory implements a complete SystemC kernel that runs within gem5's event-driven simulation engine. This enables native SystemC modules to execute alongside gem5 components.</p>
+<h3 id="scheduler-phases">Scheduler Phases</h3>
+<div class="diagram-container" data-diagram="scheduler">
+<pre class="mermaid">flowchart TD
+    INIT["Initialization Phase"]
+    EVAL["Evaluate Phase"]
+    UPD["Update Phase"]
+    DELTA["Delta Notification"]
+    TIME["Timed Notification"]
+    CHECK{More deltas?}
+
+    INIT --> EVAL
+    EVAL --> UPD
+    UPD --> DELTA
+    DELTA --> CHECK
+    CHECK -->|"Yes"| EVAL
+    CHECK -->|"No"| TIME
+    TIME --> EVAL
+</pre>
+</div>
+<table>
+<thead><tr><th>Phase</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Initialization</strong></td><td><a href="../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Execute</a> <code>SC_METHOD</code>/<code>SC_THREAD</code> initialization, perform channel updates, process delta notifications</td></tr>
+<tr><td><strong>Evaluate</strong></td><td>Run all runnable processes (methods and threads), collect channel update requests</td></tr>
+<tr><td><strong>Update</strong></td><td>Apply pending channel updates atomically (signal new values, FIFO writes)</td></tr>
+<tr><td><strong>Delta Notification</strong></td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Process</a> zero-delay event notifications, may trigger new evaluations</td></tr>
+<tr><td><strong>Timed Notification</strong></td><td>Advance to next timed event; integrates with gem5 tick via <code>sc_time</code> ↔ Tick conversion</td></tr>
+</tbody>
+</table>
+
+<h3 id="process-model">Process Model</h3>
+<p>The <code>Process</code> class manages SC_THREAD and SC_METHOD execution using gem5's Fiber-based context switching. Key state management:</p>
+<ul>
+<li><code>needsStart()</code> — process hasn't been started yet</li>
+<li><code>suspended()</code> / <code>resume()</code> — manual suspend/resume control</li>
+<li><code>disable()</code> / <code>enable()</code> — sensitivity disable/enable</li>
+<li><code>kill()</code> / <code>reset()</code> — process termination and restart</li>
+<li>Reference counting via <code>incref()</code> / <code>decref()</code> for safe lifecycle management</li>
+</ul>
+</section>
+
+<section>
+<h2 id="port-wrappers">Deep Dive: Port Wrappers</h2>
+<p>The port wrapper layer adapts SystemC's port/export/interface model to gem5's <code>Port</code> base class, enabling the gem5 port binding system to connect to SystemC components.</p>
+<div class="diagram-container" data-diagram="ports">
+<pre class="mermaid">classDiagram
+    class Port {
+        &lt;&lt;gem5::Port&gt;&gt;
+        +bind(Port)
+        +unbind()
+    }
+    class ScPortWrapper~IF~ {
+        -sc_port~IF~ &amp;port
+        +bind(Port)
+    }
+    class ScInterfaceWrapper~IF~ {
+        -IF &amp;interface
+        +bind(Port)
+    }
+    class ScExportWrapper~IF~ {
+        -sc_export~IF~ &amp;exp
+        +bind(Port)
+    }
+    Port <|-- ScPortWrapper
+    Port <|-- ScInterfaceWrapper
+    Port <|-- ScExportWrapper
+</pre>
+</div>
+<p>The binding rules enforce type safety:</p>
+<ul>
+<li><code>ScPortWrapper</code> can bind to <code>ScPortWrapper</code> (port-to-port) or <code>ScInterfaceWrapper</code> (port-to-interface)</li>
+<li><code>ScExportWrapper</code> can bind to <code>ScPortWrapper</code> (export-to-port)</li>
+<li>Unbinding panics — SystemC does not support port unbinding at runtime</li>
+</ul>
+</section>
+
+<section>
+<h2 id="interactions">Cross-Module Interactions</h2>
+<table>
+<thead><tr><th>Dependency</th><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><a href="../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> protocol</td><td><code>mem</code></td><td>Packet, <a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">RequestPort</a>, <a href="../mem_doc/index.html" title="mem — Memory System | gem5 Wiki" class="xref">ResponsePort</a>, Backdoor, RequestorID</td></tr>
+<tr><td>Simulation core</td><td><code>sim</code></td><td><a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">EventQueue</a>, Port base class, tick management</td></tr>
+<tr><td>Context switching</td><td><code>base/fiber</code></td><td>Fiber-based coroutines for SC_THREAD implementation</td></tr>
+<tr><td>SystemC standard</td><td><code>systemc/ext</code></td><td>IEEE 1666 headers: core, TLM, channels, data types</td></tr>
+<tr><td>Logging</td><td><code>base</code></td><td>Types, logging, trace, panic/fatal</td></tr>
+<tr><td><a title="Configuration System and Standard Library — the control plane of gem5" href="../python/index.html">Python</a> config</td><td><code>python</code></td><td>Tlm.py <a href="../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a> configuration wrapper</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-tree">
+src/systemc/
+├── <strong>tlm_bridge/</strong> — Transaction translation (2.3K LOC)
+│   ├── gem5_to_tlm.hh/cc       — gem5 Packet → TLM payload bridge
+│   ├── tlm_to_gem5.hh/cc       — TLM payload → gem5 Packet bridge
+│   ├── sc_ext.hh/cc             — SystemC extensions and utilities
+│   ├── sc_mm.hh/cc              — Memory management for payloads
+│   └── TlmBridge.py             — Python configuration interface
+├── <strong>core/</strong> — SystemC kernel (9.2K LOC)
+│   ├── scheduler.hh/cc          — Delta-cycle event scheduler
+│   ├── process.hh/cc            — SC_THREAD / SC_METHOD execution
+│   ├── module.hh/cc             — Module instantiation and hierarchy
+│   ├── channel.hh/cc            — Channel update management
+│   ├── event.hh/cc              — <a href="../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Event</a> notification system
+│   ├── port.hh/cc               — Port binding infrastructure
+│   ├── sensitivity.hh/cc        — Process sensitivity lists
+│   ├── sc_time.hh/cc            — Time handling (SC ↔ gem5 ticks)
+│   └── sc_*.cc                  — Individual SC type implementations
+├── <strong>ext/</strong> — SystemC/TLM standard headers
+│   ├── core/                    — SC core interfaces (sc_module, sc_port, etc.)
+│   ├── tlm/                     — TLM 2.0 definitions
+│   ├── channel/                 — Signal, mutex, semaphore interfaces
+│   ├── dt/                      — Data types (sc_int, sc_fixed, etc.)
+│   ├── systemc.h                — Main SystemC include
+│   └── tlm.h                    — Main TLM include
+├── <strong>channel/</strong> — Channel implementations
+│   ├── sc_signal.cc             — Signal channel
+│   ├── sc_clock.cc              — Clock signal generator
+│   ├── sc_event_queue.cc        — Event queue channel
+│   ├── sc_mutex.cc              — Mutual exclusion
+│   └── sc_semaphore.cc          — Counting semaphore
+├── <strong>tlm_core/</strong> — TLM core implementation
+├── <strong>tlm_utils/</strong> — TLM utility classes
+├── <strong>utils/</strong> — Internal utilities
+├── <strong>dt/</strong> — Data type implementations
+├── sc_port_wrapper.hh           — gem5::Port ↔ sc_port adapter
+├── tlm_port_wrapper.hh          — gem5::Port ↔ TLM socket adapter
+├── Tlm.py                       — Top-level Python config
+└── tests/                       — SystemC integration tests
+</div>
+</section>
+
+<section>
+<h2 id="config-table">Configuration Parameters</h2>
+<table>
+<thead><tr><th>Parameter</th><th>Class</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>tlm_bridge_bitwidth</code></td><td>Gem5ToTlmBridge / TlmToGem5Bridge</td><td>Address bus width template parameter (32, 64)</td></tr>
+<tr><td><code>system</code></td><td>TlmBridge</td><td>Reference to parent System object</td></tr>
+<tr><td><code>cpu_side_port</code></td><td>Gem5ToTlmBridge</td><td>gem5 ResponsePort for incoming requests</td></tr>
+<tr><td><code>mem_side_port</code></td><td>TlmToGem5Bridge</td><td>gem5 RequestPort for outgoing requests</td></tr>
+<tr><td><code>addr_ranges</code></td><td>Both bridges</td><td>Address ranges handled by this bridge instance</td></tr>
+</tbody>
+</table>
+<h3 id="python-config">Python Configuration Example</h3>
+<pre><code class="language-python">from m5.objects import Gem5ToTlmBridge64, TlmToGem5Bridge64
+
+# Create bridge from gem5 CPU to SystemC memory
+g2t_bridge = Gem5ToTlmBridge64()
+g2t_bridge.cpu_side_port = system.membus.mem_side_ports
+
+# Create bridge from SystemC DMA to gem5 memory
+t2g_bridge = TlmToGem5Bridge64()
+t2g_bridge.mem_side_port = system.membus.cpu_side_ports</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+<section>
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-g2t">Gem5-to-TLM Packet Conversion</h3>
+<pre><code class="language-cpp">// tlm_bridge/gem5_to_tlm.cc — Convert gem5 packet to TLM payload
+template &lt;unsigned int BITWIDTH&gt;
+void Gem5ToTlmBridge&lt;BITWIDTH&gt;::packet2payload(
+    PacketPtr pkt, tlm_generic_payload &amp;trans)
+{
+    trans.set_address(pkt-&gt;getAddr());
+
+    // Map gem5 command to TLM command
+    if (pkt-&gt;isRead())
+        trans.set_command(tlm::TLM_READ_COMMAND);
+    else if (pkt-&gt;isWrite())
+        trans.set_command(tlm::TLM_WRITE_COMMAND);
+    else
+        trans.set_command(tlm::TLM_IGNORE_COMMAND);
+
+    // Set data pointer and length
+    trans.set_data_ptr(pkt-&gt;getPtr&lt;unsigned char&gt;());
+    trans.set_data_length(pkt-&gt;getSize());
+    trans.set_streaming_width(pkt-&gt;getSize());
+
+    // Run registered conversion steps
+    for (auto &amp;step : conversionSteps)
+        step(pkt, trans);
+}</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-port-wrapper">Port Wrapper Binding</h3>
+<pre><code class="language-cpp">// sc_port_wrapper.hh — Type-safe port adapter
+template &lt;typename IF&gt;
+class ScPortWrapper : public gem5::Port
+{
+    sc_core::sc_port&lt;IF&gt; &amp;port_;
+  public:
+    ScPortWrapper(sc_core::sc_port&lt;IF&gt; &amp;p, const std::string &amp;name)
+        : gem5::Port(name), port_(p) {}
+
+    void bind(Port &amp;peer) override
+    {
+        // Bind to another ScPortWrapper or ScInterfaceWrapper
+        auto *iface = dynamic_cast&lt;ScInterfaceWrapper&lt;IF&gt;*&gt;(&amp;peer);
+        if (iface) {
+            port_.bind(iface-&gt;interface());
+            return;
+        }
+        auto *other = dynamic_cast&lt;ScPortWrapper&lt;IF&gt;*&gt;(&amp;peer);
+        if (other) {
+            port_.bind(other-&gt;port());
+            return;
+        }
+        gem5::fatal("Incompatible port binding");
+    }
+
+    void unbind() override { gem5::panic("Cannot unbind sc_port"); }
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+
+<h3 id="ex-sc-process">SystemC Process Lifecycle</h3>
+<pre><code class="language-cpp">// core/process.hh — Process state management
+class Process : public sc_core::sc_process_b
+{
+  public:
+    bool needsStart() const;     // Not yet started
+    bool dynamic() const;        // Dynamically spawned
+    bool scheduled() const;      // In runnable list
+
+    void suspend(bool inc_kids);
+    void resume(bool inc_kids);
+    void disable(bool inc_kids);
+    void enable(bool inc_kids);
+    void kill(bool inc_kids);
+    void reset(bool inc_kids);
+
+    // Reference counting for safe lifecycle
+    void incref() { refCount++; }
+    void decref() { if (--refCount == 0) delete this; }
+
+    // Reset signal handling
+    void signalReset(bool active, bool async);
+    void syncResetOn(bool inc_kids);
+    void syncResetOff(bool inc_kids);
+};</code></pre><button class="copy-btn" aria-label="Copy code">Copy</button>
+</section>
+
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay">
+<div class="overlay-inner">
+<button class="overlay-close" id="overlayClose" aria-label="Close overlay">&times;</button>
+<div id="overlayContent"></div>
+</div>
+</div>
+
+<footer>
+<p>gem5 systemc module wiki — auto-generated 2026-03-25 — source rev 7a2b0e413d</p>
+</footer>
+
+<script>
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('neutra-ip-theme',t)}catch(e){}
+}
+(function(){try{const s=localStorage.getItem('neutra-ip-theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}})();
+window.addEventListener('scroll',function(){document.getElementById('backToTop').style.display=window.scrollY>400?'flex':'none'});
+document.querySelectorAll('.copy-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    const code=this.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},2000)});
+  });
+});
+(function(){
+  const toc=document.querySelector('.toc');if(!toc)return;
+  const links=toc.querySelectorAll('a[href^="#"]');
+  const obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){
+      links.forEach(function(l){l.style.fontWeight=l.getAttribute('href')==='#'+e.target.id?'700':'400'});
+    }});
+  },{rootMargin:'-20% 0px -70% 0px'});
+  links.forEach(function(l){const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t)});
+})();
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  const sections=Array.from(document.querySelectorAll('h2[id],h3[id]'));
+  if(!sections.length)return;
+  let cur=0;const y=window.scrollY+100;
+  for(let i=sections.length-1;i>=0;i--){if(sections[i].offsetTop<=y){cur=i;break}}
+  if(e.key==='j'&&cur<sections.length-1)sections[cur+1].scrollIntoView({behavior:'smooth'});
+  if(e.key==='k'&&cur>0)sections[cur-1].scrollIntoView({behavior:'smooth'});
+});
+document.querySelectorAll('.diagram-container').forEach(function(d){
+  d.addEventListener('click',function(){
+    var m=d.querySelector('.mermaid');if(!m)return;
+    var ov=document.getElementById('diagramOverlay'),oc=document.getElementById('overlayContent');
+    oc.innerHTML='';var clone=m.cloneNode(true);clone.removeAttribute('data-processed');
+    oc.appendChild(clone);ov.classList.add('active');
+    if(window.mermaid)mermaid.run({nodes:[clone]});
+  });
+});
+document.getElementById('overlayClose').addEventListener('click',function(){document.getElementById('diagramOverlay').classList.remove('active')});
+document.getElementById('diagramOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')});
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.mermaid').forEach(function(el){el.setAttribute('data-source',el.textContent)});
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'default',securityLevel:'loose'});
+function renderMermaid(){
+  document.querySelectorAll('.mermaid').forEach(function(el){
+    if(el.getAttribute('data-processed'))return;
+    var src=el.getAttribute('data-source')||el.textContent;
+    el.textContent=src;el.removeAttribute('data-processed');
+  });
+  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+}
+renderMermaid();
+var obs=new MutationObserver(function(){
+  document.querySelectorAll('.mermaid[data-processed]').forEach(function(el){
+    var src=el.getAttribute('data-source');if(src){el.textContent=src;el.removeAttribute('data-processed');}
+  });
+  setTimeout(renderMermaid,50);
+});
+obs.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme:light)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme:dark)">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

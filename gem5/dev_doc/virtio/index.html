@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/dev/virtio/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>virtio — VirtIO Device Framework | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.6rem;margin:1.5rem 0}
+.toc h3{margin-top:0;color:var(--accent);font-size:1.1rem}
+.toc ul{list-style:none;padding-left:0;margin:.5rem 0 0}
+.toc li{margin:.3rem 0;font-size:.9rem}
+.toc li::before{content:"›";color:var(--accent);margin-right:.5rem;font-weight:700}
+.reading-time{color:var(--text-muted);font-size:.85rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.75rem;color:var(--text-muted);cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:3rem;margin:1rem 0;counter-increment:step}
+.walkthrough .step::before{content:counter(step);position:absolute;left:0;top:0;width:2rem;height:2rem;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.stat-row{flex-direction:column}}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.toc,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<nav class="breadcrumb"><a title="gem5 — Full-<a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> Computer Architecture <a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">Simulator</a>" href="../../index.html">gem5</a> &rsaquo; <a title="dev — Device Models | gem5 Wiki" href="../index.html">dev</a> &rsaquo; virtio</nav>
+<h1>virtio — VirtIO Device Framework</h1>
+<div class="reading-time" id="readingTime"></div>
+
+<div class="hero">
+  <div class="subtitle">Paravirtualized Device Interface with VirtQueues</div>
+  <p>The <code>virtio</code> sub-module implements the VirtIO paravirtualized device standard for gem5. Instead of emulating complex real hardware, VirtIO provides a clean, efficient guest-host interface using shared-memory ring buffers (VirtQueues). It includes block <a title="storage — Storage Device Models | gem5 Wiki" href="../storage/index.html">storage</a>, serial console, random number generator, and 9P filesystem sharing devices.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">VirtQueue</span>
+    <span class="badge green">Block Device</span>
+    <span class="badge yellow">Console</span>
+    <span class="badge red">9P / RNG</span>
+  </p>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1rem 0;">
+<h3 id="what-is-this" style="margin-top:0;color:var(--accent);">&#128218; What is this?</h3>
+<p>VirtIO is a standardized interface for paravirtualized devices in virtual machines. Unlike traditional device emulation (e.g., emulating a real Intel NIC register-by-register), VirtIO defines a <strong><a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a>, efficient contract</strong> between guest and host. The guest knows it is virtualized and uses a specialized VirtIO driver to communicate through shared memory ring buffers. This dramatically reduces the overhead of device simulation.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Analogy: A Translator / Interpreter</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine you need to communicate with someone who speaks a different language. The <strong>traditional approach</strong> (hardware emulation) is like pretending you speak their language — you laboriously translate every word and gesture to match their expectations. The <strong>VirtIO approach</strong> is like hiring a professional interpreter: both sides agree on a simple, efficient communication protocol. The guest says "here's a buffer with data I need written to disk" and the host processes it directly. No need to emulate register timing, bus protocols, or hardware quirks. The <strong>VirtQueue</strong> is the shared notebook the interpreter uses — a ring buffer where both sides can leave messages without waiting for the other.</p>
+</details>
+</div>
+
+<div class="toc">
+<h3>&#128220; Table of Contents</h3>
+<ul id="toc-list"></ul>
+</div>
+
+<h2 id="architecture">VirtIO Architecture</h2>
+<p>The VirtIO framework in gem5 has three layers: the transport mechanism (MMIO or <a title="pci — PCI Bus and Device Framework | gem5 Wiki" href="../pci/index.html">PCI</a>), the <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> device with VirtQueues, and the concrete device implementations:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph Guest["Guest OS"]
+    DRIVER["VirtIO Driver\n(in kernel)"]
+    VRING_G["VirtQueue Ring\n(shared memory)"]
+  end
+
+  subgraph Transport["Transport Layer"]
+    MMIO["VirtIOMMIO\n(memory-mapped)"]
+    VPCI["VirtIOPCI\n(PCI device)"]
+  end
+
+  subgraph Framework["VirtIO Base"]
+    VDB["VirtIODeviceBase\n(feature negotiation,\nstatus, config)"]
+    VQ["VirtQueue\n(descriptor ring,\navail ring, used ring)"]
+    VD["VirtDescriptor\n(buffer chain)"]
+  end
+
+  subgraph Devices["Concrete Devices"]
+    BLK["VirtIOBlock\n(disk I/O)"]
+    CON["VirtIOConsole\n(serial terminal)"]
+    RNG["VirtIORng\n(random numbers)"]
+    FS9P["VirtIO9P\n(filesystem sharing)"]
+  end
+
+  DRIVER <-->|"kicks / interrupts"| MMIO
+  DRIVER <-->|"kicks / interrupts"| VPCI
+  DRIVER <-->|"shared memory"| VRING_G
+  MMIO --> VDB
+  VPCI --> VDB
+  VDB --> VQ
+  VQ --> VD
+  VDB --> BLK
+  VDB --> CON
+  VDB --> RNG
+  VDB --> FS9P
+</pre>
+</div>
+
+<h2 id="virtqueue">VirtQueue — The Core Mechanism</h2>
+<p>The VirtQueue is a shared-memory ring buffer consisting of three parts that reside in guest physical memory:</p>
+
+<h3 id="vring-structure">Vring Structure</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph DescriptorTable["Descriptor Table (N entries)"]
+    D0["desc[0]\naddr, len, flags, next"]
+    D1["desc[1]\naddr, len, flags, next"]
+    D2["desc[2]\n..."]
+    DN["desc[N-1]"]
+  end
+
+  subgraph AvailRing["Available Ring (guest → host)"]
+    AF["flags"]
+    AI["idx (next to add)"]
+    AR0["ring[0] → desc index"]
+    AR1["ring[1] → desc index"]
+    ARN["..."]
+  end
+
+  subgraph UsedRing["Used Ring (host → guest)"]
+    UF["flags"]
+    UI["idx (next to add)"]
+    UR0["ring[0]: {id, len}"]
+    UR1["ring[1]: {id, len}"]
+    URN["..."]
+  end
+
+  AvailRing -->|"Guest adds\ndescriptor chains"| DescriptorTable
+  DescriptorTable -->|"Host processes\nand returns"| UsedRing
+</pre>
+</div>
+
+<table>
+<tr><th>Component</th><th>Owner</th><th>Structure</th><th>Purpose</th></tr>
+<tr><td>Descriptor Table</td><td>Shared</td><td><code>vring_desc[N]</code>: addr, len, flags, next</td><td>Pool of buffer descriptors that can be chained together</td></tr>
+<tr><td>Available Ring</td><td>Guest writes, Host reads</td><td><code>vring_avail</code>: flags, idx, ring[N]</td><td>Guest publishes descriptor chain heads for host to consume</td></tr>
+<tr><td>Used Ring</td><td>Host writes, Guest reads</td><td><code>vring_used</code>: flags, idx, ring[N]{id, len}</td><td>Host returns processed descriptors to guest</td></tr>
+</table>
+
+<h3 id="descriptor-chains">Descriptor Chains</h3>
+<p>A single I/O request is represented as a chain of descriptors linked by their <code>next</code> field. Each descriptor in the chain can be either read-only (data flowing guest→host) or write-only (data flowing host→guest):</p>
+
+<pre><code class="language-cpp">// vring_desc structure (from virtio_ring.h)
+struct vring_desc {
+    uint64_t addr;   // Guest physical address of buffer
+    uint32_t len;    // Length of buffer in bytes
+    uint16_t flags;  // VRING_DESC_F_NEXT, VRING_DESC_F_WRITE, VRING_DESC_F_INDIRECT
+    uint16_t next;   // Index of next descriptor in chain
+};
+
+// VirtDescriptor wrapper in gem5
+class VirtDescriptor {
+  public:
+    Index index() const;           // Descriptor index in table
+    bool isIncoming() const;       // Guest→Host (read-only)
+    bool isOutgoing() const;       // Host→Guest (write-only)
+    bool hasNext() const;          // More descriptors in chain
+    VirtDescriptor *next() const;  // Next descriptor
+
+    void read(off_t offset, uint8_t *dst, size_t size) const;
+    void write(off_t offset, const uint8_t *src, size_t size);
+    void chainRead(off_t offset, uint8_t *dst, size_t size) const;
+    void chainWrite(off_t offset, const uint8_t *src, size_t size);
+};
+</code></pre>
+
+<h2 id="device-base">VirtIODeviceBase</h2>
+<p>All VirtIO devices inherit from <code>VirtIODeviceBase</code>, which manages the device lifecycle, feature negotiation, and VirtQueue registration:</p>
+
+<pre><code class="language-cpp">class VirtIODeviceBase : public SimObject {
+  public:
+    // Device identification
+    virtual DeviceId deviceId() const = 0;
+
+    // Feature negotiation
+    void setGuestFeatures(FeatureBits features);
+    FeatureBits deviceFeatures;
+    FeatureBits guestFeatures;
+
+    // Device status (ACKNOWLEDGE, DRIVER, DRIVER_OK, etc.)
+    void setDeviceStatus(DeviceStatus status);
+    DeviceStatus getDeviceStatus() const;
+
+    // Configuration space read/write
+    virtual void readConfig(PacketPtr pkt, Addr cfgOffset);
+    virtual void writeConfig(PacketPtr pkt, Addr cfgOffset);
+
+    // Queue management
+    void registerQueue(VirtQueue &amp;queue);
+
+    // Kick — notification from guest that new buffers are available
+    virtual void kick();
+};
+</code></pre>
+
+<h3 id="device-lifecycle">Device Lifecycle</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Reset : Device created
+    Reset --> Acknowledge : Guest sets ACKNOWLEDGE
+    Acknowledge --> Driver : Guest sets DRIVER
+    Driver --> FeaturesOK : Feature negotiation complete
+    FeaturesOK --> DriverOK : Guest sets DRIVER_OK
+    DriverOK --> Running : Device operational
+    Running --> DriverOK : Queue kick / interrupt
+    Running --> Reset : Guest resets device
+    Running --> Failed : Unrecoverable error
+</pre>
+</div>
+
+<h2 id="transport">Transport Mechanisms</h2>
+
+<h3 id="virtio-mmio">VirtIO MMIO</h3>
+<p><code>MmioVirtIO</code> (in <code>dev/arm/vio_mmio.hh</code>) exposes VirtIO devices through memory-mapped I/O registers. This is the primary transport for <a title="Comprehensive ARM architecture support including <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../../arch_doc/arm/index.html">ARM</a> platforms. The guest accesses device registers at a fixed MMIO address, and notifications are delivered through a platform interrupt.</p>
+
+<h3 id="virtio-pci">VirtIO PCI</h3>
+<p><code>PciVirtIO</code> (in <code>dev/virtio/pci.hh</code>) exposes VirtIO devices as PCI devices. The device registers are mapped through PCI BARs, and interrupts use PCI INTx or MSI. This transport is used on <a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../../arch_doc/x86/index.html">x86</a> and other PCI-based platforms.</p>
+
+<pre><code class="language-cpp">// PciVirtIO — PCI transport for VirtIO devices
+class PciVirtIO : public PciEndpoint {
+  protected:
+    VirtIODeviceBase &amp;vio;  // The wrapped VirtIO device
+
+    Tick readDevice(PacketPtr pkt) override;
+    Tick writeDevice(PacketPtr pkt) override;
+
+    // BAR0 register layout:
+    // 0x00-0x13: Device features, queue select, queue notify
+    // 0x14-0x17: Device status
+    // 0x18-0x1F: ISR, config MSI vector
+    // 0x20+:     Device-specific config
+};
+</code></pre>
+
+<h2 id="devices">Concrete Device Implementations</h2>
+
+<h3 id="virtio-block">VirtIOBlock — Block Storage</h3>
+<p>Provides a paravirtualized block device (virtual disk). The guest sends read/write requests through VirtQueues, and the device processes them against a <code>DiskImage</code> backend (same as used by IDE).</p>
+<table>
+<tr><th>Queue</th><th>Purpose</th></tr>
+<tr><td>Queue 0 (requestq)</td><td>Block I/O requests: read, write, flush</td></tr>
+</table>
+
+<pre><code class="language-cpp">// VirtIOBlock request header
+struct BlkRequest {
+    uint32_t type;    // VIRTIO_BLK_T_IN (read), VIRTIO_BLK_T_OUT (write)
+    uint32_t reserved;
+    uint64_t sector;  // Starting sector number
+    // Followed by data buffer descriptors
+    // Last descriptor: 1-byte status (0=OK, 1=IOERR, 2=UNSUPP)
+};
+</code></pre>
+
+<h3 id="virtio-console">VirtIOConsole — Serial Console</h3>
+<p>Provides a paravirtualized serial console. Used for guest terminal I/O without emulating a full UART. Connects to gem5's <code>Terminal</code> for I/O.</p>
+<table>
+<tr><th>Queue</th><th>Purpose</th></tr>
+<tr><td>Queue 0 (receiveq)</td><td>Data from host → guest (keyboard input)</td></tr>
+<tr><td>Queue 1 (transmitq)</td><td>Data from guest → host (console output)</td></tr>
+</table>
+
+<h3 id="virtio-rng">VirtIORng — Random Number Generator</h3>
+<p>Provides a paravirtualized entropy source. The guest requests random bytes by submitting empty buffers; the host fills them with random data from the simulation's RNG.</p>
+<table>
+<tr><th>Queue</th><th>Purpose</th></tr>
+<tr><td>Queue 0</td><td>Buffers to fill with random data</td></tr>
+</table>
+
+<h3 id="virtio-9p">VirtIO9P — 9P Filesystem Sharing</h3>
+<p>Implements the 9P2000.L protocol over VirtIO for sharing a host directory with the guest. This allows the guest to mount a host filesystem, which is extremely useful for sharing binaries and data with the simulated system without creating disk images.</p>
+<table>
+<tr><th>Queue</th><th>Purpose</th></tr>
+<tr><td>Queue 0 (requestq)</td><td>9P protocol messages (Tread, Twrite, Twalk, etc.)</td></tr>
+</table>
+
+<pre><code class="language-cpp">// Python configuration for 9P filesystem sharing
+vio_9p = VirtIO9PProxy(
+    root='/path/to/shared/directory',
+    tag='gem5_shared'  // Guest mount tag
+)
+vio_9p_pci = PciVirtIO(vio=vio_9p)
+system.pci_host.attach(vio_9p_pci)
+
+// Guest mount command:
+// mount -t 9p -o trans=virtio gem5_shared /mnt/host
+</code></pre>
+
+<h2 id="data-flow">VirtIO Data Flow — Block Read Example</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant GUEST as Guest Driver
+    participant AVAIL as Available Ring
+    participant DESC as Descriptor Table
+    participant USED as Used Ring
+    participant HOST as VirtIOBlock (Host)
+    participant IMG as DiskImage
+
+    GUEST->>DESC: Write descriptor chain: header + data buffer + status
+    GUEST->>AVAIL: Add chain head index to available ring
+    GUEST->>HOST: Kick (write to notify register)
+    HOST->>AVAIL: Read new available index
+    HOST->>DESC: Walk descriptor chain
+    HOST->>DESC: Read BlkRequest header (type=READ, sector=N)
+    HOST->>IMG: DiskImage.read(sector_N, data)
+    IMG-->>HOST: Sector data
+    HOST->>DESC: Write data to output descriptor
+    HOST->>DESC: Write status byte (0 = success)
+    HOST->>USED: Add chain head to used ring with byte count
+    HOST->>GUEST: Raise interrupt
+    GUEST->>USED: Read used ring entry
+    GUEST->>GUEST: Process completed request
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes Reference</h2>
+<table>
+<tr><th>Class</th><th>File</th><th>Inherits</th><th>Role</th></tr>
+<tr><td><code>VirtIODeviceBase</code></td><td><code>base.hh</code></td><td><code>SimObject</code></td><td>Abstract base: features, status, config, queue management</td></tr>
+<tr><td><code>VirtIODummyDevice</code></td><td><code>base.hh</code></td><td><code>VirtIODeviceBase</code></td><td>Stub device for testing transport layer</td></tr>
+<tr><td><code>VirtQueue</code></td><td><code>base.hh</code></td><td><code>Serializable</code></td><td>VirtQueue implementation: descriptor table, avail/used rings</td></tr>
+<tr><td><code>VirtDescriptor</code></td><td><code>base.hh</code></td><td>—</td><td>Descriptor chain wrapper with read/write/chain operations</td></tr>
+<tr><td><code>VirtIOBlock</code></td><td><code>block.hh</code></td><td><code>VirtIODeviceBase</code></td><td>Block storage device backed by <a href="../storage/index.html" title="storage — Storage Device Models | gem5 Wiki" class="xref">DiskImage</a></td></tr>
+<tr><td><code>VirtIOConsole</code></td><td><code>console.hh</code></td><td><code>VirtIODeviceBase</code></td><td>Serial console (terminal I/O)</td></tr>
+<tr><td><code>VirtIORng</code></td><td><code>rng.hh</code></td><td><code>VirtIODeviceBase</code></td><td>Random number generator entropy source</td></tr>
+<tr><td><code>VirtIO9PBase</code></td><td><code>fs9p.hh</code></td><td><code>VirtIODeviceBase</code></td><td>9P filesystem base class</td></tr>
+<tr><td><code>VirtIO9PProxy</code></td><td><code>fs9p.hh</code></td><td><code>VirtIO9PBase</code></td><td>9P proxy forwarding to host filesystem</td></tr>
+<tr><td><code>PciVirtIO</code></td><td><code>pci.hh</code></td><td><code>PciEndpoint</code></td><td>PCI transport wrapper for VirtIO devices</td></tr>
+</table>
+
+<h2 id="config-reference">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th><a title="Configuration System and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> Class</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>vio</code></td><td><code>PciVirtIO</code></td><td>—</td><td><a href="../index.html" title="dev — Device Models | gem5 Wiki" class="xref">VirtIODeviceBase</a> object to wrap with PCI transport</td></tr>
+<tr><td><code>image</code></td><td><code>VirtIOBlock</code></td><td>—</td><td>DiskImage backend for block device</td></tr>
+<tr><td><code>qSize</code></td><td><code>VirtIODeviceBase</code></td><td><code>256</code></td><td>VirtQueue size (number of descriptors)</td></tr>
+<tr><td><code>root</code></td><td><code>VirtIO9PProxy</code></td><td>—</td><td>Host directory path to share via 9P</td></tr>
+<tr><td><code>tag</code></td><td><code>VirtIO9PProxy</code></td><td><code>'gem5'</code></td><td>Mount tag for the guest to identify the share</td></tr>
+<tr><td><code>terminal</code></td><td><code>VirtIOConsole</code></td><td>—</td><td>Terminal object for console I/O</td></tr>
+<tr><td><code>entropy_source</code></td><td><code>VirtIORng</code></td><td><code>'/dev/random'</code></td><td>Host entropy source file for RNG device</td></tr>
+</table>
+
+<h2 id="creating-device">Creating a New VirtIO Device</h2>
+<p>To add a new VirtIO device type, inherit from <code>VirtIODeviceBase</code> and override the key methods:</p>
+
+<pre><code class="language-cpp">// my_virtio_device.hh
+#include "dev/virtio/base.hh"
+
+namespace gem5 {
+
+class MyVirtIODevice : public VirtIODeviceBase
+{
+  public:
+    MyVirtIODevice(const Params &amp;p);
+
+    // Unique VirtIO device ID (assigned by OASIS VirtIO TC)
+    DeviceId deviceId() const override { return 0x42; }
+
+  protected:
+    // Called when guest kicks the queue
+    void kick() override {
+        // Consume descriptors from queue
+        VirtDescriptor *desc;
+        while ((desc = queue.consumeDescriptor()) != nullptr) {
+            // Read request from input descriptor
+            MyRequest req;
+            desc-&gt;chainRead(0, (uint8_t*)&amp;req, sizeof(req));
+
+            // Process request...
+            MyResponse resp = processRequest(req);
+
+            // Write response to output descriptor
+            desc-&gt;next()-&gt;chainWrite(0, (uint8_t*)&amp;resp, sizeof(resp));
+
+            // Return descriptor to guest
+            queue.produceDescriptor(desc, sizeof(resp));
+        }
+        // Notify guest of completed requests
+        kick_guest();
+    }
+
+  private:
+    VirtQueue queue;
+    MyResponse processRequest(const MyRequest &amp;req);
+};
+
+} // namespace gem5
+</code></pre>
+
+<h2 id="file-map">File Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">virtio/ directory structure</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/dev/virtio/
+├── base.hh / base.cc         ← VirtIODeviceBase, VirtQueue, VirtDescriptor
+├── block.hh / block.cc       ← VirtIOBlock (paravirtualized disk)
+├── console.hh / console.cc   ← VirtIOConsole (serial terminal)
+├── rng.hh / rng.cc           ← VirtIORng (random number generator)
+├── fs9p.hh / fs9p.cc         ← VirtIO9PBase, VirtIO9PProxy (filesystem sharing)
+├── pci.hh / pci.cc           ← PciVirtIO (PCI transport for VirtIO devices)
+├── virtio_ring.h             ← vring_desc, vring_avail, vring_used (from Linux)
+├── VirtIO.py                 ← Python config for VirtIODeviceBase, PciVirtIO
+├── VirtIOBlock.py            ← Python config for VirtIOBlock
+├── VirtIOConsole.py          ← Python config for VirtIOConsole
+├── VirtIORng.py              ← Python config for VirtIORng
+├── VirtIO9P.py               ← Python config for VirtIO9P
+└── SConscript                ← Build definitions
+</code></pre>
+</details>
+
+<h2 id="glossary">Glossary</h2>
+<table>
+<tr><th>Term</th><th>Definition</th></tr>
+<tr><td><strong>VirtIO</strong></td><td>OASIS standard for paravirtualized device I/O in virtual machines</td></tr>
+<tr><td><strong>Paravirtualization</strong></td><td>Technique where guest OS is aware of virtualization and cooperates with host</td></tr>
+<tr><td><strong>VirtQueue</strong></td><td>Shared-memory ring buffer for guest-host data exchange</td></tr>
+<tr><td><strong>Vring</strong></td><td>The concrete ring buffer structure: descriptor table + available ring + used ring</td></tr>
+<tr><td><strong>Descriptor Chain</strong></td><td>Linked list of buffer descriptors forming a single I/O request</td></tr>
+<tr><td><strong>Kick</strong></td><td>Notification from guest to host that new buffers are available for processing</td></tr>
+<tr><td><strong>9P / 9P2000.L</strong></td><td><a href="../../mem_doc/ruby/index.html" title="ruby — Coherence Protocol Simulation | gem5 Wiki" class="xref">Network</a> filesystem protocol originally from Plan 9; <a href="../../kern/index.html" title="kern — OS Kernel Support · gem5 Wiki" class="xref">Linux</a> variant for VirtIO</td></tr>
+<tr><td><strong>MMIO Transport</strong></td><td>VirtIO device registers mapped into physical memory (ARM-style)</td></tr>
+<tr><td><strong>PCI Transport</strong></td><td>VirtIO device exposed as a PCI device with BAR-mapped registers</td></tr>
+<tr><td><strong>Feature Negotiation</strong></td><td>Protocol where guest and host agree on supported device capabilities</td></tr>
+</table>
+
+<div class="footer">gem5 Wiki &mdash; <a title="dev — Device Models | gem5 Wiki" href="../index.html">dev</a>/virtio Module &mdash; Generated 2026-03-25</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    if(hljsLink){
+      hljsLink.href=(t==='light')
+        ?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+        :'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+    }
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc-list');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');headings.forEach(function(h){var li=document.createElement('li');if(h.tagName==='H3')li.style.paddingLeft='1rem';var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;a.style.color='var(--text)';li.appendChild(a);toc.appendChild(li);});})();
+(function(){var el=document.getElementById('readingTime');if(!el)return;var text=document.querySelector('main').textContent;var words=text.trim().split(/\s+/).length;var mins=Math.ceil(words/200);el.textContent='\u231A '+mins+' min read \u00B7 '+words+' words';})();
+(function(){if(window.hljs){document.querySelectorAll('pre code[class*="language-"]').forEach(function(block){hljs.highlightElement(block);});}})();
+(function(){document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});pre.appendChild(btn);});})();
+(function(){var headings=Array.from(document.querySelectorAll('h2[id],h3[id]'));document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var key=e.key;if(key!=='j'&&key!=='k')return;var scrollY=window.scrollY+100;var idx=-1;for(var i=0;i<headings.length;i++){if(headings[i].offsetTop<=scrollY)idx=i;}if(key==='j')idx=Math.min(idx+1,headings.length-1);else idx=Math.max(idx-1,0);if(idx>=0)headings[idx].scrollIntoView({behavior:'smooth',block:'start'});});})();
+</script>
+</body></html>

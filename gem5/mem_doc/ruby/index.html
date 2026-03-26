@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="gem5/src/mem/ruby">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>ruby — Coherence Protocol Simulation | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;
+--hero-bg:#161b22;--code-bg:#1c2128;--toc-bg:#161b22;--hover:#21262d;--muted:#8b949e;
+--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.4);--radius:8px;
+--link:#58a6ff;--link-hover:#79c0ff;--kbd-bg:#21262d}
+[data-theme="light"]{--bg:#ffffff;--fg:#1f2328;--card:#f6f8fa;--border:#d0d7de;--accent:#0969da;
+--accent2:#1a7f37;--hero-bg:#f6f8fa;--code-bg:#f6f8fa;--toc-bg:#f6f8fa;--hover:#eaeef2;
+--muted:#656d76;--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.1);
+--link:#0969da;--link-hover:#0550ae;--kbd-bg:#eaeef2}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+background:var(--bg);color:var(--fg);line-height:1.6;overflow-x:hidden}
+a{color:var(--link);text-decoration:none}a:hover{color:var(--link-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;
+z-index:1000;border-radius:0 0 var(--radius) 0;font-weight:600}
+.skip-link:focus{top:0}
+header{background:var(--hero-bg);border-bottom:1px solid var(--border);padding:12px 24px;
+display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.breadcrumb{font-size:14px;color:var(--muted)}
+.breadcrumb a{color:var(--link)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle{background:var(--kbd-bg);border:1px solid var(--border);color:var(--fg);
+padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:14px}
+.theme-toggle:hover{background:var(--hover)}
+.container{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+.hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:32px;margin-bottom:24px;text-align:center}
+.hero h1{margin:0 0 8px;font-size:28px;color:var(--fg)}
+.hero p{margin:0;color:var(--muted);font-size:16px}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:10px 20px;text-align:center}
+.stat .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase}
+.reading-time{font-size:13px;color:var(--muted);margin:8px 0 20px;text-align:right}
+.toc-panel{background:var(--toc-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px 20px;margin-bottom:24px}
+.toc-panel summary{font-weight:600;cursor:pointer;font-size:15px}
+.toc-panel ul{list-style:none;padding-left:16px;margin:8px 0 0}
+.toc-panel li{margin:4px 0}
+.toc-panel a{font-size:14px}
+section{margin-bottom:32px}
+h2{font-size:22px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-top:32px}
+h3{font-size:18px;margin-top:24px}
+.intro-box{background:var(--card);border-left:4px solid var(--accent);border-radius:var(--radius);
+padding:16px 20px;margin:16px 0}
+.intro-box .label{font-weight:700;color:var(--accent);font-size:13px;text-transform:uppercase;margin-bottom:4px}
+.diagram-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;margin:16px 0;overflow-x:auto;cursor:pointer;position:relative}
+.diagram-wrap .expand-hint{position:absolute;top:8px;right:12px;font-size:11px;color:var(--muted);opacity:0.7}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even){background:var(--table-stripe)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:20px;transition:box-shadow .2s,border-color .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h3 a{color:var(--fg)}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.card .meta{margin-top:8px;font-size:12px;color:var(--muted)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+code{background:var(--kbd-bg);padding:2px 6px;border-radius:4px;font-size:13px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--kbd-bg);border:1px solid var(--border);
+color:var(--fg);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--hover)}
+.code-block{position:relative}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;
+border:none;padding:10px 14px;border-radius:50%;cursor:pointer;font-size:18px;
+display:none;z-index:50;box-shadow:var(--shadow)}
+.back-to-top:hover{opacity:0.9}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);z-index:200;justify-content:center;align-items:center;padding:24px}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:24px;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--fg);
+font-size:24px;cursor:pointer}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:48px;margin:12px 0}
+.walkthrough .step::before{counter-increment:step;content:counter(step);position:absolute;
+left:0;top:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;
+display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;font-family:monospace;font-size:13px;line-height:1.7;overflow-x:auto}
+@media(max-width:768px){.card-grid{grid-template-columns:1fr}.container{padding:16px}
+.hero{padding:20px}.stat-row{flex-direction:column;align-items:center}}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.overlay,.copy-btn,.expand-hint{display:none!important}
+body{background:#fff;color:#000}.container{max-width:100%}
+.hero,.card,.toc-panel,.intro-box,.diagram-wrap,.stat{border-color:#ccc;background:#f9f9f9}
+a{color:#000;text-decoration:underline}.dir-map,pre{background:#f5f5f5;border-color:#ccc}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="mem — Memory System | gem5 Wiki" href="../index.html">mem</a> &rsaquo; ruby</nav>
+  <div class="header-actions">
+    <span class="reading-time" id="readTime"></span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">🌓</button>
+  </div>
+</header>
+
+<main id="main">
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>ruby — Coherence Protocol Simulation</h1>
+  <p>Protocol-driven memory system using SLICC-generated controllers, network-on-chip models, and detailed coherence state machines for multiprocessor simulation.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">5</div><div class="lbl">Sub-directories</div></div>
+    <div class="stat"><div class="num">SLICC</div><div class="lbl">Protocol Language</div></div>
+    <div class="stat"><div class="num">2</div><div class="lbl">Network Models</div></div>
+    <div class="stat"><div class="num">MOESI / MESI</div><div class="lbl">Protocol Families</div></div>
+    <div class="stat"><div class="num">GPU + HTM</div><div class="lbl">Specialized Support</div></div>
+  </div>
+</div>
+
+<!-- TOC -->
+<details class="toc-panel" open>
+  <summary>Table of Contents</summary>
+  <ul id="toc"></ul>
+</details>
+
+<!-- Overview -->
+<section>
+<h2 id="overview">Overview</h2>
+<div class="intro-box">
+  <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+  <div class="label">Analogy — Traffic Management</div>
+  <p>Think of Ruby as a <strong>city-wide traffic management system</strong>. Each intersection (<a title="cache — Classic <a href="../cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../cache/index.html">cache</a> controller) has its own traffic lights (coherence state machine) that follow a rulebook (SLICC protocol). The road network (on-chip network) carries messages between intersections. A central dispatch (directory controller) keeps track of where every vehicle (cache line) is located, ensuring no two intersections claim exclusive rights to the same road. The <em>Sequencer</em> is the on-ramp where CPUs enter the highway, and <em>MessageBuffers</em> are the traffic lanes connecting intersections.</p>
+</div>
+
+<p>Ruby is gem5's <strong>detailed coherence protocol simulator</strong>. Unlike the Classic cache system (which has coherence logic hardcoded in C++), Ruby uses <strong>SLICC</strong> (Specification Language for Implementing Cache Coherence) to define protocol state machines. This makes it straightforward to implement and test new coherence protocols — from <a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> MI to complex MOESI_CMP_directory.</p>
+
+<p>Key features:</p>
+<ul>
+  <li><strong>SLICC-generated controllers</strong> — Coherence logic defined in a high-level DSL, compiled to C++</li>
+  <li><strong>Network models</strong> — Simple network (abstract) and Garnet (detailed NoC with routers, VCs, flow control)</li>
+  <li><strong>Directory-based coherence</strong> — Scalable multiprocessor coherence via directory controllers</li>
+  <li><strong>GPU coalescer</strong> — Specialized memory interface for GPU compute units</li>
+  <li><strong>HTM support</strong> — Hardware Transactional <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> via HTMSequencer</li>
+  <li><strong>Profiling</strong> — Detailed coherence protocol statistics and event tracking</li>
+</ul>
+</section>
+
+<!-- Architecture Diagram -->
+<section>
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-wrap" data-diagram="arch">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart TD
+    CPU0["CPU 0"]
+    CPU1["CPU 1"]
+    GPU["GPU CU"]
+    SEQ0["Sequencer 0"]
+    SEQ1["Sequencer 1"]
+    GPUC["GPUCoalescer"]
+    L1C0["L1 Controller 0"]
+    L1C1["L1 Controller 1"]
+    L1CG["GPU L1 Controller"]
+    NET["On-Chip Network\n(Simple / Garnet)"]
+    L2C["L2 Controller"]
+    DIR["Directory Controller"]
+    MC["Memory Controller"]
+    DRAM["DRAM"]
+
+    CPU0 --> SEQ0
+    CPU1 --> SEQ1
+    GPU --> GPUC
+    SEQ0 --> L1C0
+    SEQ1 --> L1C1
+    GPUC --> L1CG
+    L1C0 -->|"MessageBuffer"| NET
+    L1C1 -->|"MessageBuffer"| NET
+    L1CG -->|"MessageBuffer"| NET
+    NET --> L2C
+    NET --> DIR
+    L2C -->|"MessageBuffer"| NET
+    DIR --> MC
+    MC --> DRAM
+  </pre>
+</div>
+</section>
+
+<!-- SLICC Protocol -->
+<section>
+<h2 id="slicc">SLICC Protocol System</h2>
+<p>SLICC (Specification Language for Implementing Cache Coherence) is a domain-specific language that compiles into C++ controller code. Each protocol defines:</p>
+<ul>
+  <li><strong>States</strong> — Cache line states (e.g., I, S, M, O, E and transient states)</li>
+  <li><strong>Events</strong> — Triggers (e.g., Load, Store, Fwd_GetS, Data_from_Dir)</li>
+  <li><strong>Transitions</strong> — State × <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Event</a> → Actions + New State</li>
+  <li><strong>Actions</strong> — Atomic operations (send message, allocate TBE, set permissions)</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram="slicc">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">stateDiagram-v2
+    [*] --> I : Initial
+    I --> IS_D : Load / send GetS
+    IS_D --> S : Data_from_Dir
+    I --> IM_AD : Store / send GetX
+    IM_AD --> IM_A : Data_from_Dir
+    IM_A --> M : Ack_all
+    S --> SM_AD : Store / send Upgrade
+    SM_AD --> SM_A : Data_from_Dir
+    SM_A --> M : Ack_all
+    M --> MI_A : Replacement / send PutX
+    MI_A --> I : Put_Ack
+    M --> S : Fwd_GetS / send data
+    M --> I : Fwd_GetX / send data
+    S --> I : Replacement / send PutS
+  </pre>
+</div>
+
+<h3 id="slicc-compilation">SLICC Compilation Pipeline</h3>
+<div class="walkthrough">
+  <div class="step"><strong>Protocol definition</strong> — Write <code>.sm</code> files defining states, events, transitions, and actions for each controller type (L1Cache, L2Cache, Directory).</div>
+  <div class="step"><strong>SLICC compiler</strong> — The SLICC compiler (<a title="Configuration <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a>-based, in <code>src/mem/slicc/</code>) parses the <code>.sm</code> files and generates C++ controller classes.</div>
+  <div class="step"><strong>Generated code</strong> — <a href="../../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Output</a> includes controller classes, message types, and profiling stubs that integrate with the Ruby infrastructure.</div>
+  <div class="step"><strong>Integration</strong> — Generated controllers extend <code>AbstractController</code> and plug into the network via <code>MessageBuffer</code> ports.</div>
+</div>
+</section>
+
+<!-- Key Classes -->
+<section>
+<h2 id="key-classes">Key Classes Reference</h2>
+<table>
+  <thead><tr><th>Class</th><th>Location</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>RubySystem</code></td><td>system/RubySystem.hh</td><td>Top-level Ruby container. Manages all controllers, the network, and provides the global clock. Handles warm-up and cool-down phases.</td></tr>
+    <tr><td><code>Sequencer</code></td><td>system/Sequencer.hh</td><td><a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a>-facing interface. Accepts memory requests from the CPU, converts them to Ruby protocol events, and handles responses. Enforces ordering and manages pending request tables.</td></tr>
+    <tr><td><code>DMASequencer</code></td><td>system/DMASequencer.hh</td><td>Specialized sequencer for DMA devices that need to access coherent memory.</td></tr>
+    <tr><td><code>GPUCoalescer</code></td><td>system/GPUCoalescer.hh</td><td>Memory interface for GPU compute units. Coalesces requests from multiple GPU threads before injecting into the coherence network.</td></tr>
+    <tr><td><code>HTMSequencer</code></td><td>system/HTMSequencer.hh</td><td>Extends Sequencer with Hardware Transactional Memory support — tracks read/write sets and handles conflict detection.</td></tr>
+    <tr><td><code>RubyPort</code></td><td>system/RubyPort.hh</td><td>Bridge between gem5 classic ports and Ruby. Translates between <a href="../index.html" title="mem — Memory System | gem5 Wiki" class="xref">Packet</a>-based and Ruby message-based interfaces.</td></tr>
+    <tr><td><code>AbstractController</code></td><td>slicc_interface/AbstractController.hh</td><td><a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">Base</a> class for all SLICC-generated controllers. Provides message buffer management, wake-up logic, and statistics.</td></tr>
+    <tr><td><code>CacheMemory</code></td><td>structures/CacheMemory.hh</td><td>Ruby's internal cache <a title="storage — Storage Device Models | gem5 Wiki" href="../../dev_doc/storage/index.html">storage</a>. Provides tag lookup, allocation, and replacement for controller-local caches.</td></tr>
+    <tr><td><code>DirectoryMemory</code></td><td>structures/DirectoryMemory.hh</td><td>Stores directory entries mapping cache line addresses to sharing/owner information.</td></tr>
+    <tr><td><code>Network</code></td><td>network/Network.hh</td><td>Abstract network interface. Subclassed by SimpleNetwork and GarnetNetwork.</td></tr>
+    <tr><td><code>MessageBuffer</code></td><td>network/MessageBuffer.hh</td><td>FIFO message queue connecting controllers to the network. Supports enqueue/dequeue with configurable latency.</td></tr>
+    <tr><td><code>Topology</code></td><td>network/Topology.hh</td><td>Defines the network topology (mesh, crossbar, custom) and computes routing tables.</td></tr>
+    <tr><td><code>CacheRecorder</code></td><td>system/CacheRecorder.hh</td><td>Records cache state for checkpointing and warm-up acceleration.</td></tr>
+    <tr><td><code>RubyRequest</code></td><td>slicc_interface/RubyRequest.hh</td><td>Ruby-internal request representation carrying address, type, data, and requestor info.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Network Models -->
+<section>
+<h2 id="network-models">Network Models</h2>
+<p>Ruby provides two network implementations with different fidelity/speed trade-offs:</p>
+
+<h3 id="simple-network">Simple Network</h3>
+<p>An abstract network model that delivers messages with fixed latency. No contention modeling — messages never block each other. Fast simulation for protocol debugging.</p>
+<ul>
+  <li>Fixed per-hop latency</li>
+  <li>Infinite bandwidth links</li>
+  <li>No router microarchitecture</li>
+  <li>Best for: protocol correctness testing, large-scale studies where network detail isn't critical</li>
+</ul>
+
+<h3 id="garnet-network">Garnet Network</h3>
+<p>A detailed on-chip network model with cycle-accurate router pipelines, virtual channels, credit-based flow control, and configurable topologies.</p>
+<ul>
+  <li>5-stage router pipeline (buffer write → route compute → VC allocate → switch allocate → switch traverse)</li>
+  <li>Wormhole routing with virtual channels (VCs)</li>
+  <li>Credit-based flow control</li>
+  <li>Configurable link bandwidth, latency, and buffer depths</li>
+  <li>Support for mesh, torus, custom topologies</li>
+  <li>Fault injection modeling</li>
+  <li>Best for: NoC research, detailed performance studies</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram="garnet">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart LR
+    subgraph Router["Garnet Router Pipeline"]
+      BW["Buffer\nWrite"]
+      RC["Route\nCompute"]
+      VA["VC\nAllocate"]
+      SA["Switch\nAllocate"]
+      ST["Switch\nTraverse"]
+      LT["Link\nTraverse"]
+      BW --> RC --> VA --> SA --> ST --> LT
+    end
+
+    NI_IN["Network\nInterface\n(Inbound)"] --> Router
+    Router --> NI_OUT["Network\nInterface\n(Outbound)"]
+  </pre>
+</div>
+</section>
+
+<!-- Structures -->
+<section>
+<h2 id="structures">Ruby Structures</h2>
+<p>The <code>structures/</code> directory contains storage components used by controllers:</p>
+<table>
+  <thead><tr><th>Structure</th><th>File</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>CacheMemory</code></td><td>CacheMemory.hh</td><td>Set-associative tag+data store for L1/L2 caches within controllers. Supports replacement policies and banked access.</td></tr>
+    <tr><td><code>DirectoryMemory</code></td><td>DirectoryMemory.hh</td><td>Maps addresses to directory entries containing owner/sharer bitmasks.</td></tr>
+    <tr><td><code>PerfectCacheMemory</code></td><td>PerfectCacheMemory.hh</td><td>Unbounded cache for ideal studies — every access hits.</td></tr>
+    <tr><td><code>PersistentTable</code></td><td>PersistentTable.hh</td><td>Tracks persistent (starvation-prevention) requests from Token protocols.</td></tr>
+    <tr><td><code>BankedArray</code></td><td>BankedArray.hh</td><td>Models banked storage with bank conflict detection for timing accuracy.</td></tr>
+    <tr><td><code>ALUFreeListArray</code></td><td>ALUFreeListArray.hh</td><td>Manages ALU availability for TBE processing in controllers.</td></tr>
+    <tr><td><code>MN_TBETable</code></td><td>MN_TBETable.hh</td><td>Transaction Buffer Entry table — tracks in-flight coherence transactions.</td></tr>
+    <tr><td><code>RubyPrefetcher</code></td><td>RubyPrefetcher.hh</td><td>Simple stride prefetcher integrated into Ruby controllers.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- <a href="../index.html" title="mem — Memory System | gem5 Wiki" class="xref">Request</a> Flow Walkthrough -->
+<section>
+<h2 id="request-walkthrough">Request Flow Walkthrough</h2>
+<p>Trace a CPU load through the Ruby coherence system:</p>
+<div class="walkthrough">
+  <div class="step"><strong>CPU issues load</strong> — The CPU sends a read request to the Sequencer via RubyPort.</div>
+  <div class="step"><strong>Sequencer processes</strong> — The Sequencer checks its pending table for conflicts, then calls <code>makeRequest()</code> on the L1 cache controller.</div>
+  <div class="step"><strong>L1 controller event</strong> — The SLICC state machine receives a <code>Load</code> event. If the block is in state <code>S</code> or <code>M</code>, it returns data immediately.</div>
+  <div class="step"><strong>Cache miss → GetS</strong> — If the block is in state <code>I</code>, the controller transitions to <code>IS_D</code> and enqueues a <code>GetS</code> message into the network.</div>
+  <div class="step"><strong>Network transport</strong> — The message traverses the on-chip network (Simple: fixed latency; Garnet: full router pipeline) to reach the directory.</div>
+  <div class="step"><strong>Directory lookup</strong> — The Directory controller looks up the address. If no exclusive owner exists, it fetches data from memory and sends <code>Data_from_Dir</code>.</div>
+  <div class="step"><strong>Data response</strong> — The data message travels back through the network to the requesting L1 controller.</div>
+  <div class="step"><strong>State transition</strong> — The L1 controller receives the data, transitions from <code>IS_D</code> to <code>S</code>, allocates the cache block, and notifies the Sequencer.</div>
+  <div class="step"><strong>Sequencer completes</strong> — The Sequencer marks the request as complete and sends the response back to the CPU via RubyPort.</div>
+</div>
+</section>
+
+<!-- Protocols -->
+<section>
+<h2 id="protocols">Available Protocols</h2>
+<p>gem5 ships with several pre-defined SLICC protocols:</p>
+<table>
+  <thead><tr><th>Protocol</th><th>Description</th><th>Use Case</th></tr></thead>
+  <tbody>
+    <tr><td><code>MI_example</code></td><td>Minimal 2-state protocol (Modified / Invalid). Teaching and debugging.</td><td>Tutorial, baseline</td></tr>
+    <tr><td><code>MESI_Two_Level</code></td><td>MESI protocol with private L1 and shared L2. Classic multi-core.</td><td>Multi-core CPU</td></tr>
+    <tr><td><code>MESI_Three_Level</code></td><td>Three-level MESI with L0, L1, and L2 caches.</td><td>Complex hierarchy</td></tr>
+    <tr><td><code>MOESI_CMP_directory</code></td><td>MOESI with CMP-style directory. Supports Owned state for reduced memory traffic.</td><td>Large-scale CMP</td></tr>
+    <tr><td><code>MOESI_hammer</code></td><td>AMD Hammer-style broadcast protocol with MOESI states.</td><td>AMD-style systems</td></tr>
+    <tr><td><code>GPU_VIPER</code></td><td>GPU-specific protocol supporting compute unit coalescing and scope-based synchronization.</td><td>GPU simulation</td></tr>
+    <tr><td><code>CHI</code></td><td><a title="Comprehensive ARM architecture support including <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../../arch_doc/arm/index.html">Arm</a> CHI (Coherent Hub Interface) protocol implementation.</td><td>Arm-based systems</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Sub-module Cards -->
+<section>
+<h2 id="submodules">Sub-module Overview</h2>
+<div class="card-grid">
+  <div class="card">
+    <h3>system/</h3>
+    <p>Core Ruby infrastructure: RubySystem, Sequencer, DMASequencer, GPUCoalescer, HTMSequencer, RubyPort, CacheRecorder. The interface between gem5 CPUs and Ruby's protocol world.</p>
+    <div class="meta">20+ files · CPU/GPU interface</div>
+  </div>
+  <div class="card">
+    <h3>network/</h3>
+    <p>On-chip network models. Includes SimpleNetwork (abstract), Garnet (detailed NoC), MessageBuffer, Topology, BasicRouter, BasicLink. Contains garnet/ and simple/ sub-directories.</p>
+    <div class="meta">15+ files · 2 network models</div>
+  </div>
+  <div class="card">
+    <h3>structures/</h3>
+    <p>Storage components: CacheMemory, DirectoryMemory, PerfectCacheMemory, BankedArray, TBE tables, PersistentTable, RubyPrefetcher.</p>
+    <div class="meta">15+ files · Cache/directory storage</div>
+  </div>
+  <div class="card">
+    <h3>slicc_interface/</h3>
+    <p>SLICC runtime: AbstractController, AbstractCacheEntry, RubyRequest, Message, ProtocolInfo. Base classes that SLICC-generated code extends.</p>
+    <div class="meta">13+ files · Protocol runtime</div>
+  </div>
+  <div class="card">
+    <h3>protocol/</h3>
+    <p>SLICC protocol source files (.sm). This directory is populated based on the selected protocol at build time. Contains the state machine definitions.</p>
+    <div class="meta">Per-protocol · SLICC source</div>
+  </div>
+  <div class="card">
+    <h3>profiler/</h3>
+    <p>Ruby-specific profiling and statistics collection. Tracks protocol events, cache hit/miss rates, network utilization, and coherence transition counts.</p>
+    <div class="meta"><a href="../../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar <a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> — gem5 Wiki" class="xref">Statistics</a> &amp; profiling</div>
+  </div>
+</div>
+</section>
+
+<!-- Connection Diagram -->
+<section>
+<h2 id="connections">Cross-Module Connections</h2>
+<div class="diagram-wrap" data-diagram="connections">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart TD
+    subgraph gem5_Core["gem5 Core"]
+      PKT["mem/packet.hh\nPacket"]
+      PORT["mem/port.hh\nRequestPort / ResponsePort"]
+    end
+    subgraph Ruby["mem/ruby/"]
+      RP["RubyPort\n(Port adapter)"]
+      SEQ["Sequencer"]
+      CTRL["AbstractController\n(SLICC-generated)"]
+      CM["CacheMemory"]
+      MB["MessageBuffer"]
+      NET["Network"]
+    end
+    subgraph Memory["mem/"]
+      MEMCTRL["MemCtrl\nDRAM Controller"]
+    end
+
+    PKT --> RP
+    PORT --> RP
+    RP --> SEQ
+    SEQ --> CTRL
+    CTRL --> CM
+    CTRL --> MB
+    MB --> NET
+    NET --> MB
+    CTRL --> MEMCTRL
+  </pre>
+</div>
+</section>
+
+<!-- Directory Map -->
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">
+src/mem/ruby/
+├── common/                        # Shared types and utilities
+│   ├── Address.hh                 # Ruby address types
+│   ├── DataBlock.hh               # Cache line data container
+│   └── MachineID.hh               # Controller identification
+├── network/                       # Network models
+│   ├── Network.hh / .cc           # Abstract Network base
+│   ├── MessageBuffer.hh / .cc     # Inter-controller message FIFO
+│   ├── Topology.hh / .cc          # Network topology definition
+│   ├── BasicRouter.hh / .cc       # Abstract router base
+│   ├── BasicLink.hh / .cc         # Abstract link base
+│   ├── simple/                    # Simple (abstract) network
+│   │   ├── SimpleNetwork.hh / .cc
+│   │   └── Switch.hh / .cc
+│   └── garnet/                    # Garnet detailed NoC
+│       ├── GarnetNetwork.hh / .cc
+│       ├── Router.hh / .cc
+│       ├── InputUnit.hh / .cc
+│       ├── OutputUnit.hh / .cc
+│       ├── CrossbarSwitch.hh / .cc
+│       └── NetworkLink.hh / .cc
+├── structures/                    # Storage components
+│   ├── CacheMemory.hh / .cc      # Ruby cache storage
+│   ├── DirectoryMemory.hh / .cc   # Directory entries
+│   ├── PerfectCacheMemory.hh      # Ideal cache
+│   ├── BankedArray.hh / .cc       # Banked storage model
+│   └── RubyPrefetcher.hh / .cc    # Ruby prefetcher
+├── system/                        # Core runtime
+│   ├── RubySystem.hh / .cc        # Top-level container
+│   ├── Sequencer.hh / .cc         # CPU interface
+│   ├── DMASequencer.hh / .cc      # DMA interface
+│   ├── GPUCoalescer.hh / .cc      # GPU interface
+│   ├── HTMSequencer.hh / .cc      # HTM interface
+│   ├── RubyPort.hh / .cc          # Port adapter
+│   └── CacheRecorder.hh / .cc     # Checkpoint support
+├── slicc_interface/               # SLICC runtime base
+│   ├── AbstractController.hh / .cc
+│   ├── AbstractCacheEntry.hh / .cc
+│   ├── RubyRequest.hh / .cc
+│   ├── Message.hh
+│   └── RubySlicc_Util.hh
+├── protocol/                      # SLICC source files (build-time)
+└── profiler/                      # Statistics collection
+</div>
+</section>
+
+<!-- Configuration -->
+<section>
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+  <thead><tr><th>Parameter</th><th><a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a></th><th>Description</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td><code>num_l1_controllers</code></td><td>RubySystem</td><td>Number of L1 cache controllers</td><td>Per-core</td></tr>
+    <tr><td><code>cache_size</code></td><td>CacheMemory</td><td>Total cache capacity</td><td>32 kB - 2 MB</td></tr>
+    <tr><td><code>cache_assoc</code></td><td>CacheMemory</td><td>Set associativity</td><td>4-16</td></tr>
+    <tr><td><code>number_of_virtual_networks</code></td><td>Network</td><td>Virtual network count for message classes</td><td>Protocol-specific</td></tr>
+    <tr><td><code>vcs_per_vnet</code></td><td>GarnetNetwork</td><td>Virtual channels per virtual network</td><td>4</td></tr>
+    <tr><td><code>ni_flit_size</code></td><td>GarnetNetwork</td><td>Flit size in bytes</td><td>16</td></tr>
+    <tr><td><code>routing_algorithm</code></td><td>GarnetNetwork</td><td>Routing algorithm (XY, custom)</td><td>0 (XY)</td></tr>
+    <tr><td><code>buffer_size</code></td><td>MessageBuffer</td><td>Maximum messages in buffer (0 = infinite)</td><td>0</td></tr>
+    <tr><td><code>latency</code></td><td>BasicLink</td><td>Per-link latency in cycles</td><td>1</td></tr>
+  </tbody>
+</table>
+</section>
+
+</div><!-- container -->
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Diagram Overlay -->
+<div class="overlay" id="diagramOverlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" id="overlayClose" aria-label="Close overlay">✕</button>
+    <div id="overlayContent"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getTheme() { return localStorage.getItem(THEME_KEY) || 'dark'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  const hljsLink = document.getElementById('hljs-theme');
+  hljsLink.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+}
+
+setTheme(getTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  renderMermaid();
+});
+
+mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+
+async function renderMermaid() {
+  mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+  document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+    const pre = wrap.querySelector('pre.mermaid');
+    if (!pre) return;
+    if (!pre.dataset.original) pre.dataset.original = pre.textContent;
+    pre.textContent = pre.dataset.original;
+    pre.removeAttribute('data-processed');
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+}
+renderMermaid();
+
+const toc = document.getElementById('toc');
+document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+  const li = document.createElement('li');
+  li.style.paddingLeft = h.tagName === 'H3' ? '16px' : '0';
+  const a = document.createElement('a');
+  a.href = '#' + h.id;
+  a.textContent = h.textContent;
+  li.appendChild(a);
+  toc.appendChild(li);
+});
+
+const text = document.querySelector('.container').textContent;
+const words = text.trim().split(/\s+/).length;
+document.getElementById('readTime').textContent = Math.ceil(words / 200) + ' min read';
+
+const btn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btn.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+hljs.highlightAll();
+
+document.querySelectorAll('.code-block').forEach(block => {
+  const cbtn = block.querySelector('.copy-btn');
+  if (!cbtn) return;
+  cbtn.addEventListener('click', () => {
+    const code = block.querySelector('code');
+    navigator.clipboard.writeText(code.textContent);
+    cbtn.textContent = 'Copied!';
+    setTimeout(() => cbtn.textContent = 'Copy', 2000);
+  });
+});
+
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('overlayContent');
+document.getElementById('overlayClose').addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+
+document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    const svg = wrap.querySelector('svg');
+    if (svg) {
+      overlayContent.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    }
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const sections = [...document.querySelectorAll('h2[id], h3[id]')];
+  const current = sections.findIndex(s => s.getBoundingClientRect().top > 10);
+  if (e.key === 'j' && current < sections.length) {
+    sections[current >= 0 ? current : sections.length - 1].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'k' && current > 0) {
+    sections[Math.max(0, current - 2)].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'Escape') {
+    overlay.classList.remove('active');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/arch/generic/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>generic — ISA-Independent Base Classes | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../index.html">arch</a> &rsaquo; generic</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>generic — ISA-Independent <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">Base</a> Classes</h1>
+    <p class="subtitle">Abstract interfaces that define the contract between <a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a> models and ISA implementations, enabling gem5's architecture-agnostic simulation framework.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The <code>generic</code> module is like the standard electrical outlets in a building. It doesn't matter whether you plug in an American appliance (<a title="Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller." href="../x86/index.html">x86</a>), a European one (<a title="Comprehensive ARM architecture support including <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../arm/index.html">ARM</a>), or an Asian one (RISC-V) — as long as they follow the socket specification (generic base classes), they'll work with any building's wiring (CPU model). The <code>generic</code> module defines those socket specifications: how to decode instructions, translate addresses, manage ISA state, and handle faults.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The <code>generic</code> directory contains abstract base classes that every ISA must implement. These classes form the bridge between gem5's ISA-agnostic CPU models (O3, <a title="minor — In-Order Pipelined CPU — gem5 Wiki" href="../../cpu_doc/minor/index.html">Minor</a>, TimingSimple, KVM) and the ISA-specific behavior (instruction decoding, register layout, fault handling, address translation).</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Generic Interfaces"
+      InstDecoder["InstDecoder\n(instruction fetch/decode)"]
+      BaseMMU["BaseMMU\n(memory management)"]
+      BaseISA["BaseISA\n(ISA state container)"]
+      BaseTLB["BaseTLB\n(TLB interface)"]
+      PCStateBase["PCStateBase\n(program counter)"]
+    end
+
+    subgraph "CPU Models (consumers)"
+      O3["O3CPU"]
+      Minor["MinorCPU"]
+      Simple["TimingSimpleCPU"]
+      KVM["KvmCPU"]
+    end
+
+    subgraph "ISA Implementations (providers)"
+      X86["X86ISA::*"]
+      ARM["ArmISA::*"]
+      RISCV["RiscvISA::*"]
+    end
+
+    O3 --> InstDecoder
+    O3 --> BaseMMU
+    O3 --> BaseISA
+    Minor --> InstDecoder
+    Minor --> BaseMMU
+    Simple --> InstDecoder
+    Simple --> BaseMMU
+    KVM --> BaseISA
+
+    X86 -.->|"implements"| InstDecoder
+    ARM -.->|"implements"| InstDecoder
+    RISCV -.->|"implements"| InstDecoder
+    X86 -.->|"implements"| BaseMMU
+    ARM -.->|"implements"| BaseMMU
+    RISCV -.->|"implements"| BaseMMU
+    </pre>
+  </div>
+
+  <h2 id="inst-decoder">InstDecoder — Instruction Decoder Interface</h2>
+  <p>The abstract instruction decoder defines how CPU models feed fetched bytes to the ISA-specific decoder and retrieve decoded <code>StaticInst</code> objects.</p>
+
+  <pre><code class="language-cpp">class InstDecoder : public SimObject
+{
+  protected:
+    void *machInst;  // ISA-specific machine instruction buffer
+
+  public:
+    InstDecoder(const Params &amp;p);
+
+    // Feed fetched bytes from the instruction cache
+    virtual void moreBytes(const PCStateBase &amp;pc,
+                           Addr fetchPC) = 0;
+
+    // Is a complete instruction available for decoding?
+    virtual bool instReady() const = 0;
+
+    // Decode the buffered instruction, advance PC
+    virtual StaticInstPtr decode(PCStateBase &amp;nextPC) = 0;
+
+    // Reset decoder state (e.g., after branch, exception)
+    virtual void reset() {}
+
+    // Get moreBytesSize: how many bytes to fetch per cycle
+    virtual Addr moreBytesSize() const { return sizeof(MachInst); }
+};</code></pre>
+
+  <h3 id="decoder-contract">Decoder Contract</h3>
+  <p>CPU models interact with the decoder through a <a title="simple — <a href="../riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> protocol:</p>
+  <ol>
+    <li>Call <code>moreBytes()</code> with fetched <a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a> line data</li>
+    <li>Check <code>instReady()</code> — returns true when enough bytes for a complete instruction</li>
+    <li>Call <code>decode()</code> to get the <code>StaticInst</code> and advance the PC</li>
+    <li>Repeat. Call <code>reset()</code> on branch misprediction or exception.</li>
+  </ol>
+
+  <h2 id="base-mmu">BaseMMU — Memory Management Unit Interface</h2>
+  <p>Defines the abstract interface for address translation. Each ISA provides its own MMU implementation with ISA-specific page table formats and TLB organizations.</p>
+
+  <pre><code class="language-cpp">class BaseMMU : public SimObject
+{
+  public:
+    enum Mode { Read, Write, Execute };
+
+    // Separate TLBs for instructions and data
+    BaseTLB *itb;
+    BaseTLB *dtb;
+
+    BaseMMU(const Params &amp;p);
+
+    // Atomic translation (blocks until complete)
+    virtual Fault translateAtomic(
+        const RequestPtr &amp;req,
+        ThreadContext *tc,
+        Mode mode) = 0;
+
+    // Timing translation (non-blocking, callback)
+    virtual void translateTiming(
+        const RequestPtr &amp;req,
+        ThreadContext *tc,
+        Translation *translation,
+        Mode mode) = 0;
+
+    // Functional translation (for debug/initialization)
+    virtual Fault translateFunctional(
+        const RequestPtr &amp;req,
+        ThreadContext *tc,
+        Mode mode);
+
+    // TLB management
+    virtual void flushAll() = 0;
+    virtual void demapPage(Addr vaddr, uint64_t asn) = 0;
+    virtual void takeOverFrom(BaseMMU *old) {}
+
+    // Get TLBs
+    BaseTLB *getITB() const { return itb; }
+    BaseTLB *getDTB() const { return dtb; }
+};</code></pre>
+
+  <h3 id="translation-callback">Translation Callback</h3>
+  <pre><code class="language-cpp">// Used by timing mode for asynchronous translation
+class BaseMMU::Translation
+{
+  public:
+    virtual ~Translation() {}
+
+    // Called when translation completes
+    virtual void finish(const Fault &amp;fault,
+                        const RequestPtr &amp;req,
+                        ThreadContext *tc,
+                        Mode mode) = 0;
+
+    // Called if squashed before completion
+    virtual void markDelayed() {}
+};</code></pre>
+
+  <h2 id="base-isa">BaseISA — ISA State Container</h2>
+  <p>Holds all ISA-specific register state that isn't part of the standard integer/float register files. This includes control registers, status registers, and ISA configuration state.</p>
+
+  <pre><code class="language-cpp">class BaseISA : public SimObject
+{
+  public:
+    BaseISA(const Params &amp;p);
+
+    // Read/write miscellaneous (system) registers
+    virtual RegVal readMiscRegNoEffect(RegIndex idx) const = 0;
+    virtual RegVal readMiscReg(RegIndex idx) = 0;
+
+    virtual void setMiscRegNoEffect(RegIndex idx, RegVal val) = 0;
+    virtual void setMiscReg(RegIndex idx, RegVal val) = 0;
+
+    // Number of misc registers
+    virtual int numMiscRegs() const = 0;
+
+    // Clear all ISA state
+    virtual void clear() = 0;
+
+    // Initialize for thread context
+    virtual void setThreadContext(ThreadContext *tc);
+
+    // Serialize for checkpointing
+    virtual void serialize(CheckpointOut &amp;cp) const override;
+    virtual void unserialize(CheckpointIn &amp;cp) override;
+};</code></pre>
+
+  <h2 id="base-tlb">BaseTLB — Translation Lookaside Buffer</h2>
+  <pre><code class="language-cpp">class BaseTLB : public SimObject
+{
+  public:
+    BaseTLB(const Params &amp;p);
+
+    // Flush all TLB entries
+    virtual void flushAll() = 0;
+
+    // Invalidate entries for a specific page
+    virtual void demapPage(Addr vaddr, uint64_t asn) = 0;
+
+    // Take over state from another TLB (CPU switching)
+    virtual void takeOverFrom(BaseTLB *otlb) = 0;
+
+    // Statistics
+    virtual void regStats() override;
+};</code></pre>
+
+  <h2 id="pc-state-base">PCStateBase — Program Counter Abstraction</h2>
+  <p>Different ISAs have different PC representations. x86 needs microcode PCs, ARM needs mode bits, RISC-V needs compressed instruction awareness. <code>PCStateBase</code> provides the polymorphic interface.</p>
+
+  <pre><code class="language-cpp">class PCStateBase
+{
+  protected:
+    Addr _pc = 0;        // Current instruction address
+    Addr _npc = 0;       // Next instruction address
+    MicroPC _upc = 0;    // Micro-operation PC
+    MicroPC _nupc = 0;   // Next micro-operation PC
+
+  public:
+    Addr pc() const { return _pc; }
+    void pc(Addr val) { _pc = val; }
+
+    Addr npc() const { return _npc; }
+    void npc(Addr val) { _npc = val; }
+
+    MicroPC upc() const { return _upc; }
+    MicroPC nupc() const { return _nupc; }
+
+    // Advance PC to next instruction
+    virtual void advance() = 0;
+
+    // Check if branching (npc != sequential)
+    virtual bool branching() const = 0;
+
+    // Clone for speculative execution
+    virtual PCStateBase *clone() const = 0;
+
+    // Comparison for branch prediction validation
+    virtual bool equals(const PCStateBase &amp;other) const;
+
+    // Size of current instruction (for NPC calculation)
+    virtual Addr instSize() const { return sizeof(MachInst); }
+};</code></pre>
+
+  <h2 id="isa-implementations">How ISAs Implement These Interfaces</h2>
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "InstDecoder"
+      ID["InstDecoder (generic)"]
+      X86D["X86::Decoder\n- Variable length (1-15 bytes)\n- State machine parser\n- Microcode ROM"]
+      ArmD["ArmISA::Decoder\n- ARM/Thumb/AArch64 modes\n- Conditional execution\n- Fixed-width per mode"]
+      RvD["RiscvISA::Decoder\n- 16 or 32-bit\n- Simple 2-bit length check\n- C-extension expansion"]
+    end
+
+    subgraph "BaseMMU"
+      MMU["BaseMMU (generic)"]
+      X86M["X86::MMU\n- 4-level page tables\n- CR3 page table base\n- Segmentation layer"]
+      ArmM["ArmISA::MMU\n- Sv39/Sv48 tables (AArch64)\n- Secure/Non-Secure worlds\n- TTBR0/TTBR1"]
+      RvM["RiscvISA::MMU\n- Sv39/Sv48 tables\n- PMP enforcement\n- SATP register"]
+    end
+
+    ID --> X86D
+    ID --> ArmD
+    ID --> RvD
+    MMU --> X86M
+    MMU --> ArmM
+    MMU --> RvM
+    </pre>
+  </div>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Adding a New ISA to gem5</h3>
+    <ol>
+      <li><strong>Create Directory</strong> — Add <code>src/arch/myisa/</code> with SConscript and Kconfig files.</li>
+      <li><strong>Implement InstDecoder</strong> — Subclass <code>InstDecoder</code> and implement <code>moreBytes()</code>, <code>instReady()</code>, and <code>decode()</code> for your instruction encoding.</li>
+      <li><strong>Implement BaseISA</strong> — Subclass <code>BaseISA</code> to define your ISA's system registers (CSRs, control registers, etc.).</li>
+      <li><strong>Implement BaseMMU</strong> — Subclass <code>BaseMMU</code> and <code>BaseTLB</code> with your page table format and translation logic.</li>
+      <li><strong>Define PCState</strong> — Subclass <code>PCStateBase</code> with your ISA's PC representation (instruction size, modes, etc.).</li>
+      <li><strong>Define Faults</strong> — Create fault classes inheriting from <code>FaultBase</code> for each exception type.</li>
+      <li><strong>Define StaticInst</strong> — Implement instruction classes with <code>execute()</code> methods for each opcode.</li>
+      <li><strong><a title="Configuration <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> Wrappers</strong> — Create <a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a> Python classes (MyISACPU.py, MyISAMMU.py, etc.) for configuration.</li>
+    </ol>
+  </div>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Key Methods</th><th>Implemented By</th></tr></thead>
+    <tbody>
+      <tr><td><code>InstDecoder</code></td><td>decoder.hh</td><td><code>moreBytes()</code>, <code>decode()</code>, <code>instReady()</code></td><td>x86, ARM, RISC-V, MIPS, SPARC, <a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="../../sim_doc/power/index.html">POWER</a></td></tr>
+      <tr><td><code>BaseMMU</code></td><td>mmu.hh</td><td><code>translateAtomic()</code>, <code>translateTiming()</code>, <code>flushAll()</code></td><td>x86, ARM, RISC-V, MIPS, SPARC</td></tr>
+      <tr><td><code>BaseISA</code></td><td>isa.hh</td><td><code>readMiscReg()</code>, <code>setMiscReg()</code>, <code>clear()</code></td><td>x86, ARM, RISC-V, MIPS, SPARC</td></tr>
+      <tr><td><code>BaseTLB</code></td><td>tlb.hh</td><td><code>flushAll()</code>, <code>demapPage()</code>, <code>takeOverFrom()</code></td><td>x86, ARM, RISC-V, MIPS, SPARC</td></tr>
+      <tr><td><code>PCStateBase</code></td><td>pcstate.hh</td><td><code>pc()</code>, <code>npc()</code>, <code>advance()</code>, <code>branching()</code></td><td>x86, ARM, RISC-V, MIPS, SPARC</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="design-patterns">Design Patterns</h2>
+  <ul>
+    <li><strong>Strategy Pattern</strong> — CPU models use the generic interface; concrete ISA implementations are injected at configuration time.</li>
+    <li><strong>Template Method</strong> — Base classes define the algorithm skeleton (e.g., translation workflow), ISA implementations fill in the ISA-specific steps.</li>
+    <li><strong>Polymorphism</strong> — <code>PCStateBase*</code> pointers allow CPU models to handle any ISA's PC representation uniformly.</li>
+    <li><strong>Separation of Concerns</strong> — CPU pipeline logic is completely separate from instruction semantics and address translation.</li>
+  </ul>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>StaticInst</strong></td><td>Decoded instruction object containing operands, execute method, and flags</td></tr>
+      <tr><td><strong>ThreadContext</strong></td><td>Per-thread CPU state providing access to registers, PC, and ISA state</td></tr>
+      <tr><td><strong>MachInst</strong></td><td>Raw machine instruction encoding — ISA-specific size and format</td></tr>
+      <tr><td><strong>MiscReg</strong></td><td>Miscellaneous register — ISA-specific system/control registers not in the standard regfile</td></tr>
+      <tr><td><strong>Functional Translation</strong></td><td>Instant address translation for debug or initialization (no timing modeled)</td></tr>
+      <tr><td><strong>Atomic Translation</strong></td><td>Blocking address translation that completes immediately in atomic CPU mode</td></tr>
+      <tr><td><strong>Timing Translation</strong></td><td>Non-blocking translation with callback — models real TLB miss latency</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

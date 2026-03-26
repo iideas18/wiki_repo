@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="gem5/src/mem/cache">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>cache — Classic Cache Hierarchy | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;
+--hero-bg:#161b22;--code-bg:#1c2128;--toc-bg:#161b22;--hover:#21262d;--muted:#8b949e;
+--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.4);--radius:8px;
+--link:#58a6ff;--link-hover:#79c0ff;--kbd-bg:#21262d}
+[data-theme="light"]{--bg:#ffffff;--fg:#1f2328;--card:#f6f8fa;--border:#d0d7de;--accent:#0969da;
+--accent2:#1a7f37;--hero-bg:#f6f8fa;--code-bg:#f6f8fa;--toc-bg:#f6f8fa;--hover:#eaeef2;
+--muted:#656d76;--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.1);
+--link:#0969da;--link-hover:#0550ae;--kbd-bg:#eaeef2}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+background:var(--bg);color:var(--fg);line-height:1.6;overflow-x:hidden}
+a{color:var(--link);text-decoration:none}a:hover{color:var(--link-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;
+z-index:1000;border-radius:0 0 var(--radius) 0;font-weight:600}
+.skip-link:focus{top:0}
+header{background:var(--hero-bg);border-bottom:1px solid var(--border);padding:12px 24px;
+display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.breadcrumb{font-size:14px;color:var(--muted)}
+.breadcrumb a{color:var(--link)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle{background:var(--kbd-bg);border:1px solid var(--border);color:var(--fg);
+padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:14px}
+.theme-toggle:hover{background:var(--hover)}
+.container{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+.hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:32px;margin-bottom:24px;text-align:center}
+.hero h1{margin:0 0 8px;font-size:28px;color:var(--fg)}
+.hero p{margin:0;color:var(--muted);font-size:16px}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:10px 20px;text-align:center}
+.stat .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase}
+.reading-time{font-size:13px;color:var(--muted);margin:8px 0 20px;text-align:right}
+.toc-panel{background:var(--toc-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px 20px;margin-bottom:24px}
+.toc-panel summary{font-weight:600;cursor:pointer;font-size:15px}
+.toc-panel ul{list-style:none;padding-left:16px;margin:8px 0 0}
+.toc-panel li{margin:4px 0}
+.toc-panel a{font-size:14px}
+section{margin-bottom:32px}
+h2{font-size:22px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-top:32px}
+h3{font-size:18px;margin-top:24px}
+.intro-box{background:var(--card);border-left:4px solid var(--accent);border-radius:var(--radius);
+padding:16px 20px;margin:16px 0}
+.intro-box .label{font-weight:700;color:var(--accent);font-size:13px;text-transform:uppercase;margin-bottom:4px}
+.diagram-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;margin:16px 0;overflow-x:auto;cursor:pointer;position:relative}
+.diagram-wrap .expand-hint{position:absolute;top:8px;right:12px;font-size:11px;color:var(--muted);opacity:0.7}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even){background:var(--table-stripe)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:20px;transition:box-shadow .2s,border-color .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h3 a{color:var(--fg)}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.card .meta{margin-top:8px;font-size:12px;color:var(--muted)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+code{background:var(--kbd-bg);padding:2px 6px;border-radius:4px;font-size:13px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--kbd-bg);border:1px solid var(--border);
+color:var(--fg);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--hover)}
+.code-block{position:relative}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;
+border:none;padding:10px 14px;border-radius:50%;cursor:pointer;font-size:18px;
+display:none;z-index:50;box-shadow:var(--shadow)}
+.back-to-top:hover{opacity:0.9}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);z-index:200;justify-content:center;align-items:center;padding:24px}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:24px;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--fg);
+font-size:24px;cursor:pointer}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:48px;margin:12px 0}
+.walkthrough .step::before{counter-increment:step;content:counter(step);position:absolute;
+left:0;top:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;
+display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;font-family:monospace;font-size:13px;line-height:1.7;overflow-x:auto}
+@media(max-width:768px){.card-grid{grid-template-columns:1fr}.container{padding:16px}
+.hero{padding:20px}.stat-row{flex-direction:column;align-items:center}}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.overlay,.copy-btn,.expand-hint{display:none!important}
+body{background:#fff;color:#000}.container{max-width:100%}
+.hero,.card,.toc-panel,.intro-box,.diagram-wrap,.stat{border-color:#ccc;background:#f9f9f9}
+a{color:#000;text-decoration:underline}.dir-map,pre{background:#f5f5f5;border-color:#ccc}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="mem — Memory System | gem5 Wiki" href="../index.html">mem</a> &rsaquo; cache</nav>
+  <div class="header-actions">
+    <span class="reading-time" id="readTime"></span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">🌓</button>
+  </div>
+</header>
+
+<main id="main">
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>cache — Classic Cache Hierarchy</h1>
+  <p>High-performance, configurable cache hierarchy with coherence, MSHR tracking, pluggable replacement policies, hardware prefetchers, and compressed cache support.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">26+</div><div class="lbl">Source Files</div></div>
+    <div class="stat"><div class="num">4</div><div class="lbl">Sub-directories</div></div>
+    <div class="stat"><div class="num">12</div><div class="lbl">Replacement Policies</div></div>
+    <div class="stat"><div class="num">14+</div><div class="lbl">Prefetchers</div></div>
+    <div class="stat"><div class="num">8+</div><div class="lbl">Compressors</div></div>
+  </div>
+</div>
+
+<!-- TOC -->
+<details class="toc-panel" open>
+  <summary>Table of Contents</summary>
+  <ul id="toc"></ul>
+</details>
+
+<!-- Intro -->
+<section>
+<h2 id="overview">Overview</h2>
+<div class="intro-box">
+  <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+  <div class="label">Analogy — Library Shelf</div>
+  <p>Imagine a <strong>multi-level library system</strong>. Your desk (L1 cache) has the few books you're currently reading — instant access. The room's bookshelf (L2 cache) holds more books but takes a short walk. The building's main library (L3 / memory) has everything but requires a trip downstairs. The <em>replacement policy</em> decides which book to remove from your desk when it's full. The <em>prefetcher</em> is a helpful librarian who notices your reading pattern and pre-fetches the next book before you ask. The <em>MSHR</em> is the checkout slip tracking which books you've requested but haven't arrived yet.</p>
+</div>
+
+<p>The <code>cache/</code> directory implements gem5's <strong>Classic memory system</strong> cache hierarchy. It provides:</p>
+<ul>
+  <li><strong>BaseCache</strong> — abstract <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> managing tags, MSHRs, write queues, and port handling</li>
+  <li><strong>Cache</strong> — coherent cache with snooping and flexible topologies</li>
+  <li><strong>NoncoherentCache</strong> — simplified non-snooping cache</li>
+  <li><strong>MSHR / WriteQueue</strong> — miss tracking and write coalescing</li>
+  <li><strong>Replacement Policies</strong> — 12+ algorithms (LRU, FIFO, BIP, BRRIP, SHiP, TreePLRU, …)</li>
+  <li><strong>Prefetchers</strong> — 14+ engines (Stride, BOP, AMPM, SPP, DCPT, ISB, …)</li>
+  <li><strong>Tags</strong> — set-associative, fully-associative LRU, sector, compressed</li>
+  <li><strong>Compressors</strong> — BDI, C-Pack, FPC, FPCD, FrequentValues</li>
+</ul>
+</section>
+
+<!-- Class Diagram -->
+<section>
+<h2 id="class-hierarchy">Class Hierarchy</h2>
+<div class="diagram-wrap" data-diagram="classes">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">classDiagram
+    class ClockedObject {
+        +clockPeriod()
+        +curCycle()
+    }
+    class BaseCache {
+        -MSHRQueue mshrQueue
+        -WriteQueue writeBuffer
+        -BaseTags* tags
+        -BasePrefetcher* prefetcher
+        +recvTimingReq()
+        +recvTimingResp()
+        +handleFill()
+        +satisfyRequest()
+    }
+    class Cache {
+        -doFastWrites: bool
+        -outstandingSnoop: set
+        +serviceMSHRTargets()
+        +handleSnoop()
+        +recvTimingSnoopReq()
+    }
+    class NoncoherentCache {
+        +handleTimingReqMiss()
+        +serviceMSHRTargets()
+    }
+    class MSHR {
+        -targets: TargetList
+        -deferredTargets: TargetList
+        +allocate()
+        +deallocate()
+        +getTarget()
+    }
+    class WriteQueueEntry {
+        +isFull(): bool
+    }
+    class BaseTags {
+        +accessBlock()
+        +findBlock()
+        +insertBlock()
+    }
+    class BaseSetAssoc
+    class FALRU
+    class SectorTags
+    class CompressedTags
+    class ReplacementPolicy_Base {
+        +getVictim()
+        +reset()
+        +touch()
+    }
+    class LRURP
+    class FIFORP
+    class BIPRP
+    class BRRIPRP
+    class SHiPRP
+    class TreePLRURP
+    class BasePrefetcher {
+        +notify()
+        +getPacket()
+    }
+    class Queued
+    class Stride
+    class BOP
+    class AMPM
+
+    ClockedObject <|-- BaseCache
+    BaseCache <|-- Cache
+    BaseCache <|-- NoncoherentCache
+    BaseCache *-- MSHR
+    BaseCache *-- WriteQueueEntry
+    BaseCache *-- BaseTags
+    BaseCache *-- BasePrefetcher
+    BaseTags <|-- BaseSetAssoc
+    BaseTags <|-- FALRU
+    BaseTags <|-- SectorTags
+    SectorTags <|-- CompressedTags
+    ReplacementPolicy_Base <|-- LRURP
+    ReplacementPolicy_Base <|-- FIFORP
+    ReplacementPolicy_Base <|-- BIPRP
+    BIPRP <|-- BRRIPRP
+    ReplacementPolicy_Base <|-- SHiPRP
+    ReplacementPolicy_Base <|-- TreePLRURP
+    BasePrefetcher <|-- Queued
+    Queued <|-- Stride
+    Queued <|-- BOP
+    Queued <|-- AMPM
+  </pre>
+</div>
+</section>
+
+<!-- Cache <a href="../index.html" title="mem — <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> | gem5 Wiki" class="xref">Request</a> Flow -->
+<section>
+<h2 id="request-flow">Cache Request Processing Flow</h2>
+<div class="diagram-wrap" data-diagram="flow">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart TD
+    REQ["recvTimingReq()"]
+    LOOKUP["Tag Lookup"]
+    HIT{"Hit?"}
+    RESP["Send Response"]
+    MSHR_CHK{"MSHR exists?"}
+    COALESCE["Coalesce into MSHR"]
+    ALLOC["Allocate MSHR"]
+    SEND["sendTimingReq() downstream"]
+    FILL["handleFill()"]
+    VICTIM["Select victim (RP)"]
+    WB{"Dirty victim?"}
+    WBACK["Writeback victim"]
+    INSERT["Insert new block"]
+    DEALLOC["Deallocate MSHR"]
+
+    REQ --> LOOKUP
+    LOOKUP --> HIT
+    HIT -->|Yes| RESP
+    HIT -->|No| MSHR_CHK
+    MSHR_CHK -->|Yes| COALESCE
+    MSHR_CHK -->|No| ALLOC
+    ALLOC --> SEND
+    SEND -->|Response arrives| FILL
+    FILL --> VICTIM
+    VICTIM --> WB
+    WB -->|Yes| WBACK
+    WB -->|No| INSERT
+    WBACK --> INSERT
+    INSERT --> DEALLOC
+    DEALLOC --> RESP
+  </pre>
+</div>
+</section>
+
+<!-- Key Classes -->
+<section>
+<h2 id="key-classes">Key Classes Reference</h2>
+<table>
+  <thead><tr><th>Class</th><th>File</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>BaseCache</code></td><td>base.hh</td><td>Abstract base for all classic caches. Manages tag arrays, MSHR queues, write buffers, prefetcher integration, and both <a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a>-side and memory-side ports.</td></tr>
+    <tr><td><code>Cache</code></td><td>cache.hh</td><td>Coherent cache with full snooping support, snoop filtering, and fast-write optimization.</td></tr>
+    <tr><td><code>NoncoherentCache</code></td><td>noncoherent_cache.hh</td><td>Cache without coherence protocol support — suitable for instruction caches or accelerator scratchpads.</td></tr>
+    <tr><td><code>MSHR</code></td><td>mshr.hh</td><td>Tracks outstanding cache misses. Supports target coalescing so multiple requests to the same block share one downstream fetch.</td></tr>
+    <tr><td><code>MSHRQueue</code></td><td>mshr_queue.hh</td><td>Manages the pool of MSHR entries, blocking the cache when exhausted.</td></tr>
+    <tr><td><code>WriteQueueEntry</code></td><td>write_queue_entry.hh</td><td>Tracks pending writebacks and write-cleans to lower memory.</td></tr>
+    <tr><td><code>CacheBlk</code></td><td>cache_blk.hh</td><td>Represents a single cache block with valid/dirty bits, tag, data, coherence state.</td></tr>
+    <tr><td><code>BaseTags</code></td><td>tags/base.hh</td><td>Abstract tag-store interface. Subclasses implement different organizations.</td></tr>
+    <tr><td><code>BaseSetAssoc</code></td><td>tags/base_set_assoc.hh</td><td>Standard set-associative tag store using configurable indexing policies.</td></tr>
+    <tr><td><code>FALRU</code></td><td>tags/fa_lru.hh</td><td>Fully-associative cache with LRU stack — useful for small caches and ideal-cache studies.</td></tr>
+    <tr><td><code>SectorTags</code></td><td>tags/sector_tags.hh</td><td>Sector cache: groups of blocks share a single tag, reducing tag overhead.</td></tr>
+    <tr><td><code>CompressedTags</code></td><td>tags/compressed_tags.hh</td><td>Supports variable-size compressed blocks within a sector-like structure.</td></tr>
+    <tr><td><code>Base (RP)</code></td><td>replacement_policies/base.hh</td><td>Abstract replacement policy interface. All policies implement <code>getVictim()</code>, <code>reset()</code>, <code>touch()</code>.</td></tr>
+    <tr><td><code>Base (PF)</code></td><td>prefetch/base.hh</td><td>Abstract prefetcher base. Notified on cache accesses; generates prefetch requests.</td></tr>
+    <tr><td><code>Queued</code></td><td>prefetch/queued.hh</td><td>Prefetcher with a FIFO queue of pending prefetch requests, throttled by degree and distance.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Replacement Policies -->
+<section>
+<h2 id="replacement-policies">Replacement Policies</h2>
+<p>All replacement policies live in <code>cache/replacement_policies/</code> and extend a common base class. The cache invokes <code>getVictim()</code> to select an eviction candidate and <code>touch()</code> / <code>reset()</code> on access and insertion.</p>
+<table>
+  <thead><tr><th>Policy</th><th>File</th><th>Algorithm</th></tr></thead>
+  <tbody>
+    <tr><td><code>LRURP</code></td><td>lru_rp.hh</td><td><strong>Least Recently Used</strong> — evicts the block with the oldest last-access timestamp.</td></tr>
+    <tr><td><code>FIFORP</code></td><td>fifo_rp.hh</td><td><strong>First-In First-Out</strong> — evicts the block inserted earliest, ignoring reuse.</td></tr>
+    <tr><td><code>LFURP</code></td><td>lfu_rp.hh</td><td><strong>Least Frequently Used</strong> — evicts the block with the fewest accesses.</td></tr>
+    <tr><td><code>MRURP</code></td><td>mru_rp.hh</td><td><strong>Most Recently Used</strong> — evicts the most recently accessed block (thrash-resistant).</td></tr>
+    <tr><td><code>RandomRP</code></td><td>random_rp.hh</td><td><strong>Random</strong> — evicts a randomly chosen block.</td></tr>
+    <tr><td><code>BIPRP</code></td><td>bip_rp.hh</td><td><strong>Bimodal Insertion</strong> — inserts most blocks in LRU position; a small fraction in MRU (thrash protection).</td></tr>
+    <tr><td><code>BRRIPRP</code></td><td>brrip_rp.hh</td><td><strong>Bimodal Re-Reference Interval Prediction</strong> — extends BIP with multi-bit RRPV counters for finer granularity.</td></tr>
+    <tr><td><code>SHiPRP</code></td><td>ship_rp.hh</td><td><strong>Signature-based Hit Predictor</strong> — uses PC-based signatures to predict reuse and set insertion priority.</td></tr>
+    <tr><td><code>TreePLRURP</code></td><td>tree_plru_rp.hh</td><td><strong>Tree Pseudo-LRU</strong> — binary tree of 1-bit pointers; hardware-efficient LRU approximation.</td></tr>
+    <tr><td><code>SecondChanceRP</code></td><td>second_chance_rp.hh</td><td><strong>Second Chance (Clock)</strong> — FIFO with a use bit; gives accessed blocks a second chance.</td></tr>
+    <tr><td><code>DuelingRP</code></td><td>dueling_rp.hh</td><td><strong>Set Dueling</strong> — dynamically selects between two constituent policies using tournament sampling.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Prefetchers -->
+<section>
+<h2 id="prefetchers">Prefetch Engines</h2>
+<p>Prefetchers in <code>cache/prefetch/</code> observe cache access patterns and issue speculative fetches. The <code>Queued</code> base maintains a FIFO of generated addresses, throttled by configurable degree.</p>
+<table>
+  <thead><tr><th>Prefetcher</th><th>File</th><th>Strategy</th></tr></thead>
+  <tbody>
+    <tr><td><code>StridePrefetcher</code></td><td>stride.hh</td><td>Detects constant-stride access patterns per PC; <a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> and effective for array traversals.</td></tr>
+    <tr><td><code>BOPPrefetcher</code></td><td>bop.hh</td><td><strong>Best Offset Prefetching</strong> — evaluates many candidate offsets and picks the best-performing one.</td></tr>
+    <tr><td><code>AMPMPrefetcher</code></td><td>access_map_pattern_matching.hh</td><td><strong>Access Map Pattern Matching</strong> — tracks access bitmaps per page zone to detect complex patterns.</td></tr>
+    <tr><td><code>SignaturePathPrefetcher</code></td><td>signature_path.hh</td><td><strong>SPP</strong> — builds a signature table from delta history; follows lookahead paths for deep prefetching.</td></tr>
+    <tr><td><code>SignaturePathPrefetcherV2</code></td><td>signature_path_v2.hh</td><td>SPP v2 with enhanced confidence and global accuracy feedback.</td></tr>
+    <tr><td><code>DCPTPrefetcher</code></td><td>delta_correlating_prediction_tables.hh</td><td><strong>Delta Correlating Prediction Tables</strong> — correlates deltas between consecutive addresses.</td></tr>
+    <tr><td><code>IndirectMemoryPrefetcher</code></td><td>indirect_memory.hh</td><td>Handles pointer-chasing patterns by tracking indirect memory accesses.</td></tr>
+    <tr><td><code>IrregularStreamBuffer</code></td><td>irregular_stream_buffer.hh</td><td><strong>ISB</strong> — maps structural addresses to temporal streams for irregular workloads.</td></tr>
+    <tr><td><code>SBOOEPrefetcher</code></td><td>sbooe.hh</td><td><strong>Sandbox-Based Optimal Offset Estimation</strong> — lightweight offset evaluation using sandbox.</td></tr>
+    <tr><td><code>PIFPrefetcher</code></td><td>pif.hh</td><td><strong>Proactive Instruction <a href="../../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Fetch</a></strong> — uses temporal address correlation for instruction streams.</td></tr>
+    <tr><td><code>STeMSPrefetcher</code></td><td>spatio_temporal_memory_streaming.hh</td><td><strong>Spatio-Temporal Memory Streaming</strong> — combines spatial and temporal patterns.</td></tr>
+    <tr><td><code>SlimAMPMPrefetcher</code></td><td>slim_ampm.hh</td><td>Lightweight AMPM variant with reduced <a title="storage — Storage Device Models | gem5 Wiki" href="../../dev_doc/storage/index.html">storage</a>.</td></tr>
+    <tr><td><code>TaggedPrefetcher</code></td><td>tagged.hh</td><td>Simple next-line prefetcher triggered on every cache access.</td></tr>
+    <tr><td><code>MultiPrefetcher</code></td><td>multi.hh</td><td>Wrapper that combines multiple prefetcher instances.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- MSHR Deep Dive -->
+<section>
+<h2 id="mshr-handling">MSHR &amp; Write Buffer Handling</h2>
+<p>MSHRs are the backbone of non-blocking cache operation. Each MSHR tracks one outstanding cache line fetch and coalesces all requests targeting the same block.</p>
+
+<h3 id="mshr-lifecycle">MSHR Lifecycle</h3>
+<div class="walkthrough">
+  <div class="step"><strong>Allocation</strong> — On a cache miss, <code>MSHRQueue::allocate()</code> creates an MSHR if one is available. If all MSHRs are busy, the cache blocks.</div>
+  <div class="step"><strong>Target coalescing</strong> — Subsequent misses to the same block are added as targets to the existing MSHR instead of issuing new downstream requests.</div>
+  <div class="step"><strong>Downstream fetch</strong> — The MSHR triggers a <code>sendTimingReq()</code> to the next cache level or memory controller.</div>
+  <div class="step"><strong>Response handling</strong> — When data returns, <code>BaseCache::recvTimingResp()</code> calls <code>handleFill()</code> to insert the block and service all coalesced targets.</div>
+  <div class="step"><strong>Deallocation</strong> — The MSHR is freed and the cache unblocks, allowing new misses to proceed.</div>
+</div>
+
+<h3 id="write-buffer">Write Buffer</h3>
+<p>The <code>WriteQueue</code> holds pending writebacks and write-cleans. When a dirty block is evicted, a <code>WriteQueueEntry</code> is allocated. The write buffer has its own flow control and can cause the cache to block independently of MSHRs.</p>
+
+<div class="code-block">
+  <button class="copy-btn">Copy</button>
+  <pre><code class="language-cpp">// Simplified MSHR allocation in BaseCache::access()
+MSHR *mshr = mshrQueue.findMatch(blk_addr);
+if (mshr) {
+    // Coalesce: add this request as a target
+    mshr-&gt;allocateTarget(pkt, pkt-&gt;headerDelay, order++);
+} else {
+    // New miss: allocate MSHR and send downstream
+    mshr = mshrQueue.allocate(blk_addr, blk_size, pkt, curTick(), order++);
+    memSidePort.sendTimingReq(mshr-&gt;getTarget()-&gt;pkt);
+}</code></pre>
+</div>
+</section>
+
+<!-- Tags Organization -->
+<section>
+<h2 id="tag-organization">Tag Organization</h2>
+<p>Tag stores determine how cache blocks are indexed and looked up. gem5 provides several implementations:</p>
+<table>
+  <thead><tr><th>Tag Type</th><th>File</th><th>Organization</th></tr></thead>
+  <tbody>
+    <tr><td><code>BaseSetAssoc</code></td><td>tags/base_set_assoc.hh</td><td>Standard set-associative with configurable indexing (modular, skewed, etc.).</td></tr>
+    <tr><td><code>FALRU</code></td><td>tags/fa_lru.hh</td><td>Fully-associative with LRU tracking. Useful for small filter caches or way-profiling studies.</td></tr>
+    <tr><td><code>SectorTags</code></td><td>tags/sector_tags.hh</td><td>Groups of consecutive blocks share one tag. Reduces tag area for large caches.</td></tr>
+    <tr><td><code>CompressedTags</code></td><td>tags/compressed_tags.hh</td><td>Extends sector tags: multiple compressed blocks can share a data entry if they fit.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Deep Dive Hub Cards -->
+<section>
+<h2 id="deep-dive-hubs">Component Deep Dives</h2>
+<div class="card-grid">
+  <div class="card">
+    <h3>Replacement Policies</h3>
+    <p>12 algorithms from simple LRU/FIFO to advanced BRRIP and SHiP. Extends <code>ReplacementPolicy::Base</code> with <code>getVictim()</code>, <code>reset()</code>, <code>touch()</code>, and <code>invalidate()</code> hooks.</p>
+    <div class="meta">replacement_policies/ · 12 policies · All extend Base</div>
+  </div>
+  <div class="card">
+    <h3>Prefetch Algorithms</h3>
+    <p>14+ prefetchers from simple tagged/stride to sophisticated SPP, AMPM, and ISB. All hook into cache access notifications via <code>BasePrefetcher::notify()</code>.</p>
+    <div class="meta">prefetch/ · 14+ engines · Queued base class</div>
+  </div>
+  <div class="card">
+    <h3>Compression</h3>
+    <p>Data compressors for compressed caches: BDI (Base-Delta-Immediate), C-Pack, FPC (Frequent Pattern Compression), FPCD, and FrequentValues. Compress blocks to fit more data in same area.</p>
+    <div class="meta">compressors/ · 8+ algorithms · CompressedTags integration</div>
+  </div>
+  <div class="card">
+    <h3>MSHR &amp; Write Queue</h3>
+    <p>Non-blocking cache operation with configurable MSHR count, target coalescing, deferred targets for snoop handling, and separate write buffer for writebacks.</p>
+    <div class="meta">mshr.hh, write_queue.hh · Core to cache performance</div>
+  </div>
+  <div class="card">
+    <h3>Indexing Policies</h3>
+    <p>Set selection strategies: modular (traditional), skewed (XOR-based), and custom policies in <code>tags/indexing_policies/</code>.</p>
+    <div class="meta">tags/indexing_policies/ · Pluggable indexing</div>
+  </div>
+  <div class="card">
+    <h3>Partitioning Policies</h3>
+    <p>Cache partitioning for <a title="qos — Quality of Service Memory Policies | gem5 Wiki" href="../qos/index.html">QoS</a>: way partitioning and capacity allocation across requestors, managed by <code>PartitionManager</code>.</p>
+    <div class="meta">tags/partitioning_policies/ · QoS integration</div>
+  </div>
+</div>
+</section>
+
+<!-- Configuration -->
+<section>
+<h2 id="configuration">Configuration Examples</h2>
+<p>Classic cache hierarchy is configured through <a title="Configuration System and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> SimObjects. Key parameters:</p>
+<div class="code-block">
+  <button class="copy-btn">Copy</button>
+  <pre><code class="language-cpp">// Python configuration example (gem5 style)
+// L1 Data Cache
+system.cpu.dcache = Cache(
+    size = '64kB',
+    assoc = 8,
+    tag_latency = 2,
+    data_latency = 2,
+    response_latency = 2,
+    mshrs = 4,
+    tgts_per_mshr = 20,
+    write_buffers = 8,
+    replacement_policy = LRURP(),
+    prefetcher = StridePrefetcher(degree=4)
+)
+
+// L2 Shared Cache
+system.l2cache = Cache(
+    size = '2MB',
+    assoc = 16,
+    tag_latency = 10,
+    data_latency = 10,
+    response_latency = 10,
+    mshrs = 20,
+    tgts_per_mshr = 12,
+    write_buffers = 16,
+    clusivity = 'mostly_incl',
+    replacement_policy = TreePLRURP(),
+    prefetcher = BOPPrefetcher()
+)</code></pre>
+</div>
+
+<table>
+  <thead><tr><th>Parameter</th><th>Type</th><th>Description</th><th>Typical L1</th><th>Typical L2</th></tr></thead>
+  <tbody>
+    <tr><td><code>size</code></td><td>MemorySize</td><td>Total cache capacity</td><td>32-64 kB</td><td>256 kB - 4 MB</td></tr>
+    <tr><td><code>assoc</code></td><td>int</td><td>Ways per set</td><td>4-8</td><td>8-16</td></tr>
+    <tr><td><code>tag_latency</code></td><td>Cycles</td><td>Tag array lookup latency</td><td>1-2</td><td>8-20</td></tr>
+    <tr><td><code>data_latency</code></td><td>Cycles</td><td>Data array read latency</td><td>1-2</td><td>8-20</td></tr>
+    <tr><td><code>mshrs</code></td><td>int</td><td>Number of MSHRs (outstanding misses)</td><td>4-8</td><td>16-32</td></tr>
+    <tr><td><code>write_buffers</code></td><td>int</td><td>Write buffer entries</td><td>8</td><td>16-32</td></tr>
+    <tr><td><code>clusivity</code></td><td>enum</td><td>Inclusion policy</td><td>—</td><td>mostly_incl</td></tr>
+    <tr><td><code>replacement_policy</code></td><td><a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a></td><td>Replacement policy instance</td><td>LRURP</td><td>TreePLRURP</td></tr>
+    <tr><td><code>prefetcher</code></td><td>SimObject</td><td>Prefetcher instance</td><td>Stride</td><td>BOP/SPP</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Directory Map -->
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">
+src/mem/cache/
+├── base.hh / base.cc              # BaseCache — abstract cache base
+├── cache.hh / cache.cc            # Cache — coherent cache
+├── noncoherent_cache.hh / .cc     # NoncoherentCache
+├── cache_blk.hh / .cc             # CacheBlk — block representation
+├── mshr.hh / mshr.cc              # MSHR — miss tracking
+├── mshr_queue.hh / .cc            # MSHRQueue — MSHR pool
+├── write_queue.hh / .cc           # WriteQueue — writeback buffer
+├── write_queue_entry.hh / .cc     # WriteQueueEntry
+├── queue.hh / queue_entry.hh      # <a title="Abstract interfaces that define the contract between CPU models and ISA implementations, enabling gem5's architecture-agnostic simulation framework." href="../../arch_doc/generic/index.html">Generic</a> queue infrastructure
+├── cache_probe_arg.hh             # <a title="An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code." href="../../sim_doc/probe/index.html">Probe</a> argument types
+├── Cache.py                       # Python SimObject definitions
+├── replacement_policies/
+│   ├── base.hh                    # ReplacementPolicy::Base
+│   ├── lru_rp.hh / .cc            # LRU
+│   ├── fifo_rp.hh / .cc           # FIFO
+│   ├── lfu_rp.hh / .cc            # LFU
+│   ├── mru_rp.hh / .cc            # MRU
+│   ├── random_rp.hh / .cc         # Random
+│   ├── bip_rp.hh / .cc            # BIP
+│   ├── brrip_rp.hh / .cc          # BRRIP
+│   ├── ship_rp.hh / .cc           # SHiP
+│   ├── tree_plru_rp.hh / .cc      # Tree Pseudo-LRU
+│   ├── second_chance_rp.hh / .cc  # Second Chance
+│   └── dueling_rp.hh / .cc        # Set Dueling
+├── prefetch/
+│   ├── base.hh / .cc              # BasePrefetcher
+│   ├── queued.hh / .cc            # Queued (common queue logic)
+│   ├── stride.hh / .cc            # Stride prefetcher
+│   ├── bop.hh / .cc               # Best Offset Prefetching
+│   ├── access_map_pattern_matching.hh  # AMPM
+│   ├── signature_path.hh / .cc    # SPP
+│   ├── delta_correlating_prediction_tables.hh  # DCPT
+│   ├── indirect_memory.hh / .cc   # Indirect memory
+│   └── ... (14+ engines)
+├── tags/
+│   ├── base.hh / .cc              # BaseTags
+│   ├── base_set_assoc.hh / .cc    # Set-associative
+│   ├── fa_lru.hh / .cc            # Fully-associative LRU
+│   ├── sector_tags.hh / .cc       # Sector cache
+│   ├── compressed_tags.hh / .cc   # <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Compressed</a> cache
+│   ├── indexing_policies/          # Set index functions
+│   └── partitioning_policies/      # Way partitioning
+└── compressors/
+    ├── base.hh / .cc              # Base compressor
+    ├── base_delta.hh / .cc        # BDI compressor
+    ├── cpack.hh / .cc             # C-Pack
+    ├── fpc.hh / .cc               # FPC
+    ├── fpcd.hh / .cc              # FPCD
+    └── frequent_values.hh / .cc   # FrequentValues
+</div>
+</section>
+
+</div><!-- container -->
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Diagram Overlay -->
+<div class="overlay" id="diagramOverlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" id="overlayClose" aria-label="Close overlay">✕</button>
+    <div id="overlayContent"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getTheme() { return localStorage.getItem(THEME_KEY) || 'dark'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  const hljsLink = document.getElementById('hljs-theme');
+  hljsLink.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+}
+
+setTheme(getTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  renderMermaid();
+});
+
+mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+
+async function renderMermaid() {
+  mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+  document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+    const pre = wrap.querySelector('pre.mermaid');
+    if (!pre) return;
+    if (!pre.dataset.original) pre.dataset.original = pre.textContent;
+    pre.textContent = pre.dataset.original;
+    pre.removeAttribute('data-processed');
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+}
+renderMermaid();
+
+// TOC generation
+const toc = document.getElementById('toc');
+document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+  const li = document.createElement('li');
+  li.style.paddingLeft = h.tagName === 'H3' ? '16px' : '0';
+  const a = document.createElement('a');
+  a.href = '#' + h.id;
+  a.textContent = h.textContent;
+  li.appendChild(a);
+  toc.appendChild(li);
+});
+
+// Reading time
+const text = document.querySelector('.container').textContent;
+const words = text.trim().split(/\s+/).length;
+document.getElementById('readTime').textContent = Math.ceil(words / 200) + ' min read';
+
+// Back to top
+const btn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btn.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+hljs.highlightAll();
+
+// Copy buttons
+document.querySelectorAll('.code-block').forEach(block => {
+  const cbtn = block.querySelector('.copy-btn');
+  if (!cbtn) return;
+  cbtn.addEventListener('click', () => {
+    const code = block.querySelector('code');
+    navigator.clipboard.writeText(code.textContent);
+    cbtn.textContent = 'Copied!';
+    setTimeout(() => cbtn.textContent = 'Copy', 2000);
+  });
+});
+
+// Diagram overlay
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('overlayContent');
+document.getElementById('overlayClose').addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+
+document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    const svg = wrap.querySelector('svg');
+    if (svg) {
+      overlayContent.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    }
+  });
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const sections = [...document.querySelectorAll('h2[id], h3[id]')];
+  const current = sections.findIndex(s => s.getBoundingClientRect().top > 10);
+  if (e.key === 'j' && current < sections.length) {
+    sections[current >= 0 ? current : sections.length - 1].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'k' && current > 0) {
+    sections[Math.max(0, current - 2)].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'Escape') {
+    overlay.classList.remove('active');
+  }
+});
+</script>
+</body>
+</html>

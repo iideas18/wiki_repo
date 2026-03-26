@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/base/stats/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>stats — Statistics Framework | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../index.html">base</a> &rsaquo; stats</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>stats — Statistics Framework</h1>
+    <p class="subtitle">A comprehensive framework for declaring, collecting, and outputting performance counters, distributions, histograms, and derived formulas across all gem5 components.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The <code>stats</code> module is like the instrumentation panel in a nuclear <a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="../../sim_doc/power/index.html">power</a> plant control room. Every reactor (<a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a>), cooling system (<a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a>), and power line (bus) has sensors feeding real-time readings to the panel. Some sensors are <a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> gauges (<code>Scalar</code>), some are multi-channel (<code>Vector</code>), some show distributions (<code>Distribution</code>), and some compute derived values from other readings (<code>Formula</code>). At reporting time, the entire panel is photographed (<code>dump()</code>) to a stats file.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The statistics framework is organized around <code>Group</code> objects that own collections of <code>Info</code>-backed statistics. Since <code>SimObject</code> inherits from <code>statistics::Group</code>, every simulated component automatically participates in the stats hierarchy.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    Group["statistics::Group\n(owns stats)"]
+    SimObject["SimObject\n(inherits Group)"]
+    Info["statistics::Info\n(metadata base)"]
+    Scalar["Scalar\n(single counter)"]
+    Vector["Vector\n(indexed counters)"]
+    Dist["Distribution\n(histogram)"]
+    Formula["Formula\n(derived expression)"]
+    Histogram["Histogram\n(auto-binning)"]
+    Output["Output\n(text, JSON, HDF5)"]
+
+    Group --> SimObject
+    Group --> Info
+    Info --> Scalar
+    Info --> Vector
+    Info --> Dist
+    Info --> Formula
+    Info --> Histogram
+    Group -->|"dump()"| Output
+    </pre>
+  </div>
+
+  <h2 id="stat-types">Statistic Types</h2>
+
+  <h3 id="scalar">Scalar</h3>
+  <p>The simplest statistic — a single numeric counter. Used for counting events (instructions committed, cache misses, etc.).</p>
+
+  <pre><code class="language-cpp">namespace statistics {
+
+class Scalar : public DataWrap&lt;Scalar, ScalarInfo&gt;
+{
+    Counter data;
+
+  public:
+    void operator++();
+    void operator++(int);
+    void operator--();
+    void operator--(int);
+    void operator+=(Counter v);
+    void operator-=(Counter v);
+    Counter value() const { return data; }
+
+    // Chain initialization
+    Scalar &amp;name(const std::string &amp;n);
+    Scalar &amp;desc(const std::string &amp;d);
+    Scalar &amp;precision(int p);
+    Scalar &amp;flags(Flags f);
+};
+
+} // namespace statistics</code></pre>
+
+  <h3 id="vector">Vector</h3>
+  <p>An indexed array of counters. Used for per-thread, per-bank, or per-category counting.</p>
+
+  <pre><code class="language-cpp">class Vector : public DataWrap&lt;Vector, VectorInfo&gt;
+{
+    std::vector&lt;Counter&gt; data;
+
+  public:
+    // Resize and access
+    Vector &amp;init(size_t size);
+    ScalarProxy operator[](size_t index);
+
+    // Naming sub-stats
+    Vector &amp;subname(size_t i, const std::string &amp;name);
+    Vector &amp;subdesc(size_t i, const std::string &amp;desc);
+
+    size_t size() const;
+};
+
+// Usage:
+// stats.memAccess.init(4)
+//   .subname(0, "read").subname(1, "write")
+//   .subname(2, "ifetch").subname(3, "prefetch");</code></pre>
+
+  <h3 id="distribution">Distribution</h3>
+  <p>Tracks the distribution of sampled values across fixed-width bins. Essential for latency distributions, queue depth analysis, and similar metrics.</p>
+
+  <pre><code class="language-cpp">class Distribution : public DataWrap&lt;Distribution, DistInfo&gt;
+{
+  public:
+    // Initialize with min, max, bucket_size
+    Distribution &amp;init(Counter min, Counter max, Counter bkt);
+
+    void sample(Counter val, int number = 1);
+
+    Counter min_val;
+    Counter max_val;
+    Counter bucket_size;
+    Counter underflow;
+    Counter overflow;
+    std::vector&lt;Counter&gt; cvec;  // Bucket counts
+};
+
+// Example: track memory access latency
+// latencyDist.init(0, 1000, 10) — 0-1000 cycles, 10-cycle buckets</code></pre>
+
+  <h3 id="histogram">Histogram</h3>
+  <p>Similar to Distribution but uses logarithmically-scaled or automatically-sized bins. Better for data with unknown range.</p>
+
+  <pre><code class="language-cpp">class Histogram : public DataWrap&lt;Histogram, HistInfo&gt;
+{
+  public:
+    Histogram &amp;init(size_t buckets);  // Number of buckets
+    void sample(Counter val, int number = 1);
+
+    // Auto-grows: doubles bucket width when all buckets filled
+    void grow_up();
+    void grow_out();
+
+    size_t logs;  // Log base for bucket sizes
+};</code></pre>
+
+  <h3 id="formula">Formula</h3>
+  <p>Computed statistics derived from other stats using arithmetic expressions. Evaluated at dump time, not during simulation.</p>
+
+  <pre><code class="language-cpp">class Formula : public DataWrap&lt;Formula, FormulaInfo&gt;
+{
+  public:
+    // Build from expression tree
+    Formula &amp;operator=(const Temp &amp;r);
+    const Formula &amp;operator+=(const Temp &amp;r);
+
+    // Compute current value
+    Result total() const;
+    VResult result() const;
+};
+
+// Usage in regStats():
+// ipc.name("ipc").desc("Instructions per cycle")
+//     = committedInsts / simCycles;</code></pre>
+
+  <h3 id="vector2d">Vector2d</h3>
+  <p>A 2D matrix of counters. Used for cross-product statistics like per-thread-per-type event counts.</p>
+
+  <pre><code class="language-cpp">class Vector2d : public DataWrap&lt;Vector2d, Vector2dInfo&gt;
+{
+  public:
+    Vector2d &amp;init(size_t x, size_t y);
+    ScalarProxy operator()(size_t x, size_t y);
+
+    Vector2d &amp;ysubname(size_t i, const std::string &amp;name);
+};</code></pre>
+
+  <h2 id="stat-group">Statistics Group</h2>
+  <p>The <code>Group</code> class organizes statistics hierarchically. Each <a href="../../python/index.html" title="python — Configuration <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a> is a Group, and Groups can contain sub-Groups for modular organization.</p>
+
+  <pre><code class="language-cpp">class Group
+{
+  public:
+    Group(Group *parent, const char *name = nullptr);
+
+    // Register a child group
+    void addStatGroup(const char *name, Group *group);
+
+    // Called during initialization
+    virtual void regStats();
+    virtual void resetStats();
+
+    // Merge another group's stats
+    void mergeStatGroup(Group *group);
+
+    // Stat registration (called by stat constructors)
+    void addStat(Info *info);
+};
+
+// SimObject inherits from Group:
+// class SimObject : public ... , public statistics::Group</code></pre>
+
+  <h2 id="stat-lifecycle">Statistics Lifecycle</h2>
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">sequenceDiagram
+    participant Py as Python Config
+    participant SO as SimObject
+    participant Stats as Stats System
+    participant Out as Output Backend
+
+    Py->>SO: instantiate()
+    SO->>Stats: regStats()
+    Stats->>Stats: Register all Info objects
+    Note over Stats: Simulation runs...
+    SO->>Stats: Increment/sample stats
+    Py->>Stats: dump()
+    Stats->>Out: Visit all registered stats
+    Out->>Out: Format and write (stats.txt)
+    Py->>Stats: reset()
+    Stats->>Stats: Zero all counters
+    Note over Stats: Continue simulation...
+    Py->>Stats: dump()
+    Stats->>Out: Write delta stats
+    </pre>
+  </div>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Defining and Using Statistics</h3>
+    <ol>
+      <li><strong>Declaration</strong> — In your SimObject's header, declare stat members as <code>statistics::Scalar</code>, <code>statistics::Vector</code>, etc. inside a nested <code>Stats</code> struct inheriting from <code>statistics::Group</code>.</li>
+      <li><strong>Registration</strong> — Override <code>regStats()</code>. Call each stat's <code>.name()</code>, <code>.desc()</code>, and <code>.init()</code> chain. Stats auto-register with their parent Group.</li>
+      <li><strong>Incrementing</strong> — During simulation, use <code>++stat</code>, <code>stat += value</code>, or <code>stat.sample(val)</code> to record data. These are lightweight inline operations.</li>
+      <li><strong>Formula Definition</strong> — In <code>regStats()</code>, define computed stats: <code>ipc = committedInsts / simCycles;</code>. The expression tree is stored, not evaluated.</li>
+      <li><strong>Dumping</strong> — When <code>m5.stats.dump()</code> is called (periodically or at exit), all stats are visited. Formulas are evaluated. Output is written to <code>stats.txt</code> by the text output backend.</li>
+      <li><strong>Resetting</strong> — <code>m5.stats.reset()</code> zeros all counters, enabling interval-based statistics collection.</li>
+    </ol>
+  </div>
+
+  <h2 id="output-backends">Output Backends</h2>
+  <p><a href="../../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar <a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> — gem5 Wiki" class="xref">Statistics</a> can be output in multiple formats simultaneously:</p>
+
+  <table>
+    <thead><tr><th>Backend</th><th>File</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Text</strong></td><td><code>stats.txt</code></td><td>Human-readable key=value format (default)</td></tr>
+      <tr><td><strong>JSON</strong></td><td><code>stats.json</code></td><td>Machine-parseable JSON output</td></tr>
+      <tr><td><strong>HDF5</strong></td><td><code>stats.h5</code></td><td>Hierarchical binary format for large-scale analysis</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="text-output-example">Text Output Example</h3>
+  <pre><code class="language-cpp">---------- Begin Simulation Statistics ----------
+system.cpu.committedInsts                     1000000
+system.cpu.committedOps                       1523847
+system.cpu.numCycles                          2500000
+system.cpu.ipc                                0.400000
+system.cpu.cpi                                2.500000
+system.l2cache.overallMissRate::total         0.032456
+system.l2cache.overallAvgMissLatency::total   185.234
+---------- End Simulation Statistics   ----------</code></pre>
+
+  <h2 id="stat-flags">Statistic Flags</h2>
+  <table>
+    <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>none</code></td><td>Default — always printed</td></tr>
+      <tr><td><code>nozero</code></td><td>Don't print if value is zero</td></tr>
+      <tr><td><code>nonan</code></td><td>Don't print if value is NaN</td></tr>
+      <tr><td><code>total</code></td><td>Print total of vector elements</td></tr>
+      <tr><td><code>dist</code></td><td>Print distribution details</td></tr>
+      <tr><td><code>pdf</code></td><td>Print probability density function</td></tr>
+      <tr><td><code>cdf</code></td><td>Print cumulative distribution function</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="usage-example">Complete Usage Example</h2>
+  <pre><code class="language-cpp">class MyCache : public ClockedObject
+{
+    struct MyCacheStats : public statistics::Group
+    {
+        MyCacheStats(MyCache *cache);
+
+        statistics::Scalar hits;
+        statistics::Scalar misses;
+        statistics::Formula missRate;
+        statistics::Vector accessesByType;
+        statistics::Distribution hitLatency;
+    } stats;
+
+  public:
+    MyCache(const Params &amp;p)
+        : ClockedObject(p), stats(this) {}
+};
+
+MyCache::MyCacheStats::MyCacheStats(MyCache *cache)
+    : statistics::Group(cache, "cache_stats")
+{
+    hits.name("hits").desc("Number of cache hits");
+    misses.name("misses").desc("Number of cache misses");
+    missRate.name("missRate").desc("Cache miss rate")
+        = misses / (hits + misses);
+
+    accessesByType.init(3)
+        .name("accessesByType")
+        .subname(0, "read")
+        .subname(1, "write")
+        .subname(2, "prefetch");
+
+    hitLatency.init(0, 100, 5)
+        .name("hitLatency")
+        .desc("Hit latency distribution (cycles)")
+        .flags(statistics::pdf | statistics::cdf);
+}</code></pre>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Group</code></td><td>group.hh</td><td>Hierarchical stat container (SimObject <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../index.html">base</a>)</td></tr>
+      <tr><td><code>Info</code></td><td>info.hh</td><td>Metadata base for all statistics</td></tr>
+      <tr><td><code>Scalar</code></td><td>statistics.hh</td><td>Single counter value</td></tr>
+      <tr><td><code>Vector</code></td><td>statistics.hh</td><td>Indexed array of counters</td></tr>
+      <tr><td><code>Vector2d</code></td><td>statistics.hh</td><td>2D matrix of counters</td></tr>
+      <tr><td><code>Distribution</code></td><td>statistics.hh</td><td>Fixed-bin distribution of sampled values</td></tr>
+      <tr><td><code>Histogram</code></td><td>statistics.hh</td><td>Auto-growing histogram</td></tr>
+      <tr><td><code>Formula</code></td><td>statistics.hh</td><td>Derived expression evaluated at dump time</td></tr>
+      <tr><td><code>Output</code></td><td>output.hh</td><td>Abstract output backend interface</td></tr>
+      <tr><td><code>Text</code></td><td>text.hh</td><td>Text file output backend</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Counter</strong></td><td>The underlying numeric type for statistics (typically <code>double</code>)</td></tr>
+      <tr><td><strong>Result</strong></td><td>The computed value of a statistic at dump time</td></tr>
+      <tr><td><strong>Dump</strong></td><td>The operation that writes all statistics to output files</td></tr>
+      <tr><td><strong>Reset</strong></td><td>Zeroing all counters to enable interval measurement</td></tr>
+      <tr><td><strong>Formula</strong></td><td>A derived statistic that computes its value from other statistics using arithmetic</td></tr>
+      <tr><td><strong>PDF</strong></td><td>Probability Density Function — fraction of samples in each bin</td></tr>
+      <tr><td><strong>CDF</strong></td><td>Cumulative Distribution Function — running total of PDF</td></tr>
+      <tr><td><strong>IPC</strong></td><td>Instructions Per Cycle — the most common derived performance metric</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

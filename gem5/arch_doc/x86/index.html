@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/arch/x86/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>x86 — x86-64 ISA Implementation | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="ISA-specific implementations providing instruction decoding, register definitions, fault handling, and MMU logic for each supported architecture." href="../index.html">arch</a> &rsaquo; x86</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>x86 — x86-64 ISA Implementation</h1>
+    <p class="subtitle">Full x86-64 instruction set support with variable-length decoding, microcode engine, CPUID emulation, segmentation, and Local APIC interrupt controller.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like…</strong>
+    <p class="analogy">The x86 ISA implementation is like a vintage clock repair shop — each instruction is a complex mechanism with variable-size gears (prefix bytes, opcodes, ModR/M, SIB, displacement, immediate). The decoder acts as a master watchmaker who first identifies each gear, then decomposes complex movements into <a title="simple — <a href="../riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">simple</a> micro-operations that the <a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a>'s simpler internal engine can execute one tick at a time.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The x86 ISA is one of gem5's most complex architecture implementations due to the CISC nature of x86-64. Key challenges include variable-length instruction encoding (1-15 bytes), the microcode decomposition of complex instructions, legacy segmentation support, and the full Local APIC interrupt controller model.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Decoder Pipeline"
+      Fetch["Byte Stream"]
+      Prefix["Prefix Parsing\n(REX, VEX, EVEX)"]
+      Opcode["Opcode Decode"]
+      ModRM["ModR/M + SIB"]
+      Micro["Microcode ROM\n(complex insts)"]
+      SI["StaticInst"]
+    end
+
+    subgraph "ISA State"
+      Regs["Register File\n(16 GPRs, XMM, flags)"]
+      Segs["Segment Registers\n(CS, DS, SS, ES, FS, GS)"]
+      CPUID_["CPUID Database"]
+      MSRs["Model-Specific Regs"]
+    end
+
+    subgraph "System"
+      APIC["Local APIC\n(interrupt controller)"]
+      MMU["x86 MMU\n(4-level page tables)"]
+      TLB["x86 TLB"]
+    end
+
+    Fetch --> Prefix --> Opcode --> ModRM --> SI
+    Opcode -->|"complex"| Micro --> SI
+    SI --> Regs
+    APIC --> Regs
+    MMU --> TLB
+    </pre>
+  </div>
+
+  <h2 id="decoder">Instruction Decoder</h2>
+  <p>The x86 decoder is a state-machine-based parser that handles the full complexity of x86 instruction encoding. It processes bytes sequentially through states: prefix parsing, opcode identification, ModR/M/SIB decoding, and displacement/immediate extraction.</p>
+
+  <pre><code class="language-cpp">namespace X86ISA {
+
+class Decoder : public InstDecoder
+{
+  public:
+    // Decoder states
+    enum State {
+        ResetState,
+        PrefixState,
+        TwoByteOpcodeState,
+        ThreeByte0F38State,
+        ThreeByte0F3AState,
+        VexTwoByteState,
+        VexThreeByteState,
+        OneByteOpcodeState,
+        ModRMState,
+        SIBState,
+        DisplacementState,
+        ImmediateState,
+        // ... additional states
+    };
+
+    void moreBytes(const PCStateBase &amp;pc, Addr fetchPC) override;
+    bool instReady() const override;
+    StaticInstPtr decode(PCStateBase &amp;nextPC) override;
+    void reset() override;
+
+  private:
+    State state;
+    ExtMachInst emi;        // Extended machine instruction
+    uint8_t prefixes;        // Accumulated prefix bytes
+    uint8_t rexPrefix;       // REX prefix for 64-bit mode
+    int immediateSize;
+    int displacementSize;
+
+    // Microcode ROM for complex instructions
+    StaticInstPtr decodeInst(ExtMachInst mach_inst);
+};</code></pre>
+
+  <h3 id="microcode-engine">Microcode Engine</h3>
+  <p>Complex x86 instructions (e.g., <code>REP MOVSB</code>, <code>CPUID</code>, <code>XSAVE</code>) are decomposed into sequences of micro-operations. The microcode ROM maps each macroop to a sequence of microops that the CPU pipeline processes individually.</p>
+
+  <pre><code class="language-cpp">// A macroop decomposes into microops
+class MacroopBase : public StaticInst
+{
+  protected:
+    std::vector&lt;StaticInstPtr&gt; microops;
+    uint32_t numMicroops;
+
+  public:
+    StaticInstPtr fetchMicroop(MicroPC upc) const override {
+        return microops[upc];
+    }
+    bool isMacroop() const override { return true; }
+    bool isMicroop() const override { return false; }
+};
+
+// Individual microop
+class MicroopBase : public X86ISA::X86StaticInst
+{
+  public:
+    bool isMicroop() const override { return true; }
+    bool isLastMicroop() const override;
+    bool isFirstMicroop() const override;
+};</code></pre>
+
+  <h2 id="register-file">Register File</h2>
+  <table>
+    <thead><tr><th>Category</th><th>Registers</th><th>Count</th><th>Width</th></tr></thead>
+    <tbody>
+      <tr><td>General Purpose</td><td>RAX, RBX, RCX, RDX, RSI, RDI, RSP, RBP, R8-R15</td><td>16</td><td>64-bit</td></tr>
+      <tr><td>SSE/AVX</td><td>XMM0-XMM15 (YMM, ZMM in AVX-512)</td><td>16</td><td>128/256/512-bit</td></tr>
+      <tr><td>Segment</td><td>CS, DS, SS, ES, FS, GS</td><td>6</td><td>16-bit selector + hidden</td></tr>
+      <tr><td><a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Control</a></td><td>CR0, CR2, CR3, CR4, CR8</td><td>5</td><td>64-bit</td></tr>
+      <tr><td>Flags</td><td>RFLAGS (CF, ZF, SF, OF, etc.)</td><td>1</td><td>64-bit</td></tr>
+      <tr><td>FP/x87</td><td>ST(0)-ST(7), FP status, control</td><td>8+</td><td>80-bit</td></tr>
+      <tr><td>MSR</td><td>EFER, STAR, LSTAR, FS_BASE, etc.</td><td>many</td><td>64-bit</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="fault-handling">Fault Handling</h2>
+  <p>x86 defines a complex fault hierarchy mapping to processor exceptions. Each fault carries a vector number and optional error code pushed onto the stack during exception delivery.</p>
+
+  <pre><code class="language-cpp">namespace X86ISA {
+
+class X86Fault : public FaultBase
+{
+  protected:
+    const char *faultName;
+    uint8_t vector;       // IDT vector number
+    bool errorCode;       // Whether error code is pushed
+
+  public:
+    void invoke(ThreadContext *tc, const StaticInstPtr &amp;inst) override;
+};
+
+// Specific faults
+class DivideError : public X86Fault { /* vector 0 */ };
+class DebugException : public X86Fault { /* vector 1 */ };
+class Breakpoint : public X86Fault { /* vector 3 */ };
+class InvalidOpcode : public X86Fault { /* vector 6 */ };
+class PageFault : public X86Fault {
+    Addr addr;
+    uint32_t errorCode;  // P, W/R, U/S, RSVD, I/D bits
+};
+class GeneralProtection : public X86Fault { /* vector 13 */ };
+
+} // namespace X86ISA</code></pre>
+
+  <h2 id="local-apic">Local APIC</h2>
+  <p>The Local APIC (Advanced Programmable Interrupt Controller) model handles interrupt delivery, IPI (Inter-Processor Interrupt) routing, timer functionality, and interrupt prioritization.</p>
+
+  <pre><code class="language-cpp">class Interrupts : public BaseInterrupts
+{
+  public:
+    // APIC registers
+    uint32_t regs[NUM_APIC_REGS];
+
+    // Interrupt request/service registers (256 bits each)
+    ApicRegister IRR;  // Interrupt Request Register
+    ApicRegister ISR;  // In-Service Register
+
+    // Timer
+    uint32_t initialCount;
+    uint32_t currentCount;
+    Tick timerPeriod;
+
+    // Check for pending interrupts
+    bool checkInterrupts() const override;
+    Fault getInterrupt() override;
+    void updateIntrInfo() override;
+
+    // IPI interface
+    void sendIPI(uint8_t destId, uint8_t vector, uint8_t deliveryMode);
+
+    // MMIO interface for APIC register access
+    Tick read(PacketPtr pkt) override;
+    Tick write(PacketPtr pkt) override;
+};</code></pre>
+
+  <h2 id="cpuid">CPUID Emulation</h2>
+  <p>gem5 emulates CPUID responses to correctly identify the simulated processor's capabilities to guest software. The CPUID database returns appropriate feature flags, <a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">cache</a> topology, and vendor information.</p>
+
+  <pre><code class="language-cpp">// CPUID leaf 0: Vendor string
+// Returns "GenuineIntel" or "AuthenticAMD" based on config
+
+// CPUID leaf 1: Feature flags
+// Reports supported extensions: SSE, SSE2, SSE3, SSSE3,
+// SSE4.1, SSE4.2, POPCNT, CLFLUSH, etc.
+
+// CPUID leaf 4: Cache topology
+// Reports L1I, L1D, L2, L3 cache parameters
+
+// CPUID leaf 0x80000000+: Extended features
+// Reports long mode support, NX bit, etc.</code></pre>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Decoding a MOV Instruction</h3>
+    <ol>
+      <li><strong>Byte <a href="../../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar Pipeline — gem5 Wiki" class="xref">Fetch</a></strong> — CPU fetches bytes starting at the current PC. The decoder receives: <code>48 89 44 24 08</code> (MOV [RSP+8], RAX).</li>
+      <li><strong>Prefix Parse</strong> — <code>0x48</code> is a REX prefix (REX.W = 1, 64-bit operand size). <a href="../arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">Decoder</a> records the prefix and advances.</li>
+      <li><strong>Opcode <a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Decode</a></strong> — <code>0x89</code> is the MOV r/m64, r64 opcode. Decoder identifies this as a register-to-memory move.</li>
+      <li><strong>ModR/M</strong> — <code>0x44</code> decodes as Mod=01 (8-bit displacement), Reg=RAX, R/M=100 (SIB follows).</li>
+      <li><strong>SIB Byte</strong> — <code>0x24</code> decodes as Scale=1, Index=none, <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">Base</a>=RSP. The effective address is RSP + displacement.</li>
+      <li><strong>Displacement</strong> — <code>0x08</code> is the 8-bit signed displacement. Final address: [RSP + 8].</li>
+      <li><strong><a href="../generic/index.html" title="generic — ISA-Independent Base Classes | gem5 Wiki" class="xref">StaticInst</a> Creation</strong> — A <code>Mov</code> StaticInst is created with source=RAX, dest=memory(RSP+8). Since this is a simple MOV, no microcode decomposition is needed.</li>
+    </ol>
+  </div>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Decoder</code></td><td>decoder.hh</td><td>Variable-length instruction decoder with state machine</td></tr>
+      <tr><td><code>X86ISA::ISA</code></td><td>isa.hh</td><td>x86 ISA register state (MSRs, control regs)</td></tr>
+      <tr><td><code>Interrupts</code></td><td>interrupts.hh</td><td>Local APIC interrupt controller model</td></tr>
+      <tr><td><code>X86MMU</code></td><td>X86MMU.py</td><td>4-level page table walker + TLB</td></tr>
+      <tr><td><code>X86Fault</code></td><td>faults.hh</td><td>x86 exception/fault hierarchy</td></tr>
+      <tr><td><code>EmulEnv</code></td><td>emulenv.hh</td><td>Instruction emulation environment (mode, operand size)</td></tr>
+      <tr><td><code>MacroopBase</code></td><td>insts/</td><td>Complex instruction microcode sequences</td></tr>
+      <tr><td><code>cpuid()</code></td><td>cpuid.cc</td><td>CPUID response database</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>REX Prefix</strong></td><td>x86-64 prefix byte enabling 64-bit operands and access to extended registers (R8-R15)</td></tr>
+      <tr><td><strong>ModR/M</strong></td><td>Byte encoding the addressing mode, register operand, and memory operand for an instruction</td></tr>
+      <tr><td><strong>SIB</strong></td><td>Scale-Index-Base byte for complex memory addressing (base + index×scale + disp)</td></tr>
+      <tr><td><strong>Macroop</strong></td><td>A complex x86 instruction decomposed into multiple simpler microops</td></tr>
+      <tr><td><strong><a href="../index.html" title="arch — Instruction Set Architectures | gem5 Wiki" class="xref">Microop</a></strong></td><td>A simple internal operation executed by the CPU pipeline</td></tr>
+      <tr><td><strong>APIC</strong></td><td>Advanced Programmable Interrupt Controller — manages hardware interrupts</td></tr>
+      <tr><td><strong>MSR</strong></td><td>Model-Specific Register — processor configuration and feature control registers</td></tr>
+      <tr><td><strong>CPUID</strong></td><td>Instruction returning processor identification and feature information</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

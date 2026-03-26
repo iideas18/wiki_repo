@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wiki-generated" content="2026-03-26">
+<meta name="wiki-source" content="minimind">
+<meta name="wiki-source-rev" content="83e52f6">
+<title>MiniMind — From-Scratch LLM Training Framework</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76;--shadow:0 2px 8px rgba(0,0,0,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3,h4{color:var(--heading);font-weight:600;margin-top:2rem;margin-bottom:.75rem}
+h1{font-size:2rem}h2{font-size:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}h3{font-size:1.2rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em;font-family:'SFMono-Regular',Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;position:relative}
+pre code{background:none;padding:0}
+.skip-link{position:absolute;top:-100px;left:8px;background:var(--accent);color:#fff;padding:8px 16px;border-radius:var(--radius);z-index:999;font-weight:600}
+.skip-link:focus{top:8px}
+.container{max-width:960px;margin:0 auto;padding:0 1.5rem 4rem}
+/* Theme Toggle */
+.theme-toggle{position:fixed;top:12px;right:16px;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;color:var(--text);font-size:1.1rem;box-shadow:var(--shadow);transition:background .2s}
+.theme-toggle:hover{background:var(--border)}
+/* Back to top */
+.back-top{position:fixed;bottom:24px;right:20px;z-index:100;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;display:none;box-shadow:var(--shadow);transition:opacity .2s}
+.back-top:hover{opacity:.85}
+/* Hero */
+.hero{text-align:center;padding:3rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.hero h1{font-size:2.5rem;margin:0 0 .3rem}
+.hero .subtitle{color:var(--text-muted);font-size:1.15rem;margin-bottom:1rem}
+.hero .reading-time{color:var(--text-muted);font-size:.85rem}
+/* Stat row */
+.stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin:1.2rem 0}
+.stat{text-align:center}.stat .num{font-size:1.6rem;font-weight:700;color:var(--accent)}.stat .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+/* Badges */
+.badges{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:1rem 0 .5rem}
+.badge{padding:4px 12px;border-radius:12px;font-size:.8rem;font-weight:600;border:1px solid var(--border)}
+.badge-blue{background:rgba(88,166,255,.12);color:var(--accent)}.badge-green{background:rgba(63,185,80,.12);color:var(--accent2)}
+.badge-yellow{background:rgba(210,153,34,.12);color:var(--accent3)}.badge-red{background:rgba(248,81,73,.12);color:var(--accent4)}
+/* Info box */
+.info-box{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:1.2rem 1.5rem;margin:1.5rem 0}
+.info-box h3{margin-top:0;color:var(--accent)}
+/* TOC */
+#toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;margin:1.5rem 0}
+#toc h3{margin-top:0}#toc ul{list-style:none;padding-left:1rem}#toc a{font-size:.9rem}#toc li{margin:.3rem 0}
+/* Table */
+.tbl-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:.55rem .75rem;border:1px solid var(--border);text-align:left}
+th{background:var(--surface);color:var(--heading);font-weight:600}
+tr:nth-child(even){background:var(--surface)}
+/* Cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card h4{margin:0 0 .4rem;font-size:1rem}.card p{font-size:.85rem;color:var(--text-muted);margin:0}
+.card .tag{font-size:.75rem;color:var(--accent2);margin-top:.5rem;display:inline-block}
+/* Mermaid */
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin:1rem 0;overflow:auto;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:'🔍 Click to expand';position:absolute;top:6px;right:10px;font-size:.7rem;color:var(--text-muted);opacity:.7}
+.mermaid-wrap:hover::after{opacity:1}
+/* Zoom overlay */
+.zoom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;cursor:zoom-out}
+.zoom-overlay.active{display:flex}
+.zoom-overlay .inner{transform-origin:center;transition:transform .1s}
+/* Directory tree */
+.dir-tree{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;font-family:'SFMono-Regular',Consolas,monospace;font-size:.85rem;line-height:1.8;overflow-x:auto;white-space:pre}
+/* Copy button */
+pre .copy-btn{position:absolute;top:6px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.72rem;cursor:pointer}
+pre .copy-btn:hover{color:var(--heading)}
+/* Footer */
+footer{border-top:1px solid var(--border);padding:1.5rem 0;margin-top:3rem;text-align:center;font-size:.85rem;color:var(--text-muted)}
+footer a{color:var(--accent)}
+/* Print */
+@media print{
+  .theme-toggle,.back-top,.skip-link,.zoom-overlay,.copy-btn{display:none!important}
+  body{background:#fff;color:#000}
+  .hero,.info-box,.card,.mermaid-wrap,#toc,pre,.dir-tree{border-color:#ccc}
+  a{color:#000;text-decoration:underline}
+  .card-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){.stats{gap:1rem}.hero h1{font-size:1.8rem}.card-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+<button class="back-top" id="backTop" aria-label="Back to top" title="Back to top">↑</button>
+<div class="zoom-overlay" id="zoomOverlay"><div class="inner" id="zoomInner"></div></div>
+
+<div class="container" id="main">
+<!-- Hero -->
+<header class="hero">
+  <h1>🧠 MiniMind</h1>
+  <div class="subtitle">From-Scratch LLM Training Framework</div>
+  <div class="stats">
+    <div class="stat"><div class="num">4</div><div class="label">Sub-modules</div></div>
+    <div class="stat"><div class="num">Python</div><div class="label">Language</div></div>
+    <div class="stat"><div class="num">21</div><div class="label">Files</div></div>
+    <div class="stat"><div class="num">~3.9K</div><div class="label">Lines</div></div>
+  </div>
+  <div class="badges">
+    <span class="badge badge-blue">🔵 Transformer · GQA</span>
+    <span class="badge badge-green">🟢 MoE · LoRA</span>
+    <span class="badge badge-yellow">🟡 RLHF · DPO · GRPO</span>
+    <span class="badge badge-red">🔴 26M–145M Params</span>
+  </div>
+  <div class="reading-time" id="readingTime"></div>
+</header>
+
+<!-- What is this? -->
+<div class="info-box">
+  <h3>💡 What is this?</h3>
+  <p>MiniMind is a minimalist open-source project that lets you train a GPT-style language model <strong>entirely from scratch</strong>. Think of it as a teaching hospital for LLMs: small enough to understand every layer, yet complete enough to cover the full training lifecycle — from BPE tokenizer training through pretraining, supervised fine-tuning (SFT), LoRA adaptation, and reinforcement learning from human feedback (DPO, PPO, GRPO, SPO). The smallest config (26M params) trains on a single consumer GPU, making it ideal for learning how transformers really work.</p>
+</div>
+
+<!-- TOC -->
+<nav id="toc"><h3>📑 Table of Contents</h3></nav>
+
+<!-- Architecture Diagram -->
+<h2 id="architecture">Architecture Overview</h2>
+<p>The system is organised into four sub-modules. <code>model/</code> defines the transformer backbone, <code>trainer/</code> orchestrates every training recipe, <code>dataset/</code> provides data loaders, and <code>scripts/</code> handles deployment and inference.</p>
+<div class="mermaid-wrap" data-source="architecture-diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph model["model/"]
+    MC[MiniMindConfig]
+    MM[MiniMindModel<br/>RoPE + GQA]
+    MCL[MiniMindForCausalLM<br/>GenerationMixin]
+    ATT[Attention<br/>Flash + KV Cache]
+    FF[FeedForward<br/>SwiGLU]
+    MOE[MOEFeedForward<br/>MoEGate + SharedExpert]
+    RMS[RMSNorm]
+    LORA[LoRA Module]
+    MC --> MM
+    MM --> MCL
+    ATT --> MM
+    FF --> MM
+    MOE --> MM
+    RMS --> MM
+    LORA -.-> MCL
+  end
+  subgraph trainer["trainer/"]
+    PT[pretrain.py]
+    SFT[train_sft.py]
+    TLORA[train_lora.py]
+    DPO[train_dpo.py]
+    PPO[train_ppo.py]
+    GRPO[train_grpo.py]
+    SPO[train_spo.py]
+    KD[train_distillation.py]
+    TR[train_reasoning.py]
+    TOK[train_tokenizer.py]
+    TU[trainer_utils.py]
+  end
+  subgraph dataset["dataset/"]
+    PD[PretrainDataset]
+    SD[SFTDataset]
+    DD[DPODataset]
+    RD[RLAIFDataset]
+  end
+  subgraph scripts["scripts/"]
+    API[serve_api.py<br/>FastAPI]
+    WEB[web_demo.py<br/>Streamlit]
+    CVT[convert_model.py]
+    CLI[api_client.py]
+  end
+  dataset --> trainer
+  model --> trainer
+  model --> scripts
+</pre>
+</div>
+
+<!-- Data-Flow Diagram -->
+<h2 id="data-flow">Training Data Flow</h2>
+<p>Every training recipe follows a similar pipeline. Raw text is tokenised, batched by the dataset classes, passed through the model, and gradients flow back through the optimizer.</p>
+<div class="mermaid-wrap" data-source="data-flow-diagram">
+<pre class="mermaid">
+sequenceDiagram
+    participant T as Tokenizer<br/>(BPE, vocab=6400)
+    participant D as Dataset<br/>(PretrainDataset / SFTDataset)
+    participant M as MiniMindForCausalLM<br/>(Transformer + MoE)
+    participant L as Loss<br/>(CE / DPO / PPO)
+    participant O as Optimizer<br/>(AdamW)
+    T->>D: Encode raw text → token IDs
+    D->>M: Batched input_ids + labels
+    M->>M: Embedding → N×(RMSNorm → Attention → RMSNorm → FFN) → LM Head
+    M->>L: logits + labels → loss
+    L->>O: loss.backward()
+    O->>M: parameter update (lr=5e-4, weight_decay=0.1)
+    Note over M,L: MoE adds aux_loss for load balancing
+</pre>
+</div>
+
+<!-- Narrated Walkthrough -->
+<h2 id="walkthrough">Narrated Walkthrough</h2>
+<div class="info-box">
+  <h3>🚶 Following the Full Training Pipeline</h3>
+  <p><strong>Step 1 — Tokenizer Training</strong> (<code>trainer/train_tokenizer.py</code>): Train a BPE tokenizer on your corpus to produce a 6,400-token vocabulary. This creates the <code>tokenizer.model</code> file consumed by all downstream stages.</p>
+  <p><strong>Step 2 — Pretraining</strong> (<code>trainer/pretrain.py</code>): Feed raw text through <code>PretrainDataset</code> into <code>MiniMindForCausalLM</code> with standard cross-entropy loss. The model learns general language patterns over ~10B tokens. Distributed training via DDP is supported.</p>
+  <p><strong>Step 3 — Supervised Fine-Tuning</strong> (<code>trainer/train_sft.py</code>): Switch to <code>SFTDataset</code> with instruction/response pairs. The loss mask ignores prompt tokens so the model only learns to generate responses.</p>
+  <p><strong>Step 4 — LoRA Adaptation</strong> (<code>trainer/train_lora.py</code>): Freeze the base model, inject <code>LoRA</code> low-rank matrices into Q/V projections, and fine-tune on domain data with ~0.1% trainable params.</p>
+  <p><strong>Step 5 — Preference Alignment</strong> (<code>trainer/train_dpo.py</code>): Use <code>DPODataset</code> to learn from chosen/rejected response pairs. DPO directly optimises the policy without a separate reward model.</p>
+  <p><strong>Step 6 — GRPO Reinforcement</strong> (<code>trainer/train_grpo.py</code>): Group Relative Policy Optimization samples multiple completions per prompt, ranks them, and updates the policy using relative advantages — no critic network needed.</p>
+  <p><strong>Step 7 — Deployment</strong> (<code>scripts/serve_api.py</code>): Wrap the trained model in an OpenAI-compatible FastAPI server. The <code>scripts/web_demo.py</code> Streamlit app provides a chat interface for interactive testing.</p>
+</div>
+
+<!-- Key Components Table -->
+<h2 id="components">Key Components</h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Class / Function</th><th>File</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><code>MiniMindConfig</code></td><td>model/model_minimind.py</td><td>HuggingFace-compatible config holding hidden_size, num_layers, MoE params, RoPE theta</td></tr>
+<tr><td><code>MiniMindModel</code></td><td>model/model_minimind.py</td><td>Core transformer stack: token embedding → N × MiniMindBlock → RMSNorm</td></tr>
+<tr><td><code>MiniMindForCausalLM</code></td><td>model/model_minimind.py</td><td>Full causal LM wrapping MiniMindModel + LM head + loss; inherits GenerationMixin</td></tr>
+<tr><td><code>Attention</code></td><td>model/model_minimind.py</td><td>Grouped Query Attention (GQA) with KV cache, RoPE, optional Flash Attention</td></tr>
+<tr><td><code>FeedForward</code></td><td>model/model_minimind.py</td><td>SwiGLU feed-forward: gate_proj · up_proj → SiLU → down_proj</td></tr>
+<tr><td><code>MoEGate</code></td><td>model/model_minimind.py</td><td>Top-k softmax gating with auxiliary load-balancing loss</td></tr>
+<tr><td><code>MOEFeedForward</code></td><td>model/model_minimind.py</td><td>Mixture of Experts layer dispatching tokens to top-k experts + shared expert</td></tr>
+<tr><td><code>RMSNorm</code></td><td>model/model_minimind.py</td><td>Root Mean Square Layer Normalization (no centering, faster than LayerNorm)</td></tr>
+<tr><td><code>LoRA</code></td><td>model/model_lora.py</td><td>Low-Rank Adaptation module injected into attention Q/V projections</td></tr>
+<tr><td><code>PretrainDataset</code></td><td>dataset/lm_dataset.py</td><td>Streams tokenised raw-text chunks for next-token pretraining</td></tr>
+<tr><td><code>SFTDataset</code></td><td>dataset/lm_dataset.py</td><td>Instruction-response pairs with prompt masking for supervised fine-tuning</td></tr>
+<tr><td><code>DPODataset</code></td><td>dataset/lm_dataset.py</td><td>Chosen/rejected pairs for Direct Preference Optimization</td></tr>
+<tr><td><code>RLAIFDataset</code></td><td>dataset/lm_dataset.py</td><td>Prompt dataset for RL-based training (PPO, GRPO, SPO)</td></tr>
+<tr><td><code>CriticModel</code></td><td>trainer/train_ppo.py</td><td>PPO value network extending MiniMindForCausalLM with a scalar value head</td></tr>
+<tr><td><code>AutoAdaptiveValueTracker</code></td><td>trainer/train_spo.py</td><td>SPO adaptive baseline tracker for reward normalisation</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Deep-dive Hub -->
+<h2 id="deep-dives">Deep-Dive Topics</h2>
+<p>Focused explorations of key architectural decisions and training strategies.</p>
+<div class="card-grid">
+  <div class="card">
+    <h4>🏗️ Transformer Architecture</h4>
+    <p>RoPE positional encoding, Grouped Query Attention with KV cache, RMSNorm, and SwiGLU feed-forward — how MiniMind assembles a GPT-style decoder.</p>
+    <span class="tag">model/model_minimind.py</span>
+  </div>
+  <div class="card">
+    <h4>🔄 Training Pipeline Flow</h4>
+    <p>From pretrain through SFT, DPO, PPO, GRPO, and SPO — the complete lifecycle of training a language model with MiniMind.</p>
+    <span class="tag">trainer/*.py</span>
+  </div>
+  <div class="card">
+    <h4>🔀 MoE Routing</h4>
+    <p>MoEGate softmax scoring, top-k expert selection, shared expert path, and auxiliary load-balancing loss for stable training.</p>
+    <span class="tag">model/model_minimind.py → MoEGate</span>
+  </div>
+  <div class="card">
+    <h4>🎯 LoRA Fine-tuning</h4>
+    <p>Low-rank decomposition of weight updates, injection into Q/V projections, rank selection, and merging for efficient adaptation.</p>
+    <span class="tag">model/model_lora.py → LoRA</span>
+  </div>
+</div>
+
+<!-- Directory Map -->
+<h2 id="directory">Directory Map</h2>
+<div class="dir-tree">minimind/
+├── model/
+│   ├── __init__.py
+│   ├── model_minimind.py      # MiniMindConfig, MiniMindModel, MiniMindForCausalLM, Attention, FeedForward, MoEGate, MOEFeedForward, RMSNorm
+│   └── model_lora.py          # LoRA module, apply_lora(), merge_lora()
+├── trainer/
+│   ├── pretrain.py            # Pretraining loop (DDP, gradient accumulation)
+│   ├── train_sft.py           # Supervised fine-tuning
+│   ├── train_lora.py          # LoRA fine-tuning pipeline
+│   ├── train_dpo.py           # Direct Preference Optimization
+│   ├── train_ppo.py           # PPO with CriticModel value network
+│   ├── train_grpo.py          # Group Relative Policy Optimization
+│   ├── train_spo.py           # Self-Play Optimization with AutoAdaptiveValueTracker
+│   ├── train_distillation.py  # Knowledge distillation from teacher model
+│   ├── train_reasoning.py     # Reasoning-focused fine-tuning
+│   ├── train_tokenizer.py     # BPE tokenizer training (vocab_size=6400)
+│   └── trainer_utils.py       # Shared utilities: lr schedulers, logging, checkpointing
+├── dataset/
+│   ├── __init__.py
+│   └── lm_dataset.py          # PretrainDataset, SFTDataset, DPODataset, RLAIFDataset
+├── scripts/
+│   ├── serve_api.py           # OpenAI-compatible FastAPI server
+│   ├── web_demo.py            # Streamlit chat interface
+│   ├── convert_model.py       # Model format converter (HF ↔ custom)
+│   └── api_client.py          # API client for testing serve_api.py
+└── eval_llm.py                # Evaluation harness (imports model + trainer_utils)</div>
+
+<!-- Configuration Table -->
+<h2 id="configuration">Model Configuration (MiniMindConfig)</h2>
+<p>Key knobs exposed via <code>MiniMindConfig(PretrainedConfig)</code>. The three standard model sizes are Small-26M, MoE-145M, and Base-104M.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Parameter</th><th>Small-26M</th><th>MoE-145M</th><th>Base-104M</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>hidden_size</code></td><td>512</td><td>640</td><td>768</td><td>Transformer hidden dimension</td></tr>
+<tr><td><code>num_hidden_layers</code></td><td>8</td><td>8</td><td>16</td><td>Number of transformer blocks</td></tr>
+<tr><td><code>num_attention_heads</code></td><td>8</td><td>8</td><td>8</td><td>Query heads in multi-head attention</td></tr>
+<tr><td><code>num_key_value_heads</code></td><td>2</td><td>2</td><td>2</td><td>KV heads for Grouped Query Attention</td></tr>
+<tr><td><code>vocab_size</code></td><td colspan="3">6400</td><td>BPE tokenizer vocabulary size</td></tr>
+<tr><td><code>max_position_embeddings</code></td><td colspan="3">32768</td><td>Maximum sequence length (with YaRN RoPE scaling)</td></tr>
+<tr><td><code>rope_theta</code></td><td colspan="3">1000000.0</td><td>RoPE base frequency for long-context extrapolation</td></tr>
+<tr><td><code>use_moe</code></td><td>false</td><td>true</td><td>false</td><td>Enable Mixture of Experts layers</td></tr>
+<tr><td><code>num_experts</code></td><td>—</td><td>8</td><td>—</td><td>Total expert count per MoE layer</td></tr>
+<tr><td><code>num_experts_per_tok</code></td><td>—</td><td>2</td><td>—</td><td>Top-k experts activated per token</td></tr>
+<tr><td><code>n_shared_experts</code></td><td>—</td><td>1</td><td>—</td><td>Always-on shared experts alongside routed ones</td></tr>
+<tr><td><code>flash_attn</code></td><td colspan="3">true (if available)</td><td>Use Flash Attention 2 for memory-efficient attention</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Sub-module Cards -->
+<h2 id="sub-modules">Sub-Module Index</h2>
+<p>Drill down into each sub-module for class-level documentation, diagrams, and code walkthroughs.</p>
+<div class="card-grid">
+  <a href="model/index.html" class="card" style="text-decoration:none;color:inherit">
+    <h4>📦 model/</h4>
+    <p>Core transformer architecture — MiniMindForCausalLM, Attention with GQA + RoPE, MoE routing, LoRA adaptation, RMSNorm, SwiGLU FFN.</p>
+    <span class="tag">3 files · model_minimind.py · model_lora.py</span>
+  </a>
+  <a href="trainer/index.html" class="card" style="text-decoration:none;color:inherit">
+    <h4>🏋️ trainer/</h4>
+    <p>Complete training pipeline — pretrain, SFT, LoRA, DPO, PPO, GRPO, SPO, knowledge distillation, reasoning, tokenizer training, shared utilities.</p>
+    <span class="tag">11 files · pretrain.py … trainer_utils.py</span>
+  </a>
+  <a href="dataset/index.html" class="card" style="text-decoration:none;color:inherit">
+    <h4>📊 dataset/</h4>
+    <p>Data loading and preprocessing — PretrainDataset for raw text, SFTDataset for instructions, DPODataset for preferences, RLAIFDataset for RL prompts.</p>
+    <span class="tag">2 files · lm_dataset.py</span>
+  </a>
+  <a href="scripts/index.html" class="card" style="text-decoration:none;color:inherit">
+    <h4>🚀 scripts/</h4>
+    <p>Deployment and tooling — OpenAI-compatible FastAPI server, Streamlit web demo, model format converter, API test client.</p>
+    <span class="tag">4 files · serve_api.py · web_demo.py</span>
+  </a>
+</div>
+
+<!-- Cross-Module Dependencies -->
+<h2 id="dependencies">Cross-Module Dependencies</h2>
+<div class="mermaid-wrap" data-source="dependency-diagram">
+<pre class="mermaid">
+flowchart TD
+  dataset["dataset/<br/>lm_dataset.py"]
+  model_mm["model/<br/>model_minimind.py"]
+  model_lora["model/<br/>model_lora.py"]
+  trainer["trainer/*<br/>(11 training scripts)"]
+  scripts["scripts/*<br/>(API, demo, converter)"]
+  eval["eval_llm.py"]
+  utils["trainer/<br/>trainer_utils.py"]
+
+  dataset -->|"PretrainDataset, SFTDataset, DPODataset"| trainer
+  model_mm -->|"MiniMindForCausalLM"| trainer
+  model_mm -->|"MiniMindForCausalLM"| scripts
+  model_lora -->|"LoRA, apply_lora"| scripts
+  model_mm -->|"MiniMindForCausalLM"| eval
+  model_lora -->|"LoRA"| eval
+  utils -->|"lr_scheduler, logging"| eval
+
+  style dataset fill:#1a3a2a,stroke:#3fb950,color:#c9d1d9
+  style model_mm fill:#1a2a3a,stroke:#58a6ff,color:#c9d1d9
+  style model_lora fill:#1a2a3a,stroke:#58a6ff,color:#c9d1d9
+  style trainer fill:#3a2a1a,stroke:#d29922,color:#c9d1d9
+  style scripts fill:#3a1a1a,stroke:#f85149,color:#c9d1d9
+</pre>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>Generated on 2026-03-26 · Source rev <code>83e52f6</code> · 21 Python files · ~3,882 lines</p>
+  <p><a href="search.html">🔍 Search wiki</a> · <a href="https://github.com/jingyaogong/minimind" target="_blank" rel="noopener">GitHub Repository</a></p>
+</footer>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+/* ── Theme Toggle ─────────────────────────────────────────── */
+function getTheme() {
+  return localStorage.getItem(THEME_KEY) || 'dark';
+}
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  document.getElementById('themeToggle').textContent = t === 'dark' ? '🌙' : '☀️';
+}
+applyTheme(getTheme());
+document.getElementById('themeToggle').addEventListener('click', () => {
+  applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+});
+
+/* ── Mermaid Init ─────────────────────────────────────────── */
+mermaid.initialize({
+  startOnLoad: false,
+  theme: getTheme() === 'dark' ? 'dark' : 'default',
+  securityLevel: 'loose',
+  flowchart: { useMaxWidth: true, htmlLabels: true }
+});
+document.querySelectorAll('.mermaid-wrap[data-source]').forEach(async (wrap) => {
+  const pre = wrap.querySelector('pre.mermaid');
+  if (!pre) return;
+  const code = pre.textContent;
+  const id = 'mm-' + wrap.getAttribute('data-source');
+  try {
+    const { svg } = await mermaid.render(id, code);
+    pre.innerHTML = svg;
+  } catch (e) { console.warn('Mermaid render error:', e); }
+});
+
+/* ── TOC Generator ────────────────────────────────────────── */
+const toc = document.getElementById('toc');
+const headings = document.querySelectorAll('h2[id]');
+if (headings.length && toc) {
+  const ul = document.createElement('ul');
+  headings.forEach(h => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+  toc.appendChild(ul);
+}
+
+/* ── Reading Time ─────────────────────────────────────────── */
+const text = document.getElementById('main').innerText;
+const words = text.split(/\s+/).length;
+const mins = Math.max(1, Math.round(words / 220));
+document.getElementById('readingTime').textContent = `⏱ ${mins} min read · ${words.toLocaleString()} words`;
+
+/* ── Back to Top ──────────────────────────────────────────── */
+const backBtn = document.getElementById('backTop');
+window.addEventListener('scroll', () => {
+  backBtn.style.display = window.scrollY > 400 ? 'block' : 'none';
+});
+backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ── Copy Buttons for <pre> ───────────────────────────────── */
+document.querySelectorAll('pre:not(.mermaid)').forEach(pre => {
+  if (pre.closest('.mermaid-wrap')) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(pre.textContent.replace(/^Copy/, '').trim());
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+  pre.appendChild(btn);
+});
+
+/* ── Diagram Zoom Overlay ─────────────────────────────────── */
+const overlay = document.getElementById('zoomOverlay');
+const zoomInner = document.getElementById('zoomInner');
+let zoomScale = 1;
+
+document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    const svg = wrap.querySelector('svg');
+    if (!svg) return;
+    zoomInner.innerHTML = svg.outerHTML;
+    zoomScale = 1;
+    zoomInner.style.transform = `scale(${zoomScale})`;
+    overlay.classList.add('active');
+  });
+});
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay || e.target === zoomInner) {
+    overlay.classList.remove('active');
+  }
+});
+overlay.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoomScale = Math.max(0.3, Math.min(5, zoomScale + (e.deltaY < 0 ? 0.15 : -0.15)));
+  zoomInner.style.transform = `scale(${zoomScale})`;
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') overlay.classList.remove('active');
+});
+
+/* ── Keyboard Navigation (j/k for H2 sections) ───────────── */
+document.addEventListener('keydown', (e) => {
+  if (overlay.classList.contains('active')) return;
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+  const h2s = Array.from(document.querySelectorAll('h2[id]'));
+  if (!h2s.length) return;
+  const scrollY = window.scrollY + 80;
+  let idx = h2s.findIndex(h => h.offsetTop > scrollY);
+  if (idx === -1) idx = h2s.length;
+  if (e.key === 'j') {
+    const target = h2s[Math.min(idx, h2s.length - 1)];
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (e.key === 'k') {
+    const target = h2s[Math.max(idx - 2, 0)];
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+
+/* ── Highlight.js ─────────────────────────────────────────── */
+hljs.highlightAll();
+</script>
+</body>
+</html>

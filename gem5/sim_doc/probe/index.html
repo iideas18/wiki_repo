@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="src/sim/probe/">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>probe — Non-Intrusive Instrumentation | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0;font-weight:600}.skip-link:focus{top:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+.theme-toggle{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.4em;color:var(--heading);margin-bottom:8px}.hero .subtitle{color:var(--text-muted);font-size:1.15em}
+.reading-time{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:32px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:32px}.toc h2{font-size:1em;color:var(--heading);margin-bottom:12px}.toc ul{list-style:none;padding-left:0}.toc li{padding:3px 0}.toc a{color:var(--accent);font-size:14px}.toc ul ul{padding-left:16px}
+h2{font-size:1.6em;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:1.25em;color:var(--heading);margin:28px 0 12px}
+p{margin-bottom:16px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:16px 0;position:relative}
+pre code{background:none;padding:0;color:inherit;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:0.9em}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th{background:var(--surface);color:var(--heading);text-align:left;padding:10px 12px;border:1px solid var(--border);font-weight:600}td{padding:10px 12px;border:1px solid var(--border)}tr:nth-child(even){background:var(--table-even)}tr:nth-child(odd){background:var(--table-odd)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+.mermaid-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;cursor:pointer;text-align:center;position:relative}
+.mermaid-container::after{content:"Click to expand";position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text-muted);opacity:0;transition:opacity .2s}.mermaid-container:hover::after{opacity:1}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;cursor:zoom-out}.overlay.active{display:flex}.overlay-content{max-width:95vw;max-height:95vh;overflow:auto;transform-origin:center center}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.walkthrough{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:24px 0}.walkthrough h3{color:var(--accent);margin-top:0}.walkthrough ol{padding-left:20px}.walkthrough li{margin-bottom:12px;color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-core{background:var(--accent);color:#fff}.badge-util{background:var(--accent2);color:#fff}.badge-config{background:var(--accent3);color:#fff}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.copy-btn,.overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.hero h1{font-size:1.8em}a{color:#000;text-decoration:underline}.mermaid-container{break-inside:avoid}}
+@media(max-width:768px){.hero h1{font-size:1.6em}main{padding:16px}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="The discrete-event simulation core that drives gem5's timing model, managing object lifecycles, event scheduling, and system-level coordination." href="../index.html">sim</a> &rsaquo; probe</nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌓 Theme</button>
+</header>
+<main id="main">
+  <div class="hero">
+    <h1>probe — Non-Intrusive Instrumentation</h1>
+    <p class="subtitle">An observer-pattern framework for attaching monitoring, profiling, and analysis tools to simulation components without modifying their source code.</p>
+  </div>
+  <div class="reading-time" id="reading-time"></div>
+
+  <div class="intro-box">
+    <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+    <strong>💡 Think of it like medical monitoring…</strong>
+    <p class="analogy">Imagine a patient (<a href="../../python/index.html" title="python — Configuration <a href="../index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a>) in a hospital. <code>ProbePoint</code> is a sensor port on the patient's body — a pulse oximeter clip, blood pressure cuff, or EKG lead. <code>ProbeListener</code> is the monitoring device plugged into that sensor. The patient doesn't need surgery to add monitoring — you just clip on a new sensor. Similarly, gem5 components expose probe points that external listeners can attach to without changing the component's core logic.</p>
+  </div>
+
+  <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+  <h2 id="architecture-overview">Architecture Overview</h2>
+  <p>The probe framework implements the Observer design pattern. <code>SimObject</code> subclasses register named <code>ProbePoint</code> objects during initialization. Separate <code>ProbeListener</code> objects (often from different SimObjects) attach to these points to receive notifications when interesting events occur — without the producer needing to know about the consumer.</p>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">graph TB
+    subgraph "Producer (e.g., CPU)"
+      CPU["BaseCPU"]
+      PP1["ProbePoint&lt;InstPtr&gt;\n'Commit'"]
+      PP2["ProbePoint&lt;Addr&gt;\n'DataAccess'"]
+      CPU --> PP1
+      CPU --> PP2
+    end
+
+    subgraph "Framework"
+      PM["ProbeManager\n(registry)"]
+    end
+
+    subgraph "Consumers"
+      PL1["ProbeListener\n(SimpleCache stats)"]
+      PL2["ProbeListener\n(PMU counter)"]
+      PL3["ProbeListener\n(Trace logger)"]
+    end
+
+    PP1 -->|"notify"| PL1
+    PP1 -->|"notify"| PL2
+    PP2 -->|"notify"| PL3
+    PM --> PP1
+    PM --> PP2
+    </pre>
+  </div>
+
+  <h2 id="probe-point">ProbePoint</h2>
+  <p>A <code>ProbePoint</code> is a named notification source templated on the type of data it emits. When the producing component wants to signal an event, it calls <code>notify()</code> on the probe point, which fans out to all registered listeners.</p>
+
+  <h3 id="probe-point-class">ProbePointArg Class</h3>
+  <pre><code class="language-cpp">// Type-erased base for probe point registration
+class ProbePoint
+{
+  protected:
+    std::string name;
+    ProbeManager *manager;
+
+  public:
+    ProbePoint(ProbeManager *manager, const std::string &amp;name);
+    virtual ~ProbePoint();
+
+    const std::string &amp;getName() const { return name; }
+};
+
+// Typed probe point with argument
+template&lt;typename Arg&gt;
+class ProbePointArg : public ProbePoint
+{
+    std::vector&lt;ProbeListener *&gt; listeners;
+
+  public:
+    ProbePointArg(ProbeManager *manager, const std::string &amp;name);
+
+    // Fire notification to all listeners
+    void notify(const Arg &amp;val) {
+        for (auto *l : listeners)
+            static_cast&lt;ProbeListenerArg&lt;Arg&gt; *&gt;(l)-&gt;notify(val);
+    }
+
+    void addListener(ProbeListener *l);
+    void removeListener(ProbeListener *l);
+    bool hasListeners() const { return !listeners.empty(); }
+};</code></pre>
+
+  <h2 id="probe-listener">ProbeListener</h2>
+  <p>A <code>ProbeListener</code> attaches to a specific probe point and receives callbacks when events occur. The listener specifies which SimObject and probe point name to listen to.</p>
+
+  <h3 id="probe-listener-class">ProbeListenerArg Class</h3>
+  <pre><code class="language-cpp">class ProbeListener
+{
+  protected:
+    ProbeManager *manager;
+    std::string pointName;
+
+  public:
+    ProbeListener(ProbeManager *pm, const std::string &amp;name);
+    virtual ~ProbeListener();
+};
+
+template&lt;typename Arg&gt;
+class ProbeListenerArg : public ProbeListener
+{
+  public:
+    ProbeListenerArg(ProbeManager *pm, const std::string &amp;name,
+                     std::function&lt;void(const Arg &amp;)&gt; callback);
+
+    virtual void notify(const Arg &amp;val) {
+        callback(val);
+    }
+
+  private:
+    std::function&lt;void(const Arg &amp;)&gt; callback;
+};</code></pre>
+
+  <h2 id="probe-manager">ProbeManager</h2>
+  <p>Each SimObject has a <code>ProbeManager</code> that serves as a registry for its probe points. Listeners use the manager to find and connect to named probe points. The manager handles the lifecycle of point-listener connections.</p>
+
+  <pre><code class="language-cpp">class ProbeManager
+{
+    SimObject *object;
+    std::vector&lt;ProbePoint *&gt; points;
+
+  public:
+    ProbeManager(SimObject *obj);
+
+    // Register a new probe point
+    void addPoint(ProbePoint *point);
+
+    // Find probe point by name
+    ProbePoint *getPoint(const std::string &amp;name) const;
+
+    // Connect listener to named point
+    bool addListener(const std::string &amp;pointName,
+                     ProbeListener *listener);
+
+    bool removeListener(const std::string &amp;pointName,
+                        ProbeListener *listener);
+};</code></pre>
+
+  <h2 id="standard-probe-points">Standard Probe Points</h2>
+  <p>gem5 defines several standard probe points across its components. These provide a consistent instrumentation interface for common events.</p>
+
+  <table>
+    <thead><tr><th>Probe Point</th><th>Source Component</th><th>Argument Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>Commit</code></td><td><a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a></td><td><code>StaticInstPtr</code></td><td>Fired when an instruction commits</td></tr>
+      <tr><td><code>Fetch</code></td><td>CPU</td><td><code>StaticInstPtr</code></td><td>Fired when an instruction is fetched</td></tr>
+      <tr><td><code>DataAccess</code></td><td>CPU</td><td><code>PacketPtr</code></td><td>Fired on data memory access</td></tr>
+      <tr><td><code>Miss</code></td><td><a title="cache — Classic <a href="../../mem_doc/cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../../mem_doc/cache/index.html">Cache</a></td><td><code>PacketPtr</code></td><td>Fired on cache miss</td></tr>
+      <tr><td><code>Hit</code></td><td>Cache</td><td><code>PacketPtr</code></td><td>Fired on cache hit</td></tr>
+      <tr><td><code>Fill</code></td><td>Cache</td><td><code>PacketPtr</code></td><td>Fired when a cache line is filled</td></tr>
+      <tr><td><code>Eviction</code></td><td>Cache</td><td><code>Addr</code></td><td>Fired when a cache line is evicted</td></tr>
+      <tr><td><code>TLBMiss</code></td><td>TLB</td><td><code>Addr</code></td><td>Fired on TLB miss</td></tr>
+      <tr><td><code>PwrStateChange</code></td><td><a href="../index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">ClockedObject</a></td><td><code>PowerState</code></td><td>Fired on <a title="Hierarchical power state management, dynamic voltage/frequency scaling, thermal simulation, and energy estimation for simulated components." href="../power/index.html">power</a> state transition</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="usage-patterns">Usage Patterns</h2>
+
+  <h3 id="registering-probe-points">Registering Probe Points (Producer)</h3>
+  <pre><code class="language-cpp">// In a CPU's header file
+class MyCPU : public BaseCPU
+{
+    ProbePointArg&lt;StaticInstPtr&gt; *ppCommit;
+    ProbePointArg&lt;PacketPtr&gt; *ppDataAccess;
+
+  public:
+    void regProbePoints() override {
+        ppCommit = new ProbePointArg&lt;StaticInstPtr&gt;(
+            getProbeManager(), "Commit");
+        ppDataAccess = new ProbePointArg&lt;PacketPtr&gt;(
+            getProbeManager(), "DataAccess");
+    }
+
+    // In execute logic:
+    void commitInst(StaticInstPtr inst) {
+        // ... normal commit logic ...
+        ppCommit-&gt;notify(inst);  // Fire probe
+    }
+};</code></pre>
+
+  <h3 id="attaching-listeners">Attaching Listeners (Consumer)</h3>
+  <pre><code class="language-cpp">// A PMU-like listener object
+class MyProfiler : public SimObject
+{
+    uint64_t commitCount = 0;
+    ProbeListenerArg&lt;StaticInstPtr&gt; *listener;
+
+  public:
+    void regProbeListeners() override {
+        // Attach to CPU's "Commit" probe point
+        listener = new ProbeListenerArg&lt;StaticInstPtr&gt;(
+            cpu-&gt;getProbeManager(), "Commit",
+            [this](const StaticInstPtr &amp;inst) {
+                commitCount++;
+                if (inst-&gt;isMemRef())
+                    memAccessCount++;
+            });
+    }
+};</code></pre>
+
+  <h3 id="conditional-probing">Conditional Probing</h3>
+  <pre><code class="language-cpp">// Check if anyone is listening before doing expensive work
+void MyCPU::commitInst(StaticInstPtr inst) {
+    // ... normal commit logic ...
+
+    if (ppCommit-&gt;hasListeners()) {
+        // Only construct the notification data if someone cares
+        ppCommit-&gt;notify(inst);
+    }
+}</code></pre>
+
+  <h2 id="built-in-probe-listeners">Built-in Probe Listeners</h2>
+  <p>gem5 ships with several pre-built probe listener implementations for common analysis tasks:</p>
+
+  <h3 id="pmu-probe">PMU (Performance Monitoring Unit)</h3>
+  <p>The <a title="Comprehensive ARM architecture support including <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch32</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">AArch64</a>, <a href="../../arch_doc/arm/index.html" title="arm — ARM/AArch64 ISA Implementation | gem5 Wiki" class="xref">TrustZone</a> security extensions, SVE/SVE2 vector processing, PMU, and hardware transactional memory." href="../../arch_doc/arm/index.html">ARM</a> PMU implementation uses probe points to count architectural events (instructions retired, cache misses, branch mispredictions) without modifying the CPU pipeline code.</p>
+
+  <h3 id="stack-distance">Stack Distance Calculator</h3>
+  <p>Attaches to cache access probe points to compute reuse distance distributions — essential for cache sizing analysis.</p>
+
+  <h3 id="mem-trace">Memory Trace Recorder</h3>
+  <p>Records all memory accesses to a trace file by listening to DataAccess probe points, enabling offline analysis.</p>
+
+  <div class="walkthrough">
+    <h3>🔍 Narrated Walkthrough: Adding a Custom Probe Listener</h3>
+    <ol>
+      <li><strong>Identify the Probe</strong> — Determine which SimObject exposes the event you want to monitor. Check the component's <code>regProbePoints()</code> method for available probe point names.</li>
+      <li><strong>Create a Listener Class</strong> — Define a new SimObject subclass (or use an existing one) that will receive probe notifications. Override <code>regProbeListeners()</code>.</li>
+      <li><strong>Instantiate ProbeListenerArg</strong> — In <code>regProbeListeners()</code>, create a <code>ProbeListenerArg</code> with the target's <code>ProbeManager</code>, the point name, and your callback function.</li>
+      <li><strong>Handle Notifications</strong> — Your callback receives the typed argument whenever the probe fires. Update counters, log data, or trigger other actions.</li>
+      <li><strong><a title="Configuration System and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> Configuration</strong> — Instantiate your listener in the Python config and pass it a reference to the SimObject you want to monitor.</li>
+      <li><strong>Zero Overhead</strong> — If no listener is attached, the <code>notify()</code> call is essentially a no-op (empty vector iteration), so unmonitored components pay minimal cost.</li>
+    </ol>
+  </div>
+
+  <div class="mermaid-container" onclick="openOverlay(this)">
+    <pre class="mermaid">sequenceDiagram
+    participant Init as Initialization
+    participant CPU as CPU Component
+    participant PM as ProbeManager
+    participant PP as ProbePoint
+    participant PL as ProbeListener
+    participant User as User Callback
+
+    Init->>CPU: regProbePoints()
+    CPU->>PP: new ProbePointArg("Commit")
+    CPU->>PM: addPoint(ppCommit)
+    Init->>PL: regProbeListeners()
+    PL->>PM: addListener("Commit", listener)
+    PM->>PP: addListener(listener)
+
+    Note over CPU,User: Simulation Running
+
+    CPU->>PP: notify(inst)
+    PP->>PL: notify(inst)
+    PL->>User: callback(inst)
+    User->>User: Update statistics
+    </pre>
+  </div>
+
+  <h2 id="design-principles">Design Principles</h2>
+  <ul>
+    <li><strong>Non-intrusive</strong> — Producers don't need to know about consumers; adding monitoring doesn't require changing component code</li>
+    <li><strong>Type-safe</strong> — Template parameterization ensures listeners receive correctly-typed data</li>
+    <li><strong>Low overhead</strong> — No listeners attached = minimal cost (empty vector check)</li>
+    <li><strong>Decoupled</strong> — Listeners and producers are independent SimObjects configured in Python</li>
+    <li><strong>Composable</strong> — Multiple listeners can attach to the same probe point simultaneously</li>
+  </ul>
+
+  <h2 id="key-components">Key Components Reference</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Header</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>ProbePoint</code></td><td>probe/probe.hh</td><td>Type-erased <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> for named notification sources</td></tr>
+      <tr><td><code>ProbePointArg&lt;T&gt;</code></td><td>probe/probe.hh</td><td>Typed probe point that fires notifications with argument</td></tr>
+      <tr><td><code>ProbeListener</code></td><td>probe/probe.hh</td><td>Base class for probe event receivers</td></tr>
+      <tr><td><code>ProbeListenerArg&lt;T&gt;</code></td><td>probe/probe.hh</td><td>Typed listener with callback function</td></tr>
+      <tr><td><code>ProbeManager</code></td><td>probe/probe.hh</td><td>Per-SimObject registry of probe points</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="glossary">Glossary</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Observer Pattern</strong></td><td>Design pattern where subjects notify observers of state changes without tight coupling</td></tr>
+      <tr><td><strong>Probe Point</strong></td><td>A named notification source on a SimObject that fires when specific events occur</td></tr>
+      <tr><td><strong>Probe Listener</strong></td><td>An observer that attaches to a probe point and receives event callbacks</td></tr>
+      <tr><td><strong>Non-Intrusive</strong></td><td>Monitoring that can be added/removed without modifying the monitored component's source code</td></tr>
+      <tr><td><strong>PMU</strong></td><td>Performance Monitoring Unit — hardware counter system modeled using probe listeners</td></tr>
+      <tr><td><strong>Reuse Distance</strong></td><td>Number of unique addresses accessed between two accesses to the same address — key cache metric</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="overlay" id="diagramOverlay" onclick="closeOverlay()">
+  <div class="overlay-content" id="diagramOverlayContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const stored = localStorage.getItem('neutra-ip-theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+
+  window.toggleTheme = function(){
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    renderMermaid();
+    updateHljsTheme(next);
+  };
+
+  function updateHljsTheme(theme){
+    const link = document.getElementById('hljs-theme');
+    link.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+  if(stored) updateHljsTheme(stored);
+
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  const mermaidSources = new Map();
+
+  function renderMermaid(){
+    document.querySelectorAll('.mermaid').forEach(function(el){
+      if(!mermaidSources.has(el)) mermaidSources.set(el, el.textContent);
+      el.removeAttribute('data-processed');
+      el.textContent = mermaidSources.get(el);
+    });
+    mermaid.run();
+  }
+  renderMermaid();
+
+  hljs.highlightAll();
+
+  document.querySelectorAll('pre code').forEach(function(block){
+    if(block.closest('.mermaid-container')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function(){
+      navigator.clipboard.writeText(block.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    };
+    block.parentElement.appendChild(btn);
+  });
+
+  var toc = document.getElementById('toc');
+  var headings = document.querySelectorAll('h2[id], h3[id]');
+  if(headings.length && toc){
+    var ul = document.createElement('ul');
+    headings.forEach(function(h){
+      if(h.closest('.toc') || h.closest('.walkthrough') || h.closest('.intro-box')) return;
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if(h.tagName === 'H3'){
+        var sub = ul.querySelector('li:last-child ul') || document.createElement('ul');
+        sub.appendChild(li);
+        if(!sub.parentElement) ul.querySelector('li:last-child').appendChild(sub);
+      } else {
+        ul.appendChild(li);
+      }
+    });
+    toc.appendChild(ul);
+  }
+
+  var text = document.querySelector('main').textContent;
+  var words = text.trim().split(/\s+/).length;
+  var rt = document.getElementById('reading-time');
+  if(rt) rt.textContent = '📖 ' + Math.ceil(words/200) + ' min read';
+
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function(){
+    btt.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var hs = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+    if(e.key === 'j' || e.key === 'k'){
+      var scrollY = window.scrollY + 100;
+      var idx = hs.findIndex(function(h){ return h.offsetTop > scrollY; });
+      if(e.key === 'k') idx = Math.max(0, (idx <= 0 ? hs.length : idx) - 2);
+      else idx = idx < 0 ? hs.length - 1 : idx;
+      if(hs[idx]) hs[idx].scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayContent = document.getElementById('diagramOverlayContent');
+  var currentScale = 1;
+
+  window.openOverlay = function(container){
+    var svg = container.querySelector('svg');
+    if(!svg) return;
+    overlayContent.innerHTML = '';
+    var clone = svg.cloneNode(true);
+    clone.style.maxWidth = '90vw';
+    clone.style.maxHeight = '90vh';
+    overlayContent.appendChild(clone);
+    overlay.classList.add('active');
+    currentScale = 1;
+  };
+
+  window.closeOverlay = function(){
+    overlay.classList.remove('active');
+    overlayContent.innerHTML = '';
+  };
+
+  overlay.addEventListener('wheel', function(e){
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(5, currentScale));
+    overlayContent.style.transform = 'scale(' + currentScale + ')';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeOverlay();
+  });
+})();
+</script>
+</body>
+</html>

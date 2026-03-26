@@ -1,0 +1,210 @@
+[
+  {
+    "title": "Claude Code \u2014 AI-Powered Agentic Coding Tool",
+    "path": "index.html",
+    "excerpt": "Claude Code brings AI intelligence into your terminal, IDE, and GitHub workflows. 13 official plugins, 15+ workflows, multi-language. Plugin system with commands, agents, skills, hooks, and MCP servers.",
+    "headings": [
+      "System Architecture",
+      "Plugin Execution Flow",
+      "Cross-Module Connection",
+      "Navigation Guide",
+      "Directory Map",
+      "Build & Tech Stack"
+    ]
+  },
+  {
+    "title": "Plugins \u2014 Extensible Plugin Ecosystem",
+    "path": "plugins_doc/index.html",
+    "excerpt": "13 official plugins providing commands, agents, skills, hooks, and MCP server integrations. Plugin architecture with manifest auto-discovery, slash commands, specialized agents, progressive-disclosure skills, and event-driven hooks.",
+    "headings": [
+      "Plugin Architecture",
+      "Plugin Lifecycle",
+      "Feature Development Workflow",
+      "Key Components",
+      "Plugin Catalog",
+      "Cross-Plugin Interactions",
+      "Directory Map",
+      "Configuration Reference"
+    ]
+  },
+  {
+    "title": "Plugin Dev \u2014 Plugin Development Toolkit",
+    "path": "plugins_doc/plugin-dev/index.html",
+    "excerpt": "Comprehensive toolkit for developing Claude Code plugins with 7 specialized skills, 3 expert agents, and an 8-phase guided creation workflow. Skills cover plugin structure, agents, commands, hooks, MCP, settings, and skill development.",
+    "headings": [
+      "Architecture",
+      "Key Components",
+      "Data Flow",
+      "Interactions",
+      "Directory Map",
+      "Configuration Reference"
+    ]
+  },
+  {
+    "title": "PR Review Toolkit \u2014 Multi-Agent PR Analysis",
+    "path": "plugins_doc/pr-review-toolkit/index.html",
+    "excerpt": "6 specialized review agents for PR analysis: comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer, code-reviewer, code-simplifier. Confidence scoring with threshold of 80.",
+    "headings": [
+      "Architecture",
+      "Key Components",
+      "Data Flow",
+      "Interactions",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Hookify \u2014 Python Rule Engine for Custom Hooks",
+    "path": "plugins_doc/hookify/index.html",
+    "excerpt": "Python-based plugin enabling custom event-driven hooks with markdown rules and YAML frontmatter. Rule engine with 6 operators: regex_match, contains, equals, not_contains, starts_with, ends_with. Supports PreToolUse, PostToolUse, Stop, UserPromptSubmit events.",
+    "headings": [
+      "Architecture",
+      "Key Components",
+      "Data Flow",
+      "Rule Engine",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Feature Dev \u2014 7-Phase Feature Development",
+    "path": "plugins_doc/feature-dev/index.html",
+    "excerpt": "Structured workflow with parallel code exploration, architecture design, and quality review. 3 specialized agents: code-explorer, code-architect, code-reviewer. 7 phases from discovery to summary.",
+    "headings": [
+      "Architecture",
+      "Key Components",
+      "Data Flow",
+      "7-Phase Workflow",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Agent SDK Dev \u2014 SDK Scaffolding & Verification",
+    "path": "plugins_doc/agent-sdk-dev/index.html",
+    "excerpt": "Development kit for creating Claude Agent SDK applications in Python and TypeScript. Interactive guided setup with /new-sdk-app command. Automated verification against best practices.",
+    "headings": [
+      "Architecture",
+      "Key Components",
+      "Data Flow",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Ralph Wiggum \u2014 Autonomous AI Loop Runner",
+    "path": "plugins_doc/ralph-wiggum/index.html",
+    "excerpt": "Continuous self-referential AI loops. Claude works on the same task repeatedly, reading its own previous output. Uses Stop hook to intercept session exit and re-feed the prompt. Completion promises for loop termination.",
+    "headings": [
+      "Architecture",
+      "Loop Lifecycle",
+      "State Management",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Code Review \u2014 Multi-Agent Automated PR Review",
+    "path": "plugins_doc/code-review/index.html",
+    "excerpt": "Automated PR code review with 4+ parallel agents. CLAUDE.md compliance checking, bug detection with Opus, historical context analysis. Confidence-based filtering at 80 threshold.",
+    "headings": [
+      "Architecture",
+      "Review Pipeline",
+      "Confidence Scoring",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Commit Commands \u2014 Git Workflow Automation",
+    "path": "plugins_doc/commit-commands/index.html",
+    "excerpt": "Style-aware commits, branch management, and PR creation. Three commands: /commit, /commit-push-pr, /clean_gone. Analyzes recent commit history for message style.",
+    "headings": [
+      "Architecture",
+      "Commands",
+      "Workflow",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Claude Opus 4.5 Migration \u2014 Model Migration Tool",
+    "path": "plugins_doc/claude-opus-4-5-migration/index.html",
+    "excerpt": "Automated migration from Claude 4.x to Opus 4.5 across Anthropic API, AWS Bedrock, Google Vertex AI, Azure. Model string replacement, beta header cleanup, prompt adjustments.",
+    "headings": [
+      "Architecture",
+      "Migration Steps",
+      "Platform Support",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Frontend Design \u2014 Bold UI Design Guidance",
+    "path": "plugins_doc/frontend-design/index.html",
+    "excerpt": "Creates distinctive production-grade frontend interfaces avoiding generic AI aesthetics. Bold design choices for typography, color, animation, spatial composition. 10+ aesthetic directions.",
+    "headings": [
+      "Architecture",
+      "Design Process",
+      "Aesthetic Directions",
+      "Implementation"
+    ]
+  },
+  {
+    "title": "Explanatory Output Style \u2014 Educational Insights Hook",
+    "path": "plugins_doc/explanatory-output-style/index.html",
+    "excerpt": "SessionStart hook that injects educational context about implementation choices and codebase patterns. Recreates the deprecated Explanatory output style as a plugin.",
+    "headings": [
+      "Architecture",
+      "Insight Format",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Learning Output Style \u2014 Interactive Learning Mode",
+    "path": "plugins_doc/learning-output-style/index.html",
+    "excerpt": "Combines explanatory insights with interactive code participation. Requests meaningful code contributions from users at decision points. Two modes: Learning and Explanatory.",
+    "headings": [
+      "Architecture",
+      "Learning Mode",
+      "Decision Points",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Security Guidance \u2014 Vulnerability Pattern Detection",
+    "path": "plugins_doc/security-guidance/index.html",
+    "excerpt": "PreToolUse hook monitoring 9 security patterns: command injection, XSS, unsafe deserialization, eval, innerHTML, pickle, os.system. Session-scoped state prevents warning fatigue.",
+    "headings": [
+      "Architecture",
+      "Security Patterns",
+      "State Management",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Scripts \u2014 GitHub Automation & Issue Management",
+    "path": "scripts/index.html",
+    "excerpt": "TypeScript and shell scripts for issue lifecycle management. Duplicate detection pipeline, stale issue sweeping, label management, restricted GitHub CLI wrapper. STALE_UPVOTE_THRESHOLD of 10.",
+    "headings": [
+      "Architecture",
+      "Issue Lifecycle",
+      "Duplicate Detection",
+      "Scripts Reference",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "GitHub Workflows \u2014 CI/CD & Automated Operations",
+    "path": "github_workflows/index.html",
+    "excerpt": "15 GitHub Actions workflows for issue triage, duplicate management, lifecycle enforcement, and Claude Code mentions. Includes twice-daily sweep schedule and event-driven automation.",
+    "headings": [
+      "Architecture",
+      "Workflow Catalog",
+      "Event Routing",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Examples \u2014 Configuration & Hook Examples",
+    "path": "examples/index.html",
+    "excerpt": "Reference configurations for hooks and settings profiles. Three security profiles: lax, strict, bash-sandbox. Example PreToolUse hook for bash command validation.",
+    "headings": [
+      "Settings Profiles",
+      "Hook Examples",
+      "Configuration Reference"
+    ]
+  }
+]

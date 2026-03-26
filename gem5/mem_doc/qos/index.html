@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-03-25">
+<meta name="wiki-source" content="gem5/src/mem/qos">
+<meta name="wiki-source-rev" content="7a2b0e413d">
+<title>qos — Quality of Service Memory Policies | gem5 Wiki</title>
+<style>
+:root{--bg:#0d1117;--fg:#c9d1d9;--card:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;
+--hero-bg:#161b22;--code-bg:#1c2128;--toc-bg:#161b22;--hover:#21262d;--muted:#8b949e;
+--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.4);--radius:8px;
+--link:#58a6ff;--link-hover:#79c0ff;--kbd-bg:#21262d}
+[data-theme="light"]{--bg:#ffffff;--fg:#1f2328;--card:#f6f8fa;--border:#d0d7de;--accent:#0969da;
+--accent2:#1a7f37;--hero-bg:#f6f8fa;--code-bg:#f6f8fa;--toc-bg:#f6f8fa;--hover:#eaeef2;
+--muted:#656d76;--table-stripe:rgba(110,118,129,0.06);--shadow:0 1px 3px rgba(0,0,0,0.1);
+--link:#0969da;--link-hover:#0550ae;--kbd-bg:#eaeef2}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+background:var(--bg);color:var(--fg);line-height:1.6;overflow-x:hidden}
+a{color:var(--link);text-decoration:none}a:hover{color:var(--link-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;
+z-index:1000;border-radius:0 0 var(--radius) 0;font-weight:600}
+.skip-link:focus{top:0}
+header{background:var(--hero-bg);border-bottom:1px solid var(--border);padding:12px 24px;
+display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.breadcrumb{font-size:14px;color:var(--muted)}
+.breadcrumb a{color:var(--link)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle{background:var(--kbd-bg);border:1px solid var(--border);color:var(--fg);
+padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:14px}
+.theme-toggle:hover{background:var(--hover)}
+.container{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+.hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:32px;margin-bottom:24px;text-align:center}
+.hero h1{margin:0 0 8px;font-size:28px;color:var(--fg)}
+.hero p{margin:0;color:var(--muted);font-size:16px}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:10px 20px;text-align:center}
+.stat .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase}
+.reading-time{font-size:13px;color:var(--muted);margin:8px 0 20px;text-align:right}
+.toc-panel{background:var(--toc-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px 20px;margin-bottom:24px}
+.toc-panel summary{font-weight:600;cursor:pointer;font-size:15px}
+.toc-panel ul{list-style:none;padding-left:16px;margin:8px 0 0}
+.toc-panel li{margin:4px 0}
+.toc-panel a{font-size:14px}
+section{margin-bottom:32px}
+h2{font-size:22px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-top:32px}
+h3{font-size:18px;margin-top:24px}
+.intro-box{background:var(--card);border-left:4px solid var(--accent);border-radius:var(--radius);
+padding:16px 20px;margin:16px 0}
+.intro-box .label{font-weight:700;color:var(--accent);font-size:13px;text-transform:uppercase;margin-bottom:4px}
+.diagram-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;margin:16px 0;overflow-x:auto;cursor:pointer;position:relative}
+.diagram-wrap .expand-hint{position:absolute;top:8px;right:12px;font-size:11px;color:var(--muted);opacity:0.7}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card);font-weight:600}
+tr:nth-child(even){background:var(--table-stripe)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+padding:20px;transition:box-shadow .2s,border-color .2s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h3 a{color:var(--fg)}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.card .meta{margin-top:8px;font-size:12px;color:var(--muted)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+code{background:var(--kbd-bg);padding:2px 6px;border-radius:4px;font-size:13px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--kbd-bg);border:1px solid var(--border);
+color:var(--fg);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--hover)}
+.code-block{position:relative}
+.back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;
+border:none;padding:10px 14px;border-radius:50%;cursor:pointer;font-size:18px;
+display:none;z-index:50;box-shadow:var(--shadow)}
+.back-to-top:hover{opacity:0.9}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);z-index:200;justify-content:center;align-items:center;padding:24px}
+.overlay.active{display:flex}
+.overlay-inner{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:24px;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.overlay-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--fg);
+font-size:24px;cursor:pointer}
+.walkthrough{counter-reset:step}
+.walkthrough .step{position:relative;padding-left:48px;margin:12px 0}
+.walkthrough .step::before{counter-increment:step;content:counter(step);position:absolute;
+left:0;top:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;
+display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);
+padding:16px;font-family:monospace;font-size:13px;line-height:1.7;overflow-x:auto}
+@media(max-width:768px){.card-grid{grid-template-columns:1fr}.container{padding:16px}
+.hero{padding:20px}.stat-row{flex-direction:column;align-items:center}}
+@media print{header,.back-to-top,.theme-toggle,.skip-link,.overlay,.copy-btn,.expand-hint{display:none!important}
+body{background:#fff;color:#000}.container{max-width:100%}
+.hero,.card,.toc-panel,.intro-box,.diagram-wrap,.stat{border-color:#ccc;background:#f9f9f9}
+a{color:#000;text-decoration:underline}.dir-map,pre{background:#f5f5f5;border-color:#ccc}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="breadcrumb"><a title="gem5 — Full-System Computer Architecture Simulator" href="../../index.html">gem5</a> &rsaquo; <a title="mem — Memory System | gem5 Wiki" href="../index.html">mem</a> &rsaquo; qos</nav>
+  <div class="header-actions">
+    <span class="reading-time" id="readTime"></span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">🌓</button>
+  </div>
+</header>
+
+<main id="main">
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>qos — Quality of Service Memory Policies</h1>
+  <p>Scheduling and prioritization framework for memory controllers — enabling fair, differentiated, and QoS-aware memory access across multiple requestors.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="num">21</div><div class="lbl">Files</div></div>
+    <div class="stat"><div class="num">2</div><div class="lbl">Scheduling Policies</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">Turnaround Policy</div></div>
+    <div class="stat"><div class="num">C++</div><div class="lbl">Language</div></div>
+    <div class="stat"><div class="num">Multi-tenant</div><div class="lbl">Target <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">Workload</a></div></div>
+  </div>
+</div>
+
+<!-- TOC -->
+<details class="toc-panel" open>
+  <summary>Table of Contents</summary>
+  <ul id="toc"></ul>
+</details>
+
+<!-- Overview -->
+<section>
+<h2 id="overview">Overview</h2>
+<div class="intro-box">
+  <h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+  <div class="label">Analogy — Airport Priority Lanes</div>
+  <p>Think of the QoS memory system as an <strong>airport with multiple priority lanes</strong>. Economy passengers (low-priority requestors) and business class passengers (high-priority requestors) both need to get through security (the memory controller). The <strong>Fixed Priority</strong> policy always lets business class go first. The <strong>Proportional Fair</strong> policy gives everyone a fair share based on their needs — if an economy passenger has been waiting a long time, they get bumped up. The <strong>Turnaround Policy</strong> decides when to switch the security lanes from departures (reads) to arrivals (writes) and back, minimizing the overhead of switching direction at the DRAM bus.</p>
+</div>
+
+<p>The <code>qos/</code> directory provides a <strong>QoS framework</strong> for gem5 memory controllers. It sits between the <a title="cache — Classic <a href="../cache/index.html" title="cache — Classic Cache Hierarchy | gem5 Wiki" class="xref">Cache</a> Hierarchy | gem5 Wiki" href="../cache/index.html">cache</a> hierarchy and the DRAM/NVM backend, enabling differentiated memory service based on requestor identity, priority, or fairness objectives.</p>
+
+<p>The framework consists of three key abstractions:</p>
+<ul>
+  <li><strong>QoS <a href="../index.html" title="mem — <a href="../../gpu-compute/index.html" title="gpu-compute — AMD GCN GPU Compute Model · gem5 Wiki" class="xref">Memory</a> <a href="../../sim_doc/index.html" title="sim — Simulation Engine | gem5 Wiki" class="xref">System</a> | gem5 Wiki" class="xref">MemCtrl</a></strong> — QoS-aware memory controller <a title="Foundational types, data structures, debugging infrastructure, and utility classes used across the entire gem5 simulator." href="../../base_doc/index.html">base</a> class that integrates policies into the scheduling pipeline</li>
+  <li><strong>QoS Policy</strong> — Priority assignment algorithm (Fixed Priority, Proportional Fair)</li>
+  <li><strong>Turnaround Policy</strong> — Read/write bus direction switching policy</li>
+  <li><strong>Queue Policy</strong> — Per-requestor queue management and admission control</li>
+</ul>
+</section>
+
+<!-- Architecture -->
+<section>
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-wrap" data-diagram="arch">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart TD
+    CPU0["CPU 0\n(Requestor 0)"]
+    CPU1["CPU 1\n(Requestor 1)"]
+    GPU["GPU\n(Requestor 2)"]
+    CACHE["Cache Hierarchy"]
+    XBAR["Coherent XBar"]
+    QMC["QoS MemCtrl"]
+
+    subgraph QoS_Pipeline["QoS Pipeline"]
+      POLICY["Priority Policy\n(FixedPrio / PF)"]
+      QPOL["Queue Policy\n(Admission Control)"]
+      SCHED["Request Scheduler"]
+      TP["Turnaround Policy"]
+    end
+
+    READQ["Read Queue"]
+    WRITEQ["Write Queue"]
+    DRAM["DRAM Interface"]
+
+    CPU0 --> CACHE
+    CPU1 --> CACHE
+    GPU --> CACHE
+    CACHE --> XBAR
+    XBAR --> QMC
+    QMC --> POLICY
+    POLICY --> QPOL
+    QPOL --> SCHED
+    SCHED --> TP
+    TP --> READQ
+    TP --> WRITEQ
+    READQ --> DRAM
+    WRITEQ --> DRAM
+  </pre>
+</div>
+</section>
+
+<!-- Data Flow -->
+<section>
+<h2 id="dataflow">QoS Request Flow</h2>
+<div class="diagram-wrap" data-diagram="dataflow">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">sequenceDiagram
+    participant REQ as Requestor
+    participant MC as QoS MemCtrl
+    participant POL as Policy
+    participant QP as Queue Policy
+    participant TP as Turnaround Policy
+    participant DRAM as DRAM
+
+    REQ->>MC: Memory Request (pkt)
+    MC->>POL: schedule(requestorId, pkt)
+    POL-->>MC: priority level
+    MC->>QP: enqueue(pkt, priority)
+    QP-->>MC: accepted / rejected
+    Note over MC: Request placed in<br/>priority-ordered queue
+    MC->>TP: selectBusState()
+    TP-->>MC: READ or WRITE
+    MC->>DRAM: issue(pkt)
+    DRAM-->>MC: response
+    MC-->>REQ: Response (pkt)
+  </pre>
+</div>
+</section>
+
+<!-- Walkthrough -->
+<section>
+<h2 id="walkthrough">Narrated Walkthrough: QoS-Aware Memory Access</h2>
+<div class="walkthrough">
+  <div class="step"><strong><a href="../index.html" title="mem — Memory System | gem5 Wiki" class="xref">Request</a> arrives</strong> — A memory request arrives at the QoS-aware memory controller from the crossbar. The packet carries a <code>requestorId</code> identifying the source (<a title="cpu — CPU Timing Models — gem5 Wiki" href="../../cpu_doc/index.html">CPU</a> 0, CPU 1, GPU, etc.).</div>
+  <div class="step"><strong>Priority assignment</strong> — The controller calls <code>Policy::schedule()</code> to determine the request's priority. With <strong>FixedPriority</strong>, priority is a static mapping from requestorId. With <strong>ProportionalFair</strong>, priority is dynamically adjusted based on each requestor's recent bandwidth consumption.</div>
+  <div class="step"><strong>Queue admission</strong> — The <code>QueuePolicy</code> decides if the request can enter the queue. It may reject low-priority requests when the queue is congested, or reorder entries to maintain priority ordering.</div>
+  <div class="step"><strong>Scheduling</strong> — The scheduler selects the next request to issue from the read or write queue. Higher-priority requests are served first. Within the same priority level, FR-FCFS (First-Ready First-Come-First-Serve) is typically used.</div>
+  <div class="step"><strong>Bus turnaround</strong> — The <code>TurnaroundPolicy</code> determines whether to switch the DRAM bus between read and write mode. The <strong>IdealTurnaround</strong> policy minimizes bus turnaround overhead by batching reads and writes.</div>
+  <div class="step"><strong>DRAM access</strong> — The request is issued to the DRAM interface, which models the detailed timing of activate, read/write, and precharge commands.</div>
+  <div class="step"><strong><a href="../../cpu_doc/o3/index.html" title="o3 — Out-of-Order Superscalar <a href="../../cpu_doc/minor/index.html" title="minor — In-Order Pipelined CPU — gem5 Wiki" class="xref">Pipeline</a> — gem5 Wiki" class="xref">Statistics</a> update</strong> — The controller updates per-requestor statistics: bandwidth consumed, latency, and priority distribution. This feeds back into Proportional Fair priority adjustment.</div>
+</div>
+</section>
+
+<!-- Key Classes -->
+<section>
+<h2 id="key-classes">Key Classes Reference</h2>
+<table>
+  <thead><tr><th>Class</th><th>File</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>qos::MemCtrl</code></td><td>mem_ctrl.hh</td><td>QoS-aware memory controller base class. Extends <code>ClockedObject</code> and integrates QoS policies into request scheduling. Maintains per-requestor priority mappings, read/write queues with priority ordering, and detailed per-requestor statistics. All QoS-enabled memory controllers inherit from this.</td></tr>
+    <tr><td><code>qos::MemSinkCtrl</code></td><td>mem_sink.hh</td><td><a title="simple — <a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Atomic</a> and Timing Simple CPUs — gem5 Wiki" href="../../cpu_doc/simple/index.html">Simple</a> QoS memory controller implementation for testing. Acts as a "sink" that consumes requests with configurable latency — useful for isolating QoS policy behavior from DRAM timing complexity.</td></tr>
+    <tr><td><code>qos::Policy</code></td><td>policy.hh</td><td>Abstract base class for QoS scheduling policies. Defines the <code>schedule(requestorId, pkt)</code> interface that maps a request to a priority level. Subclasses implement specific priority assignment algorithms.</td></tr>
+    <tr><td><code>qos::FixedPriorityPolicy</code></td><td>policy_fixed_prio.hh</td><td>Static priority mapping — each requestor is assigned a fixed priority level at configuration time. Simple and deterministic; suitable when workload priorities are known a priori.</td></tr>
+    <tr><td><code>qos::PropFairPolicy</code></td><td>policy_pf.hh</td><td>Proportional Fair scheduling — dynamically adjusts priority based on each requestor's recent bandwidth usage. Requestors that have consumed less bandwidth relative to their "fair share" receive higher priority. Balances throughput and fairness.</td></tr>
+    <tr><td><code>qos::QueuePolicy</code></td><td>q_policy.hh</td><td>Queue management policy controlling admission and ordering within the read/write queues. Can enforce per-requestor queue limits to prevent monopolization.</td></tr>
+    <tr><td><code>qos::TurnaroundPolicy</code></td><td>turnaround_policy.hh</td><td>Abstract base for read/write bus direction policies. Determines when to switch the DRAM data bus between reading and writing to minimize turnaround penalty.</td></tr>
+    <tr><td><code>qos::TurnaroundPolicyIdeal</code></td><td>turnaround_policy_ideal.hh</td><td>Ideal turnaround policy that switches bus direction with minimal overhead — serves as an upper bound for turnaround efficiency.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Policy Deep Dives -->
+<section>
+<h2 id="policies">Scheduling Policies Deep Dive</h2>
+
+<h3 id="fixed-priority">Fixed Priority Policy</h3>
+<p>The simplest QoS policy: each requestor has a statically configured priority level. The memory controller always serves higher-priority requestors first.</p>
+
+<div class="diagram-wrap" data-diagram="fixprio">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart LR
+    REQ["Incoming Request"]
+    MAP["Priority Map\n(requestorId → priority)"]
+    PRI["Assigned Priority"]
+    Q["Priority Queue"]
+
+    REQ --> MAP
+    MAP --> PRI
+    PRI --> Q
+
+    MAP -.- CFG["Configuration:\nCPU0 → 3 (high)\nCPU1 → 2\nGPU → 1 (low)"]
+  </pre>
+</div>
+
+<p><strong>Characteristics:</strong></p>
+<ul>
+  <li>Zero runtime overhead — priority is a table lookup</li>
+  <li>Deterministic behavior — easy to reason about</li>
+  <li>Risk of starvation for low-priority requestors under heavy load</li>
+  <li>Best for: systems with well-defined priority hierarchies (e.g., real-time CPU over background GPU)</li>
+</ul>
+
+<h3 id="proportional-fair">Proportional Fair Policy</h3>
+<p>A dynamic policy inspired by wireless networking's proportional fair scheduling. Each requestor's priority is inversely proportional to its recent bandwidth consumption.</p>
+
+<div class="diagram-wrap" data-diagram="pf">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart TD
+    REQ["Incoming Request"]
+    HIST["Bandwidth History\n(per requestor)"]
+    SCORE["Score = Weight / Recent_BW"]
+    RANK["Rank by Score"]
+    PRI["Priority Assignment"]
+
+    REQ --> HIST
+    HIST --> SCORE
+    SCORE --> RANK
+    RANK --> PRI
+  </pre>
+</div>
+
+<p><strong>Characteristics:</strong></p>
+<ul>
+  <li>Adapts to changing workload behavior at runtime</li>
+  <li>Prevents starvation — underserved requestors naturally receive higher priority</li>
+  <li>Configurable weight per requestor to bias the "fair share"</li>
+  <li>Tracks bandwidth over a sliding time window</li>
+  <li>Best for: multi-tenant workloads where fairness matters</li>
+</ul>
+
+<h3 id="turnaround">Turnaround Policy</h3>
+<p>DRAM bus direction switching is expensive (typically 5-15ns turnaround penalty). The turnaround policy batches reads and writes to minimize switches:</p>
+<ul>
+  <li><strong>IdealTurnaround</strong> — Switches only when the current direction's queue is empty or a high-priority request in the other direction is waiting. Minimizes turnaround count.</li>
+  <li>Custom policies can implement hysteresis, threshold-based switching, or age-based urgency.</li>
+</ul>
+</section>
+
+<!-- Queue Management -->
+<section>
+<h2 id="queue-management">Queue Management</h2>
+<p>The <code>QueuePolicy</code> controls how requests are admitted into and ordered within the memory controller's queues:</p>
+
+<table>
+  <thead><tr><th>Aspect</th><th>Mechanism</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>Per-requestor limits</td><td>Maximum queue entries per requestorId</td><td>Prevents one requestor from monopolizing the queue</td></tr>
+    <tr><td>Priority ordering</td><td>Requests sorted by assigned QoS priority</td><td>Ensures higher-priority requests are served first</td></tr>
+    <tr><td>Admission control</td><td>Reject/stall low-priority requests when queue is full</td><td>Back-pressure to prevent buffer overflow</td></tr>
+    <tr><td>Separate read/write</td><td>Independent queues for reads and writes</td><td>Enables read-priority or write-draining modes</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Statistics -->
+<section>
+<h2 id="statistics">QoS Statistics</h2>
+<p>The QoS framework collects detailed per-requestor statistics:</p>
+<table>
+  <thead><tr><th>Statistic</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>avgPriority</code></td><td>Average priority level assigned to each requestor</td></tr>
+    <tr><td><code>readBW / writeBW</code></td><td>Bandwidth consumed by each requestor (reads and writes separately)</td></tr>
+    <tr><td><code>totalReadLatency / totalWriteLatency</code></td><td>Cumulative latency per requestor</td></tr>
+    <tr><td><code>numReads / numWrites</code></td><td>Request count per requestor</td></tr>
+    <tr><td><code>busStateSwitch</code></td><td>Number of read↔write bus direction switches</td></tr>
+    <tr><td><code>priorityDistribution</code></td><td><a href="../../base_doc/stats/index.html" title="stats — Statistics Framework | gem5 Wiki" class="xref">Histogram</a> of assigned priority levels per requestor</td></tr>
+    <tr><td><code>queueOccupancy</code></td><td>Average queue depth per requestor</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Code Example -->
+<section>
+<h2 id="code-example">Configuration Examples</h2>
+<div class="code-block">
+  <button class="copy-btn">Copy</button>
+  <pre><code class="language-cpp">// Python configuration: Fixed Priority QoS
+system.mem_ctrl = MemCtrl(
+    dram = DDR4_2400_16x4(),
+    qos_policy = QoSFixedPriority(
+        # CPU cores get high priority, GPU gets low
+        qos_priorities = {
+            'system.cpu0': 3,
+            'system.cpu1': 3,
+            'system.gpu':  1,
+            'system.dma':  0
+        }
+    ),
+    qos_turnaround_policy = QoSIdealTurnaround()
+)</code></pre>
+</div>
+
+<div class="code-block">
+  <button class="copy-btn">Copy</button>
+  <pre><code class="language-cpp">// Python configuration: Proportional Fair QoS
+system.mem_ctrl = MemCtrl(
+    dram = DDR4_2400_16x4(),
+    qos_policy = QoSPropFairPolicy(
+        # Weight each requestor's fair share
+        weight = {
+            'system.cpu0': 2.0,   # Double share
+            'system.cpu1': 1.0,   # Normal share
+            'system.gpu':  0.5    # Half share
+        },
+        # Sliding window for bandwidth tracking
+        scoring_interval = '10us'
+    ),
+    qos_turnaround_policy = QoSIdealTurnaround()
+)</code></pre>
+</div>
+
+<div class="code-block">
+  <button class="copy-btn">Copy</button>
+  <pre><code class="language-cpp">// C++ internals: Policy interface
+namespace qos {
+
+class Policy : public SimObject {
+  public:
+    // Called for each incoming memory request
+    // Returns priority level (0 = lowest, N = highest)
+    virtual uint8_t schedule(const RequestorID id,
+                             const uint64_t data) = 0;
+};
+
+class FixedPriorityPolicy : public Policy {
+    // priority_map: RequestorID -> priority level
+    std::map&lt;RequestorID, uint8_t&gt; priority_map;
+
+  public:
+    uint8_t schedule(const RequestorID id,
+                     const uint64_t data) override {
+        auto it = priority_map.find(id);
+        return (it != priority_map.end()) ? it-&gt;second : 0;
+    }
+};
+
+} // namespace qos</code></pre>
+</div>
+</section>
+
+<!-- Cross-Module Connections -->
+<section>
+<h2 id="connections">Cross-Module Connections</h2>
+<div class="diagram-wrap" data-diagram="connections">
+  <span class="expand-hint">Click to expand</span>
+  <pre class="mermaid">flowchart LR
+    subgraph Cache["mem/cache/"]
+      BC["BaseCache"]
+    end
+    subgraph QoS["mem/qos/"]
+      QMC["qos::MemCtrl"]
+      POL["qos::Policy"]
+      TP["TurnaroundPolicy"]
+      QP["QueuePolicy"]
+    end
+    subgraph MemCtrl["mem/"]
+      MC["MemCtrl"]
+      DI["DRAMInterface"]
+    end
+    subgraph Core["sim/"]
+      CO["ClockedObject"]
+    end
+
+    CO --> QMC
+    QMC --> POL
+    QMC --> TP
+    QMC --> QP
+    BC -->|"Writeback / Miss"| QMC
+    QMC --> MC
+    MC --> DI
+  </pre>
+</div>
+
+<p>The QoS framework integrates at the memory controller level:</p>
+<ul>
+  <li><strong>Upstream</strong>: Receives requests from the cache hierarchy via <code>ResponsePort</code></li>
+  <li><strong>Policies</strong>: Pluggable policy objects attached to the controller</li>
+  <li><strong>Downstream</strong>: Issues scheduled requests to <code>DRAMInterface</code> or <code>NVMInterface</code></li>
+  <li><strong>Base class</strong>: <code>qos::MemCtrl</code> extends <code>ClockedObject</code> and can be used as a base for custom memory controllers</li>
+</ul>
+</section>
+
+<!-- Configuration Table -->
+<section>
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+  <thead><tr><th>Parameter</th><th><a href="../../python/index.html" title="python — Configuration System &amp; Standard Library · gem5 Wiki" class="xref">SimObject</a></th><th>Description</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td><code>qos_policy</code></td><td>QoSMemCtrl</td><td>QoS scheduling policy object</td><td>None (no QoS)</td></tr>
+    <tr><td><code>qos_turnaround_policy</code></td><td>QoSMemCtrl</td><td>Bus turnaround policy object</td><td>None</td></tr>
+    <tr><td><code>qos_q_policy</code></td><td>QoSMemCtrl</td><td>Queue management policy</td><td>None</td></tr>
+    <tr><td><code>qos_priorities</code></td><td>FixedPriorityPolicy</td><td>Map of requestor → priority level</td><td>All priority 0</td></tr>
+    <tr><td><code>weight</code></td><td>PropFairPolicy</td><td>Per-requestor fair-share weight</td><td>1.0</td></tr>
+    <tr><td><code>scoring_interval</code></td><td>PropFairPolicy</td><td>Bandwidth measurement window</td><td>System-dependent</td></tr>
+    <tr><td><code>read_buffer_size</code></td><td>QoSMemCtrl</td><td>Read queue capacity</td><td>32</td></tr>
+    <tr><td><code>write_buffer_size</code></td><td>QoSMemCtrl</td><td>Write queue capacity</td><td>64</td></tr>
+    <tr><td><code>write_high_thresh</code></td><td>QoSMemCtrl</td><td>Write drain trigger threshold (%)</td><td>85%</td></tr>
+    <tr><td><code>write_low_thresh</code></td><td>QoSMemCtrl</td><td>Write drain stop threshold (%)</td><td>50%</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- Directory Map -->
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-map">
+src/mem/qos/
+├── mem_ctrl.hh / mem_ctrl.cc         # QoS MemCtrl — QoS-aware controller base
+├── mem_sink.hh / mem_sink.cc         # MemSinkCtrl — test/benchmark sink
+├── policy.hh / policy.cc            # Policy — abstract QoS policy base
+├── policy_fixed_prio.hh / .cc       # FixedPriorityPolicy — static priorities
+├── policy_pf.hh / .cc               # PropFairPolicy — proportional fair
+├── q_policy.hh / q_policy.cc        # QueuePolicy — queue management
+├── turnaround_policy.hh             # TurnaroundPolicy — abstract base
+├── turnaround_policy_ideal.hh / .cc # IdealTurnaround — minimal switching
+├── QoSMemCtrl.py                    # <a title="Configuration System and Standard Library — the control plane of gem5" href="../../python/index.html">Python</a> SimObject: QoS MemCtrl
+├── QoSMemSinkCtrl.py                # Python SimObject: MemSink
+├── QoSMemSinkInterface.py           # Python SimObject: MemSink Interface
+├── QoSPolicy.py                     # Python SimObject: Policies
+├── QoSTurnaround.py                 # Python SimObject: Turnaround
+└── SConscript                       # Build configuration
+</div>
+</section>
+
+<!-- Glossary -->
+<section>
+<h2 id="glossary">Glossary</h2>
+<table>
+  <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Requestor</strong></td><td>A unique source of memory requests, identified by <code>RequestorID</code>. Typically one per CPU core, GPU CU, or DMA engine.</td></tr>
+    <tr><td><strong>Priority Level</strong></td><td><a href="../../arch_doc/riscv/index.html" title="riscv — RISC-V ISA Implementation | gem5 Wiki" class="xref">Integer</a> value (0 = lowest) assigned to requests by the QoS policy. Higher-priority requests are scheduled before lower ones.</td></tr>
+    <tr><td><strong>Proportional Fair</strong></td><td>Scheduling algorithm that balances fairness and throughput by favoring requestors that have recently received less service.</td></tr>
+    <tr><td><strong>Bus Turnaround</strong></td><td>The time penalty incurred when switching the DRAM data bus direction between reads and writes (typically tWTR or tRTW).</td></tr>
+    <tr><td><strong>FR-FCFS</strong></td><td>First-Ready First-Come-First-Served — common DRAM scheduling policy that prioritizes row-hit requests, then by arrival order.</td></tr>
+    <tr><td><strong>Write Drain</strong></td><td>Mode where the controller exclusively processes writes to free write buffer space, triggered when the write queue exceeds a threshold.</td></tr>
+  </tbody>
+</table>
+</section>
+
+</div><!-- container -->
+</main>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Diagram Overlay -->
+<div class="overlay" id="diagramOverlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" id="overlayClose" aria-label="Close overlay">✕</button>
+    <div id="overlayContent"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getTheme() { return localStorage.getItem(THEME_KEY) || 'dark'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem(THEME_KEY, t);
+  const hljsLink = document.getElementById('hljs-theme');
+  hljsLink.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+}
+
+setTheme(getTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  renderMermaid();
+});
+
+mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+
+async function renderMermaid() {
+  mermaid.initialize({ startOnLoad: false, theme: getTheme() === 'dark' ? 'dark' : 'default' });
+  document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+    const pre = wrap.querySelector('pre.mermaid');
+    if (!pre) return;
+    if (!pre.dataset.original) pre.dataset.original = pre.textContent;
+    pre.textContent = pre.dataset.original;
+    pre.removeAttribute('data-processed');
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+}
+renderMermaid();
+
+const toc = document.getElementById('toc');
+document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+  const li = document.createElement('li');
+  li.style.paddingLeft = h.tagName === 'H3' ? '16px' : '0';
+  const a = document.createElement('a');
+  a.href = '#' + h.id;
+  a.textContent = h.textContent;
+  li.appendChild(a);
+  toc.appendChild(li);
+});
+
+const text = document.querySelector('.container').textContent;
+const words = text.trim().split(/\s+/).length;
+document.getElementById('readTime').textContent = Math.ceil(words / 200) + ' min read';
+
+const btn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => { btn.style.display = window.scrollY > 300 ? 'block' : 'none'; });
+btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+hljs.highlightAll();
+
+document.querySelectorAll('.code-block').forEach(block => {
+  const cbtn = block.querySelector('.copy-btn');
+  if (!cbtn) return;
+  cbtn.addEventListener('click', () => {
+    const code = block.querySelector('code');
+    navigator.clipboard.writeText(code.textContent);
+    cbtn.textContent = 'Copied!';
+    setTimeout(() => cbtn.textContent = 'Copy', 2000);
+  });
+});
+
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('overlayContent');
+document.getElementById('overlayClose').addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+
+document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+  wrap.addEventListener('click', () => {
+    const svg = wrap.querySelector('svg');
+    if (svg) {
+      overlayContent.innerHTML = svg.outerHTML;
+      overlay.classList.add('active');
+    }
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const sections = [...document.querySelectorAll('h2[id], h3[id]')];
+  const current = sections.findIndex(s => s.getBoundingClientRect().top > 10);
+  if (e.key === 'j' && current < sections.length) {
+    sections[current >= 0 ? current : sections.length - 1].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'k' && current > 0) {
+    sections[Math.max(0, current - 2)].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'Escape') {
+    overlay.classList.remove('active');
+  }
+});
+</script>
+</body>
+</html>
