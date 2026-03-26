@@ -213,8 +213,12 @@ class FileFixer:
             m = re.search(r'getElementById\([\'"](\w*[Oo]verlay\w*?)[\'"]\)', self.text)
             if m:
                 ov_id = m.group(1)
-                mc = re.search(r'getElementById\([\'"](\w*[Cc]ontent\w*?)[\'"]\)', self.text)
-                content_id = mc.group(1) if mc else None
+                # Look for inner content element (Content, Inner, etc.)
+                mc = re.search(
+                    r'getElementById\([\'"](\w*(?:[Cc]ontent|[Ii]nner)\w*?)[\'"]\)',
+                    self.text,
+                )
+                content_id = mc.group(1) if mc and mc.group(1) != ov_id else None
                 target = content_id or ov_id
                 wheel_code = (
                     f"\nvar _wov=document.getElementById('{ov_id}');"
@@ -405,8 +409,11 @@ class FileFixer:
                 ch = text[i]
                 if ch == '{':
                     depth += 1
-                    if depth == 1 and i >= 3 and text[i - 3:i + 1] == 'try{':
-                        return True
+                    if depth == 1:
+                        # Check for "try" before the opening brace (with optional whitespace)
+                        pre = text[max(0, i - 10):i].rstrip()
+                        if pre.endswith('try'):
+                            return True
                 elif ch == '}':
                     depth -= 1
                 i -= 1
@@ -558,8 +565,10 @@ def scan_issues(path: Path, text: str) -> list[str]:
                 ch = text[i]
                 if ch == '{':
                     depth += 1
-                    if depth == 1 and i >= 3 and text[i - 3:i + 1] == 'try{':
-                        return True
+                    if depth == 1:
+                        pre = text[max(0, i - 10):i].rstrip()
+                        if pre.endswith('try'):
+                            return True
                 elif ch == '}':
                     depth -= 1
                 i -= 1

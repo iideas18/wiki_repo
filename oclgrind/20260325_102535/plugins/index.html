@@ -579,7 +579,7 @@ renderMermaid();
   ov.addEventListener('click',()=>ov.classList.remove('active'));
 })();
 
-var _wov=document.getElementById('overlay');var _wc=document.getElementById('overlay');if(_wov&&_wc){_wov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_wc.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_wc.dataset.scale=s;_wc.style.transform='scale('+s+')';},{passive:false});}
+var _wov=document.getElementById('overlay');var _wc=document.getElementById('overlayInner');if(_wov&&_wc){_wov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_wc.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_wc.dataset.scale=s;_wc.style.transform='scale('+s+')';},{passive:false});}
 </script>
 </body>
 </html>
