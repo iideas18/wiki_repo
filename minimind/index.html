@@ -408,7 +408,7 @@ document.querySelectorAll('.mermaid-wrap[data-source]').forEach(async (wrap) => 
   const code = pre.textContent;
   const id = 'mm-' + wrap.getAttribute('data-source');
   try {
-    const { svg } = await mermaid.render(id, code);
+    try{const { svg } = await mermaid.render(id, code);}catch(e){console.warn('mermaid:',e)}
     pre.innerHTML = svg;
   } catch (e) { console.warn('Mermaid render error:', e); }
 });

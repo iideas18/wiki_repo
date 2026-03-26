@@ -608,7 +608,7 @@ async function renderMermaid() {
     pre.textContent = pre.dataset.original;
     pre.removeAttribute('data-processed');
   });
-  await mermaid.run({ querySelector: 'pre.mermaid' });
+  try{await mermaid.run({ querySelector: 'pre.mermaid' });}catch(e){console.warn('mermaid:',e)}
 }
 renderMermaid();
 

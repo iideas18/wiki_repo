@@ -322,7 +322,7 @@ async function renderDiagrams() {
     const src = wrapper.getAttribute('data-source');
     if (!src) return;
     try {
-      const { svg } = await mermaid.render(`mermaid-${i}-${Date.now()}`, src);
+      try{const { svg } = await mermaid.render(`mermaid-${i}-${Date.now()}`, src);}catch(e){console.warn('mermaid:',e)}
       wrapper.innerHTML = svg;
       wrapper.setAttribute('data-source', src);
     } catch(e) { console.warn('Mermaid render error:', e); }

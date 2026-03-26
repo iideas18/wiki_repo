@@ -482,6 +482,8 @@ window.addEventListener('scroll',()=>{
   const btn=document.querySelector('.back-to-top');
   btn.classList.toggle('visible',window.scrollY>400);
 });
+
+(function(){var _ov=document.getElementById('zoomOverlay');if(!_ov)return;var _c=_ov.querySelector('div')||_ov;_ov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_c.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_c.dataset.scale=s;_c.style.transform='scale('+s+')';},{passive:false});}());
 </script>
 </body>
 </html>

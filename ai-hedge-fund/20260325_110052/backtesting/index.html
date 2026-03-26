@@ -420,7 +420,7 @@ async function renderMermaid() {
     el.innerHTML = el.dataset.original;
     el.id = '';
   });
-  await mermaid.run({ querySelector: 'pre.mermaid' });
+  try{await mermaid.run({ querySelector: 'pre.mermaid' });}catch(e){console.warn('mermaid:',e)}
 }
 await renderMermaid();
 
@@ -495,7 +495,7 @@ document.querySelectorAll('pre > code').forEach(block => {
       const wrap = btn.closest('.diagram-wrap');
       const svg = wrap.querySelector('svg') || wrap.querySelector('pre.mermaid');
       if (!svg) return;
-      inner.innerHTML = svg.outerHTML;
+      inner.innerHTML='';inner.appendChild(svg.cloneNode(true));
       overlay.classList.add('active');
     });
   });
@@ -528,6 +528,8 @@ document.querySelectorAll('pre > code').forEach(block => {
 
 /* ── highlight.js ── */
 hljs.highlightAll();
+
+(function(){var _ov=document.getElementById('diagram-overlay');var _c=document.getElementById('diagram-overlay-inner');if(!_ov||!_c)return;_ov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_c.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_c.dataset.scale=s;_c.style.transform='scale('+s+')';},{passive:false});}());
 </script>
 </body>
 </html>

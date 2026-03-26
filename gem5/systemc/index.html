@@ -590,7 +590,7 @@ function renderMermaid(){
     var src=el.getAttribute('data-source')||el.textContent;
     el.textContent=src;el.removeAttribute('data-processed');
   });
-  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+  try{mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});}catch(e){console.warn('mermaid:',e)}
 }
 renderMermaid();
 var obs=new MutationObserver(function(){
