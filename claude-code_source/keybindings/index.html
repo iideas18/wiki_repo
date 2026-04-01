@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keybindings – Claude Code Source Map</title>
+<meta name="generator" content="internal-wiki-gen a8a678c 2026-04-01">
+<style>
+/* ===== neutra-ip-theme ===== */
+:root {
+  --bg: #f5f3ef; --bg-card: #ffffff; --bg-code: #f0ece4;
+  --text: #2d2d2d; --text-muted: #6b6560; --text-heading: #1a1a1a;
+  --accent: #6b5b4f; --accent-hover: #8b7355; --accent-light: #e8e0d4;
+  --border: #d4cfc7; --border-light: #e8e4dc;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --radius: 6px; --font-sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono: "SF Mono",SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1e; --bg-card: #252529; --bg-code: #2a2a30;
+  --text: #e0ddd8; --text-muted: #9a958e; --text-heading: #f0ede8;
+  --accent: #c4a882; --accent-hover: #d4bc9a; --accent-light: #3a352e;
+  --border: #3a3a40; --border-light: #32323a;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans); background: var(--bg); color: var(--text);
+  line-height: 1.7; transition: background 0.3s, color 0.3s;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+.skip-link {
+  position: absolute; top: -100%; left: 1rem; background: var(--accent);
+  color: #fff; padding: 0.5rem 1rem; border-radius: var(--radius); z-index: 1000;
+}
+.skip-link:focus { top: 1rem; }
+header {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px);
+}
+header h1 { font-size: 1.25rem; color: var(--text-heading); }
+header h1 span.subtitle { font-weight: 400; color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem; }
+.theme-toggle {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 1.1rem; color: var(--text);
+  transition: background 0.2s;
+}
+.theme-toggle:hover { background: var(--accent-light); }
+nav.breadcrumb { padding: 0.75rem 2rem; font-size: 0.85rem; color: var(--text-muted); }
+nav.breadcrumb a { color: var(--accent); }
+main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+.reading-time {
+  display: inline-block; background: var(--accent-light); color: var(--accent);
+  padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.78rem; margin-bottom: 1.5rem;
+}
+.hero { margin-bottom: 2rem; }
+.hero h2 { font-size: 2rem; color: var(--text-heading); margin-bottom: 0.5rem; }
+.hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 70ch; }
+.badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+.badge {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.stats-bar {
+  display: flex; gap: 2rem; padding: 1rem 0; border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light); margin: 1rem 0 2rem; font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.stats-bar strong { color: var(--text); }
+.intro-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+}
+.intro-box h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1rem; }
+.intro-box p { color: var(--text-muted); font-size: 0.95rem; }
+section { margin-bottom: 2.5rem; }
+section h3 {
+  font-size: 1.3rem; color: var(--text-heading); margin-bottom: 1rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent-light);
+}
+.diagram-wrapper {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5rem; margin: 1rem 0; position: relative; cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.diagram-wrapper:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.diagram-wrapper .expand-hint {
+  position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.75rem;
+  color: var(--text-muted); background: var(--bg); padding: 0.15rem 0.5rem;
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+.diagram-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 500; justify-content: center; align-items: center; padding: 2rem;
+}
+.diagram-overlay.active { display: flex; }
+.diagram-overlay .overlay-content {
+  background: var(--bg-card); border-radius: var(--radius); padding: 2rem;
+  max-width: 95vw; max-height: 95vh; overflow: auto; position: relative;
+}
+.diagram-overlay .close-btn {
+  position: absolute; top: 0.5rem; right: 0.75rem; background: var(--accent);
+  color: #fff; border: none; border-radius: 50%; width: 2rem; height: 2rem;
+  cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+}
+table {
+  width: 100%; border-collapse: collapse; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  margin: 1rem 0;
+}
+th {
+  background: var(--accent-light); text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.85rem; color: var(--text-heading); border-bottom: 2px solid var(--border);
+}
+td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-light); }
+pre {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 0.85rem; line-height: 1.6; position: relative; margin: 1rem 0;
+}
+pre .copy-btn {
+  position: absolute; top: 0.5rem; right: 0.5rem; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius); padding: 0.25rem 0.6rem;
+  font-size: 0.75rem; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+pre:hover .copy-btn { opacity: 1; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+:not(pre) > code {
+  background: var(--bg-code); padding: 0.15rem 0.4rem; border-radius: 3px;
+  border: 1px solid var(--border-light);
+}
+.dir-map {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;
+}
+.back-to-top {
+  position: fixed; bottom: 2rem; right: 2rem; background: var(--accent); color: #fff;
+  border: none; border-radius: 50%; width: 2.5rem; height: 2.5rem; cursor: pointer;
+  font-size: 1.2rem; display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 200; transition: transform 0.2s;
+}
+.back-to-top:hover { transform: scale(1.1); }
+footer {
+  text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem;
+  border-top: 1px solid var(--border-light); margin-top: 3rem;
+}
+@media print {
+  header, .theme-toggle, .back-to-top, .skip-link, .expand-hint, .copy-btn { display: none !important; }
+  body { background: #fff; color: #000; }
+  main { max-width: 100%; padding: 0; }
+  .diagram-wrapper { break-inside: avoid; }
+  table { font-size: 0.8rem; }
+  a { color: #000; text-decoration: underline; }
+  @page { margin: 2cm; }
+}
+@media (max-width: 768px) {
+  header { padding: 0.75rem 1rem; }
+  main { padding: 1rem; }
+  nav.breadcrumb { padding: 0.5rem 1rem; }
+  .hero h2 { font-size: 1.5rem; }
+  .stats-bar { flex-direction: column; gap: 0.5rem; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <h1>Keybindings <span class="subtitle">Keyboard Shortcut System</span></h1>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Claude Code</a> › <strong>Keybindings</strong>
+</nav>
+
+<main id="main">
+  <span class="reading-time" id="readingTime"></span>
+
+  <div class="hero">
+    <h2>Keybindings</h2>
+    <p>14 files implementing a full keyboard shortcut system with customizable bindings, chord support (multi-key sequences), context-aware resolution across 17 contexts (Global, Chat, Autocomplete, etc.), platform-specific formatting, and user override via <code>keybindings.json</code> with hot-reload.</p>
+    <div class="badge-row">
+      <span class="badge">🔵 Chord Support</span>
+      <span class="badge">🟢 Context-Aware</span>
+      <span class="badge">🟡 Customizable</span>
+      <span class="badge">🔴 Platform-Specific</span>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div><strong>14</strong> files</div>
+    <div><strong>17</strong> contexts</div>
+    <div><strong>TypeScript</strong></div>
+    <div>SHA <code>a8a678c</code></div>
+    <div>2026-04-01</div>
+  </div>
+
+  <div class="intro-box">
+    <h3>💡 Think of it like a telephone switchboard</h3>
+    <p>
+      Imagine an old telephone switchboard where an operator routes calls based on the number dialed and the
+      caller's location. The keybinding system works the same way: a keystroke comes in (the "call"), the
+      parser decodes it into a normalized key string, the resolver checks what context you're in (Chat? Autocomplete?
+      File picker?) and consults the binding table — first user overrides, then defaults. If the key is the first
+      half of a chord (like <code>Ctrl+K</code> followed by <code>Ctrl+C</code>), the system waits for the second
+      key before connecting you to the right action. Reserved shortcuts (terminal control keys) are never intercepted,
+      just like emergency numbers that always go straight through.
+    </p>
+  </div>
+
+  <!-- ===== Architecture ===== -->
+  <section>
+    <h3>Architecture Overview</h3>
+    <div class="diagram-wrapper" data-diagram="arch">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="arch-src">
+flowchart LR
+    A["⌨️ Keystroke Input"] --> B["parser.ts\nParse key string"]
+    B --> C["match.ts\nMatch against bindings"]
+    C --> D["resolver.ts\nResolve to action\n+ chord state"]
+    D --> E["🎯 Action Dispatch"]
+
+    F["defaultBindings.ts\nBuilt-in bindings"] --> D
+    G["loadUserBindings.ts\nUser overrides\nkeybindings.json"] --> D
+    H["reservedShortcuts.ts\nTerminal-reserved keys"] -.->|blocks| C
+
+    I["schema.ts\nBinding schema\nvalidation"] --> G
+    J["validate.ts\nBinding validation"] --> G
+
+    style A fill:#e8e0d4,stroke:#6b5b4f,color:#1a1a1a
+    style E fill:#e8e0d4,stroke:#6b5b4f,color:#1a1a1a
+      </pre>
+    </div>
+  </section>
+
+  <!-- ===== Sequence Diagram ===== -->
+  <section>
+    <h3>Key Resolution Sequence</h3>
+    <div class="diagram-wrapper" data-diagram="seq">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="seq-src">
+sequenceDiagram
+    participant User as User
+    participant KB as KeybindingContext
+    participant P as parser.ts
+    participant M as match.ts
+    participant R as resolver.ts
+    participant UI as UI Component
+
+    User->>KB: Key press event
+    KB->>P: parseKeystroke(event)
+    P-->>KB: NormalizedKey
+    KB->>R: Check chord state
+    alt Chord in progress
+        R->>R: Append to chord buffer
+        R->>M: matchBinding(chord, context)
+    else No chord
+        R->>M: matchBinding(key, context)
+    end
+    M->>M: Check reserved shortcuts
+    M->>M: Search user overrides
+    M->>M: Fall back to defaults
+    M-->>R: MatchResult or null
+    alt Match found
+        R->>R: Reset chord state
+        R-->>KB: Action to dispatch
+        KB->>UI: Execute action
+    else Partial chord match
+        R->>R: Enter chord-wait state
+        R-->>KB: Pending (show indicator)
+    else No match
+        R->>R: Reset chord state
+        R-->>KB: Pass through to input
+    end
+      </pre>
+    </div>
+  </section>
+
+  <!-- ===== Key Files Table ===== -->
+  <section>
+    <h3>Key Components</h3>
+    <table>
+      <thead>
+        <tr><th>File</th><th>Role</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>KeybindingContext.tsx</code></td><td>React context</td><td>Provides keybinding state and dispatch functions to the React component tree via context API</td></tr>
+        <tr><td><code>KeybindingProviderSetup.tsx</code></td><td>Provider setup</td><td>Initializes the keybinding system on mount, loads defaults + user overrides, registers global listeners</td></tr>
+        <tr><td><code>defaultBindings.ts</code></td><td>Default bindings</td><td>Ships the built-in keybinding table mapping key combos to actions across all 17 contexts</td></tr>
+        <tr><td><code>loadUserBindings.ts</code></td><td>User overrides</td><td>Reads <code>keybindings.json</code> from user config dir, validates via schema, merges with defaults, watches for changes</td></tr>
+        <tr><td><code>match.ts</code></td><td>Binding matcher</td><td>Given a normalized key and context stack, finds the best matching binding respecting priority and specificity</td></tr>
+        <tr><td><code>parser.ts</code></td><td>Key parser</td><td>Converts raw DOM keyboard events into normalized key strings like <code>ctrl+shift+k</code></td></tr>
+        <tr><td><code>reservedShortcuts.ts</code></td><td>Reserved keys</td><td>Maintains a blocklist of terminal-level shortcuts (Ctrl+C, Ctrl+Z, Ctrl+D) that must never be intercepted</td></tr>
+        <tr><td><code>resolver.ts</code></td><td>Action resolver</td><td>Core resolution engine: manages chord state machine, walks context stack, returns the winning action</td></tr>
+        <tr><td><code>schema.ts</code></td><td>Schema definition</td><td>Zod schema defining the shape of keybinding entries: key, command, when-clause, args</td></tr>
+        <tr><td><code>shortcutFormat.ts</code></td><td>Display formatting</td><td>Converts internal key representations to platform-specific display strings (⌘ on Mac, Ctrl on Windows/Linux)</td></tr>
+        <tr><td><code>template.ts</code></td><td>Config template</td><td>Generates a starter <code>keybindings.json</code> with commented examples for user customization</td></tr>
+        <tr><td><code>useKeybinding.ts</code></td><td>React hook</td><td>Hook for components to register ephemeral keybindings that auto-cleanup on unmount</td></tr>
+        <tr><td><code>useShortcutDisplay.ts</code></td><td>Display hook</td><td>Hook returning the formatted display string for a given action, reactive to platform and binding changes</td></tr>
+        <tr><td><code>validate.ts</code></td><td>Validation</td><td>Validates user keybinding files: checks for conflicts, invalid keys, unknown commands, circular chords</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== Deep-Dive Hubs ===== -->
+  <section>
+    <h3>Deep-Dive Topics</h3>
+    <h4>🔑 Key Resolution</h4>
+    <p>The resolver walks the <strong>context stack</strong> from most-specific to least-specific. A binding in the <code>Autocomplete</code> context beats the same key in <code>Global</code>. User overrides always take priority over defaults at the same context level. The chord state machine has three states: <strong>Idle</strong>, <strong>Pending</strong> (first key of chord received), and <strong>Complete</strong> (full chord matched). A configurable timeout (default 1500ms) auto-resets from Pending to Idle if the second key never arrives.</p>
+
+    <h4>🎹 Chord Matching</h4>
+    <p>Chords are multi-key sequences like <code>Ctrl+K Ctrl+C</code>. When the resolver enters Pending state, a visual indicator appears in the status bar showing the partial chord. The matcher supports arbitrary-length chords but recommends a maximum of two keys. Chord definitions in the binding table use space-separated key strings: <code>"ctrl+k ctrl+c"</code>.</p>
+  </section>
+
+  <!-- ===== Directory Map ===== -->
+  <section>
+    <h3>Directory Map</h3>
+    <div class="dir-map">
+keybindings/<br>
+├── KeybindingContext.tsx      <span style="color:var(--text-muted)"># React context provider for keybinding state</span><br>
+├── KeybindingProviderSetup.tsx <span style="color:var(--text-muted)"># Initialization and global listener registration</span><br>
+├── defaultBindings.ts        <span style="color:var(--text-muted)"># Built-in keybinding table (all 17 contexts)</span><br>
+├── loadUserBindings.ts       <span style="color:var(--text-muted)"># User keybindings.json loader with hot-reload</span><br>
+├── match.ts                  <span style="color:var(--text-muted)"># Binding matcher with priority resolution</span><br>
+├── parser.ts                 <span style="color:var(--text-muted)"># Raw keystroke → normalized key string</span><br>
+├── reservedShortcuts.ts      <span style="color:var(--text-muted)"># Terminal-reserved shortcut blocklist</span><br>
+├── resolver.ts               <span style="color:var(--text-muted)"># Core resolution engine + chord state machine</span><br>
+├── schema.ts                 <span style="color:var(--text-muted)"># Zod schema for keybinding entries</span><br>
+├── shortcutFormat.ts         <span style="color:var(--text-muted)"># Platform-specific display formatting</span><br>
+├── template.ts               <span style="color:var(--text-muted)"># Starter keybindings.json generator</span><br>
+├── useKeybinding.ts          <span style="color:var(--text-muted)"># React hook for component-scoped bindings</span><br>
+├── useShortcutDisplay.ts     <span style="color:var(--text-muted)"># Hook for formatted shortcut display strings</span><br>
+└── validate.ts               <span style="color:var(--text-muted)"># Binding file validation (conflicts, cycles)</span><br>
+    </div>
+  </section>
+
+  <!-- ===== Configuration ===== -->
+  <section>
+    <h3>Configuration</h3>
+    <p>The keybinding system is configured through multiple layers: built-in defaults, user overrides, and reserved shortcuts.</p>
+
+    <h4>Context Blocks</h4>
+    <p>Bindings are scoped to one of 17 named contexts. Each context represents a UI state where different shortcuts apply:</p>
+    <pre><code class="language-typescript">// The 17 keybinding contexts
+export enum KeybindingContext {
+  Global = 'global',
+  Chat = 'chat',
+  Autocomplete = 'autocomplete',
+  FilePicker = 'filePicker',
+  CommandPalette = 'commandPalette',
+  PermissionDialog = 'permissionDialog',
+  DiffView = 'diffView',
+  ToolOutput = 'toolOutput',
+  SearchResults = 'searchResults',
+  Settings = 'settings',
+  Help = 'help',
+  History = 'history',
+  AgentView = 'agentView',
+  MarkdownPreview = 'markdownPreview',
+  StatusBar = 'statusBar',
+  VimNormal = 'vimNormal',
+  VimInsert = 'vimInsert',
+}
+
+// Binding definition shape
+export interface KeyBinding {
+  key: string;          // e.g. "ctrl+shift+p" or "ctrl+k ctrl+c"
+  command: string;      // action identifier
+  when?: string;        // context expression
+  args?: unknown;       // optional arguments to pass to the action
+  priority?: number;    // override default priority (higher wins)
+}</code></pre>
+
+    <h4>Chord Timeout</h4>
+    <pre><code class="language-typescript">// Chord configuration
+export const CHORD_TIMEOUT_MS = 1500;   // ms before pending chord resets
+export const CHORD_INDICATOR = true;     // show partial chord in status bar
+
+// Resolver chord state
+interface ChordState {
+  status: 'idle' | 'pending' | 'complete';
+  buffer: string[];       // accumulated key strings
+  startedAt: number;      // timestamp for timeout check
+}</code></pre>
+
+    <h4>Reserved Shortcuts</h4>
+    <pre><code class="language-typescript">// Terminal-reserved shortcuts that are never intercepted
+export const RESERVED_SHORTCUTS: ReadonlySet&lt;string&gt; = new Set([
+  'ctrl+c',   // SIGINT
+  'ctrl+z',   // SIGTSTP (suspend)
+  'ctrl+d',   // EOF
+  'ctrl+\\',  // SIGQUIT
+  'ctrl+s',   // XOFF (flow control)
+  'ctrl+q',   // XON (flow control)
+]);</code></pre>
+
+    <h4>Platform Detection</h4>
+    <pre><code class="language-typescript">// Platform-specific key formatting
+export function formatShortcut(key: string): string {
+  const isMac = process.platform === 'darwin';
+  return key
+    .replace(/ctrl/gi,  isMac ? '⌃' : 'Ctrl')
+    .replace(/alt/gi,   isMac ? '⌥' : 'Alt')
+    .replace(/shift/gi, isMac ? '⇧' : 'Shift')
+    .replace(/meta/gi,  isMac ? '⌘' : 'Win')
+    .replace(/\+/g,     isMac ? '' : '+');
+}</code></pre>
+  </section>
+</main>
+
+<footer>
+  <p>Generated from <code>a8a678c</code> on 2026-04-01 · Claude Code Source Map</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="overlay-content">
+    <button class="close-btn" id="overlayClose" aria-label="Close overlay">×</button>
+    <div id="overlayBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /* ── Theme Toggle ── */
+  var toggle = document.getElementById('themeToggle');
+  var html = document.documentElement;
+  var stored = localStorage.getItem('neutra-ip-theme');
+  if (stored) { html.setAttribute('data-theme', stored); }
+  toggle.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  toggle.addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
+    toggle.textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+
+  /* ── Mermaid ── */
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+  document.querySelectorAll('pre.mermaid').forEach(function(el, i) {
+    var src = el.textContent;
+    el.setAttribute('data-source', src);
+    var id = 'mmd-' + i;
+    mermaid.render(id, src).then(function(result) {
+      el.innerHTML = result.svg;
+      el.classList.add('mermaid-rendered');
+    }).catch(function(err) { console.error('Mermaid render error:', err); });
+  });
+
+  /* ── Highlight.js ── */
+  document.querySelectorAll('pre code').forEach(function(block) {
+    hljs.highlightElement(block);
+  });
+
+  /* ── Copy Buttons ── */
+  document.querySelectorAll('pre code, pre:not(.mermaid)').forEach(function(pre) {
+    var wrapper = pre.closest('pre') || pre;
+    if (wrapper.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var text = wrapper.querySelector('code') ? wrapper.querySelector('code').textContent : wrapper.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(btn);
+  });
+
+  /* ── Reading Time ── */
+  var text = document.getElementById('main').textContent || '';
+  var words = text.trim().split(/\s+/).length;
+  var minutes = Math.max(1, Math.ceil(words / 200));
+  document.getElementById('readingTime').textContent = '📖 ' + minutes + ' min read';
+
+  /* ── Back to Top ── */
+  var topBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    topBtn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+  });
+  topBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── j/k Navigation ── */
+  var sections = Array.from(document.querySelectorAll('section'));
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'j' || e.key === 'k') {
+      var scrollY = window.scrollY + 100;
+      var idx = sections.findIndex(function(s) { return s.offsetTop > scrollY; });
+      if (e.key === 'j') {
+        var target = idx >= 0 ? sections[idx] : sections[sections.length - 1];
+      } else {
+        var target = idx > 1 ? sections[idx - 2] : sections[0];
+      }
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  /* ── Diagram Overlay with Scroll Zoom ── */
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayBody = document.getElementById('overlayBody');
+  var currentScale = 1;
+  document.querySelectorAll('.diagram-wrapper').forEach(function(wrapper) {
+    wrapper.addEventListener('click', function() {
+      var svg = wrapper.querySelector('.mermaid-rendered');
+      if (svg) {
+        overlayBody.innerHTML = svg.innerHTML;
+        currentScale = 1;
+        overlayBody.style.transform = 'scale(1)';
+        overlay.classList.add('active');
+      }
+    });
+  });
+  overlay.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    currentScale += e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.max(0.3, Math.min(3, currentScale));
+    overlayBody.style.transform = 'scale(' + currentScale + ')';
+  });
+  document.getElementById('overlayClose').addEventListener('click', function() {
+    overlay.classList.remove('active');
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+});
+</script>
+</body>
+</html>

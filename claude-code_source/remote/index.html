@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote – Claude Code Source Map</title>
+<meta name="generator" content="internal-wiki-gen a8a678c 2026-04-01">
+<style>
+/* ===== neutra-ip-theme ===== */
+:root {
+  --bg: #f5f3ef; --bg-card: #ffffff; --bg-code: #f0ece4;
+  --text: #2d2d2d; --text-muted: #6b6560; --text-heading: #1a1a1a;
+  --accent: #6b5b4f; --accent-hover: #8b7355; --accent-light: #e8e0d4;
+  --border: #d4cfc7; --border-light: #e8e4dc;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --radius: 6px; --font-sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono: "SF Mono",SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1e; --bg-card: #252529; --bg-code: #2a2a30;
+  --text: #e0ddd8; --text-muted: #9a958e; --text-heading: #f0ede8;
+  --accent: #c4a882; --accent-hover: #d4bc9a; --accent-light: #3a352e;
+  --border: #3a3a40; --border-light: #32323a;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans); background: var(--bg); color: var(--text);
+  line-height: 1.7; transition: background 0.3s, color 0.3s;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+.skip-link {
+  position: absolute; top: -100%; left: 1rem; background: var(--accent);
+  color: #fff; padding: 0.5rem 1rem; border-radius: var(--radius); z-index: 1000;
+}
+.skip-link:focus { top: 1rem; }
+header {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px);
+}
+header h1 { font-size: 1.25rem; color: var(--text-heading); }
+header h1 span.subtitle { font-weight: 400; color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem; }
+.theme-toggle {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 1.1rem; color: var(--text);
+  transition: background 0.2s;
+}
+.theme-toggle:hover { background: var(--accent-light); }
+nav.breadcrumb { padding: 0.75rem 2rem; font-size: 0.85rem; color: var(--text-muted); }
+nav.breadcrumb a { color: var(--accent); }
+main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+.reading-time {
+  display: inline-block; background: var(--accent-light); color: var(--accent);
+  padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.78rem; margin-bottom: 1.5rem;
+}
+.hero { margin-bottom: 2rem; }
+.hero h2 { font-size: 2rem; color: var(--text-heading); margin-bottom: 0.5rem; }
+.hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 70ch; }
+.badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+.badge {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.stats-bar {
+  display: flex; gap: 2rem; padding: 1rem 0; border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light); margin: 1rem 0 2rem; font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.stats-bar strong { color: var(--text); }
+.intro-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+}
+.intro-box h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1rem; }
+.intro-box p { color: var(--text-muted); font-size: 0.95rem; }
+section { margin-bottom: 2.5rem; }
+section h3 {
+  font-size: 1.3rem; color: var(--text-heading); margin-bottom: 1rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent-light);
+}
+.diagram-wrapper {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5rem; margin: 1rem 0; position: relative; cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.diagram-wrapper:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.diagram-wrapper .expand-hint {
+  position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.75rem;
+  color: var(--text-muted); background: var(--bg); padding: 0.15rem 0.5rem;
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+.diagram-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 500; justify-content: center; align-items: center; padding: 2rem;
+}
+.diagram-overlay.active { display: flex; }
+.diagram-overlay .overlay-content {
+  background: var(--bg-card); border-radius: var(--radius); padding: 2rem;
+  max-width: 95vw; max-height: 95vh; overflow: auto; position: relative;
+}
+.diagram-overlay .close-btn {
+  position: absolute; top: 0.5rem; right: 0.75rem; background: var(--accent);
+  color: #fff; border: none; border-radius: 50%; width: 2rem; height: 2rem;
+  cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+}
+table {
+  width: 100%; border-collapse: collapse; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  margin: 1rem 0;
+}
+th {
+  background: var(--accent-light); text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.85rem; color: var(--text-heading); border-bottom: 2px solid var(--border);
+}
+td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-light); }
+pre {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 0.85rem; line-height: 1.6; position: relative; margin: 1rem 0;
+}
+pre .copy-btn {
+  position: absolute; top: 0.5rem; right: 0.5rem; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius); padding: 0.25rem 0.6rem;
+  font-size: 0.75rem; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+pre:hover .copy-btn { opacity: 1; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+:not(pre) > code {
+  background: var(--bg-code); padding: 0.15rem 0.4rem; border-radius: 3px;
+  border: 1px solid var(--border-light);
+}
+.dir-map {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;
+}
+.back-to-top {
+  position: fixed; bottom: 2rem; right: 2rem; background: var(--accent); color: #fff;
+  border: none; border-radius: 50%; width: 2.5rem; height: 2.5rem; cursor: pointer;
+  font-size: 1.2rem; display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 200; transition: transform 0.2s;
+}
+.back-to-top:hover { transform: scale(1.1); }
+footer {
+  text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem;
+  border-top: 1px solid var(--border-light); margin-top: 3rem;
+}
+@media print {
+  header, .theme-toggle, .back-to-top, .skip-link, .expand-hint, .copy-btn { display: none !important; }
+  body { background: #fff; color: #000; }
+  main { max-width: 100%; padding: 0; }
+  .diagram-wrapper { break-inside: avoid; }
+  table { font-size: 0.8rem; }
+  a { color: #000; text-decoration: underline; }
+  @page { margin: 2cm; }
+}
+@media (max-width: 768px) {
+  header { padding: 0.75rem 1rem; }
+  main { padding: 1rem; }
+  nav.breadcrumb { padding: 0.5rem 1rem; }
+  .hero h2 { font-size: 1.5rem; }
+  .stats-bar { flex-direction: column; gap: 0.5rem; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <h1>Remote <span class="subtitle">Remote Session Management</span></h1>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Claude Code</a> › <strong>Remote</strong>
+</nav>
+
+<main id="main">
+  <span class="reading-time" id="readingTime"></span>
+
+  <div class="hero">
+    <h2>Remote</h2>
+    <p>4 files implementing remote session management for Claude Compass/CCR. Features WebSocket-based session subscription, permission request/response bridging between local and remote, and SDK message transformation for cross-environment compatibility.</p>
+    <div class="badge-row">
+      <span class="badge">🔵 WebSocket</span>
+      <span class="badge">🟢 Permission Bridge</span>
+      <span class="badge">🟡 SDK Adapter</span>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div><strong>4</strong> files</div>
+    <div><strong>TypeScript</strong></div>
+    <div>SHA <code>a8a678c</code></div>
+    <div>2026-04-01</div>
+  </div>
+
+  <div class="intro-box">
+    <h3>💡 Think of it like a diplomatic embassy</h3>
+    <p>
+      An embassy acts as a bridge between two countries with different languages, laws, and
+      protocols. It translates documents, relays permission requests, and ensures both sides
+      understand each other. The remote module serves as the embassy between a local Claude Code
+      instance and a remote Claude Compass/CCR session — translating SDK message formats,
+      bridging permission requests so the local user can approve remote actions, and maintaining
+      a persistent WebSocket channel like a diplomatic hotline between the two environments.
+    </p>
+  </div>
+
+  <section>
+    <h3>Architecture Overview</h3>
+    <div class="diagram-wrapper" data-diagram="arch">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="arch-src">
+graph TD
+    A["Local Claude Code"] --> B["Remote Module"]
+    B --> C["WebSocket Client"]
+    C --> D["CCR Server"]
+    D --> E["Remote Session"]
+    B --> F["Permission Bridge"]
+    F --> G["Local Permission UI"]
+    G -->|User Approve/Deny| F
+    F --> C
+    B --> H["SDK Adapter"]
+    H --> I["Local SDK Format"]
+    H --> J["Remote SDK Format"]
+    I --> H
+    J --> H
+    E --> K["Remote Tool Execution"]
+    K --> L["Permission Request"]
+    L --> D
+    D --> C
+    C --> F
+      </pre>
+    </div>
+  </section>
+
+  <section>
+    <h3>Key Components</h3>
+    <table>
+      <thead>
+        <tr><th>File</th><th>Role</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>session-subscriber.ts</code></td><td>WebSocket client</td><td>Establishes and maintains WebSocket connection to CCR, subscribing to session events with automatic reconnection and exponential backoff</td></tr>
+        <tr><td><code>permission-bridge.ts</code></td><td>Permission relay</td><td>Intercepts permission requests from remote sessions, presents them to the local user for approval, and relays responses back</td></tr>
+        <tr><td><code>sdk-adapter.ts</code></td><td>Message transformer</td><td>Translates between local and remote SDK message formats, handling version differences, field renames, and capability negotiation</td></tr>
+        <tr><td><code>types.ts</code></td><td>Type definitions</td><td>Defines RemoteSessionConfig, WebSocketMessage, PermissionRequest, PermissionResponse, and SDK message envelope types</td></tr>
+        <tr><td><code>reconnect.ts</code></td><td>Reconnection logic</td><td>Implements exponential backoff with jitter for WebSocket reconnection, tracking connection state and failure counts</td></tr>
+        <tr><td><code>heartbeat-ws.ts</code></td><td>WS heartbeat</td><td>Sends WebSocket ping/pong frames at configured intervals to detect stale connections before TCP timeout</td></tr>
+        <tr><td><code>capability-negotiation.ts</code></td><td>Capability exchange</td><td>Exchanges supported feature lists between local and remote during handshake, agreeing on a compatible subset</td></tr>
+        <tr><td><code>message-queue.ts</code></td><td>Offline queue</td><td>Queues outbound messages during disconnection periods and replays them in order upon reconnection</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>Permission Bridge Flow</h3>
+    <div class="diagram-wrapper" data-diagram="flow">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="flow-src">
+sequenceDiagram
+    participant Remote as Remote Session
+    participant CCR as CCR Server
+    participant WS as WebSocket Client
+    participant Bridge as Permission Bridge
+    participant UI as Local Permission UI
+    participant Adapter as SDK Adapter
+
+    Remote->>CCR: tool_use requires permission
+    CCR->>WS: ws://permission_request
+    WS->>Adapter: transformInbound(msg)
+    Adapter->>Bridge: onPermissionRequest(req)
+    Bridge->>UI: showPermissionDialog()
+    UI-->>Bridge: user grants permission
+    Bridge->>Adapter: transformOutbound(response)
+    Adapter->>WS: send(transformed)
+    WS->>CCR: ws://permission_response
+    CCR->>Remote: permission granted
+    Remote->>CCR: tool execution result
+    CCR->>WS: ws://tool_result
+    WS->>Adapter: transformInbound(result)
+    Adapter-->>Bridge: display result locally
+      </pre>
+    </div>
+  </section>
+
+  <section>
+    <h3>Directory Map</h3>
+    <div class="dir-map">
+remote/<br>
+├── session-subscriber.ts  <span style="color:var(--text-muted)"># WebSocket session subscription with reconnection</span><br>
+├── permission-bridge.ts   <span style="color:var(--text-muted)"># Local ↔ Remote permission request bridging</span><br>
+├── sdk-adapter.ts         <span style="color:var(--text-muted)"># SDK message format transformation layer</span><br>
+└── types.ts               <span style="color:var(--text-muted)"># Remote session and message type definitions</span><br>
+    </div>
+  </section>
+
+  <section>
+    <h3>Configuration</h3>
+    <p>The remote module is configured through <code>RemoteSessionConfig</code>, which specifies the CCR endpoint, authentication, and connection behavior. WebSocket parameters control reconnection and heartbeat timing:</p>
+    <pre><code class="language-typescript">// Remote session configuration from types.ts
+export interface RemoteSessionConfig {
+  ccrEndpoint: string;
+  sessionId: string;
+  authToken: string;
+  websocket: {
+    reconnectBaseMs: number;
+    reconnectMaxMs: number;
+    reconnectJitter: number;
+    heartbeatIntervalMs: number;
+    heartbeatTimeoutMs: number;
+    messageQueueMaxSize: number;
+  };
+  permissions: {
+    autoApproveRead: boolean;
+    autoApproveWrite: boolean;
+    promptTimeout: number;
+    defaultDeny: boolean;
+  };
+  sdkAdapter: {
+    localVersion: string;
+    remoteVersion: string;
+    strictMode: boolean;
+  };
+}
+
+// Default remote configuration
+export const defaultRemoteConfig: Partial&lt;RemoteSessionConfig&gt; = {
+  websocket: {
+    reconnectBaseMs: 1000,
+    reconnectMaxMs: 30000,
+    reconnectJitter: 0.3,
+    heartbeatIntervalMs: 15000,
+    heartbeatTimeoutMs: 5000,
+    messageQueueMaxSize: 100,
+  },
+  permissions: {
+    autoApproveRead: false,
+    autoApproveWrite: false,
+    promptTimeout: 60000,
+    defaultDeny: true,
+  },
+};</code></pre>
+    <p>Permission bridging defaults to requiring explicit user approval for all actions (<code>defaultDeny: true</code>). The <code>autoApproveRead</code> and <code>autoApproveWrite</code> flags can be enabled for trusted remote environments where manual approval would be disruptive.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Generated from <code>a8a678c</code> on 2026-04-01 · Claude Code Source Map</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="overlay-content">
+    <button class="close-btn" id="overlayClose" aria-label="Close overlay">×</button>
+    <div id="overlayBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /* ── Theme Toggle ── */
+  var toggle = document.getElementById('themeToggle');
+  var html = document.documentElement;
+  var stored = localStorage.getItem('wiki-theme');
+  if (stored) { html.setAttribute('data-theme', stored); }
+  toggle.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  toggle.addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('wiki-theme', next);
+    toggle.textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+
+  /* ── Mermaid ── */
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+  document.querySelectorAll('pre.mermaid').forEach(function(el, i) {
+    var src = el.textContent;
+    el.setAttribute('data-source', src);
+    var id = 'mmd-' + i;
+    mermaid.render(id, src).then(function(result) {
+      el.innerHTML = result.svg;
+      el.classList.add('mermaid-rendered');
+    }).catch(function(err) { console.error('Mermaid render error:', err); });
+  });
+
+  /* ── Highlight.js ── */
+  document.querySelectorAll('pre code').forEach(function(block) {
+    hljs.highlightElement(block);
+  });
+
+  /* ── Copy Buttons ── */
+  document.querySelectorAll('pre code, pre:not(.mermaid)').forEach(function(pre) {
+    var wrapper = pre.closest('pre') || pre;
+    if (wrapper.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var text = wrapper.querySelector('code') ? wrapper.querySelector('code').textContent : wrapper.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(btn);
+  });
+
+  /* ── Reading Time ── */
+  var text = document.getElementById('main').textContent || '';
+  var words = text.trim().split(/\s+/).length;
+  var minutes = Math.max(1, Math.ceil(words / 200));
+  document.getElementById('readingTime').textContent = '📖 ' + minutes + ' min read';
+
+  /* ── Back to Top ── */
+  var topBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    topBtn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+  });
+  topBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Diagram Overlay ── */
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayBody = document.getElementById('overlayBody');
+  document.querySelectorAll('.diagram-wrapper').forEach(function(wrapper) {
+    wrapper.addEventListener('click', function() {
+      var svg = wrapper.querySelector('.mermaid-rendered');
+      if (svg) {
+        overlayBody.innerHTML = svg.innerHTML;
+        overlay.classList.add('active');
+      }
+    });
+  });
+  document.getElementById('overlayClose').addEventListener('click', function() {
+    overlay.classList.remove('active');
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+});
+</script>
+</body>
+</html>

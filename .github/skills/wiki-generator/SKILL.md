@@ -115,6 +115,21 @@ versions.json                ← Manifest of all published versions
 
 ## Hard Rules
 
+- **Copilot CLI shell safety** — The Copilot CLI sandbox blocks commands with nested command substitution, indirect expansion, or process substitution. These patterns will be rejected:
+  - `$(command_inside_string)` inside an `echo` argument — e.g., `echo "count: $(wc -l < file)"` is BLOCKED
+  - `-exec sh -c '...' _ {} \;` compound exec patterns are BLOCKED
+  - `$(...)` nested inside `$(...)` is BLOCKED
+  - `while read var; do ... $(<"$var") ... done` is BLOCKED
+  
+  **Safe alternatives:**
+  - Split into separate commands: `COUNT=$(wc -l < file)` then `echo "count: $COUNT"`
+  - Use `find ... -exec wc -l {} +` (no nested `sh -c`)
+  - Use `xargs` instead of `-exec sh -c`
+  - Use Python one-liners for complex logic: `python3 -c "import os; ..."`
+  - Pipe chains are fine: `cat file | sed ... | wc -l`
+  - Simple `for` loops with `find` output piped to a variable are fine
+  - When in doubt, use a `python3 -c` one-liner instead of complex shell
+
 - Never compress or minify generated HTML. Keep readable multi-line formatting so page audits remain meaningful and line-count checks reflect real content volume.
 - For focus pages and extracted rewrites, always start from the full [focus-template.html](./resources/focus-template.html) scaffold rather than hand-assembling a reduced page.
 - If an L2 page exposes a `Deep-Dive Pages` hub, finish the extraction cleanly: do not leave old inline `deep-dive` sections alongside the new hub cards.

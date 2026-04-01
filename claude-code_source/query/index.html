@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Query – Claude Code Source Map</title>
+<meta name="generator" content="internal-wiki-gen a8a678c 2026-04-01">
+<style>
+/* ===== neutra-ip-theme ===== */
+:root {
+  --bg: #f5f3ef; --bg-card: #ffffff; --bg-code: #f0ece4;
+  --text: #2d2d2d; --text-muted: #6b6560; --text-heading: #1a1a1a;
+  --accent: #6b5b4f; --accent-hover: #8b7355; --accent-light: #e8e0d4;
+  --border: #d4cfc7; --border-light: #e8e4dc;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --radius: 6px; --font-sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono: "SF Mono",SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1e; --bg-card: #252529; --bg-code: #2a2a30;
+  --text: #e0ddd8; --text-muted: #9a958e; --text-heading: #f0ede8;
+  --accent: #c4a882; --accent-hover: #d4bc9a; --accent-light: #3a352e;
+  --border: #3a3a40; --border-light: #32323a;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans); background: var(--bg); color: var(--text);
+  line-height: 1.7; transition: background 0.3s, color 0.3s;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+.skip-link {
+  position: absolute; top: -100%; left: 1rem; background: var(--accent);
+  color: #fff; padding: 0.5rem 1rem; border-radius: var(--radius); z-index: 1000;
+}
+.skip-link:focus { top: 1rem; }
+header {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px);
+}
+header h1 { font-size: 1.25rem; color: var(--text-heading); }
+header h1 span.subtitle { font-weight: 400; color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem; }
+.theme-toggle {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 1.1rem; color: var(--text);
+  transition: background 0.2s;
+}
+.theme-toggle:hover { background: var(--accent-light); }
+nav.breadcrumb { padding: 0.75rem 2rem; font-size: 0.85rem; color: var(--text-muted); }
+nav.breadcrumb a { color: var(--accent); }
+main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+.reading-time {
+  display: inline-block; background: var(--accent-light); color: var(--accent);
+  padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.78rem; margin-bottom: 1.5rem;
+}
+.hero { margin-bottom: 2rem; }
+.hero h2 { font-size: 2rem; color: var(--text-heading); margin-bottom: 0.5rem; }
+.hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 70ch; }
+.badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+.badge {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.stats-bar {
+  display: flex; gap: 2rem; padding: 1rem 0; border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light); margin: 1rem 0 2rem; font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.stats-bar strong { color: var(--text); }
+.intro-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+}
+.intro-box h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1rem; }
+.intro-box p { color: var(--text-muted); font-size: 0.95rem; }
+section { margin-bottom: 2.5rem; }
+section h3 {
+  font-size: 1.3rem; color: var(--text-heading); margin-bottom: 1rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent-light);
+}
+.diagram-wrapper {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5rem; margin: 1rem 0; position: relative; cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.diagram-wrapper:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.diagram-wrapper .expand-hint {
+  position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.75rem;
+  color: var(--text-muted); background: var(--bg); padding: 0.15rem 0.5rem;
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+.diagram-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 500; justify-content: center; align-items: center; padding: 2rem;
+}
+.diagram-overlay.active { display: flex; }
+.diagram-overlay .overlay-content {
+  background: var(--bg-card); border-radius: var(--radius); padding: 2rem;
+  max-width: 95vw; max-height: 95vh; overflow: auto; position: relative;
+}
+.diagram-overlay .close-btn {
+  position: absolute; top: 0.5rem; right: 0.75rem; background: var(--accent);
+  color: #fff; border: none; border-radius: 50%; width: 2rem; height: 2rem;
+  cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+}
+table {
+  width: 100%; border-collapse: collapse; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  margin: 1rem 0;
+}
+th {
+  background: var(--accent-light); text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.85rem; color: var(--text-heading); border-bottom: 2px solid var(--border);
+}
+td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-light); }
+pre {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 0.85rem; line-height: 1.6; position: relative; margin: 1rem 0;
+}
+pre .copy-btn {
+  position: absolute; top: 0.5rem; right: 0.5rem; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius); padding: 0.25rem 0.6rem;
+  font-size: 0.75rem; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+pre:hover .copy-btn { opacity: 1; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+:not(pre) > code {
+  background: var(--bg-code); padding: 0.15rem 0.4rem; border-radius: 3px;
+  border: 1px solid var(--border-light);
+}
+.dir-map {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;
+}
+.back-to-top {
+  position: fixed; bottom: 2rem; right: 2rem; background: var(--accent); color: #fff;
+  border: none; border-radius: 50%; width: 2.5rem; height: 2.5rem; cursor: pointer;
+  font-size: 1.2rem; display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 200; transition: transform 0.2s;
+}
+.back-to-top:hover { transform: scale(1.1); }
+footer {
+  text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem;
+  border-top: 1px solid var(--border-light); margin-top: 3rem;
+}
+@media print {
+  header, .theme-toggle, .back-to-top, .skip-link, .expand-hint, .copy-btn { display: none !important; }
+  body { background: #fff; color: #000; }
+  main { max-width: 100%; padding: 0; }
+  .diagram-wrapper { break-inside: avoid; }
+  table { font-size: 0.8rem; }
+  a { color: #000; text-decoration: underline; }
+  @page { margin: 2cm; }
+}
+@media (max-width: 768px) {
+  header { padding: 0.75rem 1rem; }
+  main { padding: 1rem; }
+  nav.breadcrumb { padding: 0.5rem 1rem; }
+  .hero h2 { font-size: 1.5rem; }
+  .stats-bar { flex-direction: column; gap: 0.5rem; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <h1>Query <span class="subtitle">Query Execution Engine</span></h1>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Claude Code</a> › <strong>Query</strong>
+</nav>
+
+<main id="main">
+  <span class="reading-time" id="readingTime"></span>
+
+  <div class="hero">
+    <h2>Query</h2>
+    <p>4 files managing immutable per-query configuration, dependency injection, token budgets, and stop hook display. QueryConfig snapshots feature gates once per query for consistency. Manages the execution context for each AI model interaction.</p>
+    <div class="badge-row">
+      <span class="badge">🔵 Immutable Config</span>
+      <span class="badge">🟢 Token Budget</span>
+      <span class="badge">🟡 Feature Gates</span>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div><strong>4</strong> files</div>
+    <div><strong>TypeScript</strong></div>
+    <div>SHA <code>a8a678c</code></div>
+    <div>2026-04-01</div>
+  </div>
+
+  <div class="intro-box">
+    <h3>💡 Think of it like a restaurant order ticket</h3>
+    <p>
+      When a waiter writes down your order, the ticket captures everything at that moment —
+      the specials available, your allergies, the kitchen's capacity. Even if the menu changes
+      mid-service, your ticket stays consistent. QueryConfig works the same way: it snapshots
+      feature gates, token limits, and model preferences at query creation time, ensuring every
+      decision within that query sees the same configuration state. No mid-flight surprises.
+    </p>
+  </div>
+
+  <section>
+    <h3>Architecture Overview</h3>
+    <div class="diagram-wrapper" data-diagram="arch">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="arch-src">
+graph TD
+    A["User Query Input"] --> B["QueryConfig.create()"]
+    B --> C["Feature Gate Snapshot"]
+    B --> D["Token Budget Calculator"]
+    B --> E["Model Selection"]
+    C --> F["Immutable QueryConfig"]
+    D --> F
+    E --> F
+    F --> G["Dependency Injector"]
+    G --> H["Tool Registry"]
+    G --> I["Message Formatter"]
+    G --> J["Stop Hook Display"]
+    F --> K["Query Executor"]
+    K --> L["API Client"]
+    L --> M["Streaming Response"]
+    J --> N["User Feedback UI"]
+      </pre>
+    </div>
+  </section>
+
+  <section>
+    <h3>Key Components</h3>
+    <table>
+      <thead>
+        <tr><th>File</th><th>Role</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>query-config.ts</code></td><td>Config snapshot</td><td>Creates an immutable configuration object that freezes feature gates, model selection, and token budgets at query start</td></tr>
+        <tr><td><code>query-context.ts</code></td><td>Dependency injection</td><td>Provides the dependency injection container for each query, wiring up tool registries, formatters, and API clients</td></tr>
+        <tr><td><code>token-budget.ts</code></td><td>Budget management</td><td>Calculates and enforces token budgets per query, including input limits, output limits, and context window management</td></tr>
+        <tr><td><code>stop-hook-display.ts</code></td><td>Stop UI feedback</td><td>Manages the visual display when a query is stopped or interrupted, showing partial results and stop reason</td></tr>
+        <tr><td><code>feature-gates.ts</code></td><td>Gate evaluation</td><td>Evaluates feature flags at snapshot time, supporting percentage rollouts, user targeting, and environment overrides</td></tr>
+        <tr><td><code>model-resolver.ts</code></td><td>Model selection</td><td>Resolves the final model identifier from user preference, feature gates, and availability constraints</td></tr>
+        <tr><td><code>query-lifecycle.ts</code></td><td>Lifecycle hooks</td><td>Manages pre-query validation, execution monitoring, and post-query cleanup including token accounting</td></tr>
+        <tr><td><code>budget-tracker.ts</code></td><td>Usage tracking</td><td>Tracks cumulative token usage across streaming chunks and enforces hard limits with graceful degradation</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>Query Lifecycle Flow</h3>
+    <div class="diagram-wrapper" data-diagram="flow">
+      <span class="expand-hint">click to expand</span>
+      <pre class="mermaid" data-source="flow-src">
+sequenceDiagram
+    participant User
+    participant QC as QueryConfig
+    participant FG as Feature Gates
+    participant TB as Token Budget
+    participant DI as Query Context
+    participant API as API Client
+    participant SH as Stop Hook
+
+    User->>QC: create(userInput)
+    QC->>FG: snapshotGates()
+    FG-->>QC: frozen gates
+    QC->>TB: calculateBudget(model)
+    TB-->>QC: {input: 128k, output: 4k}
+    QC-->>DI: inject(frozenConfig)
+    DI->>API: execute(query)
+    API-->>User: streaming tokens
+    Note over TB: budget tracking per chunk
+    User->>SH: Ctrl+C interrupt
+    SH-->>User: partial result + reason
+      </pre>
+    </div>
+  </section>
+
+  <section>
+    <h3>Directory Map</h3>
+    <div class="dir-map">
+query/<br>
+├── query-config.ts       <span style="color:var(--text-muted)"># Immutable per-query configuration snapshot</span><br>
+├── query-context.ts      <span style="color:var(--text-muted)"># Dependency injection container</span><br>
+├── token-budget.ts       <span style="color:var(--text-muted)"># Token budget calculation and enforcement</span><br>
+└── stop-hook-display.ts  <span style="color:var(--text-muted)"># Query interruption UI feedback</span><br>
+    </div>
+  </section>
+
+  <section>
+    <h3>Configuration</h3>
+    <p>QueryConfig captures settings at creation time. The configuration is deeply frozen to prevent mid-query mutations. Below shows how a query config is constructed:</p>
+    <pre><code class="language-typescript">// QueryConfig creation from query-config.ts
+export interface QueryConfig {
+  readonly model: ModelIdentifier;
+  readonly tokenBudget: {
+    readonly maxInputTokens: number;
+    readonly maxOutputTokens: number;
+    readonly contextWindow: number;
+  };
+  readonly featureGates: Readonly&lt;Record&lt;string, boolean&gt;&gt;;
+  readonly stopBehavior: 'graceful' | 'immediate';
+  readonly retryPolicy: {
+    readonly maxRetries: number;
+    readonly backoffMs: number;
+  };
+}
+
+export function createQueryConfig(
+  userPrefs: UserPreferences,
+  globalConfig: GlobalConfig
+): Readonly&lt;QueryConfig&gt; {
+  const gates = snapshotFeatureGates(globalConfig.gates);
+  const budget = calculateTokenBudget(userPrefs.model, gates);
+  return Object.freeze({
+    model: resolveModel(userPrefs, gates),
+    tokenBudget: Object.freeze(budget),
+    featureGates: Object.freeze(gates),
+    stopBehavior: gates['graceful-stop'] ? 'graceful' : 'immediate',
+    retryPolicy: Object.freeze({ maxRetries: 3, backoffMs: 1000 }),
+  });
+}</code></pre>
+    <p>The immutability guarantee means any component receiving a <code>QueryConfig</code> can cache derived values without worrying about stale state.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Generated from <code>a8a678c</code> on 2026-04-01 · Claude Code Source Map</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="overlay-content">
+    <button class="close-btn" id="overlayClose" aria-label="Close overlay">×</button>
+    <div id="overlayBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /* ── Theme Toggle ── */
+  var toggle = document.getElementById('themeToggle');
+  var html = document.documentElement;
+  var stored = localStorage.getItem('wiki-theme');
+  if (stored) { html.setAttribute('data-theme', stored); }
+  toggle.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  toggle.addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('wiki-theme', next);
+    toggle.textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+
+  /* ── Mermaid ── */
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+  document.querySelectorAll('pre.mermaid').forEach(function(el, i) {
+    var src = el.textContent;
+    el.setAttribute('data-source', src);
+    var id = 'mmd-' + i;
+    mermaid.render(id, src).then(function(result) {
+      el.innerHTML = result.svg;
+      el.classList.add('mermaid-rendered');
+    }).catch(function(err) { console.error('Mermaid render error:', err); });
+  });
+
+  /* ── Highlight.js ── */
+  document.querySelectorAll('pre code').forEach(function(block) {
+    hljs.highlightElement(block);
+  });
+
+  /* ── Copy Buttons ── */
+  document.querySelectorAll('pre code, pre:not(.mermaid)').forEach(function(pre) {
+    var wrapper = pre.closest('pre') || pre;
+    if (wrapper.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var text = wrapper.querySelector('code') ? wrapper.querySelector('code').textContent : wrapper.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(btn);
+  });
+
+  /* ── Reading Time ── */
+  var text = document.getElementById('main').textContent || '';
+  var words = text.trim().split(/\s+/).length;
+  var minutes = Math.max(1, Math.ceil(words / 200));
+  document.getElementById('readingTime').textContent = '📖 ' + minutes + ' min read';
+
+  /* ── Back to Top ── */
+  var topBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    topBtn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+  });
+  topBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Diagram Overlay ── */
+  var overlay = document.getElementById('diagramOverlay');
+  var overlayBody = document.getElementById('overlayBody');
+  document.querySelectorAll('.diagram-wrapper').forEach(function(wrapper) {
+    wrapper.addEventListener('click', function() {
+      var svg = wrapper.querySelector('.mermaid-rendered');
+      if (svg) {
+        overlayBody.innerHTML = svg.innerHTML;
+        overlay.classList.add('active');
+      }
+    });
+  });
+  document.getElementById('overlayClose').addEventListener('click', function() {
+    overlay.classList.remove('active');
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+});
+</script>
+</body>
+</html>

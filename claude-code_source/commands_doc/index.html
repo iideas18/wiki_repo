@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commands — Slash Command System | Claude Code Wiki</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+/* ===== CSS Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Light theme (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #eef1f5;
+  --bg-card: #ffffff;
+  --bg-code: #f0f2f5;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border-color: #d1d5db;
+  --border-light: #e5e7eb;
+  --accent-blue: #2563eb;
+  --accent-blue-bg: #eff6ff;
+  --accent-green: #059669;
+  --accent-green-bg: #ecfdf5;
+  --accent-amber: #d97706;
+  --accent-amber-bg: #fffbeb;
+  --accent-red: #dc2626;
+  --accent-red-bg: #fef2f2;
+  --accent-purple: #7c3aed;
+  --accent-purple-bg: #f5f3ff;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1c2129;
+  --bg-card: #161b22;
+  --bg-code: #1c2129;
+  --text-primary: #e6edf3;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-color: #30363d;
+  --border-light: #21262d;
+  --accent-blue: #58a6ff;
+  --accent-blue-bg: #0d1f3c;
+  --accent-green: #3fb950;
+  --accent-green-bg: #0d2818;
+  --accent-amber: #d29922;
+  --accent-amber-bg: #2b1d0e;
+  --accent-red: #f85149;
+  --accent-red-bg: #2d1114;
+  --accent-purple: #bc8cff;
+  --accent-purple-bg: #1c0f35;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.65;
+  transition: background 0.25s, color 0.25s;
+}
+
+/* ===== Layout ===== */
+.page-wrapper {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 32px 64px;
+}
+
+/* ===== Top Bar ===== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 24px;
+}
+
+.breadcrumb {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.breadcrumb a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { margin: 0 6px; }
+
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.theme-toggle:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-blue);
+}
+
+/* ===== Hero Header ===== */
+.hero {
+  background: linear-gradient(135deg, var(--accent-blue-bg), var(--accent-purple-bg));
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  margin-bottom: 32px;
+}
+.hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--accent-blue);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+.hero .description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 800px;
+  line-height: 1.7;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 18px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.hero-meta code {
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+/* ===== Badges ===== */
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 0;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+}
+.badge-blue   { background: var(--accent-blue-bg);   color: var(--accent-blue); }
+.badge-green  { background: var(--accent-green-bg);  color: var(--accent-green); }
+.badge-amber  { background: var(--accent-amber-bg);  color: var(--accent-amber); }
+.badge-red    { background: var(--accent-red-bg);     color: var(--accent-red); }
+
+/* ===== Stats Bar ===== */
+.stats-bar {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+.stat {
+  flex: 1;
+  text-align: center;
+  padding: 16px 12px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+}
+.stat:last-child { border-right: none; }
+.stat .num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+.stat .label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ===== Section ===== */
+.section {
+  margin-bottom: 40px;
+}
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .icon { font-size: 1.2rem; }
+
+/* ===== Mermaid Diagrams ===== */
+.diagram-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+.diagram-caption {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ===== Intro / Analogy Box ===== */
+.intro-box {
+  background: var(--accent-blue-bg);
+  border: 1px solid var(--accent-blue);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 24px;
+}
+.intro-box .intro-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+  color: var(--accent-blue);
+}
+.intro-box p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ===== Walkthrough ===== */
+.walkthrough {
+  counter-reset: step;
+}
+.walkthrough .step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.walkthrough .step-num {
+  counter-increment: step;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.walkthrough .step-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding-top: 4px;
+}
+.walkthrough .step-text code {
+  background: var(--bg-code);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+/* ===== Component Table ===== */
+.component-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.component-table th {
+  background: var(--bg-secondary);
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-secondary);
+}
+.component-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+.component-table tr:hover td {
+  background: var(--bg-secondary);
+}
+.component-table code {
+  background: var(--bg-code);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+.component-table .type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.type-registry  { background: var(--accent-purple-bg); color: var(--accent-purple); }
+.type-prompt    { background: var(--accent-blue-bg);   color: var(--accent-blue); }
+.type-local     { background: var(--accent-green-bg);  color: var(--accent-green); }
+.type-local-jsx { background: var(--accent-amber-bg);  color: var(--accent-amber); }
+.type-infra     { background: var(--accent-red-bg);    color: var(--accent-red); }
+
+/* ===== Sub-Module Cards Grid ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-blue);
+}
+.card .card-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.card .card-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  color: var(--accent-blue);
+}
+.card .card-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== Deep-Dive Hub ===== */
+.hub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hub-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hub-item:hover {
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-sm);
+}
+.hub-item .hub-icon { font-size: 1.2rem; }
+.hub-item .hub-name { font-weight: 600; font-size: 0.9rem; }
+.hub-item .hub-desc { font-size: 0.82rem; color: var(--text-muted); margin-left: auto; }
+
+/* ===== Directory Tree ===== */
+.dir-tree {
+  background: var(--bg-code);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text-secondary);
+}
+
+/* ===== Config Section ===== */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.config-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.config-item .config-key {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+  margin-bottom: 4px;
+}
+.config-item .config-val {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ===== Glossary ===== */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.glossary-term {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+.glossary-term dt {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--accent-blue);
+  margin-bottom: 3px;
+}
+.glossary-term dd {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ===== Footer ===== */
+.footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ===== Top Bar ===== -->
+  <div class="top-bar">
+    <nav class="breadcrumb">
+      <a href="../index.html">Claude Code</a>
+      <span class="sep">›</span>
+      <strong>Commands</strong>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+      🌙 Dark
+    </button>
+  </div>
+
+  <!-- ===== Hero Header ===== -->
+  <header class="hero">
+    <h1>Commands</h1>
+    <div class="subtitle">Slash Command System</div>
+    <p class="description">
+      The commands module implements 101 slash commands that serve as high-level user workflows.
+      Commands can be <strong>prompt-based</strong> (multi-turn AI interactions with constrained tools),
+      <strong>local</strong> (synchronous execution), or <strong>local-jsx</strong> (interactive React UI).
+      The module uses a memoized registry pattern with lazy loading, feature gates, and
+      environment-based availability filtering.
+    </p>
+    <div class="hero-meta">
+      <span>📁 <code>src/commands/</code></span>
+      <span>🔖 SHA: <code>a8a678c</code></span>
+      <span>📅 2026-04-01</span>
+      <span>🛠 TypeScript</span>
+    </div>
+    <div class="badge-row">
+      <span class="badge badge-blue">🔵 Prompt / Local / JSX Types</span>
+      <span class="badge badge-green">🟢 Lazy Loading</span>
+      <span class="badge badge-amber">🟡 Feature-Gated</span>
+      <span class="badge badge-red">🔴 Permission-Constrained</span>
+    </div>
+  </header>
+
+  <!-- ===== Stats Bar ===== -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="num">189</div>
+      <div class="label">Files</div>
+    </div>
+    <div class="stat">
+      <div class="num">101</div>
+      <div class="label">Commands</div>
+    </div>
+    <div class="stat">
+      <div class="num">86</div>
+      <div class="label">Sub-Directories</div>
+    </div>
+    <div class="stat">
+      <div class="num">3</div>
+      <div class="label">Command Types</div>
+    </div>
+  </div>
+
+  <!-- ===== Intro / Analogy Box ===== -->
+  <div class="intro-box">
+    <div class="intro-title">💡 How to Think About It</div>
+    <p>
+      Think of the commands module like a <strong>restaurant menu</strong>: each slash command is a
+      named dish with its own recipe. The <em>registry</em> (<code>commands.ts</code>) is the menu
+      itself—indexed and searchable. Some dishes are cooked live by the AI chef (<strong>prompt</strong>
+      commands), some are pre-made and served instantly (<strong>local</strong> commands), and some
+      come with an interactive presentation at the table (<strong>local-jsx</strong> commands).
+      Feature gates are the seasonal availability flags, and lazy loading means the kitchen only
+      preps a dish when someone actually orders it.
+    </p>
+  </div>
+
+  <!-- ===== Architecture Diagram ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🏗️</span> Architecture</h2>
+    <div class="diagram-container">
+      <pre class="mermaid">
+flowchart LR
+    subgraph Input
+        UI["User Input<br/>/command args"]
+    end
+
+    subgraph Registry["commands.ts Registry"]
+        FC["findCommand(name)"]
+        GC["getCommands()"]
+        MEMO["Memoized<br/>COMMANDS[]"]
+    end
+
+    subgraph LazyLoad["Lazy Loading"]
+        LL["load() → import()"]
+        FG["Feature Gates"]
+        ENV["Environment<br/>Availability"]
+    end
+
+    subgraph PromptCmds["Prompt Commands"]
+        commit["commit"]
+        review["review"]
+        init["init"]
+        issue["issue"]
+        autofix["autofix-pr"]
+        bughunter["bughunter"]
+    end
+
+    subgraph LocalCmds["Local Commands"]
+        compact["compact"]
+        clear["clear"]
+        cost["cost"]
+        env["env"]
+        exit_cmd["exit"]
+        files["files"]
+        effort["effort"]
+        fast["fast"]
+    end
+
+    subgraph JSXCmds["Local-JSX Commands"]
+        config["config"]
+        help["help"]
+        diff["diff"]
+        doctor["doctor"]
+        keybindings["keybindings"]
+        context["context"]
+    end
+
+    subgraph Infra["Infrastructure"]
+        cmds_ts["commands.ts<br/>registry"]
+        moved["createMovedTo<br/>PluginCommand.ts"]
+    end
+
+    subgraph AgentCmds["Agent Commands"]
+        agents["agents/"]
+        branch["branch"]
+        chrome["chrome"]
+        desktop["desktop"]
+    end
+
+    UI --> FC
+    FC --> MEMO
+    MEMO --> LL
+    LL --> FG
+    FG --> ENV
+    ENV --> PromptCmds
+    ENV --> LocalCmds
+    ENV --> JSXCmds
+    ENV --> AgentCmds
+    cmds_ts -.-> MEMO
+    moved -.-> cmds_ts
+      </pre>
+    </div>
+    <p class="diagram-caption">Figure 1 — Command system architecture showing registry, lazy loading pipeline, and command type groupings</p>
+  </section>
+
+  <!-- ===== Data Flow Diagram ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🔄</span> Data Flow</h2>
+    <div class="diagram-container">
+      <pre class="mermaid">
+sequenceDiagram
+    actor User
+    participant REPL
+    participant Registry as commands.ts
+    participant Loader as Lazy Loader
+    participant Prompt as Prompt Engine
+    participant Local as Local Executor
+    participant JSX as JSX Renderer
+    participant Model as AI Model
+
+    User->>REPL: /commit --amend
+    REPL->>Registry: findCommand("commit")
+    Registry->>Registry: Search memoized COMMANDS[]
+    Registry->>Loader: load() → dynamic import
+    Loader-->>Registry: Command module loaded
+
+    alt type === "prompt"
+        Registry->>Prompt: getPromptForCommand()
+        Prompt->>Prompt: Constrain allowedTools
+        Prompt->>Model: System prompt + context
+        Model-->>Prompt: Generated response
+        Prompt-->>User: Display & execute
+    else type === "local"
+        Registry->>Local: call(args, context)
+        Local-->>User: Return text / compact / skip
+    else type === "local-jsx"
+        Registry->>JSX: call(onDone, context)
+        JSX-->>User: Render React component
+    end
+      </pre>
+    </div>
+    <p class="diagram-caption">Figure 2 — Sequence diagram showing how a slash command is parsed, loaded, and dispatched to the appropriate executor</p>
+  </section>
+
+  <!-- ===== Narrated Walkthrough ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🚶</span> Walkthrough: Trace <code>/commit</code></h2>
+    <div class="walkthrough">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">User types <code>/commit</code> in the REPL input.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">REPL detects the <code>/</code> slash prefix and extracts the command name <code>"commit"</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><code>findCommand("commit")</code> searches the memoized <code>COMMANDS</code> array in <code>commands.ts</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Module is lazy-loaded via the <code>load()</code> function which performs a dynamic <code>import()</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Command type is <code>"prompt"</code>, so <code>getPromptForCommand()</code> is called to prepare the AI interaction.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-text">System fetches recent <code>git log</code> and staged <code>diff</code> as context for the model.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-text">Allowed tools are constrained to <code>git add</code>, <code>git status</code>, and <code>git commit</code> only.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-text">Model analyzes the diff and generates a well-structured commit message.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">9</div>
+        <div class="step-text">User reviews the generated message, edits if desired, and confirms.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">10</div>
+        <div class="step-text"><code>git commit</code> is executed via the constrained <code>BashTool</code> with the approved message.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Key Components Table ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">📦</span> Key Components</h2>
+    <table class="component-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>commands.ts</code></td>
+          <td><span class="type-badge type-registry">registry</span></td>
+          <td>Central registry — exports <code>COMMANDS()</code>, <code>getCommands()</code>, <code>findCommand()</code>. Memoized array of all 101 command definitions.</td>
+        </tr>
+        <tr>
+          <td><code>init.ts</code></td>
+          <td><span class="type-badge type-prompt">prompt</span></td>
+          <td>Multi-phase CLAUDE.md wizard — explores codebase, generates configuration artifacts, sets up project conventions.</td>
+        </tr>
+        <tr>
+          <td><code>commit.ts</code></td>
+          <td><span class="type-badge type-prompt">prompt</span></td>
+          <td>Git commit with AI-generated messages. Constrains tools to git operations, analyzes diffs.</td>
+        </tr>
+        <tr>
+          <td><code>compact/</code></td>
+          <td><span class="type-badge type-local">local</span></td>
+          <td>Session memory compaction — includes microcompact, full summarize, and conversation cleanup strategies.</td>
+        </tr>
+        <tr>
+          <td><code>config/</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>Interactive settings panel with React UI for managing user/project configuration.</td>
+        </tr>
+        <tr>
+          <td><code>diff/</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>Diff viewer — renders side-by-side and unified diffs of current session changes.</td>
+        </tr>
+        <tr>
+          <td><code>help/</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>Help system — searchable command reference and keyboard shortcut display.</td>
+        </tr>
+        <tr>
+          <td><code>context/</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>Context visualization — shows active files, token counts, and conversation state.</td>
+        </tr>
+        <tr>
+          <td><code>doctor/</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>System diagnostics — checks environment, configuration, permissions, and connectivity.</td>
+        </tr>
+        <tr>
+          <td><code>issue/</code></td>
+          <td><span class="type-badge type-prompt">prompt</span></td>
+          <td>GitHub issue integration — creates, reads, and manages issues with AI-assisted descriptions.</td>
+        </tr>
+        <tr>
+          <td><code>review/</code></td>
+          <td><span class="type-badge type-prompt">prompt</span></td>
+          <td>Code review workflow — analyzes diffs, provides structured feedback, suggests improvements.</td>
+        </tr>
+        <tr>
+          <td><code>agents/</code></td>
+          <td><span class="type-badge type-infra">infra</span></td>
+          <td>Agent platform commands — manages multi-agent orchestration, branch agents, and parallel execution.</td>
+        </tr>
+        <tr>
+          <td><code>bridge/</code></td>
+          <td><span class="type-badge type-infra">infra</span></td>
+          <td>IDE bridge commands — handles communication between CLI and IDE extensions (VS Code, JetBrains).</td>
+        </tr>
+        <tr>
+          <td><code>hooks/</code></td>
+          <td><span class="type-badge type-infra">infra</span></td>
+          <td>Hook management — lifecycle hooks for pre/post command execution, event subscriptions.</td>
+        </tr>
+        <tr>
+          <td><code>install.tsx</code></td>
+          <td><span class="type-badge type-local-jsx">local-jsx</span></td>
+          <td>Package installation — interactive dependency management with version resolution UI.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== Sub-Module Cards ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🗂️</span> Sub-Modules</h2>
+    <div class="cards-grid">
+      <a class="card" href="init.html">
+        <div class="card-icon">🧙</div>
+        <div class="card-name">init</div>
+        <div class="card-desc">Multi-phase CLAUDE.md wizard — codebase exploration, convention extraction, artifact generation.</div>
+      </a>
+      <a class="card" href="commit.html">
+        <div class="card-icon">📝</div>
+        <div class="card-name">commit</div>
+        <div class="card-desc">AI-powered commit message generation from staged diffs with constrained tool execution.</div>
+      </a>
+      <a class="card" href="compact.html">
+        <div class="card-icon">🗜️</div>
+        <div class="card-name">compact</div>
+        <div class="card-desc">Session memory compaction — microcompact, full summarize, and cleanup strategies.</div>
+      </a>
+      <a class="card" href="config.html">
+        <div class="card-icon">⚙️</div>
+        <div class="card-name">config</div>
+        <div class="card-desc">Interactive settings panel with React UI for user/project configuration management.</div>
+      </a>
+      <a class="card" href="diff.html">
+        <div class="card-icon">🔀</div>
+        <div class="card-name">diff</div>
+        <div class="card-desc">Side-by-side and unified diff viewer for current session file changes.</div>
+      </a>
+      <a class="card" href="doctor.html">
+        <div class="card-icon">🩺</div>
+        <div class="card-name">doctor</div>
+        <div class="card-desc">System diagnostics — environment checks, config validation, connectivity tests.</div>
+      </a>
+      <a class="card" href="agents.html">
+        <div class="card-icon">🤖</div>
+        <div class="card-name">agents</div>
+        <div class="card-desc">Agent platform — multi-agent orchestration, branch agents, parallel task execution.</div>
+      </a>
+      <a class="card" href="issue.html">
+        <div class="card-icon">🐛</div>
+        <div class="card-name">issue</div>
+        <div class="card-desc">GitHub issue workflow — create, read, manage issues with AI-assisted descriptions.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== Deep-Dive Hub ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🔬</span> Deep-Dive Topics</h2>
+    <div class="hub-list">
+      <a class="hub-item" href="command_registry.html">
+        <span class="hub-icon">📋</span>
+        <span class="hub-name">Command Registry Pattern</span>
+        <span class="hub-desc">Memoized registry, findCommand(), getCommands(), type discrimination</span>
+      </a>
+      <a class="hub-item" href="lazy_loading.html">
+        <span class="hub-icon">⏳</span>
+        <span class="hub-name">Lazy Loading &amp; Feature Gates</span>
+        <span class="hub-desc">Dynamic imports, environment filtering, availability predicates</span>
+      </a>
+      <a class="hub-item" href="compact_algorithm.html">
+        <span class="hub-icon">🧬</span>
+        <span class="hub-name">Compact Algorithm</span>
+        <span class="hub-desc">Microcompact triggers, summarization strategies, token budget management</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== Directory Map ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🗺️</span> Directory Map</h2>
+    <div class="dir-tree">src/commands/
+├── commands.ts                  # Central registry — COMMANDS(), findCommand()
+├── createMovedToPluginCommand.ts # Plugin migration helper
+├── init.ts                      # /init — CLAUDE.md wizard
+├── commit.ts                    # /commit — AI commit messages
+├── review.ts                    # /review — Code review workflow
+├── issue/                       # /issue — GitHub issue integration
+│   ├── index.ts
+│   └── prompts.ts
+├── compact/                     # /compact — Session compaction
+│   ├── index.ts
+│   ├── microcompact.ts
+│   └── summarize.ts
+├── config/                      # /config — Settings panel (JSX)
+│   ├── index.tsx
+│   ├── ConfigPanel.tsx
+│   └── sections/
+├── diff/                        # /diff — Diff viewer (JSX)
+│   ├── index.tsx
+│   └── DiffView.tsx
+├── help/                        # /help — Help system (JSX)
+│   ├── index.tsx
+│   └── HelpPanel.tsx
+├── context/                     # /context — Context visualization
+│   ├── index.tsx
+│   └── ContextView.tsx
+├── doctor/                      # /doctor — System diagnostics
+│   ├── index.tsx
+│   └── checks/
+├── agents/                      # Agent platform commands
+│   ├── index.ts
+│   ├── branch.ts
+│   ├── chrome.ts
+│   └── desktop.ts
+├── bridge/                      # IDE bridge commands
+│   ├── index.ts
+│   └── handlers/
+├── hooks/                       # Hook management
+│   └── index.ts
+├── install.tsx                  # /install — Package installation
+├── autofix-pr.ts                # /autofix-pr — PR auto-fixer
+├── bughunter.ts                 # /bughunter — Bug hunting workflow
+├── clear.ts                     # /clear — Clear conversation
+├── cost.ts                      # /cost — Token cost display
+├── env.ts                       # /env — Environment info
+├── exit.ts                      # /exit — Exit CLI
+├── fast.ts                      # /fast — Toggle fast mode
+├── effort.ts                    # /effort — Set effort level
+├── files.ts                     # /files — List tracked files
+├── keybindings/                 # /keybindings — Key binding editor
+│   └── index.tsx
+└── ... (56 more sub-directories)</div>
+  </section>
+
+  <!-- ===== Configuration ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">⚡</span> Configuration &amp; Constants</h2>
+    <div class="config-grid">
+      <div class="config-item">
+        <div class="config-key">Command Types</div>
+        <div class="config-val">"prompt" | "local" | "local-jsx" — discriminated union type for command dispatch</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">allowedTools</div>
+        <div class="config-val">Per-command tool whitelist patterns — constrains which tools a prompt command may invoke</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">availability</div>
+        <div class="config-val">Predicate functions checking environment, permissions, and feature flags before command registration</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">Feature Gates</div>
+        <div class="config-val">Boolean flags gating experimental or rolling-release commands behind feature flag checks</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">REMOTE_SAFE_COMMANDS</div>
+        <div class="config-val">Allowlist of commands safe for execution in remote / headless environments</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">BRIDGE_SAFE_COMMANDS</div>
+        <div class="config-val">Subset of commands approved for IDE bridge execution without full CLI context</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">INTERNAL_ONLY_COMMANDS</div>
+        <div class="config-val">Commands restricted to internal Anthropic builds — excluded from public releases</div>
+      </div>
+      <div class="config-item">
+        <div class="config-key">load()</div>
+        <div class="config-val">Each command entry has a <code>load()</code> thunk returning a dynamic import for code-splitting</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Glossary ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">📖</span> Glossary</h2>
+    <div class="glossary-grid">
+      <div class="glossary-term">
+        <dt>Prompt Command</dt>
+        <dd>A command that initiates a multi-turn AI conversation with constrained tool access and a specialized system prompt.</dd>
+      </div>
+      <div class="glossary-term">
+        <dt>Local Command</dt>
+        <dd>A synchronous command that runs entirely client-side, returning text output without invoking the AI model.</dd>
+      </div>
+      <div class="glossary-term">
+        <dt>Local-JSX Command</dt>
+        <dd>A command that renders an interactive React (Ink) component in the terminal for rich UI interactions.</dd>
+      </div>
+      <div class="glossary-term">
+        <dt>Memoized Registry</dt>
+        <dd>The COMMANDS array is computed once and cached — subsequent calls to getCommands() return the same reference.</dd>
+      </div>
+      <div class="glossary-term">
+        <dt>Feature Gate</dt>
+        <dd>A boolean check (often server-driven) that determines whether a command is available in the current session.</dd>
+      </div>
+      <div class="glossary-term">
+        <dt>Constrained Tools</dt>
+        <dd>The allowedTools pattern limits which tools (Bash, file read/write, etc.) a prompt command may use during its AI turn.</dd>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Cross-Module Connections ===== -->
+  <section class="section">
+    <h2 class="section-title"><span class="icon">🔗</span> Cross-Module Connections</h2>
+    <div class="diagram-container">
+      <pre class="mermaid">
+flowchart TB
+    Commands["commands/"]
+    REPL["repl/"]
+    Tools["tools/"]
+    Permissions["permissions/"]
+    Features["features/"]
+    Model["model/"]
+    Git["git/"]
+    Config["config/"]
+    Hooks["hooks/"]
+
+    REPL -->|"findCommand()"| Commands
+    Commands -->|"constrained tool calls"| Tools
+    Commands -->|"check permissions"| Permissions
+    Commands -->|"evaluate gates"| Features
+    Commands -->|"prompt → model"| Model
+    Commands -->|"commit, diff, log"| Git
+    Commands -->|"read/write settings"| Config
+    Commands -->|"pre/post hooks"| Hooks
+      </pre>
+    </div>
+    <p class="diagram-caption">Figure 3 — How the commands module connects to other top-level modules in the Claude Code architecture</p>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    Generated for Claude Code internal wiki · SHA <code>a8a678c</code> · 2026-04-01
+    · <code>src/commands/</code> · 189 files · 101 commands
+  </footer>
+
+</div>
+
+<!-- ===== Theme Toggle Script ===== -->
+<script>
+(function() {
+  var THEME_KEY = 'neutra-ip-theme';
+  var toggle = document.getElementById('themeToggle');
+  var root = document.documentElement;
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    toggle.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch(e) {}
+  applyTheme(saved || 'light');
+
+  toggle.addEventListener('click', function() {
+    var current = root.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+
+<!-- ===== Mermaid Init ===== -->
+<script>
+(function() {
+  var THEME_KEY = 'neutra-ip-theme';
+  var saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch(e) {}
+  var isDark = saved === 'dark';
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: isDark ? 'dark' : 'default',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    },
+    sequence: {
+      useMaxWidth: true,
+      showSequenceNumbers: true
+    },
+    securityLevel: 'loose'
+  });
+})();
+</script>
+</body>
+</html>

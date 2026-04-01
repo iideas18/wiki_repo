@@ -6,10 +6,12 @@
 #   bash run_wiki_gen.sh [options]
 #
 # Options:
-#   -s, --source DIR        Source directory to document (required or via env)
+#   -s, --source DIR|URL    Source directory or git URL to document (required)
 #   -o, --output DIR        Output base directory (default: /mnt/disk1/zy/internal_wiki)
 #   -m, --model MODEL       LLM model name (default: claude-opus-4.6)
 #   -n, --name NAME         Project slug for output dir (default: derived from source)
+#   -b, --branch REF        Git branch/tag/commit to checkout (default: default branch)
+#   --subdir PATH           Subdirectory within the repo to document (default: repo root)
 #   --no-cache              Force Phase 1 re-research (ignore cache)
 #   --cache-only            Run Phase 1 research only, then stop (populate cache)
 #   --max-continues N       Max autopilot continues (default: 50)
@@ -19,24 +21,34 @@
 #   -h, --help              Show this help message
 #
 # Environment variables (override defaults, flags take priority):
-#   WIKI_SOURCE_DIR         Source directory
+#   WIKI_SOURCE_DIR         Source directory or git URL
 #   WIKI_OUTPUT_BASE        Output base directory
 #   WIKI_MODEL              LLM model
 #   WIKI_SKILL_REPO         Skill repository path
 #   WIKI_LOG_DIR            Log directory
+#   WIKI_GIT_CLONE_DIR      Base directory for git clones (default: OUTPUT_BASE/.git-clones)
+#
+# Examples:
+#   bash run_wiki_gen.sh -s /path/to/source
+#   bash run_wiki_gen.sh -s https://github.com/user/repo.git
+#   bash run_wiki_gen.sh -s git@github.com:user/repo.git -b main --subdir src
+#   bash run_wiki_gen.sh -s https://github.com/user/repo.git --branch v2.0 --dry-run
 #
 # Cron entry (daily midnight):
 #   0 0 * * * /path/to/run_wiki_gen.sh -s /path/to/source
 # ============================================================================
 set -euo pipefail
-
+REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")/../../../.." && pwd)"
 # === Defaults (environment overrides, flags override both) ===
-SKILL_REPO="${WIKI_SKILL_REPO:-/mnt/disk1/zy/stock_related/finicial_plugin}"
+SKILL_REPO="${WIKI_SKILL_REPO:-$REPO_ROOT}"
 SOURCE_DIR="${WIKI_SOURCE_DIR:-/mnt/disk2/applications.simulators.cpu.keiko/indigo}"
-OUTPUT_BASE="${WIKI_OUTPUT_BASE:-/mnt/disk1/zy/internal_wiki}"
-LOG_DIR="${WIKI_LOG_DIR:-/mnt/disk1/zy/copilot_cli/logs}"
+OUTPUT_BASE="${WIKI_OUTPUT_BASE:-$REPO_ROOT}"
+LOG_DIR="${WIKI_LOG_DIR:-$REPO_ROOT/logs}"
 MODEL="${WIKI_MODEL:-claude-opus-4.6}"
 PROJECT_NAME=""
+GIT_BRANCH=""
+GIT_SUBDIR=""
+GIT_CLONE_BASE="${WIKI_GIT_CLONE_DIR:-}"
 MAX_CONTINUES=50
 KEEP_SNAPSHOTS=7
 LOG_RETENTION_DAYS=30
@@ -56,6 +68,8 @@ while [ $# -gt 0 ]; do
     -o|--output)       OUTPUT_BASE="$2"; shift 2 ;;
     -m|--model)        MODEL="$2"; shift 2 ;;
     -n|--name)         PROJECT_NAME="$2"; shift 2 ;;
+    -b|--branch)       GIT_BRANCH="$2"; shift 2 ;;
+    --subdir)          GIT_SUBDIR="$2"; shift 2 ;;
     --no-cache)        NO_CACHE=true; shift ;;
     --cache-only)      CACHE_ONLY=true; shift ;;
     --max-continues)   MAX_CONTINUES="$2"; shift 2 ;;
@@ -72,11 +86,81 @@ if [ -z "$SOURCE_DIR" ]; then
   echo "[ERROR] Source directory required. Use -s/--source or set WIKI_SOURCE_DIR." >&2
   exit 1
 fi
+
+# === Handle git URL sources ===
+GIT_CLONED=false
+is_git_url() {
+  case "$1" in
+    https://*.git|http://*.git|git@*:*|ssh://*|https://github.com/*|https://gitlab.com/*|https://bitbucket.org/*)
+      return 0 ;;
+    *)
+      return 1 ;;
+  esac
+}
+
+repo_name_from_url() {
+  # Extract repo name: https://github.com/user/repo.git → repo
+  local url="$1"
+  local base
+  base="$(basename "$url")"
+  echo "${base%.git}"
+}
+
+if is_git_url "$SOURCE_DIR"; then
+  GIT_URL="$SOURCE_DIR"
+  REPO_NAME="$(repo_name_from_url "$GIT_URL")"
+
+  # Determine clone directory
+  if [ -z "$GIT_CLONE_BASE" ]; then
+    GIT_CLONE_BASE="${OUTPUT_BASE}/.git-clones"
+  fi
+  CLONE_DIR="${GIT_CLONE_BASE}/${REPO_NAME}"
+
+  if [ -d "$CLONE_DIR/.git" ]; then
+    echo "[INFO] Updating existing clone at $CLONE_DIR"
+    git -C "$CLONE_DIR" fetch --all --prune --quiet
+    if [ -n "$GIT_BRANCH" ]; then
+      git -C "$CLONE_DIR" checkout "$GIT_BRANCH" --quiet 2>/dev/null \
+        || git -C "$CLONE_DIR" checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH" --quiet
+      git -C "$CLONE_DIR" pull --ff-only --quiet 2>/dev/null || true
+    else
+      # Update the current branch
+      git -C "$CLONE_DIR" pull --ff-only --quiet 2>/dev/null || true
+    fi
+  else
+    echo "[INFO] Cloning $GIT_URL into $CLONE_DIR"
+    mkdir -p "$GIT_CLONE_BASE"
+    CLONE_ARGS=(git clone --quiet)
+    if [ -n "$GIT_BRANCH" ]; then
+      CLONE_ARGS+=(--branch "$GIT_BRANCH")
+    fi
+    CLONE_ARGS+=("$GIT_URL" "$CLONE_DIR")
+    "${CLONE_ARGS[@]}"
+  fi
+
+  GIT_CLONED=true
+  SOURCE_DIR="$CLONE_DIR"
+
+  # Apply --subdir if specified
+  if [ -n "$GIT_SUBDIR" ]; then
+    SOURCE_DIR="${CLONE_DIR}/${GIT_SUBDIR}"
+  fi
+fi
+
+if [ ! -d "$SOURCE_DIR" ]; then
+  echo "[ERROR] Source directory not found: $SOURCE_DIR" >&2
+  exit 1
+fi
 SOURCE_DIR="$(realpath "$SOURCE_DIR")"
 
 # === Derive project name from source dir if not given ===
 if [ -z "$PROJECT_NAME" ]; then
-  PROJECT_NAME="$(basename "$SOURCE_DIR" | tr '[:upper:]' '[:lower:]' | tr ' .' '_')"
+  if [ "$GIT_CLONED" = "true" ] && [ -n "$GIT_SUBDIR" ]; then
+    # Use repo-subdir as the project name
+    PROJECT_NAME="${REPO_NAME}_$(echo "$GIT_SUBDIR" | tr '/' '_' | tr '[:upper:]' '[:lower:]')"
+  else
+    PROJECT_NAME="$(basename "$SOURCE_DIR" | tr '[:upper:]' '[:lower:]' | tr ' .' '_')"
+  fi
 fi
 
 # === Environment (cron has minimal PATH) ===
@@ -96,11 +180,6 @@ SCRIPTS_DIR="$SKILL_REPO/.github/skills/wiki-generator/scripts"
 
 if [ ! -d "$SKILL_REPO/.github/skills/wiki-generator" ]; then
   echo "[ERROR] wiki-generator skill not found at $SKILL_REPO" >&2
-  exit 1
-fi
-
-if [ ! -d "$SOURCE_DIR" ]; then
-  echo "[ERROR] Source directory not found: $SOURCE_DIR" >&2
   exit 1
 fi
 
@@ -163,6 +242,12 @@ if [ "$DRY_RUN" = "true" ]; then
   echo "Cache hit:    $CACHE_HIT"
   echo "No-cache:     $NO_CACHE"
   echo "Cache-only:   $CACHE_ONLY"
+  if [ "$GIT_CLONED" = "true" ]; then
+  echo "Git URL:      $GIT_URL"
+  echo "Git branch:   ${GIT_BRANCH:-<default>}"
+  echo "Git subdir:   ${GIT_SUBDIR:-<root>}"
+  echo "Clone dir:    $CLONE_DIR"
+  fi
   echo "Copilot:      $COPILOT_BIN"
   echo "Skill repo:   $SKILL_REPO"
   echo "Log file:     $LOG_FILE"
@@ -193,6 +278,12 @@ fi
   echo "  Cache dir:   ${CACHE_DIR:-none}"
   echo "  No-cache:    $NO_CACHE"
   echo "  Cache-only:  $CACHE_ONLY"
+  if [ "$GIT_CLONED" = "true" ]; then
+  echo "  Git URL:     $GIT_URL"
+  echo "  Git branch:  ${GIT_BRANCH:-<default>}"
+  echo "  Git subdir:  ${GIT_SUBDIR:-<root>}"
+  echo "  Clone dir:   $CLONE_DIR"
+  fi
   echo "  Copilot:     $COPILOT_BIN"
   echo "---"
 } >> "$LOG_FILE"
@@ -200,6 +291,7 @@ fi
 # === Run Copilot ===
 cd "$SKILL_REPO"
 
+set +e
 "$COPILOT_BIN" -p \
   "$PROMPT" \
   --allow-all \
@@ -207,8 +299,8 @@ cd "$SKILL_REPO"
   --max-autopilot-continues "$MAX_CONTINUES" \
   --model "$MODEL" \
   >> "$LOG_FILE" 2>&1
-
 EXIT_CODE=$?
+set -e
 
 {
   echo "---"

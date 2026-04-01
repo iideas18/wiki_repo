@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State – Global State Management | Claude Code Wiki</title>
+    <meta name="description" content="Internal wiki documentation for the State module – Global State Management in Claude Code.">
+    <meta name="generator" content="claude-code-wiki-gen">
+    <meta name="source-sha" content="a8a678c">
+    <meta name="generated-date" content="2026-04-01">
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <style media="print">
+        .theme-toggle, .back-to-top, .skip-link, .diagram-overlay-btn, .copy-btn { display: none !important; }
+        body { font-size: 11pt; color: #000; background: #fff; }
+        pre { border: 1px solid #ccc; page-break-inside: avoid; }
+        table { page-break-inside: avoid; }
+        h1, h2, h3 { page-break-after: avoid; }
+        a { color: #000; text-decoration: underline; }
+    </style>
+
+    <style>
+        /* ===== neutra-ip-theme ===== */
+        :root {
+            --bg-primary: #fafaf8; --bg-secondary: #f0efeb; --bg-tertiary: #e8e6e1;
+            --text-primary: #2c2c2c; --text-secondary: #5a5a58; --text-muted: #8a8a86;
+            --accent-primary: #6b8f71; --accent-secondary: #8fbc8f; --accent-tertiary: #3a6b4a;
+            --border-color: #d4d2cc; --border-light: #e8e6e1;
+            --card-bg: #ffffff; --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --code-bg: #f5f4f0; --code-border: #d4d2cc;
+            --intro-bg: linear-gradient(135deg, #e8f0e8 0%, #f0f4ee 100%); --intro-border: #6b8f71;
+            --badge-bg: #e8f0e8; --badge-text: #3a6b4a;
+            --table-header-bg: #f0efeb; --table-stripe-bg: #fafaf8;
+            --hub-card-bg: #ffffff; --hub-card-border: #d4d2cc; --hub-card-hover-border: #6b8f71;
+            --reading-time-color: #8a8a86;
+            --focus-ring: 0 0 0 3px rgba(107,143,113,0.4);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a; --bg-secondary: #242424; --bg-tertiary: #2e2e2e;
+            --text-primary: #e0e0dc; --text-secondary: #a8a8a4; --text-muted: #707070;
+            --accent-primary: #8fbc8f; --accent-secondary: #6b8f71; --accent-tertiary: #a8d8a8;
+            --border-color: #3a3a3a; --border-light: #2e2e2e;
+            --card-bg: #242424; --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --code-bg: #2a2a2a; --code-border: #3a3a3a;
+            --intro-bg: linear-gradient(135deg, #1e2e1e 0%, #242e24 100%); --intro-border: #6b8f71;
+            --badge-bg: #2a3a2a; --badge-text: #8fbc8f;
+            --table-header-bg: #2a2a2a; --table-stripe-bg: #1e1e1e;
+            --hub-card-bg: #242424; --hub-card-border: #3a3a3a; --hub-card-hover-border: #8fbc8f;
+            --reading-time-color: #707070;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            line-height: 1.7; transition: background 0.3s ease, color 0.3s ease;
+        }
+        a { color: var(--accent-primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent-tertiary); text-decoration: underline; }
+        a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 3px; }
+
+        .skip-link {
+            position: absolute; top: -100%; left: 1rem; z-index: 10000;
+            padding: 0.75rem 1.5rem; background: var(--accent-primary); color: #fff;
+            border-radius: 0 0 6px 6px; font-weight: 600; transition: top 0.2s;
+        }
+        .skip-link:focus { top: 0; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+        .breadcrumb {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; flex-wrap: wrap;
+        }
+        .breadcrumb a { color: var(--text-secondary); }
+        .breadcrumb .separator { color: var(--border-color); }
+
+        .module-header { margin-bottom: 2rem; }
+        .module-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .module-header .subtitle { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .module-header .description { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; max-width: 760px; }
+        .module-meta {
+            display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 1rem;
+            font-size: 0.8rem; color: var(--text-muted);
+        }
+        .module-meta span { display: flex; align-items: center; gap: 0.35rem; }
+        .reading-time { color: var(--reading-time-color); font-style: italic; }
+
+        .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.25rem 0.7rem; border-radius: 999px;
+            font-size: 0.78rem; font-weight: 500;
+            background: var(--badge-bg); color: var(--badge-text);
+            border: 1px solid var(--border-light);
+        }
+
+        .theme-toggle {
+            position: fixed; top: 1rem; right: 1rem; z-index: 1000;
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 1px solid var(--border-color); background: var(--card-bg);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: var(--card-shadow);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .theme-toggle:hover { box-shadow: var(--card-hover-shadow); }
+
+        .intro-box {
+            background: var(--intro-bg); border-left: 4px solid var(--intro-border);
+            border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin: 2rem 0;
+        }
+        .intro-box .intro-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+        .intro-box p { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; }
+
+        h2 {
+            font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem;
+            padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-light);
+        }
+        h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+
+        .table-wrapper { overflow-x: auto; margin: 1rem 0; border-radius: 8px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        thead th {
+            background: var(--table-header-bg); padding: 0.65rem 0.85rem;
+            text-align: left; font-weight: 600; border-bottom: 2px solid var(--border-color); white-space: nowrap;
+        }
+        tbody td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border-light); }
+        tbody tr:nth-child(even) { background: var(--table-stripe-bg); }
+        tbody tr:hover { background: var(--bg-tertiary); }
+        td code {
+            font-size: 0.82rem; background: var(--code-bg); padding: 0.15rem 0.4rem;
+            border-radius: 4px; border: 1px solid var(--code-border);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        .code-block-wrapper { position: relative; margin: 1rem 0; }
+        .code-block-wrapper .copy-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            padding: 0.3rem 0.65rem; font-size: 0.75rem;
+            background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; color: var(--text-secondary);
+            transition: background 0.2s, color 0.2s; z-index: 2;
+        }
+        .code-block-wrapper .copy-btn:hover { background: var(--accent-primary); color: #fff; }
+        pre {
+            background: var(--code-bg); border: 1px solid var(--code-border);
+            border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto;
+            font-size: 0.85rem; line-height: 1.6;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+        code { font-family: inherit; }
+
+        .diagram-container {
+            margin: 1.5rem 0; padding: 1.25rem; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            position: relative; text-align: center;
+        }
+        .diagram-container .diagram-title {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+            margin-bottom: 0.75rem; text-align: left;
+        }
+        .diagram-overlay-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            padding: 0.3rem 0.65rem; font-size: 0.75rem;
+            background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; color: var(--text-secondary);
+        }
+        .diagram-overlay-btn:hover { background: var(--accent-primary); color: #fff; }
+        .diagram-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; padding: 2rem; cursor: zoom-out;
+        }
+        .diagram-overlay.active { display: flex; }
+        .diagram-overlay .mermaid { background: #fff; padding: 2rem; border-radius: 12px; max-width: 95vw; max-height: 95vh; overflow: auto; }
+
+        .directory-map {
+            background: var(--code-bg); border: 1px solid var(--code-border);
+            border-radius: 8px; padding: 1rem 1.25rem; font-size: 0.85rem;
+            font-family: 'SFMono-Regular', Consolas, monospace; line-height: 1.8;
+            overflow-x: auto; margin: 1rem 0;
+        }
+
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+        .hub-card {
+            background: var(--hub-card-bg); border: 1px solid var(--hub-card-border);
+            border-radius: 8px; padding: 1.25rem; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .hub-card:hover { border-color: var(--hub-card-hover-border); box-shadow: var(--card-hover-shadow); }
+        .hub-card .hub-card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+        .hub-card .hub-card-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+        .hub-card .hub-card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        .back-to-top {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 900;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent-primary); color: #fff; border: none;
+            cursor: pointer; display: none; align-items: center; justify-content: center;
+            font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .back-to-top.visible { display: flex; }
+        .back-to-top:hover { transform: translateY(-2px); }
+
+        .page-footer {
+            margin-top: 3rem; padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.8rem; color: var(--text-muted);
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .module-header h1 { font-size: 1.5rem; }
+            .hub-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">🌙</button>
+    <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
+
+    <div class="container" id="main-content">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../index.html">Claude Code</a>
+            <span class="separator">›</span>
+            <span>State</span>
+        </nav>
+
+        <!-- Module Header -->
+        <header class="module-header">
+            <h1>State</h1>
+            <div class="subtitle">Global State Management</div>
+            <p class="description">
+                6 files managing Claude Code's global application state. Provides immutable state containers
+                for bootstrap configuration, session data, feature flags, and runtime state that all other
+                modules read from.
+            </p>
+            <div class="module-meta">
+                <span>📁 6 files</span>
+                <span>📂 0 sub-directories</span>
+                <span>🏷️ TypeScript</span>
+                <span>🔖 <code>a8a678c</code></span>
+                <span class="reading-time">~5 min read</span>
+            </div>
+            <div class="badge-row">
+                <span class="badge">🔵 Immutable State</span>
+                <span class="badge">🟢 Bootstrap Config</span>
+                <span class="badge">🟡 Session Data</span>
+            </div>
+        </header>
+
+        <!-- Intro Box -->
+        <div class="intro-box">
+            <div class="intro-title">💡 Think of it like a Building's Foundation</div>
+            <p>
+                The State module is the concrete foundation on which every other part of Claude Code stands.
+                Just as a building's foundation is poured once and then every floor, wall, and roof relies
+                on its stability, the State module is populated during bootstrap and then provides an immutable,
+                read-only surface that every other module queries. Feature flags are like the building's
+                blueprints — they decide what rooms exist. Session state is like the current tenant registry —
+                it tracks who's using the building right now. And bootstrap config is the original survey data
+                that determined where the foundation goes.
+            </p>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <h2 id="architecture">Architecture Overview</h2>
+
+        <div class="diagram-container">
+            <div class="diagram-title">Figure 1 — State Flow from Bootstrap to Consumers</div>
+            <button class="diagram-overlay-btn" onclick="openOverlay('diagram1')">⛶ Expand</button>
+            <div class="mermaid" id="diagram1">
+graph TB
+    subgraph Bootstrap["Bootstrap Phase"]
+        A[CLI Entry Point] --> B[loadConfig]
+        B --> C[resolveFeatureFlags]
+        C --> D[initSession]
+    end
+
+    subgraph StateContainer["Immutable State Container"]
+        E[BootstrapState]
+        F[SessionState]
+        G[FeatureFlagState]
+        H[RuntimeState]
+    end
+
+    subgraph Consumers["Consumer Modules"]
+        I[Bridge]
+        J[Context]
+        K[Skills]
+        L[Tasks]
+        M[Tools]
+    end
+
+    D --> E
+    D --> F
+    D --> G
+    D --> H
+
+    E -.->|read-only| I
+    F -.->|read-only| J
+    G -.->|read-only| K
+    H -.->|read-only| L
+    E -.->|read-only| M
+    G -.->|read-only| M
+            </div>
+        </div>
+
+        <div class="diagram-container">
+            <div class="diagram-title">Figure 2 — State Lifecycle Sequence</div>
+            <button class="diagram-overlay-btn" onclick="openOverlay('diagram2')">⛶ Expand</button>
+            <div class="mermaid" id="diagram2">
+sequenceDiagram
+    participant CLI as CLI Entry
+    participant Config as Config Loader
+    participant Flags as Feature Flags
+    participant State as State Container
+    participant Module as Consumer Module
+
+    CLI->>Config: loadConfig(cliArgs, envVars)
+    Config->>Config: merge(defaults, fileConfig, envOverrides)
+    Config->>Flags: resolveFeatureFlags(config)
+    Flags->>Flags: evaluate flag rules
+    Flags->>State: initState(config, flags, session)
+    State->>State: freeze(state) — immutable
+    Note over State: State is now read-only
+
+    Module->>State: getBootstrapState()
+    State-->>Module: BootstrapState (frozen)
+    Module->>State: getFeatureFlags()
+    State-->>Module: FeatureFlagState (frozen)
+    Module->>State: getSessionState()
+    State-->>Module: SessionState (frozen)
+            </div>
+        </div>
+
+        <!-- Key Components Table -->
+        <h2 id="components">Key Components</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File / Component</th>
+                        <th>Responsibility</th>
+                        <th>Key Exports</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>state.ts</code></td>
+                        <td>Central state container holding all global state slices with freeze semantics</td>
+                        <td><code>AppState</code>, <code>getState()</code>, <code>initState()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap_state.ts</code></td>
+                        <td>Holds initial configuration resolved during CLI startup (paths, API keys, model)</td>
+                        <td><code>BootstrapState</code>, <code>getBootstrapState()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>session_state.ts</code></td>
+                        <td>Manages per-session data (session ID, conversation history reference, working dir)</td>
+                        <td><code>SessionState</code>, <code>getSessionState()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>feature_flags.ts</code></td>
+                        <td>Resolves and stores feature flag values from config, environment, and remote sources</td>
+                        <td><code>FeatureFlagState</code>, <code>isFeatureEnabled()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>runtime_state.ts</code></td>
+                        <td>Tracks ephemeral runtime data: active tool calls, pending operations, connection status</td>
+                        <td><code>RuntimeState</code>, <code>getRuntimeState()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>types.ts</code></td>
+                        <td>TypeScript type definitions and interfaces for all state shapes</td>
+                        <td><code>StateShape</code>, <code>BootstrapConfig</code>, <code>SessionConfig</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>state.ts</code> — <code>freezeDeep()</code></td>
+                        <td>Utility that recursively freezes state objects to enforce immutability at runtime</td>
+                        <td><code>freezeDeep()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>state.ts</code> — <code>stateEvents</code></td>
+                        <td>Event emitter for state lifecycle events (initialized, session-started, session-ended)</td>
+                        <td><code>stateEvents</code>, <code>onStateReady()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>feature_flags.ts</code> — resolver</td>
+                        <td>Flag resolution engine evaluating rules: env > remote > config > defaults priority</td>
+                        <td><code>resolveFlags()</code>, <code>FlagRule</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap_state.ts</code> — validator</td>
+                        <td>Validates bootstrap config at startup, throwing clear errors for missing required fields</td>
+                        <td><code>validateBootstrapConfig()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Directory Map -->
+        <h2 id="directory-map">Directory Map</h2>
+
+        <div class="directory-map">
+src/state/
+├── state.ts               # Central state container + freeze + events
+├── bootstrap_state.ts     # Bootstrap configuration state
+├── session_state.ts       # Per-session state management
+├── feature_flags.ts       # Feature flag resolution and storage
+├── runtime_state.ts       # Ephemeral runtime state tracking
+└── types.ts               # TypeScript type definitions
+        </div>
+
+        <!-- Configuration Table -->
+        <h2 id="configuration">Configuration</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>state.immutable</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Whether to deep-freeze state objects (disable in tests for mutability)</td>
+                    </tr>
+                    <tr>
+                        <td><code>state.emitEvents</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Emit lifecycle events (state-initialized, session-started, session-ended)</td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap.apiKey</code></td>
+                        <td><code>string</code></td>
+                        <td>(required)</td>
+                        <td>API key for Claude model access, resolved from env or config file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap.model</code></td>
+                        <td><code>string</code></td>
+                        <td><code>"claude-sonnet"</code></td>
+                        <td>Default model identifier used for AI operations</td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap.workingDir</code></td>
+                        <td><code>string</code></td>
+                        <td><code>process.cwd()</code></td>
+                        <td>Working directory for file operations and git context</td>
+                    </tr>
+                    <tr>
+                        <td><code>session.id</code></td>
+                        <td><code>string</code></td>
+                        <td>(generated UUID)</td>
+                        <td>Unique session identifier for conversation tracking</td>
+                    </tr>
+                    <tr>
+                        <td><code>session.resumable</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Whether the session supports resume after CLI restart</td>
+                    </tr>
+                    <tr>
+                        <td><code>flags.source</code></td>
+                        <td><code>string</code></td>
+                        <td><code>"config"</code></td>
+                        <td>Primary flag source: "config", "remote", or "env"</td>
+                    </tr>
+                    <tr>
+                        <td><code>flags.refreshInterval</code></td>
+                        <td><code>number</code></td>
+                        <td><code>0</code></td>
+                        <td>Milliseconds between remote flag refreshes (0 = no refresh)</td>
+                    </tr>
+                    <tr>
+                        <td><code>flags.overrides</code></td>
+                        <td><code>Record&lt;string, boolean&gt;</code></td>
+                        <td><code>{}</code></td>
+                        <td>Local flag overrides that take highest priority</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Code Examples -->
+        <h2 id="code-examples">Code Examples</h2>
+
+        <h3>Reading Global State</h3>
+        <div class="code-block-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-typescript">import { getBootstrapState, getSessionState, isFeatureEnabled } from './state';
+
+// All getters return frozen (immutable) objects
+const bootstrap = getBootstrapState();
+console.log(`Model: ${bootstrap.model}`);      // "claude-sonnet"
+console.log(`Working dir: ${bootstrap.workingDir}`);
+
+const session = getSessionState();
+console.log(`Session ID: ${session.id}`);
+console.log(`Resumable: ${session.resumable}`);
+
+// Feature flags with type-safe keys
+if (isFeatureEnabled('skills.discovery')) {
+  console.log('Skill discovery is enabled');
+}
+
+// Attempting to mutate throws in strict mode
+// bootstrap.model = 'other'; // ❌ TypeError: Cannot assign to read only property</code></pre>
+        </div>
+
+        <h3>Initializing State at Bootstrap</h3>
+        <div class="code-block-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-typescript">import { initState, onStateReady } from './state';
+import { loadConfig } from '../config/loader';
+import { resolveFlags } from './feature_flags';
+
+// Called once during CLI startup
+async function bootstrap(cliArgs: string[]) {
+  const config = await loadConfig(cliArgs, process.env);
+  const flags = await resolveFlags(config);
+
+  initState({
+    bootstrap: {
+      apiKey: config.apiKey,
+      model: config.model ?? 'claude-sonnet',
+      workingDir: config.workingDir ?? process.cwd(),
+    },
+    session: {
+      id: crypto.randomUUID(),
+      resumable: config.resumable ?? true,
+    },
+    flags,
+  });
+
+  // State is now frozen and available globally
+}
+
+// Other modules can await state readiness
+onStateReady((state) =&gt; {
+  console.log(`State initialized for session ${state.session.id}`);
+});</code></pre>
+        </div>
+
+        <!-- Deep-Dive Hub -->
+        <h2 id="deep-dive">Deep-Dive Topics</h2>
+        <p>Explore focused documentation on key aspects of the State module.</p>
+
+        <div class="hub-grid">
+            <div class="hub-card">
+                <div class="hub-card-title">🔄 State Lifecycle</div>
+                <div class="hub-card-desc">
+                    Complete walkthrough of the state lifecycle from CLI entry through bootstrap,
+                    initialization, freeze, consumer reads, and session teardown. Covers the
+                    event system, error handling for missing required config, and testing patterns
+                    for mocking state.
+                </div>
+                <div class="hub-card-meta">Covers: state.ts, bootstrap_state.ts, session_state.ts</div>
+            </div>
+            <div class="hub-card">
+                <div class="hub-card-title">🚀 Bootstrap Flow</div>
+                <div class="hub-card-desc">
+                    Deep dive into the bootstrap configuration resolution pipeline. How CLI arguments,
+                    environment variables, config files, and defaults are merged with proper precedence.
+                    Includes feature flag resolution rules and the validation step that catches
+                    configuration errors early.
+                </div>
+                <div class="hub-card-meta">Covers: bootstrap_state.ts, feature_flags.ts, types.ts</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <span>Generated on 2026-04-01 from <code>a8a678c</code></span>
+            <span>Claude Code Internal Wiki</span>
+        </footer>
+    </div>
+
+    <!-- Diagram Overlay -->
+    <div class="diagram-overlay" id="diagramOverlay" onclick="closeOverlay()">
+        <div class="mermaid" id="overlayContent" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- Mermaid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/typescript.min.js"></script>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+            flowchart: { useMaxWidth: true, htmlLabels: true },
+            sequence: { useMaxWidth: true },
+        });
+        hljs.highlightAll();
+
+        const themeToggle = document.getElementById('themeToggle');
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('wiki-theme', theme);
+        }
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+        const savedTheme = localStorage.getItem('wiki-theme');
+        if (savedTheme) setTheme(savedTheme);
+
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 400);
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function copyCode(btn) {
+            const code = btn.parentElement.querySelector('code');
+            navigator.clipboard.writeText(code.textContent).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            });
+        }
+
+        function openOverlay(diagramId) {
+            const source = document.getElementById(diagramId);
+            const overlay = document.getElementById('diagramOverlay');
+            const content = document.getElementById('overlayContent');
+            content.innerHTML = source.innerHTML;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeOverlay() {
+            document.getElementById('diagramOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeOverlay();
+        });
+
+        const headings = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'j' || e.key === 'k') {
+                const scrollY = window.scrollY + 100;
+                let currentIndex = -1;
+                for (let i = 0; i < headings.length; i++) {
+                    if (headings[i].offsetTop <= scrollY) currentIndex = i;
+                }
+                if (e.key === 'j' && currentIndex < headings.length - 1) {
+                    headings[currentIndex + 1].scrollIntoView({ behavior: 'smooth' });
+                } else if (e.key === 'k' && currentIndex > 0) {
+                    headings[currentIndex - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tools — AI Capability Extensions | Claude Code Internal Wiki</title>
+  <meta name="description" content="L1 overview of the Tools module: 40+ modular tool implementations extending Claude's capabilities via buildTool() factory pattern."/>
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --bg:           #0d1117;
+      --bg-card:      #161b22;
+      --bg-code:      #1c2128;
+      --bg-hover:     #1f2733;
+      --border:       #30363d;
+      --text:         #e6edf3;
+      --text-muted:   #8b949e;
+      --accent:       #58a6ff;
+      --accent-hover: #79b8ff;
+      --badge-blue:   #1f6feb;
+      --badge-green:  #238636;
+      --badge-yellow: #9e6a03;
+      --badge-red:    #da3633;
+      --shadow:       0 2px 8px rgba(0,0,0,.4);
+      --radius:       8px;
+      --font-sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-mono:    'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      --toc-width:    240px;
+      --max-content:  960px;
+    }
+    [data-theme="light"] {
+      --bg:           #ffffff;
+      --bg-card:      #f6f8fa;
+      --bg-code:      #f0f2f5;
+      --bg-hover:     #eaeef2;
+      --border:       #d0d7de;
+      --text:         #1f2328;
+      --text-muted:   #656d76;
+      --accent:       #0969da;
+      --accent-hover: #0550ae;
+      --badge-blue:   #0969da;
+      --badge-green:  #1a7f37;
+      --badge-yellow: #9a6700;
+      --badge-red:    #cf222e;
+      --shadow:       0 2px 8px rgba(0,0,0,.1);
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+    /* ===== Skip Link ===== */
+    .skip-link {
+      position: absolute; top: -100px; left: 8px;
+      background: var(--accent); color: #fff; padding: 8px 16px;
+      border-radius: var(--radius); z-index: 999;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 8px; }
+
+    /* ===== Header & Breadcrumb ===== */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: .85rem; color: var(--text-muted); }
+    .breadcrumb a { color: var(--text-muted); }
+    .breadcrumb span { color: var(--text); font-weight: 600; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .reading-time { font-size: .8rem; color: var(--text-muted); }
+    .theme-toggle {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); cursor: pointer; padding: 6px 12px; font-size: .85rem;
+      transition: background .2s;
+    }
+    .theme-toggle:hover { background: var(--bg-hover); }
+
+    /* ===== Layout ===== */
+    .layout { display: flex; max-width: 1280px; margin: 0 auto; }
+    .toc-sidebar {
+      width: var(--toc-width); position: sticky; top: 60px; height: calc(100vh - 60px);
+      overflow-y: auto; padding: 20px 12px; border-right: 1px solid var(--border);
+      font-size: .82rem; flex-shrink: 0;
+    }
+    .toc-sidebar h4 { color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; font-size: .75rem; }
+    .toc-sidebar ul { list-style: none; }
+    .toc-sidebar li { margin-bottom: 4px; }
+    .toc-sidebar a { color: var(--text-muted); display: block; padding: 2px 8px; border-radius: 4px; }
+    .toc-sidebar a:hover { color: var(--accent); background: var(--bg-hover); text-decoration: none; }
+    .toc-sidebar .toc-h3 { padding-left: 20px; font-size: .78rem; }
+    main { flex: 1; min-width: 0; padding: 32px 40px; max-width: var(--max-content); }
+
+    /* ===== Typography ===== */
+    h1 { font-size: 2rem; margin-bottom: 4px; }
+    h1 .subtitle { display: block; font-size: 1rem; color: var(--text-muted); font-weight: 400; margin-top: 4px; }
+    h2 { font-size: 1.4rem; margin-top: 48px; margin-bottom: 16px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; margin-top: 28px; margin-bottom: 10px; }
+    p, li { margin-bottom: 8px; }
+
+    /* ===== Meta Bar ===== */
+    .meta-bar {
+      display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0 12px;
+      font-size: .82rem; color: var(--text-muted);
+    }
+    .meta-bar code { background: var(--bg-code); padding: 2px 6px; border-radius: 4px; font-size: .8rem; }
+
+    /* ===== Badges ===== */
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 28px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 600;
+      color: #fff;
+    }
+    .badge-blue   { background: var(--badge-blue); }
+    .badge-green  { background: var(--badge-green); }
+    .badge-yellow { background: var(--badge-yellow); }
+    .badge-red    { background: var(--badge-red); }
+
+    /* ===== Stats Bar ===== */
+    .stats-bar {
+      display: flex; flex-wrap: wrap; gap: 24px; padding: 16px 20px; margin: 0 0 32px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .stat { text-align: center; }
+    .stat .num { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .stat .label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; }
+
+    /* ===== Diagram Container ===== */
+    .diagram-container {
+      position: relative; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin: 16px 0 24px; overflow-x: auto;
+      cursor: zoom-in;
+    }
+    .diagram-container svg { max-width: 100%; height: auto; }
+
+    /* ===== Diagram Zoom Overlay ===== */
+    .zoom-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.85); justify-content: center; align-items: center;
+      cursor: zoom-out; padding: 24px;
+    }
+    .zoom-overlay.active { display: flex; }
+    .zoom-overlay svg { max-width: 95vw; max-height: 90vh; }
+
+    /* ===== Tables ===== */
+    table {
+      width: 100%; border-collapse: collapse; margin: 12px 0 24px;
+      font-size: .88rem;
+    }
+    th, td {
+      text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { background: var(--bg-card); color: var(--text-muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+    tr:hover td { background: var(--bg-hover); }
+
+    /* ===== Walkthrough ===== */
+    .walkthrough { counter-reset: step; }
+    .walkthrough .step {
+      position: relative; padding: 12px 16px 12px 52px; margin: 8px 0;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .walkthrough .step::before {
+      counter-increment: step; content: counter(step);
+      position: absolute; left: 14px; top: 12px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); color: #fff; font-weight: 700; font-size: .8rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ===== Cards Grid ===== */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px; margin: 16px 0 28px;
+    }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px; transition: box-shadow .2s, border-color .2s;
+    }
+    .card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .card h4 { font-size: .95rem; margin-bottom: 6px; }
+    .card p { font-size: .82rem; color: var(--text-muted); margin-bottom: 0; }
+    .card .card-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .card .tag {
+      font-size: .7rem; padding: 2px 8px; border-radius: 12px;
+      background: var(--bg-code); color: var(--text-muted); border: 1px solid var(--border);
+    }
+
+    /* ===== Code Blocks ===== */
+    pre {
+      background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; overflow-x: auto; font-size: .82rem; position: relative;
+      margin: 12px 0 20px;
+    }
+    pre code { background: none; padding: 0; font-family: var(--font-mono); }
+    code { background: var(--bg-code); padding: 2px 6px; border-radius: 4px; font-size: .85em; font-family: var(--font-mono); }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 4px; padding: 4px 8px; font-size: .72rem;
+      cursor: pointer; opacity: 0; transition: opacity .2s;
+    }
+    pre:hover .copy-btn { opacity: 1; }
+
+    /* ===== Directory Map ===== */
+    .dir-tree {
+      font-family: var(--font-mono); font-size: .8rem; line-height: 1.8;
+      background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 20px; white-space: pre; overflow-x: auto; margin: 12px 0 24px;
+    }
+
+    /* ===== Back to Top ===== */
+    .back-to-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 100;
+      background: var(--accent); color: #fff; border: none; border-radius: 50%;
+      width: 44px; height: 44px; font-size: 1.2rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: var(--shadow); transition: opacity .2s;
+    }
+    .back-to-top.visible { display: flex; }
+
+    /* ===== Deep-Dive Hub ===== */
+    .hub-card {
+      display: block; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px; margin: 10px 0;
+      transition: border-color .2s, box-shadow .2s; text-decoration: none;
+    }
+    .hub-card:hover { border-color: var(--accent); box-shadow: var(--shadow); text-decoration: none; }
+    .hub-card h4 { color: var(--text); margin-bottom: 4px; }
+    .hub-card p { color: var(--text-muted); font-size: .85rem; margin: 0; }
+
+    /* ===== Print ===== */
+    @media print {
+      header, .toc-sidebar, .back-to-top, .theme-toggle, .copy-btn, .zoom-overlay { display: none !important; }
+      main { max-width: 100%; padding: 0; }
+      body { color: #000; background: #fff; }
+      .diagram-container, .card, .step, pre, .stats-bar { break-inside: avoid; }
+      a { color: #000; }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 860px) {
+      .toc-sidebar { display: none; }
+      main { padding: 20px 16px; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- ===== Header ===== -->
+  <header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Claude Code</a> ›
+      <span>Tools</span>
+    </nav>
+    <div class="header-right">
+      <span class="reading-time" id="readingTime"></span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙 Dark</button>
+    </div>
+  </header>
+
+  <!-- ===== Layout ===== -->
+  <div class="layout">
+    <!-- TOC Sidebar -->
+    <aside class="toc-sidebar" id="tocSidebar">
+      <h4>On this page</h4>
+      <ul id="tocList"></ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content">
+      <h1>
+        🔧 Tools
+        <span class="subtitle">AI Capability Extensions</span>
+      </h1>
+
+      <!-- Meta -->
+      <div class="meta-bar">
+        <span>Language: <strong>TypeScript</strong></span>
+        <span>Source: <code>src/tools/</code></span>
+        <span>SHA: <code>a8a678c</code></span>
+        <span>Date: 2026-04-01</span>
+      </div>
+
+      <!-- Badges -->
+      <div class="badges">
+        <span class="badge badge-blue">🔵 buildTool() Factory</span>
+        <span class="badge badge-green">🟢 Zod Schema Validation</span>
+        <span class="badge badge-yellow">🟡 Permission-Gated</span>
+        <span class="badge badge-red">🔴 Multi-Agent</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat"><div class="num">184</div><div class="label">Files</div></div>
+        <div class="stat"><div class="num">42</div><div class="label">Tool Implementations</div></div>
+        <div class="stat"><div class="num">~40K</div><div class="label">Lines of Code</div></div>
+        <div class="stat"><div class="num">TypeScript</div><div class="label">Language</div></div>
+      </div>
+
+      <p>The <strong>tools module</strong> contains 40+ modular tool implementations that extend Claude's capabilities. Each tool follows a consistent <code>buildTool()</code> factory pattern with Zod schema validation, permission integration, and structured I/O. Tools are the primary interface for executing file operations, shell commands, code searches, web fetching, and multi-agent orchestration.</p>
+
+      <!-- ===== Architecture ===== -->
+      <h2 id="architecture">Architecture Overview</h2>
+      <p>Tools are grouped by functional category. The <code>buildTool()</code> factory wires each tool with schema validation, permission checks, and output formatting. Cross-cutting concerns like concurrency safety and cost tracking are handled at the router level.</p>
+
+      <div class="diagram-container" data-diagram="architecture">
+        <pre class="mermaid" data-source="architecture">
+flowchart LR
+  subgraph FileOps["📁 File Operations"]
+    FileReadTool
+    FileEditTool
+    FileWriteTool
+    GlobTool
+    GrepTool
+    NotebookEditTool
+  end
+
+  subgraph Shell["🖥️ Shell &amp; Process"]
+    BashTool
+    PowerShellTool
+    REPLTool
+  end
+
+  subgraph Agent["🤖 Agent &amp; Task"]
+    AgentTool
+    TaskCreateTool
+    TaskStopTool
+    TaskGetTool
+    TaskListTool
+    TaskOutputTool
+    TaskUpdateTool
+    TeamCreateTool
+    TeamDeleteTool
+    SendMessageTool
+  end
+
+  subgraph Web["🌐 Web &amp; External"]
+    WebFetchTool
+    WebSearchTool
+    MCPTool
+    ListMcpResourcesTool
+    ReadMcpResourceTool
+    McpAuthTool
+  end
+
+  subgraph UserCfg["👤 User &amp; Config"]
+    AskUserQuestionTool
+    ConfigTool
+    SkillTool
+    ToolSearchTool
+    BriefTool
+  end
+
+  subgraph Flow["⚡ Flow Control"]
+    EnterPlanModeTool
+    ExitPlanModeTool
+    EnterWorktreeTool
+    ExitWorktreeTool
+    SleepTool
+    ScheduleCronTool
+    RemoteTriggerTool
+    SyntheticOutputTool
+    TodoWriteTool
+  end
+
+  subgraph Shared["📦 Shared"]
+    shared_utils["shared/ &amp; utils.ts"]
+  end
+
+  AgentTool -->|spawns| BashTool
+  AgentTool -->|spawns| FileEditTool
+  AgentTool -->|spawns| GrepTool
+  AgentTool -->|spawns| WebFetchTool
+  TaskCreateTool -->|creates| AgentTool
+  shared_utils -.->|used by| FileOps
+  shared_utils -.->|used by| Shell
+  shared_utils -.->|used by| Agent
+        </pre>
+      </div>
+
+      <!-- ===== Data Flow ===== -->
+      <h2 id="data-flow">Data Flow</h2>
+      <p>Every tool invocation follows the same lifecycle: the model emits a structured tool call, the router validates input via Zod, the permission system gates execution, and results flow back through a formatter.</p>
+
+      <div class="diagram-container" data-diagram="dataflow">
+        <pre class="mermaid" data-source="dataflow">
+sequenceDiagram
+    participant M as Model
+    participant TR as ToolRouter
+    participant PC as PermissionCheck
+    participant TE as ToolExec
+    participant RF as ResultFormatter
+    participant FS as FileSystem
+    participant SH as Shell
+    participant SA as SubAgent
+
+    M->>TR: tool_call(name, params)
+    TR->>TR: Zod schema validation
+    TR->>PC: check permissions(tool, params)
+    PC-->>TR: allowed / denied
+    alt Denied
+        TR-->>M: PermissionError
+    end
+    TR->>TE: execute(validated_params)
+
+    alt BashTool
+        TE->>SH: spawn process
+        SH-->>TE: stdout/stderr
+    else FileEditTool
+        TE->>FS: read → patch → write
+        FS-->>TE: updated content
+    else AgentTool
+        TE->>SA: spawn sub-agent
+        SA-->>TE: agent result
+    end
+
+    TE->>RF: format result
+    RF-->>M: structured output + cost
+        </pre>
+      </div>
+
+      <!-- ===== Narrated Walkthrough ===== -->
+      <h2 id="walkthrough">Narrated Walkthrough: File Edit Operation</h2>
+      <p>Tracing a <code>FileEditTool</code> invocation end-to-end illustrates the shared lifecycle all tools follow, plus edit-specific logic like fuzzy matching and diff generation.</p>
+
+      <div class="walkthrough">
+        <div class="step">
+          <strong>Model sends FileEditTool call</strong> — The model emits a structured call with <code>file_path</code>, <code>old_str</code>, and <code>new_str</code> parameters.
+        </div>
+        <div class="step">
+          <strong>Zod schema validation</strong> — Input is validated against the tool's Zod schema. Missing or malformed fields produce immediate errors with helpful messages.
+        </div>
+        <div class="step">
+          <strong>Permission check</strong> — The permission system verifies filesystem access rules for the target path, including workspace boundaries and deny-list checks.
+        </div>
+        <div class="step">
+          <strong>Fuzzy string matching</strong> — <code>findActualString()</code> performs fuzzy matching with quote-character preservation to locate <code>old_str</code> in the file content, tolerating minor whitespace variations.
+        </div>
+        <div class="step">
+          <strong>File content read</strong> — The file is read from disk. For large files, streaming is used. The <code>MAX_EDIT_FILE_SIZE</code> limit (1 GiB) is enforced.
+        </div>
+        <div class="step">
+          <strong>Diff generation</strong> — <code>getPatchForEdit()</code> generates a unified diff showing the change context, used both for display and audit logging.
+        </div>
+        <div class="step">
+          <strong>Content write</strong> — The new content (with <code>old_str</code> replaced by <code>new_str</code>) is written atomically to the file.
+        </div>
+        <div class="step">
+          <strong>Result formatting</strong> — The result is formatted with a diff preview, line numbers of the change location, and a snippet of surrounding context.
+        </div>
+        <div class="step">
+          <strong>Cost tracking</strong> — Token usage for the operation is tracked and attributed to the current session's cost budget.
+        </div>
+        <div class="step">
+          <strong>UI display</strong> — The UI renders the edit diff with syntax highlighting, showing the before/after state of the modified region.
+        </div>
+      </div>
+
+      <!-- ===== Key Components ===== -->
+      <h2 id="key-components">Key Components</h2>
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Path</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>BashTool</strong></td><td><code>BashTool/BashTool.tsx</code></td><td>Shell command execution with sandbox isolation and command classification</td></tr>
+          <tr><td><strong>FileEditTool</strong></td><td><code>FileEditTool/FileEditTool.ts</code></td><td>Surgical file editing with fuzzy matching and diff generation</td></tr>
+          <tr><td><strong>FileReadTool</strong></td><td><code>FileReadTool/FileReadTool.ts</code></td><td>File reading with PDF, notebook, and image support</td></tr>
+          <tr><td><strong>FileWriteTool</strong></td><td><code>FileWriteTool/FileWriteTool.ts</code></td><td>Complete file creation and overwrite with atomic writes</td></tr>
+          <tr><td><strong>GlobTool</strong></td><td><code>GlobTool/GlobTool.ts</code></td><td>File pattern matching with recursive directory traversal</td></tr>
+          <tr><td><strong>GrepTool</strong></td><td><code>GrepTool/GrepTool.ts</code></td><td>Ripgrep-powered code search with context flags and output modes</td></tr>
+          <tr><td><strong>AgentTool</strong></td><td><code>AgentTool/AgentTool.tsx</code></td><td>Sub-agent orchestration with worktree isolation and context cloning</td></tr>
+          <tr><td><strong>WebFetchTool</strong></td><td><code>WebFetchTool/WebFetchTool.ts</code></td><td>URL fetching with HTML-to-markdown conversion and host approval</td></tr>
+          <tr><td><strong>MCPTool</strong></td><td><code>MCPTool/MCPTool.ts</code></td><td>Model Context Protocol server tool invocation and resource management</td></tr>
+          <tr><td><strong>SkillTool</strong></td><td><code>SkillTool/SkillTool.ts</code></td><td>User-defined skill execution with discovery and lifecycle management</td></tr>
+          <tr><td><strong>TaskCreateTool</strong></td><td><code>TaskCreateTool/</code></td><td>Background task creation with agent spawning and progress tracking</td></tr>
+          <tr><td><strong>AskUserQuestionTool</strong></td><td><code>AskUserQuestionTool/</code></td><td>Interactive user question prompting with response handling</td></tr>
+          <tr><td><strong>TodoWriteTool</strong></td><td><code>TodoWriteTool/</code></td><td>Todo list management with structured task tracking</td></tr>
+          <tr><td><strong>shared/</strong></td><td><code>shared/</code></td><td>Git operation tracking, multi-agent spawn infrastructure, common helpers</td></tr>
+          <tr><td><strong>utils.ts</strong></td><td><code>utils.ts</code></td><td>Shared tool utilities — result formatting, error handling, path resolution</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ===== Sub-Module Cards ===== -->
+      <h2 id="sub-modules">Sub-Module Overview</h2>
+      <div class="cards-grid">
+        <div class="card">
+          <h4>🖥️ BashTool</h4>
+          <p>Shell command execution with command classification (read-only vs write), sandbox isolation, timeout management, and structured stdout/stderr capture.</p>
+          <div class="card-tags">
+            <span class="tag">shell</span><span class="tag">sandbox</span><span class="tag">process</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>✏️ FileEditTool</h4>
+          <p>Surgical file edits via old_str→new_str replacement. Fuzzy matching with <code>findActualString()</code>, unified diff generation via <code>getPatchForEdit()</code>, and atomic writes.</p>
+          <div class="card-tags">
+            <span class="tag">edit</span><span class="tag">diff</span><span class="tag">fuzzy-match</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>📖 FileReadTool</h4>
+          <p>Reads files with support for PDF extraction, Jupyter notebook rendering, image base64 encoding, line range selection, and large-file streaming.</p>
+          <div class="card-tags">
+            <span class="tag">read</span><span class="tag">pdf</span><span class="tag">notebook</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>🤖 AgentTool</h4>
+          <p>Spawns sub-agents with isolated contexts. Supports worktree-based git isolation, context cloning, token budget inheritance, and result aggregation.</p>
+          <div class="card-tags">
+            <span class="tag">agent</span><span class="tag">worktree</span><span class="tag">orchestration</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>🔍 GrepTool</h4>
+          <p>Ripgrep integration with configurable output modes (content, files, count), context line flags (-A, -B, -C), glob filtering, and multiline support.</p>
+          <div class="card-tags">
+            <span class="tag">search</span><span class="tag">ripgrep</span><span class="tag">regex</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>🌐 WebFetchTool</h4>
+          <p>Fetches URLs with HTML-to-markdown conversion, host approval gating, content truncation, LLM post-processing for readability, and raw HTML mode.</p>
+          <div class="card-tags">
+            <span class="tag">web</span><span class="tag">fetch</span><span class="tag">markdown</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>🔌 MCPTool</h4>
+          <p>Invokes tools exposed by Model Context Protocol servers. Handles server discovery, tool listing, parameter marshalling, and authentication flows.</p>
+          <div class="card-tags">
+            <span class="tag">mcp</span><span class="tag">protocol</span><span class="tag">integration</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>📋 TaskTools</h4>
+          <p>Background task lifecycle — TaskCreate, TaskStop, TaskGet, TaskList, TaskOutput, TaskUpdate. Manages async agent execution with progress polling.</p>
+          <div class="card-tags">
+            <span class="tag">task</span><span class="tag">async</span><span class="tag">lifecycle</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>📦 shared/</h4>
+          <p>Common infrastructure: git operation tracking for diff attribution, multi-agent spawn helpers, tool registry utilities, and cross-tool type definitions.</p>
+          <div class="card-tags">
+            <span class="tag">shared</span><span class="tag">git</span><span class="tag">infra</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Deep-Dive Hub ===== -->
+      <h2 id="deep-dives">Deep-Dive Focus Pages</h2>
+      <p>Detailed explorations of cross-cutting concerns and complex subsystems within the tools module.</p>
+
+      <a class="hub-card" href="tool_factory.html">
+        <h4>🏭 Tool Factory Pattern</h4>
+        <p><code>buildTool()</code> — Zod schemas, permission wiring, input/output typing, concurrency flags, and the factory that assembles every tool.</p>
+      </a>
+      <a class="hub-card" href="bash_security.html">
+        <h4>🔒 Bash Security Model</h4>
+        <p>Command classification (read-only vs write), sandbox isolation, deny-list enforcement, timeout management, and safe process spawning.</p>
+      </a>
+      <a class="hub-card" href="agent_orchestration.html">
+        <h4>🤖 Agent Orchestration</h4>
+        <p>Sub-agent spawning, worktree-based git isolation, context cloning, token budget inheritance, and multi-agent coordination patterns.</p>
+      </a>
+
+      <!-- ===== Directory Map ===== -->
+      <h2 id="directory-map">Directory Map</h2>
+      <div class="dir-tree">src/tools/
+├── AgentTool/
+│   └── AgentTool.tsx
+├── AskUserQuestionTool/
+│   └── AskUserQuestionTool.ts
+├── BashTool/
+│   └── BashTool.tsx
+├── BriefTool/
+│   └── BriefTool.ts
+├── ConfigTool/
+│   └── ConfigTool.ts
+├── EnterPlanModeTool/
+│   └── EnterPlanModeTool.ts
+├── EnterWorktreeTool/
+│   └── EnterWorktreeTool.ts
+├── ExitPlanModeTool/
+│   └── ExitPlanModeTool.ts
+├── ExitWorktreeTool/
+│   └── ExitWorktreeTool.ts
+├── FileEditTool/
+│   └── FileEditTool.ts
+├── FileReadTool/
+│   └── FileReadTool.ts
+├── FileWriteTool/
+│   └── FileWriteTool.ts
+├── GlobTool/
+│   └── GlobTool.ts
+├── GrepTool/
+│   └── GrepTool.ts
+├── ListMcpResourcesTool/
+│   └── ListMcpResourcesTool.ts
+├── McpAuthTool/
+│   └── McpAuthTool.ts
+├── MCPTool/
+│   └── MCPTool.ts
+├── NotebookEditTool/
+│   └── NotebookEditTool.ts
+├── PowerShellTool/
+│   └── PowerShellTool.ts
+├── ReadMcpResourceTool/
+│   └── ReadMcpResourceTool.ts
+├── RemoteTriggerTool/
+│   └── RemoteTriggerTool.ts
+├── REPLTool/
+│   └── REPLTool.ts
+├── ScheduleCronTool/
+│   └── ScheduleCronTool.ts
+├── SendMessageTool/
+│   └── SendMessageTool.ts
+├── SkillTool/
+│   └── SkillTool.ts
+├── SleepTool/
+│   └── SleepTool.ts
+├── SyntheticOutputTool/
+│   └── SyntheticOutputTool.ts
+├── TaskCreateTool/
+│   └── TaskCreateTool.ts
+├── TaskGetTool/
+│   └── TaskGetTool.ts
+├── TaskListTool/
+│   └── TaskListTool.ts
+├── TaskOutputTool/
+│   └── TaskOutputTool.ts
+├── TaskStopTool/
+│   └── TaskStopTool.ts
+├── TaskUpdateTool/
+│   └── TaskUpdateTool.ts
+├── TeamCreateTool/
+│   └── TeamCreateTool.ts
+├── TeamDeleteTool/
+│   └── TeamDeleteTool.ts
+├── TodoWriteTool/
+│   └── TodoWriteTool.ts
+├── ToolSearchTool/
+│   └── ToolSearchTool.ts
+├── WebFetchTool/
+│   └── WebFetchTool.ts
+├── WebSearchTool/
+│   └── WebSearchTool.ts
+├── shared/
+│   ├── gitTracking.ts
+│   ├── multiAgent.ts
+│   └── index.ts
+└── utils.ts</div>
+
+      <!-- ===== Configuration ===== -->
+      <h2 id="configuration">Configuration Reference</h2>
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>maxResultSizeChars</code></td><td>30,000 (Bash) / 100,000 (FileEdit)</td><td>Maximum result size in characters before truncation</td></tr>
+          <tr><td><code>strict</code></td><td><code>true</code></td><td>Enable strict Zod schema validation for all tool inputs</td></tr>
+          <tr><td><code>isConcurrencySafe</code></td><td>per-tool</td><td>Whether the tool can be invoked concurrently without side-effect conflicts</td></tr>
+          <tr><td><code>isReadOnly</code></td><td>per-tool</td><td>Whether the tool performs only read operations (affects permission checks)</td></tr>
+          <tr><td><code>shouldDefer</code></td><td><code>false</code></td><td>Whether the tool should execute asynchronously with deferred result delivery</td></tr>
+          <tr><td><code>MAX_EDIT_FILE_SIZE</code></td><td>1 GiB</td><td>Maximum file size for FileEditTool operations</td></tr>
+          <tr><td><code>PDF page limits</code></td><td>varies</td><td>Maximum pages extracted from PDF files by FileReadTool</td></tr>
+          <tr><td><code>sandbox isolation</code></td><td>enabled</td><td>BashTool process sandboxing for untrusted command execution</td></tr>
+          <tr><td><code>agent token budget</code></td><td>inherited</td><td>Token budget for sub-agents spawned by AgentTool, inherited from parent context</td></tr>
+          <tr><td><code>worktree isolation</code></td><td>optional</td><td>Git worktree isolation mode for AgentTool — separate branch per sub-agent</td></tr>
+        </tbody>
+      </table>
+
+    </main>
+  </div>
+
+  <!-- Zoom Overlay -->
+  <div class="zoom-overlay" id="zoomOverlay"></div>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+  <!-- ===== Scripts ===== -->
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" id="hljsTheme"/>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+
+  <script>
+    /* ===== Theme Toggle ===== */
+    (function initTheme() {
+      var THEME_KEY = 'neutra-ip-theme';
+      var saved = localStorage.getItem(THEME_KEY);
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+      var btn = document.getElementById('themeToggle');
+      var hljsLink = document.getElementById('hljsTheme');
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem(THEME_KEY, theme);
+        btn.textContent = theme === 'dark' ? '🌙 Dark' : '☀️ Light';
+        hljsLink.href = theme === 'dark'
+          ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css'
+          : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css';
+      }
+
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(current);
+
+      btn.addEventListener('click', function() {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        // Re-render Mermaid diagrams for new theme
+        renderMermaid();
+      });
+    })();
+
+    /* ===== Mermaid ===== */
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      fontFamily: 'var(--font-sans)',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+      sequence: { useMaxWidth: true, showSequenceNumbers: true }
+    });
+
+    function renderMermaid() {
+      var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme,
+        fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif',
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+        sequence: { useMaxWidth: true, showSequenceNumbers: true }
+      });
+
+      document.querySelectorAll('.mermaid').forEach(function(el) {
+        var source = el.getAttribute('data-source');
+        if (!el._originalCode) {
+          el._originalCode = el.textContent;
+        }
+        el.removeAttribute('data-processed');
+        el.innerHTML = el._originalCode;
+      });
+
+      mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderMermaid();
+    });
+
+    /* ===== TOC Generation ===== */
+    (function buildTOC() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var tocList = document.getElementById('tocList');
+        var headings = document.querySelectorAll('main h2, main h3');
+        headings.forEach(function(h) {
+          if (!h.id) {
+            h.id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          }
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = '#' + h.id;
+          a.textContent = h.textContent.trim();
+          if (h.tagName === 'H3') a.classList.add('toc-h3');
+          li.appendChild(a);
+          tocList.appendChild(li);
+        });
+      });
+    })();
+
+    /* ===== Reading Time ===== */
+    (function calcReadingTime() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var text = document.getElementById('main-content').textContent || '';
+        var words = text.split(/\s+/).length;
+        var mins = Math.max(1, Math.round(words / 220));
+        document.getElementById('readingTime').textContent = mins + ' min read';
+      });
+    })();
+
+    /* ===== Copy Buttons ===== */
+    (function addCopyButtons() {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre) {
+          if (pre.querySelector('.mermaid')) return;
+          if (pre.closest('.diagram-container')) return;
+          var btn = document.createElement('button');
+          btn.className = 'copy-btn';
+          btn.textContent = 'Copy';
+          btn.addEventListener('click', function() {
+            var code = pre.querySelector('code') || pre;
+            navigator.clipboard.writeText(code.textContent).then(function() {
+              btn.textContent = 'Copied!';
+              setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+            });
+          });
+          pre.appendChild(btn);
+        });
+      });
+    })();
+
+    /* ===== Diagram Zoom ===== */
+    (function diagramZoom() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var overlay = document.getElementById('zoomOverlay');
+
+        document.querySelectorAll('.diagram-container').forEach(function(container) {
+          container.addEventListener('click', function() {
+            var svg = container.querySelector('svg');
+            if (!svg) return;
+            overlay.innerHTML = '';
+            overlay.appendChild(svg.cloneNode(true));
+            overlay.classList.add('active');
+          });
+        });
+
+        overlay.addEventListener('click', function() {
+          overlay.classList.remove('active');
+          overlay.innerHTML = '';
+        });
+
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            overlay.innerHTML = '';
+          }
+        });
+      });
+    })();
+
+    /* ===== Back to Top ===== */
+    (function backToTop() {
+      var btn = document.getElementById('backToTop');
+      window.addEventListener('scroll', function() {
+        btn.classList.toggle('visible', window.scrollY > 400);
+      });
+      btn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    /* ===== j/k Keyboard Navigation ===== */
+    (function keyboardNav() {
+      document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        var headings = Array.from(document.querySelectorAll('main h2, main h3'));
+        if (!headings.length) return;
+
+        var scrollY = window.scrollY + 100;
+        var currentIdx = -1;
+        for (var i = headings.length - 1; i >= 0; i--) {
+          if (headings[i].getBoundingClientRect().top + window.scrollY <= scrollY) {
+            currentIdx = i;
+            break;
+          }
+        }
+
+        if (e.key === 'j') {
+          var next = Math.min(currentIdx + 1, headings.length - 1);
+          headings[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (e.key === 'k') {
+          var prev = Math.max(currentIdx - 1, 0);
+          headings[prev].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    })();
+
+    /* ===== Highlight.js ===== */
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('pre code').forEach(function(block) {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
+</body>
+</html>

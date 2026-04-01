@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="src/">
+<meta name="wiki-source-rev" content="a8a678c">
+<!--
+  L0 — Project Hub Page for Claude Code
+  Generated 2026-04-01 from src/ @ a8a678c
+  Theme key: neutra-ip (localStorage: neutra-ip-theme)
+-->
+<title>Claude Code — AI-Powered Terminal Assistant</title>
+<style>
+/* === Dark theme (default) === */
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #d29922;
+  --accent4: #f85149;
+  --heading: #f0f6fc;
+  --code-bg: #1c2128;
+  --table-even: #161b22;
+  --table-odd: #0d1117;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+}
+h1 { color: var(--heading); font-size: 2.4rem; margin: 1rem 0; border-bottom: 2px solid var(--accent); padding-bottom: .6rem; }
+h2 { color: var(--accent); font-size: 1.7rem; margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: .4rem; }
+h3 { color: var(--heading); font-size: 1.3rem; margin: 1.8rem 0 .6rem; }
+h4 { color: var(--accent2); font-size: 1.1rem; margin: 1.2rem 0 .4rem; }
+p { margin: .6rem 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.badge { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 12px; margin-right: 6px; color: #000; }
+.badge.blue { background: var(--accent); }
+.badge.green { background: var(--accent2); }
+.badge.yellow { background: var(--accent3); }
+.badge.red { background: var(--accent4); }
+
+.hero {
+  background: linear-gradient(135deg, #1a2332 0%, #0d1117 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1.5rem 0 2rem;
+  text-align: center;
+}
+.hero p { color: var(--text-muted); font-size: 1.1rem; }
+.hero .subtitle { color: var(--accent); font-size: 1.3rem; margin-bottom: .5rem; }
+
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .92rem; }
+th { background: var(--surface); color: var(--accent); text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+td { padding: 10px 14px; border: 1px solid var(--border); vertical-align: top; }
+tr:nth-child(even) td { background: var(--table-even); }
+tr:nth-child(odd) td { background: var(--table-odd); }
+
+code {
+  background: var(--code-bg); color: var(--accent2); padding: 2px 6px; border-radius: 4px;
+  font-size: .88rem; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: .85rem; line-height: 1.5;
+}
+pre code { background: none; padding: 0; }
+
+blockquote {
+  border-left: 3px solid var(--accent); margin: 1rem 0; padding: .6rem 1rem;
+  color: var(--text-muted); background: var(--surface); border-radius: 0 6px 6px 0; font-style: italic;
+}
+
+.diagram-container {
+  background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1.2rem 0;
+  overflow-x: auto; border: 1px solid var(--border); cursor: zoom-in;
+}
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.2rem; transition: border-color .2s, box-shadow .2s; text-decoration: none; color: inherit; display: block;
+}
+.card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,.3); text-decoration: none; }
+.card h4 { margin-top: 0; color: var(--accent2); }
+.card p { font-size: .9rem; color: var(--text-muted); }
+
+.stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.stat-box {
+  flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1rem; text-align: center;
+}
+.stat-box .num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+.stat-box .label { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+
+.footer {
+  text-align: center; color: var(--text-muted); font-size: .85rem;
+  margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);
+}
+.footer a { color: var(--accent); }
+
+/* Module cards — L0 specific */
+.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.2rem; margin: 1.5rem 0; }
+.module-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.4rem; transition: transform .15s, box-shadow .15s;
+  cursor: pointer; text-decoration: none; color: inherit; display: block;
+}
+.module-card:hover {
+  transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.4);
+  border-color: var(--accent); text-decoration: none;
+}
+.module-card h3 { margin: 0 0 .4rem 0; color: var(--accent); font-size: 1.25rem; }
+.module-card .tagline { color: var(--text-muted); font-size: .9rem; margin-bottom: .6rem; }
+.module-card p { color: var(--text); font-size: .88rem; }
+.module-card .stats { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .6rem; }
+.module-card .stats span {
+  background: var(--code-bg); padding: .15rem .5rem; border-radius: 4px;
+  font-size: .75rem; color: var(--text-muted);
+}
+.section-label {
+  color: var(--accent); font-size: .85rem; text-transform: uppercase; letter-spacing: .1em;
+  margin: 2rem 0 .5rem; border-bottom: 1px solid var(--border); padding-bottom: .3rem;
+}
+
+/* Intro box */
+.intro-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.4rem 1.6rem; margin: 1.5rem 0;
+}
+.intro-box h3 { color: var(--accent2); margin: 0 0 .6rem 0; }
+.intro-box p { color: var(--text); font-size: .95rem; }
+
+@media (max-width: 768px) {
+  body { padding: 1rem; }
+  .card-grid { grid-template-columns: 1fr; }
+  .module-grid { grid-template-columns: 1fr; }
+}
+
+/* === Light theme === */
+[data-theme="light"] {
+  --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de; --text: #1f2328;
+  --text-muted: #656d76; --accent: #0969da; --accent2: #1a7f37; --accent3: #9a6700;
+  --accent4: #cf222e; --heading: #1f2328; --code-bg: #f6f8fa;
+  --table-even: #f6f8fa; --table-odd: #ffffff;
+}
+[data-theme="light"] .hero { background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%); }
+[data-theme="light"] .badge { color: #fff; }
+[data-theme="light"] .module-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+
+/* === Theme toggle button === */
+.theme-toggle {
+  position: fixed; top: 1rem; right: 1rem; z-index: 1000;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 50%;
+  width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 1.2rem; color: var(--text);
+  transition: background .2s, border-color .2s; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.theme-toggle:hover { border-color: var(--accent); }
+
+/* === Skip-link (accessibility) === */
+.skip-link {
+  position: absolute; top: -100%; left: 1rem; background: var(--accent); color: #fff;
+  padding: .5rem 1rem; border-radius: 0 0 6px 6px; z-index: 2000; font-size: .9rem;
+  text-decoration: none; transition: top .2s;
+}
+.skip-link:focus { top: 0; }
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,.85); z-index: 3000; align-items: center; justify-content: center;
+  cursor: zoom-out;
+}
+.diagram-overlay.active { display: flex; }
+.diagram-overlay .diagram-overlay-content {
+  max-width: 95vw; max-height: 90vh; overflow: auto; background: var(--bg);
+  border-radius: 12px; padding: 2rem; border: 1px solid var(--border); transform-origin: center center;
+}
+#diagramOverlay.active svg,
+#diagramOverlayContent svg { max-width: 90vw !important; max-height: 85vh !important; width: 90vw !important; }
+
+/* === Back-to-top button === */
+.back-to-top {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 50%;
+  width: 40px; height: 40px; cursor: pointer; display: none; align-items: center;
+  justify-content: center; font-size: 1.3rem; color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15); transition: opacity .2s, border-color .2s;
+}
+.back-to-top.visible { display: flex; }
+.back-to-top:hover { border-color: var(--accent); color: var(--accent); }
+
+/* === Print === */
+@media print {
+  .theme-toggle, .skip-link, .back-to-top, .diagram-overlay { display: none !important; }
+  body { max-width: 100%; padding: 1rem; color: #1f2328; background: #fff; }
+  :root {
+    --bg: #fff; --surface: #f6f8fa; --border: #d0d7de; --text: #1f2328;
+    --text-muted: #656d76; --accent: #0969da; --accent2: #1a7f37; --accent3: #9a6700;
+    --accent4: #cf222e; --heading: #1f2328; --code-bg: #f6f8fa;
+  }
+  .hero { background: #f0f4f8 !important; border-color: #d0d7de; }
+  .module-card, .card, .stat-box { break-inside: avoid; }
+  .diagram-container { break-inside: avoid; }
+  a { color: #0969da; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  .footer a[href]:after { content: none; }
+}
+</style>
+
+<!-- Mermaid.js — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: "default", flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis" } });</script>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+
+<!-- ===== HERO BANNER ===== -->
+<h1>Claude Code</h1>
+<div class="hero">
+  <div class="subtitle">AI-Powered Terminal Assistant</div>
+  <p>
+    Claude Code is an AI-powered CLI tool by Anthropic that enables conversational coding directly in the terminal.
+    It features a React-based terminal UI (Ink), modular tool system, slash commands, MCP integration,
+    IDE bridging, multi-agent orchestration, and comprehensive permission management across 1900+ TypeScript/TSX files.
+  </p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">🔵 CLI Tool</span>
+    <span class="badge green">🟢 React/Ink UI</span>
+    <span class="badge yellow">🟡 Multi-Agent</span>
+    <span class="badge red">🔴 MCP Extensible</span>
+  </p>
+</div>
+
+<!-- ===== STAT ROW ===== -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">35</div><div class="label">Modules</div></div>
+  <div class="stat-box"><div class="num">1,902</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">172K</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">TS</div><div class="label">TypeScript</div></div>
+</div>
+
+<!-- ===== INTRO BOX ===== -->
+<div class="intro-box">
+  <h3>🏙️ What is this?</h3>
+  <p>
+    Think of Claude Code as a <strong>city with districts</strong>. The <em>CLI district</em> is the main gate
+    where users enter commands. The <em>UI district</em> (React/Ink) renders everything you see in the terminal —
+    permission dialogs, tool output, streaming markdown. The <em>Tools district</em> is the industrial zone where
+    real work happens: editing files, running bash, fetching web pages, spawning sub-agents. The <em>Services
+    district</em> connects the city to the outside world via MCP servers, LSP language services, OAuth providers,
+    and IDE bridges. And the <em>Infrastructure district</em> keeps the lights on — utilities, state management,
+    migrations, and configuration constants that every other district depends on.
+  </p>
+  <p>
+    This wiki maps every street in the city. Start here at the hub, pick a district, then drill into individual
+    buildings (sub-modules) to see exactly how each piece works.
+  </p>
+</div>
+
+<!-- ===== SYSTEM ARCHITECTURE ===== -->
+<h2>System Architecture</h2>
+<p>Major module groups and their relationships within <code>src/</code>.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph CorePipeline["🔧 Core Pipeline"]
+    commands["commands\n101 slash commands"]
+    tools["tools\n42 tool impls"]
+    query["query\nexecution config"]
+    tasks["tasks\nagent/shell/workflow"]
+    coordinator["coordinator\norchestration"]
+  end
+
+  subgraph UILayer["🎨 UI Layer"]
+    components["components\n31 UI groups"]
+    hooks["hooks\nReact hooks"]
+    ink["ink\ncustom renderer"]
+    screens["screens\nDoctor/REPL/Resume"]
+    keybindings["keybindings\nshortcut system"]
+    vim["vim\nvim emulation"]
+  end
+
+  subgraph Services["🌐 Services"]
+    services["services\nMCP/LSP/OAuth/analytics"]
+    bridge["bridge\nIDE comm"]
+    server["server\ndirect-connect"]
+    remote["remote\nremote sessions"]
+  end
+
+  subgraph DataState["📦 Data &amp; State"]
+    state["state\nglobal state"]
+    context["context\nprompt assembly"]
+    memdir["memdir\nmemory mgmt"]
+    constants["constants\napp-wide consts"]
+    types["types\ncore TS types"]
+    schemas["schemas\nvalidation"]
+  end
+
+  subgraph Infrastructure["⚙️ Infrastructure"]
+    utils["utils\nAPI/auth/bash/settings"]
+    entrypoints["entrypoints\napp entry"]
+    bootstrap["bootstrap\ninit sequence"]
+    migrations["migrations\ndata migrations"]
+    plugins["plugins\nplugin mgmt"]
+    skills["skills\nskill system"]
+    cli["cli\narg parsing"]
+  end
+
+  entrypoints --> bootstrap
+  bootstrap --> cli
+  cli --> screens
+  screens --> query
+  query --> coordinator
+  coordinator --> tools
+  coordinator --> commands
+  tools --> services
+  commands --> components
+  components --> hooks
+  hooks --> state
+  components --> ink
+  services --> bridge
+  services --> remote
+  services --> server
+  context --> query
+  utils --> services
+  constants --> utils
+  types --> tools
+  schemas --> context
+  memdir --> context
+  migrations --> state
+  plugins --> tools
+  skills --> tools
+  tasks --> coordinator
+  keybindings --> components
+  vim --> keybindings
+</pre>
+</div>
+
+<!-- ===== MODULE CARDS ===== -->
+
+<!-- — Core Pipeline — -->
+<p class="section-label">🔧 Core Pipeline</p>
+<div class="module-grid">
+  <a href="commands_doc/index.html" class="module-card">
+    <h3>commands</h3>
+    <div class="tagline">Slash command registry and execution</div>
+    <p>101 slash commands including <code>/init</code>, <code>/commit</code>, <code>/compact</code>,
+    <code>/config</code>, <code>/diff</code> and more. Each command is self-contained with argument parsing,
+    validation, and execution logic.</p>
+    <div class="stats">
+      <span>189 files</span>
+      <span>101 commands</span>
+    </div>
+  </a>
+  <a href="tools_doc/index.html" class="module-card">
+    <h3>tools</h3>
+    <div class="tagline">Tool system — the engine room</div>
+    <p>42 tool implementations that do the real work: <code>BashTool</code>, <code>FileEditTool</code>,
+    <code>AgentTool</code>, <code>WebFetchTool</code>, and more. Each tool has permission checks, input
+    validation, and structured output.</p>
+    <div class="stats">
+      <span>184 files</span>
+      <span>42 tools</span>
+    </div>
+  </a>
+  <a href="query/index.html" class="module-card">
+    <h3>query</h3>
+    <div class="tagline">Query execution configuration</div>
+    <p>Configures how queries are routed to the model API — prompt construction, token limits, streaming
+    settings, and retry logic.</p>
+    <div class="stats">
+      <span>4 files</span>
+    </div>
+  </a>
+  <a href="tasks/index.html" class="module-card">
+    <h3>tasks</h3>
+    <div class="tagline">Background task management</div>
+    <p>Manages agent tasks, shell tasks, and workflow orchestration. Handles task lifecycle, cancellation,
+    and result collection for multi-agent operations.</p>
+    <div class="stats">
+      <span>12 files</span>
+    </div>
+  </a>
+</div>
+
+<!-- — UI Layer — -->
+<p class="section-label">🎨 UI Layer</p>
+<div class="module-grid">
+  <a href="components_doc/index.html" class="module-card">
+    <h3>components</h3>
+    <div class="tagline">React/Ink terminal UI components</div>
+    <p>31 UI component groups: the main <code>App</code> shell, permission dialogs, message rendering,
+    tool output display, cost tracking, and interactive prompts — all rendered in the terminal via Ink.</p>
+    <div class="stats">
+      <span>389 files</span>
+      <span>31 groups</span>
+    </div>
+  </a>
+  <a href="hooks_doc/index.html" class="module-card">
+    <h3>hooks</h3>
+    <div class="tagline">React hooks for UI state and logic</div>
+    <p>Custom React hooks powering permissions, suggestions, history, IDE integration, input handling,
+    and terminal lifecycle management.</p>
+    <div class="stats">
+      <span>104 files</span>
+    </div>
+  </a>
+  <a href="ink_doc/index.html" class="module-card">
+    <h3>ink</h3>
+    <div class="tagline">Custom terminal UI framework</div>
+    <p>A custom React reconciler, layout engine, and rendering pipeline purpose-built for terminal output.
+    Handles text measurement, flexbox-like layout, and ANSI color management.</p>
+    <div class="stats">
+      <span>96 files</span>
+    </div>
+  </a>
+  <a href="screens/index.html" class="module-card">
+    <h3>screens</h3>
+    <div class="tagline">Modal screens</div>
+    <p>Top-level screens: <code>Doctor</code> (diagnostics), <code>REPL</code> (main interaction loop),
+    and <code>Resume</code> (session restoration).</p>
+    <div class="stats">
+      <span>3 files</span>
+    </div>
+  </a>
+  <a href="keybindings/index.html" class="module-card">
+    <h3>keybindings</h3>
+    <div class="tagline">Keyboard shortcut system</div>
+    <p>Registers and dispatches keyboard shortcuts. Maps key sequences to actions with support for
+    chords, modifiers, and context-dependent bindings.</p>
+    <div class="stats">
+      <span>14 files</span>
+    </div>
+  </a>
+  <a href="vim/index.html" class="module-card">
+    <h3>vim</h3>
+    <div class="tagline">Vim keybinding emulation</div>
+    <p>Vim-style modal editing for the terminal input: normal mode, insert mode, visual mode,
+    and common motions/operators.</p>
+    <div class="stats">
+      <span>5 files</span>
+    </div>
+  </a>
+</div>
+
+<!-- — Services — -->
+<p class="section-label">🌐 Services</p>
+<div class="module-grid">
+  <a href="services_doc/index.html" class="module-card">
+    <h3>services</h3>
+    <div class="tagline">External service integrations</div>
+    <p>20 service modules: MCP server management, LSP language services, OAuth authentication,
+    analytics/telemetry, context compaction, rate limiting, and cost tracking.</p>
+    <div class="stats">
+      <span>130 files</span>
+      <span>20 services</span>
+    </div>
+  </a>
+  <a href="bridge/index.html" class="module-card">
+    <h3>bridge</h3>
+    <div class="tagline">IDE communication bridge</div>
+    <p>Bidirectional communication layer between Claude Code and IDE extensions (VS Code, JetBrains).
+    Handles command relay, file sync, and diagnostic reporting.</p>
+    <div class="stats">
+      <span>31 files</span>
+    </div>
+  </a>
+  <a href="server/index.html" class="module-card">
+    <h3>server</h3>
+    <div class="tagline">Direct-connect session management</div>
+    <p>Manages direct-connect sessions for local server mode, handling WebSocket connections
+    and session lifecycle.</p>
+    <div class="stats">
+      <span>3 files</span>
+    </div>
+  </a>
+  <a href="remote/index.html" class="module-card">
+    <h3>remote</h3>
+    <div class="tagline">Remote session management</div>
+    <p>Manages remote coding sessions — SSH tunneling, remote file system access, and session
+    reconnection logic.</p>
+    <div class="stats">
+      <span>4 files</span>
+    </div>
+  </a>
+</div>
+
+<!-- — Data & State — -->
+<p class="section-label">📦 Data &amp; State</p>
+<div class="module-grid">
+  <a href="state/index.html" class="module-card">
+    <h3>state</h3>
+    <div class="tagline">Global state management</div>
+    <p>Central state store for the application. Manages conversation history, tool results,
+    permission grants, and session metadata with reactive subscriptions.</p>
+    <div class="stats">
+      <span>6 files</span>
+    </div>
+  </a>
+  <a href="context/index.html" class="module-card">
+    <h3>context</h3>
+    <div class="tagline">System/user prompt context assembly</div>
+    <p>Assembles the system prompt and user context from multiple sources — environment info,
+    project files, user preferences, and MCP-provided context.</p>
+    <div class="stats">
+      <span>9 files</span>
+    </div>
+  </a>
+  <a href="memdir/index.html" class="module-card">
+    <h3>memdir</h3>
+    <div class="tagline">Memory management for long contexts</div>
+    <p>Implements memory directory — a persistent scratch space for the AI to store notes,
+    summaries, and intermediate results across long conversations.</p>
+    <div class="stats">
+      <span>8 files</span>
+    </div>
+  </a>
+  <a href="constants/index.html" class="module-card">
+    <h3>constants</h3>
+    <div class="tagline">Application-wide constants</div>
+    <p>Centralized constant definitions: model names, token limits, file size thresholds,
+    default paths, feature flags, and configuration keys.</p>
+    <div class="stats">
+      <span>21 files</span>
+    </div>
+  </a>
+  <a href="types/index.html" class="module-card">
+    <h3>types</h3>
+    <div class="tagline">Core TypeScript type definitions</div>
+    <p>Shared type definitions used across the entire codebase — message types, tool schemas,
+    API response shapes, and configuration interfaces.</p>
+    <div class="stats">
+      <span>11 files</span>
+    </div>
+  </a>
+</div>
+
+<!-- — Infrastructure — -->
+<p class="section-label">⚙️ Infrastructure</p>
+<div class="module-grid">
+  <a href="utils_doc/index.html" class="module-card">
+    <h3>utils</h3>
+    <div class="tagline">Utility modules — the foundation</div>
+    <p>31 utility modules providing API wrappers, authentication, bash execution, settings management,
+    background task runners, file I/O helpers, and much more.</p>
+    <div class="stats">
+      <span>564 files</span>
+      <span>31 modules</span>
+    </div>
+  </a>
+  <a href="entrypoints/index.html" class="module-card">
+    <h3>entrypoints</h3>
+    <div class="tagline">Application entry points</div>
+    <p>Multiple entry points for different execution modes: CLI main, MCP server mode,
+    direct-connect mode, and test harness entry.</p>
+    <div class="stats">
+      <span>8 files</span>
+    </div>
+  </a>
+  <a href="cli/index.html" class="module-card">
+    <h3>cli</h3>
+    <div class="tagline">CLI argument parsing</div>
+    <p>Command-line argument parsing, validation, and help text generation. Defines all
+    CLI flags, subcommands, and environment variable overrides.</p>
+    <div class="stats">
+      <span>19 files</span>
+    </div>
+  </a>
+  <a href="skills/index.html" class="module-card">
+    <h3>skills</h3>
+    <div class="tagline">Skill system</div>
+    <p>Skill discovery, loading, and execution framework. Skills are pluggable capability
+    bundles that extend Claude Code's abilities via MCP or local definitions.</p>
+    <div class="stats">
+      <span>20 files</span>
+    </div>
+  </a>
+  <a href="migrations/index.html" class="module-card">
+    <h3>migrations</h3>
+    <div class="tagline">Settings/config data migrations</div>
+    <p>Versioned migration scripts for user settings, configuration files, and cached data.
+    Ensures smooth upgrades between Claude Code versions.</p>
+    <div class="stats">
+      <span>11 files</span>
+    </div>
+  </a>
+  <a href="plugins/index.html" class="module-card">
+    <h3>plugins</h3>
+    <div class="tagline">Plugin management</div>
+    <p>Plugin discovery and lifecycle management. Plugins extend functionality through
+    a well-defined hook interface.</p>
+    <div class="stats">
+      <span>2 files</span>
+    </div>
+  </a>
+</div>
+
+<!-- ===== CROSS-MODULE CONNECTION DIAGRAM ===== -->
+<h2>Request Flow — How Modules Connect</h2>
+<p>Trace a single user request from keyboard input through to rendered response.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant User as 👤 User Input
+    participant CLI as CLI Parser
+    participant Screen as REPL Screen
+    participant Query as Query Engine
+    participant Model as Model API
+    participant Tools as Tool Execution
+    participant Hooks as Hook Pipeline
+    participant Render as Response Rendering
+
+    User->>CLI: Type command or prompt
+    CLI->>Screen: Route to REPL screen
+    Screen->>Query: Build query with context
+    Note over Screen,Query: context + memdir + state assembled
+    Query->>Model: Send to Claude API
+    Note over Query,Model: Token budget, streaming config applied
+
+    loop Tool Use Loop
+        Model->>Tools: Request tool call
+        Note over Tools: Permission check via hooks
+        Tools->>Hooks: Check permissions
+        Hooks-->>Tools: Grant / deny / ask user
+        Tools->>Tools: Execute tool (bash, edit, fetch...)
+        Tools-->>Model: Return tool result
+        Note over Model: Cost tracking updated
+    end
+
+    Model->>Render: Stream final response
+    Render->>Screen: Render markdown in terminal
+    Screen->>User: Display formatted output
+    Note over User,Render: Conversation stored in state for /compact and resume
+</pre>
+</div>
+<blockquote>
+  <strong>Key insight:</strong> The Query Engine is the central hub — it assembles context from <code>context/</code>,
+  sends requests through <code>services/</code>, and dispatches tool calls through the permission-gated
+  <code>tools/</code> system. Every tool execution passes through the <code>hooks</code> pipeline for
+  permission checks, cost tracking, and telemetry. The <code>state</code> module persists the full conversation
+  so sessions can be compacted or resumed.
+</blockquote>
+
+<!-- ===== NAVIGATION GUIDE ===== -->
+<h2>Navigation Guide</h2>
+<table style="max-width:700px">
+  <tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+  <tr>
+    <td><strong>0 — Project Hub</strong> (this page)</td>
+    <td>Project overview, architecture, module map, quick stats</td>
+    <td>Getting started, finding the right module</td>
+  </tr>
+  <tr>
+    <td><strong>1 — Module Overview</strong></td>
+    <td>Architecture diagram, key components, sub-module cards</td>
+    <td>Understanding a module's purpose and internal structure</td>
+  </tr>
+  <tr>
+    <td><strong>2 — Sub-Module Deep Dive</strong></td>
+    <td>Source-level types, algorithms, configs, code walkthroughs</td>
+    <td>Implementing, debugging, or extending specific functionality</td>
+  </tr>
+</table>
+
+<!-- ===== DIRECTORY MAP ===== -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">src/ top-level structure</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/
+├── commands/              ← 101 slash commands (/init, /commit, /compact …)
+├── tools/                 ← 42 tool implementations (BashTool, FileEditTool …)
+├── components/            ← 31 React/Ink UI component groups
+├── services/              ← MCP, LSP, OAuth, analytics, compact, rate limits
+├── utils/                 ← 31 utility modules (API, auth, bash, settings …)
+├── hooks/                 ← React hooks (permissions, suggestions, history …)
+├── ink/                   ← Custom terminal UI framework (React reconciler)
+├── bridge/                ← IDE communication (VS Code, JetBrains)
+├── state/                 ← Global state management
+├── context/               ← System/user prompt context assembly
+├── skills/                ← Skill discovery, loading, execution
+├── tasks/                 ← Background task management
+├── keybindings/           ← Keyboard shortcut system
+├── constants/             ← Application-wide constants
+├── types/                 ← Core TypeScript type definitions
+├── entrypoints/           ← Application entry points (CLI, MCP, direct-connect)
+├── memdir/                ← Memory management for long contexts
+├── cli/                   ← CLI argument parsing
+├── query/                 ← Query execution config
+├── vim/                   ← Vim keybinding emulation
+├── migrations/            ← Settings/config data migrations
+├── server/                ← Direct-connect session management
+├── remote/                ← Remote session management
+├── plugins/               ← Plugin management
+├── screens/               ← Modal screens (Doctor, REPL, Resume)
+├── schemas/               ← Validation schemas
+├── bootstrap/             ← Init sequence
+└── coordinator/           ← Multi-agent orchestration
+</code></pre>
+</details>
+
+<!-- ===== BUILD & TECH STACK ===== -->
+<h2>Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>TypeScript</h4>
+    <p>1900+ <code>.ts</code> / <code>.tsx</code> files. Strict mode with comprehensive type definitions.
+    TSX used for React/Ink terminal components.</p>
+  </div>
+  <div class="card">
+    <h4>React / Ink</h4>
+    <p>Terminal UI built on React with a custom Ink renderer. Components use hooks for state,
+    effects, and lifecycle — just like web React, but rendered to ANSI terminal output.</p>
+  </div>
+  <div class="card">
+    <h4>Bun Runtime</h4>
+    <p>Built and executed with Bun for fast startup, native TypeScript support, and efficient
+    bundling. Uses Bun's built-in test runner for the test suite.</p>
+  </div>
+  <div class="card">
+    <h4>MCP Protocol</h4>
+    <p>Model Context Protocol integration for extensibility — connect to external tools, data sources,
+    and services through a standardized JSON-RPC interface.</p>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <a href="search.html">🔍 Search</a> &nbsp;|&nbsp;
+  Claude Code Wiki &nbsp;|&nbsp;
+  Generated 2026-04-01 from <code>src/</code> @ <code>a8a678c</code>
+</div>
+
+</main>
+
+<!-- Diagram zoom overlay -->
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el) {
+  if (!el.getAttribute('data-source')) {
+    el.setAttribute('data-source', el.textContent);
+  }
+});
+
+// Theme toggle
+(function() {
+  var btn = document.getElementById('themeToggle');
+
+  function renderMermaid(t) {
+    var nodes = document.querySelectorAll('pre.mermaid');
+    if (!nodes.length || !window.mermaid) return;
+    nodes.forEach(function(el) {
+      var src = el.getAttribute('data-source');
+      if (src) {
+        el.removeAttribute('data-processed');
+        el.textContent = src;
+      }
+    });
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: (t === 'light') ? 'default' : 'dark',
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+      });
+      mermaid.run();
+    } catch (e) {
+      console.warn('mermaid re-render:', e);
+    }
+  }
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    btn.textContent = (t === 'light') ? '\u2600' : '\u263E';
+    localStorage.setItem('neutra-ip-theme', t);
+    renderMermaid(t);
+  }
+
+  var saved = localStorage.getItem('neutra-ip-theme') ||
+    (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+  applyTheme(saved);
+
+  btn.addEventListener('click', function() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+})();
+
+// Diagram zoom with scroll-wheel support
+(function() {
+  var overlay = document.getElementById('diagramOverlay');
+  var content = document.getElementById('diagramOverlayContent');
+  var scale = 1;
+
+  function resetZoom() {
+    scale = 1;
+    content.style.transform = 'scale(1)';
+  }
+
+  function openOverlay(dc) {
+    content.innerHTML = '';
+    var svg = dc.querySelector('svg');
+    if (svg) {
+      var clone = svg.cloneNode(true);
+      clone.style.maxWidth = '90vw';
+      clone.style.maxHeight = '85vh';
+      clone.style.width = '90vw';
+      content.appendChild(clone);
+    } else {
+      content.innerHTML = dc.innerHTML;
+    }
+    resetZoom();
+    overlay.classList.add('active');
+  }
+
+  document.querySelectorAll('.diagram-container').forEach(function(dc) {
+    dc.addEventListener('click', function() {
+      openOverlay(dc);
+    });
+  });
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      resetZoom();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      overlay.classList.remove('active');
+      resetZoom();
+    }
+  });
+
+  content.addEventListener('wheel', function(e) {
+    if (!overlay.classList.contains('active')) return;
+    e.preventDefault();
+    var d = e.deltaY > 0 ? -0.1 : 0.1;
+    scale = Math.min(5, Math.max(0.5, scale + d));
+    content.style.transform = 'scale(' + scale + ')';
+  }, { passive: false });
+})();
+
+// Back to top
+(function() {
+  var b = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    b.classList.toggle('visible', window.scrollY > 400);
+  });
+  b.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+
+</body>
+</html>

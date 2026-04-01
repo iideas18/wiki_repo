@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridge – IDE Communication Layer | Claude Code Wiki</title>
+    <meta name="description" content="Internal wiki documentation for the Bridge module – IDE Communication Layer in Claude Code.">
+    <meta name="generator" content="claude-code-wiki-gen">
+    <meta name="source-sha" content="a8a678c">
+    <meta name="generated-date" content="2026-04-01">
+
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Print Stylesheet -->
+    <style media="print">
+        .theme-toggle, .back-to-top, .skip-link, .diagram-overlay-btn, .copy-btn { display: none !important; }
+        body { font-size: 11pt; color: #000; background: #fff; }
+        pre { border: 1px solid #ccc; page-break-inside: avoid; }
+        table { page-break-inside: avoid; }
+        h1, h2, h3 { page-break-after: avoid; }
+        a { color: #000; text-decoration: underline; }
+    </style>
+
+    <style>
+        /* ===== neutra-ip-theme: CSS Variables ===== */
+        :root {
+            --bg-primary: #fafaf8;
+            --bg-secondary: #f0efeb;
+            --bg-tertiary: #e8e6e1;
+            --text-primary: #2c2c2c;
+            --text-secondary: #5a5a58;
+            --text-muted: #8a8a86;
+            --accent-primary: #6b8f71;
+            --accent-secondary: #8fbc8f;
+            --accent-tertiary: #3a6b4a;
+            --border-color: #d4d2cc;
+            --border-light: #e8e6e1;
+            --card-bg: #ffffff;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --code-bg: #f5f4f0;
+            --code-border: #d4d2cc;
+            --intro-bg: linear-gradient(135deg, #e8f0e8 0%, #f0f4ee 100%);
+            --intro-border: #6b8f71;
+            --badge-bg: #e8f0e8;
+            --badge-text: #3a6b4a;
+            --table-header-bg: #f0efeb;
+            --table-stripe-bg: #fafaf8;
+            --hub-card-bg: #ffffff;
+            --hub-card-border: #d4d2cc;
+            --hub-card-hover-border: #6b8f71;
+            --reading-time-color: #8a8a86;
+            --focus-ring: 0 0 0 3px rgba(107,143,113,0.4);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-tertiary: #2e2e2e;
+            --text-primary: #e0e0dc;
+            --text-secondary: #a8a8a4;
+            --text-muted: #707070;
+            --accent-primary: #8fbc8f;
+            --accent-secondary: #6b8f71;
+            --accent-tertiary: #a8d8a8;
+            --border-color: #3a3a3a;
+            --border-light: #2e2e2e;
+            --card-bg: #242424;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --code-bg: #2a2a2a;
+            --code-border: #3a3a3a;
+            --intro-bg: linear-gradient(135deg, #1e2e1e 0%, #242e24 100%);
+            --intro-border: #6b8f71;
+            --badge-bg: #2a3a2a;
+            --badge-text: #8fbc8f;
+            --table-header-bg: #2a2a2a;
+            --table-stripe-bg: #1e1e1e;
+            --hub-card-bg: #242424;
+            --hub-card-border: #3a3a3a;
+            --hub-card-hover-border: #8fbc8f;
+            --reading-time-color: #707070;
+        }
+
+        /* ===== Base Reset & Typography ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        a { color: var(--accent-primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent-tertiary); text-decoration: underline; }
+        a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 3px; }
+
+        /* ===== Skip Link ===== */
+        .skip-link {
+            position: absolute; top: -100%; left: 1rem; z-index: 10000;
+            padding: 0.75rem 1.5rem; background: var(--accent-primary); color: #fff;
+            border-radius: 0 0 6px 6px; font-weight: 600;
+            transition: top 0.2s;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* ===== Layout ===== */
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+        /* ===== Breadcrumb ===== */
+        .breadcrumb {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .breadcrumb a { color: var(--text-secondary); }
+        .breadcrumb .separator { color: var(--border-color); }
+
+        /* ===== Header ===== */
+        .module-header { margin-bottom: 2rem; }
+        .module-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-primary); }
+        .module-header .subtitle { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .module-header .description { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; max-width: 760px; }
+        .module-meta {
+            display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 1rem;
+            font-size: 0.8rem; color: var(--text-muted);
+        }
+        .module-meta span { display: flex; align-items: center; gap: 0.35rem; }
+        .reading-time { color: var(--reading-time-color); font-style: italic; }
+
+        /* ===== Badges ===== */
+        .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.25rem 0.7rem; border-radius: 999px;
+            font-size: 0.78rem; font-weight: 500;
+            background: var(--badge-bg); color: var(--badge-text);
+            border: 1px solid var(--border-light);
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle {
+            position: fixed; top: 1rem; right: 1rem; z-index: 1000;
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 1px solid var(--border-color); background: var(--card-bg);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: var(--card-shadow);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .theme-toggle:hover { box-shadow: var(--card-hover-shadow); }
+
+        /* ===== Intro Box ===== */
+        .intro-box {
+            background: var(--intro-bg);
+            border-left: 4px solid var(--intro-border);
+            border-radius: 0 8px 8px 0;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+        }
+        .intro-box .intro-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+        .intro-box p { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; }
+
+        /* ===== Section Headings ===== */
+        h2 {
+            font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem;
+            padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-light);
+        }
+        h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+
+        /* ===== Tables ===== */
+        .table-wrapper { overflow-x: auto; margin: 1rem 0; border-radius: 8px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        thead th {
+            background: var(--table-header-bg); padding: 0.65rem 0.85rem;
+            text-align: left; font-weight: 600; color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color); white-space: nowrap;
+        }
+        tbody td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border-light); }
+        tbody tr:nth-child(even) { background: var(--table-stripe-bg); }
+        tbody tr:hover { background: var(--bg-tertiary); }
+        td code {
+            font-size: 0.82rem; background: var(--code-bg); padding: 0.15rem 0.4rem;
+            border-radius: 4px; border: 1px solid var(--code-border); font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        /* ===== Code Blocks ===== */
+        .code-block-wrapper { position: relative; margin: 1rem 0; }
+        .code-block-wrapper .copy-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            padding: 0.3rem 0.65rem; font-size: 0.75rem;
+            background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; color: var(--text-secondary);
+            transition: background 0.2s, color 0.2s; z-index: 2;
+        }
+        .code-block-wrapper .copy-btn:hover { background: var(--accent-primary); color: #fff; }
+        pre {
+            background: var(--code-bg); border: 1px solid var(--code-border);
+            border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto;
+            font-size: 0.85rem; line-height: 1.6;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+        code { font-family: inherit; }
+
+        /* ===== Mermaid Diagrams ===== */
+        .diagram-container {
+            margin: 1.5rem 0; padding: 1.25rem; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            position: relative; text-align: center;
+        }
+        .diagram-container .diagram-title {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+            margin-bottom: 0.75rem; text-align: left;
+        }
+        .diagram-overlay-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            padding: 0.3rem 0.65rem; font-size: 0.75rem;
+            background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; color: var(--text-secondary);
+        }
+        .diagram-overlay-btn:hover { background: var(--accent-primary); color: #fff; }
+        .diagram-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.85); justify-content: center; align-items: center;
+            padding: 2rem; cursor: zoom-out;
+        }
+        .diagram-overlay.active { display: flex; }
+        .diagram-overlay .mermaid { background: #fff; padding: 2rem; border-radius: 12px; max-width: 95vw; max-height: 95vh; overflow: auto; }
+
+        /* ===== Directory Map ===== */
+        .directory-map {
+            background: var(--code-bg); border: 1px solid var(--code-border);
+            border-radius: 8px; padding: 1rem 1.25rem; font-size: 0.85rem;
+            font-family: 'SFMono-Regular', Consolas, monospace; line-height: 1.8;
+            overflow-x: auto; margin: 1rem 0;
+        }
+
+        /* ===== Deep-Dive Hub ===== */
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+        .hub-card {
+            background: var(--hub-card-bg); border: 1px solid var(--hub-card-border);
+            border-radius: 8px; padding: 1.25rem; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .hub-card:hover { border-color: var(--hub-card-hover-border); box-shadow: var(--card-hover-shadow); }
+        .hub-card .hub-card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+        .hub-card .hub-card-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+        .hub-card .hub-card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        /* ===== Back to Top ===== */
+        .back-to-top {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 900;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent-primary); color: #fff; border: none;
+            cursor: pointer; display: none; align-items: center; justify-content: center;
+            font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .back-to-top.visible { display: flex; }
+        .back-to-top:hover { transform: translateY(-2px); }
+
+        /* ===== Footer ===== */
+        .page-footer {
+            margin-top: 3rem; padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.8rem; color: var(--text-muted);
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .module-header h1 { font-size: 1.5rem; }
+            .hub-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">🌙</button>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
+
+    <div class="container" id="main-content">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../index.html">Claude Code</a>
+            <span class="separator">›</span>
+            <span>Bridge</span>
+        </nav>
+
+        <!-- Module Header -->
+        <header class="module-header">
+            <h1>Bridge</h1>
+            <div class="subtitle">IDE Communication Layer</div>
+            <p class="description">
+                31 files providing bidirectional communication between Claude Code CLI and IDEs (VS Code, JetBrains).
+                Implements WebSocket-based message passing, selection tracking, file synchronization, diagnostics relay,
+                and terminal management.
+            </p>
+            <div class="module-meta">
+                <span>📁 31 files</span>
+                <span>📂 0 sub-directories</span>
+                <span>🏷️ TypeScript</span>
+                <span>🔖 <code>a8a678c</code></span>
+                <span class="reading-time">~8 min read</span>
+            </div>
+            <div class="badge-row">
+                <span class="badge">🔵 WebSocket</span>
+                <span class="badge">🟢 VS Code</span>
+                <span class="badge">🟡 JetBrains</span>
+                <span class="badge">🔴 Bidirectional</span>
+            </div>
+        </header>
+
+        <!-- Intro Box -->
+        <div class="intro-box">
+            <div class="intro-title">💡 Think of it like a Diplomatic Embassy</div>
+            <p>
+                The Bridge module acts like an embassy between two sovereign systems — the Claude Code CLI
+                and IDE extensions. Just as an embassy translates diplomatic messages between countries with
+                different languages and protocols, the Bridge translates commands, selections, edits, and
+                diagnostics between Claude's internal representation and the IDE's native APIs. WebSocket
+                connections serve as the secure communication channels, while typed message handlers act as
+                specialized attachés handling specific diplomatic portfolios: text selections, file changes,
+                terminal commands, and diagnostic reports.
+            </p>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <h2 id="architecture">Architecture Overview</h2>
+
+        <div class="diagram-container">
+            <div class="diagram-title">Figure 1 — Bridge Communication Architecture</div>
+            <button class="diagram-overlay-btn" onclick="openOverlay('diagram1')">⛶ Expand</button>
+            <div class="mermaid" id="diagram1">
+graph LR
+    subgraph CLI["Claude Code CLI"]
+        A[Command Processor]
+        B[Edit Engine]
+        C[Diagnostics Reader]
+    end
+
+    subgraph Bridge["WebSocket Bridge"]
+        D[Bridge Manager]
+        E[Message Router]
+        F[Selection Tracker]
+        G[File Sync Handler]
+        H[Diagnostics Relay]
+        I[Terminal Manager]
+    end
+
+    subgraph IDE["IDE Extension"]
+        J[VS Code Extension]
+        K[JetBrains Plugin]
+        L[Editor API]
+    end
+
+    A -->|"commands"| D
+    B -->|"edit ops"| D
+    C -->|"diag queries"| D
+    D -->|"route"| E
+    E --> F
+    E --> G
+    E --> H
+    E --> I
+    F -->|"selection events"| L
+    G -->|"file changes"| L
+    H -->|"diagnostics"| L
+    I -->|"terminal I/O"| L
+    L --> J
+    L --> K
+    J -->|"IDE events"| D
+    K -->|"IDE events"| D
+            </div>
+        </div>
+
+        <!-- Sequence Diagram -->
+        <div class="diagram-container">
+            <div class="diagram-title">Figure 2 — Selection-to-Edit Round Trip</div>
+            <button class="diagram-overlay-btn" onclick="openOverlay('diagram2')">⛶ Expand</button>
+            <div class="mermaid" id="diagram2">
+sequenceDiagram
+    participant IDE as IDE Extension
+    participant WS as WebSocket Bridge
+    participant Router as Message Router
+    participant Claude as Claude Processor
+    participant Edit as Edit Engine
+
+    IDE->>WS: selection.changed {file, range, text}
+    WS->>Router: route(selection.changed)
+    Router->>Claude: updateContext(selection)
+    Claude->>Claude: Process with selection context
+    Claude->>Edit: generateEdit(file, changes)
+    Edit->>Router: edit.apply {file, patches}
+    Router->>WS: send(edit.apply)
+    WS->>IDE: applyEdit(patches)
+    IDE-->>WS: edit.applied {success: true}
+    WS-->>Router: ack(edit.applied)
+            </div>
+        </div>
+
+        <!-- Key Components Table -->
+        <h2 id="components">Key Components</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File / Component</th>
+                        <th>Responsibility</th>
+                        <th>Key Exports</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>bridge_manager.ts</code></td>
+                        <td>Central orchestrator managing WebSocket server lifecycle and connection pooling</td>
+                        <td><code>BridgeManager</code>, <code>createBridge()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>message_router.ts</code></td>
+                        <td>Routes incoming messages to appropriate handlers based on message type</td>
+                        <td><code>MessageRouter</code>, <code>registerHandler()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>selection_tracker.ts</code></td>
+                        <td>Tracks and caches current IDE text selections for context enrichment</td>
+                        <td><code>SelectionTracker</code>, <code>getSelection()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>file_sync.ts</code></td>
+                        <td>Synchronizes file contents bidirectionally between CLI working tree and IDE buffers</td>
+                        <td><code>FileSync</code>, <code>syncFile()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>diagnostics_relay.ts</code></td>
+                        <td>Relays IDE diagnostics (errors, warnings) to Claude for context-aware responses</td>
+                        <td><code>DiagnosticsRelay</code>, <code>getDiagnostics()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>terminal_manager.ts</code></td>
+                        <td>Manages IDE terminal instances for command execution and output capture</td>
+                        <td><code>TerminalManager</code>, <code>runInTerminal()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>vscode_adapter.ts</code></td>
+                        <td>VS Code-specific adapter translating generic bridge messages to VS Code API calls</td>
+                        <td><code>VSCodeAdapter</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>jetbrains_adapter.ts</code></td>
+                        <td>JetBrains-specific adapter for IntelliJ, WebStorm, and other JetBrains IDEs</td>
+                        <td><code>JetBrainsAdapter</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>protocol.ts</code></td>
+                        <td>Defines the typed message protocol (message types, payloads, response schemas)</td>
+                        <td><code>BridgeMessage</code>, <code>MessageType</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>connection_pool.ts</code></td>
+                        <td>Manages multiple concurrent IDE connections with heartbeat and reconnection</td>
+                        <td><code>ConnectionPool</code>, <code>getConnection()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>auth_handshake.ts</code></td>
+                        <td>Authenticates IDE extensions during WebSocket handshake using shared secrets</td>
+                        <td><code>AuthHandshake</code>, <code>validateToken()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>edit_applier.ts</code></td>
+                        <td>Applies text edits in the IDE using operational transforms for conflict resolution</td>
+                        <td><code>EditApplier</code>, <code>applyEdits()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Directory Map -->
+        <h2 id="directory-map">Directory Map</h2>
+
+        <div class="directory-map">
+src/bridge/
+├── bridge_manager.ts          # Central bridge orchestrator
+├── message_router.ts          # Message type routing
+├── protocol.ts                # Message type definitions
+├── connection_pool.ts         # Multi-connection management
+├── auth_handshake.ts          # Extension authentication
+├── selection_tracker.ts       # IDE selection tracking
+├── file_sync.ts               # Bidirectional file sync
+├── diagnostics_relay.ts       # IDE diagnostics relay
+├── terminal_manager.ts        # Terminal session management
+├── edit_applier.ts            # Edit application with OT
+├── vscode_adapter.ts          # VS Code specific adapter
+├── jetbrains_adapter.ts       # JetBrains specific adapter
+├── workspace_watcher.ts       # Workspace file change watcher
+├── cursor_tracker.ts          # Cursor position tracking
+├── hover_provider.ts          # Hover information relay
+├── completion_bridge.ts       # Completion suggestion bridge
+├── status_bar.ts              # IDE status bar updates
+├── notification_sender.ts     # IDE notification relay
+├── progress_reporter.ts       # Progress indication relay
+├── quick_pick_bridge.ts       # Quick-pick dialog bridge
+├── input_box_bridge.ts        # Input dialog bridge
+├── webview_bridge.ts          # Webview panel communication
+├── tree_view_bridge.ts        # Tree view data provider
+├── debug_adapter.ts           # Debug session bridge
+├── task_provider.ts           # IDE task system bridge
+├── test_adapter.ts            # Test runner bridge
+├── scm_bridge.ts              # Source control bridge
+├── output_channel.ts          # Output channel manager
+├── config_sync.ts             # Settings synchronization
+├── extension_api.ts           # Public extension API surface
+└── index.ts                   # Module barrel export
+        </div>
+
+        <!-- Configuration Table -->
+        <h2 id="configuration">Configuration</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>bridge.port</code></td>
+                        <td><code>number</code></td>
+                        <td><code>0</code> (auto)</td>
+                        <td>WebSocket server port; 0 selects an available port automatically</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.host</code></td>
+                        <td><code>string</code></td>
+                        <td><code>"127.0.0.1"</code></td>
+                        <td>Bind address for WebSocket server (localhost only for security)</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.reconnectInterval</code></td>
+                        <td><code>number</code></td>
+                        <td><code>3000</code></td>
+                        <td>Milliseconds between reconnection attempts after disconnect</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.heartbeatInterval</code></td>
+                        <td><code>number</code></td>
+                        <td><code>15000</code></td>
+                        <td>Milliseconds between WebSocket ping/pong heartbeat cycles</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.maxConnections</code></td>
+                        <td><code>number</code></td>
+                        <td><code>4</code></td>
+                        <td>Maximum simultaneous IDE connections</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.authSecret</code></td>
+                        <td><code>string</code></td>
+                        <td>(generated)</td>
+                        <td>Shared secret used during WebSocket handshake authentication</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.enableDiagnostics</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Whether to relay IDE diagnostics to Claude's context</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.enableFileSync</code></td>
+                        <td><code>boolean</code></td>
+                        <td><code>true</code></td>
+                        <td>Enable bidirectional file content synchronization</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.syncDebounceMs</code></td>
+                        <td><code>number</code></td>
+                        <td><code>250</code></td>
+                        <td>Debounce delay for file sync events to batch rapid changes</td>
+                    </tr>
+                    <tr>
+                        <td><code>bridge.logLevel</code></td>
+                        <td><code>string</code></td>
+                        <td><code>"warn"</code></td>
+                        <td>Logging verbosity: "debug", "info", "warn", "error"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Code Examples -->
+        <h2 id="code-examples">Code Examples</h2>
+
+        <h3>Initializing the Bridge</h3>
+        <div class="code-block-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-typescript">import { BridgeManager } from './bridge_manager';
+import { MessageRouter } from './message_router';
+import { SelectionTracker } from './selection_tracker';
+import { DiagnosticsRelay } from './diagnostics_relay';
+
+// Create and configure the bridge
+const router = new MessageRouter();
+const bridge = new BridgeManager({
+  port: 0,               // auto-select port
+  host: '127.0.0.1',
+  heartbeatInterval: 15000,
+  maxConnections: 4,
+});
+
+// Register handlers
+router.registerHandler('selection.changed', SelectionTracker.handleSelectionChange);
+router.registerHandler('diagnostics.updated', DiagnosticsRelay.handleDiagnosticsUpdate);
+
+// Start the bridge server
+await bridge.start(router);
+console.log(`Bridge listening on port ${bridge.port}`);</code></pre>
+        </div>
+
+        <h3>Sending an Edit to the IDE</h3>
+        <div class="code-block-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-typescript">import { BridgeMessage, MessageType } from './protocol';
+import type { EditPayload } from './protocol';
+
+// Construct a typed edit message
+const editMessage: BridgeMessage&lt;EditPayload&gt; = {
+  type: MessageType.EditApply,
+  id: crypto.randomUUID(),
+  payload: {
+    file: '/workspace/src/index.ts',
+    patches: [
+      {
+        range: { startLine: 10, startCol: 0, endLine: 10, endCol: 25 },
+        newText: 'const result = await compute();',
+      },
+    ],
+  },
+};
+
+// Send through the bridge and await acknowledgment
+const response = await bridge.send(editMessage);
+if (response.payload.success) {
+  console.log('Edit applied successfully in IDE');
+}</code></pre>
+        </div>
+
+        <!-- Deep-Dive Hub -->
+        <h2 id="deep-dive">Deep-Dive Topics</h2>
+        <p>Explore focused documentation on key subsystems within the Bridge module.</p>
+
+        <div class="hub-grid">
+            <div class="hub-card">
+                <div class="hub-card-title">📡 Bridge Protocol</div>
+                <div class="hub-card-desc">
+                    Deep dive into the typed message protocol including all message types,
+                    payload schemas, error handling, and versioning strategy. Covers the
+                    WebSocket frame format, handshake flow, and binary vs. JSON encoding decisions.
+                </div>
+                <div class="hub-card-meta">Covers: protocol.ts, auth_handshake.ts, connection_pool.ts</div>
+            </div>
+            <div class="hub-card">
+                <div class="hub-card-title">🖥️ IDE Integration</div>
+                <div class="hub-card-desc">
+                    Detailed walkthrough of VS Code and JetBrains adapter implementations.
+                    How each IDE's extension API is mapped to generic bridge operations,
+                    platform-specific quirks, and testing strategies for cross-IDE compatibility.
+                </div>
+                <div class="hub-card-meta">Covers: vscode_adapter.ts, jetbrains_adapter.ts, extension_api.ts</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <span>Generated on 2026-04-01 from <code>a8a678c</code></span>
+            <span>Claude Code Internal Wiki</span>
+        </footer>
+    </div>
+
+    <!-- Diagram Overlay -->
+    <div class="diagram-overlay" id="diagramOverlay" onclick="closeOverlay()">
+        <div class="mermaid" id="overlayContent" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- Mermaid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/typescript.min.js"></script>
+
+    <script>
+        // ===== Mermaid Init =====
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+            flowchart: { useMaxWidth: true, htmlLabels: true },
+            sequence: { useMaxWidth: true },
+        });
+
+        // ===== Highlight.js Init =====
+        hljs.highlightAll();
+
+        // ===== Theme Toggle =====
+        const themeToggle = document.getElementById('themeToggle');
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('wiki-theme', theme);
+        }
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+        const savedTheme = localStorage.getItem('wiki-theme');
+        if (savedTheme) setTheme(savedTheme);
+
+        // ===== Back to Top =====
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 400);
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ===== Copy Code =====
+        function copyCode(btn) {
+            const code = btn.parentElement.querySelector('code');
+            navigator.clipboard.writeText(code.textContent).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            });
+        }
+
+        // ===== Diagram Overlay =====
+        function openOverlay(diagramId) {
+            const source = document.getElementById(diagramId);
+            const overlay = document.getElementById('diagramOverlay');
+            const content = document.getElementById('overlayContent');
+            content.innerHTML = source.innerHTML;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeOverlay() {
+            document.getElementById('diagramOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeOverlay();
+        });
+
+        // ===== J/K Keyboard Navigation =====
+        const headings = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'j' || e.key === 'k') {
+                const scrollY = window.scrollY + 100;
+                let currentIndex = -1;
+                for (let i = 0; i < headings.length; i++) {
+                    if (headings[i].offsetTop <= scrollY) currentIndex = i;
+                }
+                if (e.key === 'j' && currentIndex < headings.length - 1) {
+                    headings[currentIndex + 1].scrollIntoView({ behavior: 'smooth' });
+                } else if (e.key === 'k' && currentIndex > 0) {
+                    headings[currentIndex - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

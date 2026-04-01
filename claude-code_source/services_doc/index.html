@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services — Backend Service Layer | Claude Code Wiki</title>
+  <meta name="description" content="L1 overview of the Services module — 20+ background service modules powering Claude Code infrastructure." />
+  <meta name="generator" content="module-docs / neutra-ip-theme" />
+  <meta name="source-sha" content="a8a678c" />
+  <meta name="source-date" content="2026-04-01" />
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    /* ===== neutra-ip-theme — colour tokens ===== */
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #1c2028;
+      --bg-card: #1a1f27;
+      --bg-card-hover: #22272e;
+      --bg-code: #1c2028;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-primary: #7c8daa;
+      --accent-secondary: #6b7d99;
+      --accent-tertiary: #93a1b5;
+      --border-primary: #30363d;
+      --border-secondary: #21262d;
+      --border-accent: #4a5568;
+      --badge-blue: #1f3a5f;
+      --badge-blue-text: #79b8ff;
+      --badge-green: #1a3a2a;
+      --badge-green-text: #7ee787;
+      --badge-yellow: #3a3520;
+      --badge-yellow-text: #f0d060;
+      --badge-red: #3a1a1a;
+      --badge-red-text: #f08080;
+      --shadow-card: 0 1px 4px rgba(0,0,0,.35);
+      --shadow-card-hover: 0 4px 14px rgba(0,0,0,.45);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: .22s ease;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f6f8fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #eef1f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f0f3f7;
+      --bg-code: #eef1f5;
+      --text-primary: #1f2328;
+      --text-secondary: #57606a;
+      --text-muted: #8b949e;
+      --accent-primary: #5a6a80;
+      --accent-secondary: #4a5a70;
+      --accent-tertiary: #6b7d99;
+      --border-primary: #d0d7de;
+      --border-secondary: #e1e4e8;
+      --border-accent: #8b949e;
+      --badge-blue: #ddf4ff;
+      --badge-blue-text: #0969da;
+      --badge-green: #dafbe1;
+      --badge-green-text: #1a7f37;
+      --badge-yellow: #fff8c5;
+      --badge-yellow-text: #9a6700;
+      --badge-red: #ffebe9;
+      --badge-red-text: #cf222e;
+      --shadow-card: 0 1px 3px rgba(0,0,0,.10);
+      --shadow-card-hover: 0 4px 12px rgba(0,0,0,.14);
+    }
+
+    /* ===== Reset & base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--accent-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; color: var(--accent-tertiary); }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.88em;
+    }
+    pre {
+      background: var(--bg-code);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    code {
+      background: var(--bg-code);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+    }
+
+    /* ===== Layout ===== */
+    .page-wrapper {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ===== Top bar ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .breadcrumb a { color: var(--text-muted); }
+    .breadcrumb .sep { margin: 0 0.4rem; color: var(--text-muted); }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 20px;
+      padding: 0.35rem 0.9rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .theme-toggle:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-tertiary);
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .hero .description {
+      color: var(--text-secondary);
+      max-width: 82ch;
+      line-height: 1.7;
+    }
+
+    /* Meta strip */
+    .meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+    }
+    .meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    /* Badges */
+    .badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-blue   { background: var(--badge-blue);   color: var(--badge-blue-text); }
+    .badge-green  { background: var(--badge-green);  color: var(--badge-green-text); }
+    .badge-yellow { background: var(--badge-yellow); color: var(--badge-yellow-text); }
+    .badge-red    { background: var(--badge-red);    color: var(--badge-red-text); }
+
+    /* ===== Section ===== */
+    .section {
+      margin-bottom: 2.5rem;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 650;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .section-intro {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+
+    /* ===== Mermaid container ===== */
+    .mermaid-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+    .mermaid-container .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ===== Cards grid ===== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: box-shadow var(--transition), border-color var(--transition), background var(--transition);
+      box-shadow: var(--shadow-card);
+    }
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-card-hover);
+    }
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .card .card-badge {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      border: 1px solid var(--border-secondary);
+    }
+
+    /* ===== Table ===== */
+    .data-table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .data-table th,
+    .data-table td {
+      text-align: left;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    .data-table th {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--bg-card-hover); }
+    .data-table code { font-size: 0.82rem; }
+
+    /* ===== Walkthrough ===== */
+    .walkthrough {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+    .walkthrough-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .walk-steps {
+      list-style: none;
+      counter-reset: walk-step;
+    }
+    .walk-steps li {
+      counter-increment: walk-step;
+      position: relative;
+      padding-left: 2.8rem;
+      padding-bottom: 1.2rem;
+      border-left: 2px solid var(--border-primary);
+      margin-left: 0.85rem;
+    }
+    .walk-steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .walk-steps li::before {
+      content: counter(walk-step);
+      position: absolute;
+      left: -0.7rem;
+      top: 0;
+      width: 1.4rem;
+      height: 1.4rem;
+      background: var(--accent-primary);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .walk-steps li strong { color: var(--text-primary); }
+    .walk-steps li span { color: var(--text-secondary); font-size: 0.9rem; }
+
+    /* ===== Deep-dive hub ===== */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .hub-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: box-shadow var(--transition), border-color var(--transition);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .hub-card:hover {
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-card-hover);
+      text-decoration: none;
+    }
+    .hub-card .hub-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .hub-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .hub-card p { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ===== Directory map ===== */
+    .dir-map {
+      background: var(--bg-code);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      color: var(--text-secondary);
+    }
+    .dir-map .dir  { color: var(--accent-primary); font-weight: 600; }
+    .dir-map .file { color: var(--text-secondary); }
+    .dir-map .comment { color: var(--text-muted); font-style: italic; }
+
+    /* ===== Config table ===== */
+    .config-table th:first-child,
+    .config-table td:first-child { white-space: nowrap; }
+
+    /* ===== Footer ===== */
+    .page-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-secondary);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 640px) {
+      .page-wrapper { padding: 1rem; }
+      .hero { padding: 1.5rem 1.25rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .card-grid { grid-template-columns: 1fr; }
+      .hub-grid  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- ===== Top Bar ===== -->
+    <div class="top-bar">
+      <nav class="breadcrumb">
+        <a href="../index.html">Claude Code</a>
+        <span class="sep">›</span>
+        <strong>Services</strong>
+      </nav>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="theme-icon">🌓</span> Toggle theme
+      </button>
+    </div>
+
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+      <h1>Services</h1>
+      <div class="subtitle">Backend Service Layer</div>
+      <p class="description">
+        The services module provides 20+ background service modules that power Claude Code's
+        infrastructure. This includes MCP (Model Context Protocol) server management, LSP
+        integration, OAuth authentication, analytics/telemetry, session memory compaction, rate
+        limiting, plugin management, voice input, and diagnostic tracking. Services run
+        independently of the UI layer and provide data/functionality to commands and components.
+      </p>
+
+      <div class="meta-strip">
+        <span class="meta-tag">📂 <strong>src/services/</strong></span>
+        <span class="meta-tag">🏷️ TypeScript</span>
+        <span class="meta-tag">📊 130 files</span>
+        <span class="meta-tag">🧩 20 service modules</span>
+        <span class="meta-tag">🔖 Git SHA: <code>a8a678c</code></span>
+        <span class="meta-tag">📅 2026-04-01</span>
+      </div>
+
+      <div class="badge-strip">
+        <span class="badge badge-blue">🔵 MCP Protocol</span>
+        <span class="badge badge-green">🟢 LSP Integration</span>
+        <span class="badge badge-yellow">🟡 OAuth / Auth</span>
+        <span class="badge badge-red">🔴 Analytics</span>
+      </div>
+    </section>
+
+    <!-- ===== Architecture Diagram ===== -->
+    <section class="section">
+      <h2 class="section-title">🏗️ Architecture Overview</h2>
+      <p class="section-intro">
+        The services module is organised into seven functional clusters. Protocol services
+        handle external tool &amp; language-server communication; Intelligence services manage
+        memory and summarisation; Monitoring captures events and diagnostics; and Control
+        services enforce policies and sync settings across instances.
+      </p>
+      <div class="mermaid-container">
+        <pre class="mermaid">
+flowchart LR
+    subgraph Protocol["Protocol Services"]
+        MCP["mcp/"]
+        LSP["lsp/"]
+    end
+
+    subgraph Auth["Auth &amp; Identity"]
+        OAuth["oauth/"]
+    end
+
+    subgraph Intelligence["Intelligence"]
+        Compact["compact/"]
+        ExtMem["extractMemories/"]
+        AgentSum["AgentSummary/"]
+        PromptSug["PromptSuggestion/"]
+    end
+
+    subgraph Monitoring["Monitoring"]
+        Analytics["analytics/"]
+        DiagTrack["diagnosticTracking.ts"]
+        IntLog["internalLogging.ts"]
+    end
+
+    subgraph Data["Data"]
+        SessMem["SessionMemory/"]
+        MagicDocs["MagicDocs/"]
+        Tips["tips/"]
+    end
+
+    subgraph Control["Control"]
+        PolicyLim["policyLimits/"]
+        RemoteSet["remoteManagedSettings/"]
+        SetSync["settingsSync/"]
+        TeamSync["teamMemorySync/"]
+    end
+
+    subgraph Runtime["Runtime"]
+        Plugins["plugins/"]
+        Tools["tools/"]
+        Voice["voice.ts"]
+        Sleep["preventSleep.ts"]
+        Notifier["notifier.ts"]
+    end
+
+    Protocol --> Intelligence
+    Protocol --> Monitoring
+    Auth --> Protocol
+    Intelligence --> Data
+    Control --> Intelligence
+    Runtime --> Protocol
+    Runtime --> Monitoring
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===== Data Flow Diagram ===== -->
+    <section class="section">
+      <h2 class="section-title">🔄 Data Flow</h2>
+      <p class="section-intro">
+        A typical request flows through protocol services, gathers intelligence, logs telemetry,
+        and cycles back through authentication and memory optimisation layers.
+      </p>
+      <div class="mermaid-container">
+        <pre class="mermaid">
+sequenceDiagram
+    participant QE as Query Engine
+    participant MCP as MCP Server
+    participant LSP as LSP Service
+    participant AN as Analytics
+    participant OA as OAuth
+    participant CO as Compact
+
+    QE->>MCP: tool call request
+    MCP->>LSP: code intelligence lookup
+    LSP-->>MCP: symbols &amp; references
+    MCP-->>QE: tool result
+    QE->>AN: log event
+    AN->>OA: token refresh (if expired)
+    OA-->>AN: fresh token
+    AN->>CO: memory optimization pass
+    CO-->>AN: compacted context
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===== Narrated Walkthrough ===== -->
+    <section class="section">
+      <h2 class="section-title">🚶 Walkthrough — Trace an MCP Tool Invocation</h2>
+      <p class="section-intro">
+        Follow a single MCP tool call from user configuration to final display, touching
+        permission checks, server communication, analytics, and token accounting.
+      </p>
+      <div class="walkthrough">
+        <ol class="walk-steps">
+          <li>
+            <strong>User configures MCP server in settings</strong><br />
+            <span>Server endpoint, authentication, and capability metadata are persisted to the local configuration store.</span>
+          </li>
+          <li>
+            <strong>MCP service discovers and connects to server</strong><br />
+            <span>The <code>mcp/</code> module reads config, opens a transport channel, and performs the MCP handshake.</span>
+          </li>
+          <li>
+            <strong>Server capabilities registered as available tools</strong><br />
+            <span>Returned tool schemas are normalised and merged into the global tool registry.</span>
+          </li>
+          <li>
+            <strong>Model requests MCP tool execution</strong><br />
+            <span>During inference, the model emits a <code>tool_use</code> block targeting a registered MCP tool.</span>
+          </li>
+          <li>
+            <strong>Permission check against MCP server approval rules</strong><br />
+            <span>The request is evaluated against server-level and tool-level approval policies.</span>
+          </li>
+          <li>
+            <strong>Tool call forwarded to MCP server process</strong><br />
+            <span>Serialised arguments are sent over the transport; the server executes the operation.</span>
+          </li>
+          <li>
+            <strong>Response received and formatted</strong><br />
+            <span>The raw response is deserialised, validated, and transformed into the internal result format.</span>
+          </li>
+          <li>
+            <strong>Analytics event logged</strong><br />
+            <span><code>analytics/</code> records the tool call, latency, and outcome for telemetry.</span>
+          </li>
+          <li>
+            <strong>Token usage tracked</strong><br />
+            <span><code>tokenEstimation.ts</code> accounts for input/output tokens consumed by the tool call.</span>
+          </li>
+          <li>
+            <strong>Result displayed in UI</strong><br />
+            <span>The formatted result is handed to the rendering pipeline and shown to the user.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Key Components Table ===== -->
+    <section class="section">
+      <h2 class="section-title">📋 Key Components</h2>
+      <p class="section-intro">
+        Reference table of every major service module, its primary responsibility, and
+        architectural cluster.
+      </p>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>Description</th>
+              <th>Cluster</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mcp/</code></td>
+              <td>MCP server management, tool routing, and resource access</td>
+              <td>Protocol</td>
+            </tr>
+            <tr>
+              <td><code>lsp/</code></td>
+              <td>Language Server Protocol integration for code intelligence</td>
+              <td>Protocol</td>
+            </tr>
+            <tr>
+              <td><code>oauth/</code></td>
+              <td>OAuth authentication flows and token lifecycle</td>
+              <td>Auth &amp; Identity</td>
+            </tr>
+            <tr>
+              <td><code>analytics/</code></td>
+              <td>Event logging, GrowthBook feature flags, telemetry sinks</td>
+              <td>Monitoring</td>
+            </tr>
+            <tr>
+              <td><code>compact/</code></td>
+              <td>Session memory compaction algorithms</td>
+              <td>Intelligence</td>
+            </tr>
+            <tr>
+              <td><code>extractMemories/</code></td>
+              <td>Memory extraction and distillation from conversations</td>
+              <td>Intelligence</td>
+            </tr>
+            <tr>
+              <td><code>AgentSummary/</code></td>
+              <td>Agent execution summaries and run reporting</td>
+              <td>Intelligence</td>
+            </tr>
+            <tr>
+              <td><code>PromptSuggestion/</code></td>
+              <td>Contextual prompt suggestions for the user</td>
+              <td>Intelligence</td>
+            </tr>
+            <tr>
+              <td><code>SessionMemory/</code></td>
+              <td>Session memory management and persistence</td>
+              <td>Data</td>
+            </tr>
+            <tr>
+              <td><code>MagicDocs/</code></td>
+              <td>Automated documentation generation from source</td>
+              <td>Data</td>
+            </tr>
+            <tr>
+              <td><code>policyLimits/</code></td>
+              <td>Rate limiting policies and quota enforcement</td>
+              <td>Control</td>
+            </tr>
+            <tr>
+              <td><code>remoteManagedSettings/</code></td>
+              <td>Enterprise-managed settings pushed from backend</td>
+              <td>Control</td>
+            </tr>
+            <tr>
+              <td><code>settingsSync/</code></td>
+              <td>Cross-device settings synchronisation</td>
+              <td>Control</td>
+            </tr>
+            <tr>
+              <td><code>teamMemorySync/</code></td>
+              <td>Team-wide shared memory synchronisation</td>
+              <td>Control</td>
+            </tr>
+            <tr>
+              <td><code>plugins/</code></td>
+              <td>Plugin discovery, lifecycle management, sandboxing</td>
+              <td>Runtime</td>
+            </tr>
+            <tr>
+              <td><code>tips/</code></td>
+              <td>Contextual usage tips and onboarding hints</td>
+              <td>Data</td>
+            </tr>
+            <tr>
+              <td><code>tools/</code></td>
+              <td>Service-level tool utilities and helpers</td>
+              <td>Runtime</td>
+            </tr>
+            <tr>
+              <td><code>autoDream/</code></td>
+              <td>Background auto-dream processing and generation</td>
+              <td>Intelligence</td>
+            </tr>
+            <tr>
+              <td><code>voice.ts</code></td>
+              <td>Voice input capture and speech-to-text integration</td>
+              <td>Runtime</td>
+            </tr>
+            <tr>
+              <td><code>tokenEstimation.ts</code></td>
+              <td>Token count estimation for context budgeting</td>
+              <td>Runtime</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Sub-Module Cards ===== -->
+    <section class="section">
+      <h2 class="section-title">🧩 Sub-Module Cards</h2>
+      <p class="section-intro">
+        Quick-access cards for the most critical sub-modules. Click through for the L2
+        deep-dive documentation when available.
+      </p>
+      <div class="card-grid">
+
+        <div class="card">
+          <div class="card-icon">🔌</div>
+          <h3>mcp/</h3>
+          <p>
+            Model Context Protocol server management — discovery, handshake, tool routing,
+            resource access, and permission enforcement.
+          </p>
+          <span class="card-badge">Protocol · Core</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3>lsp/</h3>
+          <p>
+            Language Server Protocol client — symbol resolution, go-to-definition, diagnostics,
+            and code-action integration.
+          </p>
+          <span class="card-badge">Protocol · Code Intel</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🔑</div>
+          <h3>oauth/</h3>
+          <p>
+            OAuth 2.0 / PKCE authentication flows, token refresh, and credential storage for
+            service-to-service auth.
+          </p>
+          <span class="card-badge">Auth · Security</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>analytics/</h3>
+          <p>
+            Telemetry pipeline — event logging, GrowthBook feature-flag evaluation, and
+            configurable analytics sinks.
+          </p>
+          <span class="card-badge">Monitoring · Telemetry</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🗜️</div>
+          <h3>compact/</h3>
+          <p>
+            Session memory compaction — pruning, summarising, and re-ranking context to stay
+            within token budgets.
+          </p>
+          <span class="card-badge">Intelligence · Memory</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <h3>extractMemories/</h3>
+          <p>
+            Extracts reusable knowledge from conversations and persists it to the memory store
+            for future sessions.
+          </p>
+          <span class="card-badge">Intelligence · Memory</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧩</div>
+          <h3>plugins/</h3>
+          <p>
+            Plugin lifecycle — discovery, installation, sandboxed execution, and capability
+            registration.
+          </p>
+          <span class="card-badge">Runtime · Extensibility</span>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🚦</div>
+          <h3>policyLimits/</h3>
+          <p>
+            Rate limiting and quota enforcement — per-user, per-org, and per-model policy
+            evaluation.
+          </p>
+          <span class="card-badge">Control · Governance</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== Deep-Dive Hub ===== -->
+    <section class="section">
+      <h2 class="section-title">🔬 Deep-Dive Hub</h2>
+      <p class="section-intro">
+        Curated deep-dive pages for the most complex service subsystems. Each page provides
+        implementation detail, algorithm walkthroughs, and integration guidance.
+      </p>
+      <div class="hub-grid">
+
+        <a class="hub-card" href="mcp_protocol.html">
+          <div class="hub-icon">🔌</div>
+          <div>
+            <h3>MCP Protocol Integration</h3>
+            <p>
+              Transport layer, handshake protocol, tool schema normalisation, permission model,
+              and multi-server orchestration.
+            </p>
+          </div>
+        </a>
+
+        <a class="hub-card" href="compact_engine.html">
+          <div class="hub-icon">🗜️</div>
+          <div>
+            <h3>Memory Compaction Engine</h3>
+            <p>
+              Compaction strategies, scoring heuristics, incremental summarisation, and
+              token-budget allocation algorithms.
+            </p>
+          </div>
+        </a>
+
+        <a class="hub-card" href="oauth_flow.html">
+          <div class="hub-icon">🔑</div>
+          <div>
+            <h3>OAuth Authentication Flow</h3>
+            <p>
+              PKCE code exchange, token refresh lifecycle, secure credential storage, and
+              enterprise SSO integration.
+            </p>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ===== Directory Map ===== -->
+    <section class="section">
+      <h2 class="section-title">📁 Directory Map</h2>
+      <p class="section-intro">
+        Full tree of <code>src/services/</code> showing every sub-module and standalone file.
+      </p>
+      <div class="dir-map">
+<span class="dir">src/services/</span>
+├── <span class="dir">mcp/</span>                          <span class="comment"># MCP server management &amp; tool routing</span>
+│   ├── client.ts
+│   ├── discovery.ts
+│   ├── permissions.ts
+│   ├── router.ts
+│   ├── schema.ts
+│   ├── transport.ts
+│   └── types.ts
+├── <span class="dir">lsp/</span>                          <span class="comment"># Language Server Protocol integration</span>
+│   ├── client.ts
+│   ├── diagnostics.ts
+│   ├── symbols.ts
+│   └── types.ts
+├── <span class="dir">oauth/</span>                        <span class="comment"># OAuth authentication flows</span>
+│   ├── flow.ts
+│   ├── pkce.ts
+│   ├── store.ts
+│   └── types.ts
+├── <span class="dir">analytics/</span>                    <span class="comment"># Telemetry &amp; feature flags</span>
+│   ├── events.ts
+│   ├── growthbook.ts
+│   ├── sinks.ts
+│   └── types.ts
+├── <span class="dir">compact/</span>                      <span class="comment"># Session memory compaction</span>
+│   ├── compactor.ts
+│   ├── scoring.ts
+│   ├── strategies.ts
+│   └── types.ts
+├── <span class="dir">extractMemories/</span>              <span class="comment"># Memory extraction pipeline</span>
+│   ├── extractor.ts
+│   ├── filters.ts
+│   └── types.ts
+├── <span class="dir">AgentSummary/</span>                 <span class="comment"># Agent run summaries</span>
+│   ├── generator.ts
+│   └── types.ts
+├── <span class="dir">PromptSuggestion/</span>             <span class="comment"># Contextual prompt suggestions</span>
+│   ├── engine.ts
+│   └── types.ts
+├── <span class="dir">SessionMemory/</span>                <span class="comment"># Session memory persistence</span>
+│   ├── manager.ts
+│   ├── store.ts
+│   └── types.ts
+├── <span class="dir">MagicDocs/</span>                    <span class="comment"># Documentation generation</span>
+│   ├── generator.ts
+│   └── types.ts
+├── <span class="dir">policyLimits/</span>                 <span class="comment"># Rate limiting &amp; quotas</span>
+│   ├── evaluator.ts
+│   ├── policies.ts
+│   └── types.ts
+├── <span class="dir">remoteManagedSettings/</span>        <span class="comment"># Enterprise settings push</span>
+│   ├── fetcher.ts
+│   └── types.ts
+├── <span class="dir">settingsSync/</span>                 <span class="comment"># Cross-device settings sync</span>
+│   ├── sync.ts
+│   └── types.ts
+├── <span class="dir">teamMemorySync/</span>               <span class="comment"># Team memory synchronisation</span>
+│   ├── sync.ts
+│   └── types.ts
+├── <span class="dir">plugins/</span>                      <span class="comment"># Plugin lifecycle &amp; sandbox</span>
+│   ├── loader.ts
+│   ├── registry.ts
+│   ├── sandbox.ts
+│   └── types.ts
+├── <span class="dir">tips/</span>                         <span class="comment"># Usage tips system</span>
+│   ├── tips.ts
+│   └── types.ts
+├── <span class="dir">tools/</span>                        <span class="comment"># Service-level tool utilities</span>
+│   ├── helpers.ts
+│   └── types.ts
+├── <span class="dir">autoDream/</span>                    <span class="comment"># Background auto-dream processing</span>
+│   ├── dreamer.ts
+│   └── types.ts
+├── <span class="file">voice.ts</span>                     <span class="comment"># Voice input / STT</span>
+├── <span class="file">tokenEstimation.ts</span>           <span class="comment"># Token count estimation</span>
+├── <span class="file">diagnosticTracking.ts</span>        <span class="comment"># Diagnostic event tracking</span>
+├── <span class="file">internalLogging.ts</span>           <span class="comment"># Internal structured logging</span>
+├── <span class="file">preventSleep.ts</span>              <span class="comment"># Prevent system sleep during ops</span>
+└── <span class="file">notifier.ts</span>                  <span class="comment"># User notification dispatch</span>
+      </div>
+    </section>
+
+    <!-- ===== Configuration ===== -->
+    <section class="section">
+      <h2 class="section-title">⚙️ Configuration Reference</h2>
+      <p class="section-intro">
+        Key configuration surfaces consumed by the services module. Settings may come from local
+        config files, environment variables, or remote-managed enterprise policies.
+      </p>
+      <div class="data-table-wrapper">
+        <table class="data-table config-table">
+          <thead>
+            <tr>
+              <th>Setting</th>
+              <th>Scope</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mcp.servers</code></td>
+              <td>User / Project</td>
+              <td>List of MCP server endpoints with auth, transport, and capability filters</td>
+            </tr>
+            <tr>
+              <td><code>oauth.clientId</code></td>
+              <td>App</td>
+              <td>OAuth client identifier for the authentication provider</td>
+            </tr>
+            <tr>
+              <td><code>oauth.redirectUri</code></td>
+              <td>App</td>
+              <td>Redirect URI registered with the OAuth provider</td>
+            </tr>
+            <tr>
+              <td><code>analytics.sinks</code></td>
+              <td>Enterprise</td>
+              <td>Configured telemetry sinks (e.g. Segment, custom HTTP endpoints)</td>
+            </tr>
+            <tr>
+              <td><code>analytics.enabled</code></td>
+              <td>User</td>
+              <td>Master toggle for all analytics event collection</td>
+            </tr>
+            <tr>
+              <td><code>policyLimits.maxRequests</code></td>
+              <td>Enterprise</td>
+              <td>Maximum API requests per window for rate-limiting enforcement</td>
+            </tr>
+            <tr>
+              <td><code>policyLimits.windowMs</code></td>
+              <td>Enterprise</td>
+              <td>Sliding window duration (ms) for rate-limit evaluation</td>
+            </tr>
+            <tr>
+              <td><code>compact.threshold</code></td>
+              <td>User</td>
+              <td>Token count threshold that triggers automatic memory compaction</td>
+            </tr>
+            <tr>
+              <td><code>compact.strategy</code></td>
+              <td>User</td>
+              <td>Compaction strategy: <code>summarise</code>, <code>prune</code>, or <code>hybrid</code></td>
+            </tr>
+            <tr>
+              <td><code>voice.enabled</code></td>
+              <td>User</td>
+              <td>Enable/disable voice input and STT transcription</td>
+            </tr>
+            <tr>
+              <td><code>voice.language</code></td>
+              <td>User</td>
+              <td>BCP-47 language tag for speech recognition (e.g. <code>en-US</code>)</td>
+            </tr>
+            <tr>
+              <td><code>plugins.allowList</code></td>
+              <td>Enterprise</td>
+              <td>Allowlisted plugin identifiers for enterprise environments</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="page-footer">
+      <span>Generated by <strong>module-docs</strong> · neutra-ip theme · <code>a8a678c</code></span>
+      <span>2026-04-01 · Claude Code Wiki</span>
+    </footer>
+
+  </div><!-- /.page-wrapper -->
+
+  <!-- ===== Scripts ===== -->
+  <script>
+    /* Mermaid init */
+    document.addEventListener("DOMContentLoaded", function () {
+      var currentTheme = document.documentElement.getAttribute("data-theme");
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: currentTheme === "light" ? "default" : "dark",
+        flowchart: { curve: "basis", useMaxWidth: true },
+        sequence: { useMaxWidth: true }
+      });
+    });
+
+    /* Theme toggle */
+    function toggleTheme() {
+      var root = document.documentElement;
+      var current = root.getAttribute("data-theme");
+      var next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+
+      try {
+        localStorage.setItem("wiki-theme", next);
+      } catch (e) {
+        /* storage unavailable */
+      }
+
+      /* Re-render Mermaid diagrams with updated theme */
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: next === "light" ? "default" : "dark",
+        flowchart: { curve: "basis", useMaxWidth: true },
+        sequence: { useMaxWidth: true }
+      });
+
+      var diagrams = document.querySelectorAll(".mermaid");
+      diagrams.forEach(function (el) {
+        var raw = el.getAttribute("data-original");
+        if (!raw) {
+          raw = el.textContent;
+          el.setAttribute("data-original", raw);
+        }
+        el.removeAttribute("data-processed");
+        el.innerHTML = raw;
+      });
+
+      mermaid.init(undefined, diagrams);
+    }
+
+    /* Restore saved theme */
+    (function () {
+      try {
+        var saved = localStorage.getItem("wiki-theme");
+        if (saved && saved !== document.documentElement.getAttribute("data-theme")) {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (e) {
+        /* storage unavailable */
+      }
+    })();
+  </script>
+</body>
+</html>

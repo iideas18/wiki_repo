@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utils — Shared Utility Library | Claude Code Wiki</title>
+  <meta name="description" content="L1 module overview for the Utils module — foundational utility layer powering every other module in Claude Code." />
+  <meta name="generator" content="claude-code-wiki v2 neutra-ip" />
+  <meta name="source-sha" content="a8a678c" />
+  <meta name="source-date" content="2026-04-01" />
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    /* ===== neutra-ip theme tokens ===== */
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-card: #1e2a47;
+      --bg-code: #0f1729;
+      --text-primary: #e0e0e0;
+      --text-secondary: #a8a8b8;
+      --text-muted: #6c6c80;
+      --accent-blue: #4ea8de;
+      --accent-green: #6bcb77;
+      --accent-yellow: #ffd93d;
+      --accent-red: #ff6b6b;
+      --accent-purple: #b088f9;
+      --border-color: #2a2a4a;
+      --border-card: #303050;
+      --shadow-card: 0 2px 12px rgba(0,0,0,0.35);
+      --radius: 8px;
+      --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    }
+    [data-theme="light"] {
+      --bg-primary: #f5f5f0;
+      --bg-secondary: #eaeae2;
+      --bg-card: #ffffff;
+      --bg-code: #f0f0e8;
+      --text-primary: #2c2c2c;
+      --text-secondary: #555566;
+      --text-muted: #888898;
+      --accent-blue: #2b7ab8;
+      --accent-green: #3a9e4f;
+      --accent-yellow: #c5a000;
+      --accent-red: #d94040;
+      --accent-purple: #7c4dbd;
+      --border-color: #d0d0c8;
+      --border-card: #c8c8be;
+      --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: var(--font-mono); font-size: 0.9em; }
+    code {
+      background: var(--bg-code);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background: var(--bg-code);
+      padding: 16px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+    }
+
+    /* ===== Layout ===== */
+    .page-wrapper {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ===== Top Bar ===== */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .breadcrumb a { color: var(--accent-blue); }
+    .breadcrumb .sep { margin: 0 6px; color: var(--text-muted); }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent-blue); }
+
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .hero .meta-line {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+    .badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-blue   { background: var(--accent-blue); }
+    .dot-green  { background: var(--accent-green); }
+    .dot-yellow { background: var(--accent-yellow); }
+    .dot-red    { background: var(--accent-red); }
+
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-item .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+    .stat-item .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== Sections ===== */
+    .section {
+      margin-bottom: 44px;
+    }
+    .section h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 18px 0 10px;
+      color: var(--text-primary);
+    }
+    .section p, .section li {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+    }
+    .section ul, .section ol {
+      padding-left: 22px;
+      margin-top: 8px;
+    }
+    .section li { margin-bottom: 5px; }
+
+    /* ===== Intro Box (analogy) ===== */
+    .intro-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-left: 4px solid var(--accent-purple);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+    }
+    .intro-box .intro-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: var(--accent-purple);
+    }
+    .intro-box p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== Mermaid container ===== */
+    .mermaid-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 16px 0;
+      overflow-x: auto;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* ===== Key Components Table ===== */
+    .components-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 12px;
+    }
+    .components-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-color);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .components-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .components-table tr:hover td {
+      background: var(--bg-secondary);
+    }
+    .components-table .file-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--accent-blue);
+      font-size: 0.85rem;
+    }
+
+    /* ===== Sub-module Cards ===== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .sub-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .sub-card:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-2px);
+    }
+    .sub-card .card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    .sub-card .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .sub-card .card-meta {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== Deep-Dive Hub ===== */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .hub-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      border-top: 3px solid var(--accent-blue);
+    }
+    .hub-card .hub-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+    .hub-card .hub-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .hub-card .hub-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* ===== Walkthrough ===== */
+    .walkthrough-steps {
+      position: relative;
+      padding-left: 32px;
+      margin-top: 12px;
+    }
+    .walkthrough-steps::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-color);
+    }
+    .wt-step {
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .wt-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: -32px;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .wt-step .step-title {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+    .wt-step .step-desc {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ===== Directory Map ===== */
+    .dir-tree {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+    .dir-tree .dir { color: var(--accent-blue); font-weight: 600; }
+    .dir-tree .file { color: var(--text-secondary); }
+
+    /* ===== Config Table ===== */
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 12px;
+    }
+    .config-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border-bottom: 2px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+    .config-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .config-table code {
+      font-size: 0.82rem;
+    }
+
+    /* ===== Glossary ===== */
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .glossary-item {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+    }
+    .glossary-item dt {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+      margin-bottom: 3px;
+    }
+    .glossary-item dd {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ===== Footer ===== */
+    .page-footer {
+      margin-top: 48px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== Connections Diagram ===== */
+    .connections-note {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== Top Bar ===== -->
+  <nav class="top-bar">
+    <div class="breadcrumb">
+      <a href="../index.html">Claude Code</a>
+      <span class="sep">›</span>
+      <strong>Utils</strong>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      🌗 Toggle Theme
+    </button>
+  </nav>
+
+  <div class="page-wrapper">
+
+    <!-- ===== Hero ===== -->
+    <header class="hero">
+      <h1>Utils</h1>
+      <div class="subtitle">Shared Utility Library</div>
+      <div class="meta-line">
+        TypeScript · Git SHA: <code>a8a678c</code> · 2026-04-01 · Source: <code>src/utils/</code>
+      </div>
+      <div class="stat-row">
+        <div class="stat-item">
+          <div class="stat-value">564</div>
+          <div class="stat-label">Files</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">31</div>
+          <div class="stat-label">Sub-Modules</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">~60K</div>
+          <div class="stat-label">Lines of Code</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">TypeScript</div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge"><span class="dot dot-blue"></span> API Client</span>
+        <span class="badge"><span class="dot dot-green"></span> Settings Hierarchy</span>
+        <span class="badge"><span class="dot dot-yellow"></span> Permission Engine</span>
+        <span class="badge"><span class="dot dot-red"></span> Bash Execution</span>
+      </div>
+    </header>
+
+    <!-- ===== Intro Box ===== -->
+    <div class="intro-box">
+      <div class="intro-title">💡 Think of it like…</div>
+      <p>
+        If Claude Code were a city, <strong>Utils</strong> would be the underground infrastructure —
+        the water pipes, electrical grid, sewage system, and road network that every building depends on
+        but nobody sees. The API client is the postal service carrying messages to the outside world,
+        Settings is the city zoning code with federal/state/local layers, Bash is the construction crew
+        that builds things on command, and Permissions is the security checkpoint at every gate.
+        Without Utils, nothing else in the codebase could function.
+      </p>
+    </div>
+
+    <!-- ===== Module Description ===== -->
+    <section class="section">
+      <h2>📖 Overview</h2>
+      <p>
+        The <strong>utils</strong> module is the largest in the Claude Code codebase, spanning
+        <strong>564 files</strong> across <strong>31 sub-directories</strong>. It provides the
+        foundational utility layer powering every other module: API client and authentication,
+        bash command execution, settings management (user/project/managed hierarchy), background
+        task orchestration, file operations, git integration, permissions engine, swarm coordination,
+        and hundreds of helper functions for everything from ANSI rendering to cost calculation.
+      </p>
+      <p style="margin-top: 10px;">
+        Every module in the system — from the CLI entry point to the conversation engine to the
+        tool implementations — imports from utils. It is the single shared dependency that binds
+        the architecture together.
+      </p>
+    </section>
+
+    <!-- ===== Architecture Diagram ===== -->
+    <section class="section">
+      <h2>🏗️ Architecture</h2>
+      <p>High-level architecture of the Utils module organized by functional domain:</p>
+      <div class="mermaid-container">
+        <pre class="mermaid">
+flowchart LR
+    subgraph API_Auth["API &amp; Auth"]
+        api["api.ts"]
+        auth["auth.ts"]
+        authPortable["authPortable.ts"]
+        aws["aws.ts"]
+        billing["billing.ts"]
+    end
+
+    subgraph Shell_Process["Shell &amp; Process"]
+        bash["bash/"]
+        shell["Shell.ts"]
+        shellCmd["ShellCommand.ts"]
+        bg["background/"]
+    end
+
+    subgraph Settings_Mgmt["Settings"]
+        settings["settings/"]
+        user["user settings"]
+        project["project settings"]
+        managed["managed/MDM"]
+    end
+
+    subgraph File_System["File System"]
+        fileOps["file operations"]
+        claudemd["claudemd.ts"]
+        cache["cachePaths.ts"]
+    end
+
+    subgraph Git_Integration["Git"]
+        git["git utilities"]
+    end
+
+    subgraph Permissions_Engine["Permissions"]
+        classifier["classifierApprovals.ts"]
+        denials["autoModeDenials.ts"]
+    end
+
+    subgraph UI_Helpers["UI Helpers"]
+        ansiPng["ansiToPng.ts"]
+        ansiSvg["ansiToSvg.ts"]
+        browser["browser.ts"]
+    end
+
+    subgraph Context_Mgmt["Context"]
+        agentCtx["agentContext.ts"]
+        analyzeCtx["analyzeContext.ts"]
+        attach["attachments.ts"]
+    end
+
+    subgraph Swarm_Coord["Swarm"]
+        swarm["swarm/"]
+    end
+
+    subgraph Data_Structures["Data"]
+        circBuf["CircularBuffer.ts"]
+        cursor["Cursor.ts"]
+        array["array.ts"]
+        bufWriter["bufferedWriter.ts"]
+    end
+
+    API_Auth --> Shell_Process
+    API_Auth --> Settings_Mgmt
+    Shell_Process --> File_System
+    Shell_Process --> Git_Integration
+    Settings_Mgmt --> Permissions_Engine
+    Permissions_Engine --> Shell_Process
+    Context_Mgmt --> API_Auth
+    Swarm_Coord --> API_Auth
+    Swarm_Coord --> Shell_Process
+    UI_Helpers --> Data_Structures
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===== Data Flow Diagram ===== -->
+    <section class="section">
+      <h2>🔄 Data Flow</h2>
+      <p>How data flows through the Utils module during a typical operation:</p>
+      <div class="mermaid-container">
+        <pre class="mermaid">
+flowchart TD
+    A["Settings loaded<br/>(user → project → managed)"] --> B["API client initialized"]
+    B --> C["Auth tokens managed<br/>(OAuth / API key / AWS)"]
+    C --> D["Bash commands executed"]
+    D --> E["Results processed"]
+    E --> F["Cost tracked<br/>(token counts → billing)"]
+    F --> G["Analytics event logged"]
+
+    B -.-> H["Rate limit headers"]
+    B -.-> I["Cache headers<br/>(prompt caching)"]
+    D -.-> J["Permissions checked"]
+    J -.-> D
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===== Cross-Module Connections ===== -->
+    <section class="section">
+      <h2>🔗 Cross-Module Connections</h2>
+      <p class="connections-note">
+        Utils is the universal dependency — every module in Claude Code imports from it.
+        Below shows the primary connections to other top-level modules:
+      </p>
+      <div class="mermaid-container">
+        <pre class="mermaid">
+flowchart LR
+    UTILS["utils/"]
+
+    CLI["cli/"] -->|"imports auth, settings"| UTILS
+    CONV["conversation/"] -->|"imports api, context"| UTILS
+    TOOLS["tools/"] -->|"imports bash, permissions"| UTILS
+    SERV["services/"] -->|"imports api, billing"| UTILS
+    HOOKS["hooks/"] -->|"imports agentContext"| UTILS
+
+    UTILS -->|"settings hierarchy"| CONFIG["config files"]
+    UTILS -->|"API calls"| ANTHROPIC["Anthropic API"]
+    UTILS -->|"shell commands"| OS["OS / shell"]
+    UTILS -->|"git operations"| GIT["git"]
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===== Narrated Walkthrough ===== -->
+    <section class="section">
+      <h2>🚶 Walkthrough: Trace an API Call</h2>
+      <p>Follow a single API request from creation to completion through the Utils module:</p>
+      <div class="walkthrough-steps">
+        <div class="wt-step" data-step="1">
+          <div class="step-title">api.ts creates HTTP client with auth headers</div>
+          <div class="step-desc">The API module builds the request, attaching model parameters, system prompt, and conversation history.</div>
+        </div>
+        <div class="wt-step" data-step="2">
+          <div class="step-title">Auth module provides tokens</div>
+          <div class="step-desc">auth.ts resolves the correct credential — OAuth token, API key, or AWS SigV4 signature — based on current configuration.</div>
+        </div>
+        <div class="wt-step" data-step="3">
+          <div class="step-title">Request sent to Anthropic API</div>
+          <div class="step-desc">The HTTP client dispatches the request with streaming enabled, connection keep-alive, and appropriate timeouts.</div>
+        </div>
+        <div class="wt-step" data-step="4">
+          <div class="step-title">Response streamed back</div>
+          <div class="step-desc">Server-sent events are parsed incrementally, feeding tokens to the conversation engine in real time.</div>
+        </div>
+        <div class="wt-step" data-step="5">
+          <div class="step-title">Token usage extracted and tracked</div>
+          <div class="step-desc">Input tokens, output tokens, and cache read/write counts are extracted from the response metadata.</div>
+        </div>
+        <div class="wt-step" data-step="6">
+          <div class="step-title">Rate limit headers processed</div>
+          <div class="step-desc">X-RateLimit-* headers are read to manage request pacing and back-off strategies.</div>
+        </div>
+        <div class="wt-step" data-step="7">
+          <div class="step-title">Cache headers managed for prompt caching</div>
+          <div class="step-desc">Anthropic prompt caching headers are processed to optimize subsequent requests with the same system prompt.</div>
+        </div>
+        <div class="wt-step" data-step="8">
+          <div class="step-title">Error handling with retry logic</div>
+          <div class="step-desc">Transient errors (429, 500, 529) trigger exponential backoff retries. Permanent errors surface immediately.</div>
+        </div>
+        <div class="wt-step" data-step="9">
+          <div class="step-title">Cost calculated from token counts</div>
+          <div class="step-desc">billing.ts computes cost using per-model pricing tables, accounting for cached vs. uncached token rates.</div>
+        </div>
+        <div class="wt-step" data-step="10">
+          <div class="step-title">Analytics event logged</div>
+          <div class="step-desc">A structured analytics event is emitted with latency, token usage, model, and cost information.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Key Components Table ===== -->
+    <section class="section">
+      <h2>📦 Key Components</h2>
+      <table class="components-table">
+        <thead>
+          <tr>
+            <th>File / Directory</th>
+            <th>Purpose</th>
+            <th>Domain</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="file-name">api.ts</td>
+            <td>Anthropic API client — request building, streaming, response parsing</td>
+            <td>API &amp; Auth</td>
+          </tr>
+          <tr>
+            <td class="file-name">auth.ts</td>
+            <td>Authentication management — OAuth, API keys, token refresh</td>
+            <td>API &amp; Auth</td>
+          </tr>
+          <tr>
+            <td class="file-name">bash/</td>
+            <td>Bash command execution engine — sandboxing, timeout, output capture</td>
+            <td>Shell &amp; Process</td>
+          </tr>
+          <tr>
+            <td class="file-name">settings/</td>
+            <td>Settings hierarchy — user, project, and managed settings with MDM support</td>
+            <td>Settings</td>
+          </tr>
+          <tr>
+            <td class="file-name">background/</td>
+            <td>Background task orchestration — queue management, lifecycle hooks</td>
+            <td>Shell &amp; Process</td>
+          </tr>
+          <tr>
+            <td class="file-name">swarm/</td>
+            <td>Multi-agent swarm coordination — backend selection, message routing</td>
+            <td>Swarm</td>
+          </tr>
+          <tr>
+            <td class="file-name">Shell.ts</td>
+            <td>Shell session management — PTY allocation, environment setup</td>
+            <td>Shell &amp; Process</td>
+          </tr>
+          <tr>
+            <td class="file-name">ShellCommand.ts</td>
+            <td>Shell command abstraction — argument escaping, working directory</td>
+            <td>Shell &amp; Process</td>
+          </tr>
+          <tr>
+            <td class="file-name">claudemd.ts</td>
+            <td>CLAUDE.md file parsing — project instructions, context extraction</td>
+            <td>File System</td>
+          </tr>
+          <tr>
+            <td class="file-name">classifierApprovals.ts</td>
+            <td>Auto-mode permission classifier — tool approval/denial decisions</td>
+            <td>Permissions</td>
+          </tr>
+          <tr>
+            <td class="file-name">agentContext.ts</td>
+            <td>Agent context management — session state, capability tracking</td>
+            <td>Context</td>
+          </tr>
+          <tr>
+            <td class="file-name">CircularBuffer.ts</td>
+            <td>Fixed-size ring buffer — efficient bounded data storage</td>
+            <td>Data Structures</td>
+          </tr>
+          <tr>
+            <td class="file-name">ansiToPng.ts</td>
+            <td>ANSI terminal output to PNG image conversion</td>
+            <td>UI Helpers</td>
+          </tr>
+          <tr>
+            <td class="file-name">autoUpdater.ts</td>
+            <td>Auto-update management — version checks, update downloads</td>
+            <td>Infrastructure</td>
+          </tr>
+          <tr>
+            <td class="file-name">caCerts.ts</td>
+            <td>CA certificate handling — custom cert stores, TLS configuration</td>
+            <td>Infrastructure</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== Sub-Module Cards ===== -->
+    <section class="section">
+      <h2>📂 Sub-Modules</h2>
+      <p>Major sub-directories within <code>src/utils/</code>, each with its own internal structure:</p>
+      <div class="card-grid">
+        <div class="sub-card">
+          <div class="card-title">bash/</div>
+          <div class="card-desc">
+            Bash command execution engine — sandboxed shell execution, output capture,
+            timeout management, and process lifecycle control. Powers all tool-use shell operations.
+          </div>
+          <div class="card-meta">Core execution engine · High traffic</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">settings/</div>
+          <div class="card-desc">
+            Hierarchical settings management with user, project, and managed (MDM) layers.
+            Supports schema validation, migration, and environment-specific overrides.
+          </div>
+          <div class="card-meta">3-tier hierarchy · Configuration backbone</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">background/</div>
+          <div class="card-desc">
+            Background task orchestration — manages long-running operations outside the
+            main conversation loop, with queue prioritization and cancellation support.
+          </div>
+          <div class="card-meta">Async operations · Task queue</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">swarm/</div>
+          <div class="card-desc">
+            Multi-agent swarm coordination backends — enables parallel agent execution,
+            task delegation, result aggregation, and inter-agent communication.
+          </div>
+          <div class="card-meta">Multi-agent · Parallel execution</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">claudeInChrome/</div>
+          <div class="card-desc">
+            Chrome extension integration utilities — browser automation bridge,
+            message passing, and DOM interaction helpers for the Claude-in-Chrome workflow.
+          </div>
+          <div class="card-meta">Browser integration · Extension bridge</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">git/</div>
+          <div class="card-desc">
+            Git integration utilities — repository state queries, diff parsing,
+            branch management, and commit operations for the file-editing workflow.
+          </div>
+          <div class="card-meta">Version control · Diff engine</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">permissions/</div>
+          <div class="card-desc">
+            Permission evaluation engine — determines which tools and operations
+            are allowed based on user settings, project rules, and auto-mode policies.
+          </div>
+          <div class="card-meta">Security · Access control</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">analytics/</div>
+          <div class="card-desc">
+            Analytics and telemetry — structured event logging, session tracking,
+            usage metrics collection, and privacy-respecting data aggregation.
+          </div>
+          <div class="card-meta">Telemetry · Metrics</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">crypto/</div>
+          <div class="card-desc">
+            Cryptographic utilities — hashing, token generation, signature verification,
+            and secure random number generation for auth and integrity checks.
+          </div>
+          <div class="card-meta">Security · Cryptography</div>
+        </div>
+        <div class="sub-card">
+          <div class="card-title">formatting/</div>
+          <div class="card-desc">
+            Output formatting — markdown rendering, syntax highlighting,
+            ANSI code handling, and terminal output beautification.
+          </div>
+          <div class="card-meta">Display · Rendering</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Deep-Dive Hub ===== -->
+    <section class="section">
+      <h2>🔬 Deep-Dive Hub</h2>
+      <p>In-depth explorations of the most architecturally significant sub-systems:</p>
+      <div class="hub-grid">
+        <div class="hub-card">
+          <div class="hub-title">API Client</div>
+          <div class="hub-desc">
+            Complete breakdown of the Anthropic API client — request lifecycle, streaming protocol,
+            error handling, retry strategies, prompt caching, and token accounting. The single most
+            critical file in the entire codebase.
+          </div>
+          <a class="hub-link" href="./api_client.html">Read Deep-Dive →</a>
+        </div>
+        <div class="hub-card" style="border-top-color: var(--accent-green);">
+          <div class="hub-title">Settings Hierarchy</div>
+          <div class="hub-desc">
+            How user preferences, project configuration, and managed (MDM) policies merge into a
+            single resolved settings object. Covers schema validation, migration paths, and
+            environment variable overrides.
+          </div>
+          <a class="hub-link" href="./settings_hierarchy.html">Read Deep-Dive →</a>
+        </div>
+        <div class="hub-card" style="border-top-color: var(--accent-red);">
+          <div class="hub-title">Bash Engine</div>
+          <div class="hub-desc">
+            Deep-dive into the bash execution engine — PTY allocation, sandboxing strategies,
+            timeout management, output streaming, signal handling, and the security boundary
+            between agent intent and OS execution.
+          </div>
+          <a class="hub-link" href="./bash_engine.html">Read Deep-Dive →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Directory Map ===== -->
+    <section class="section">
+      <h2>🗂️ Directory Map</h2>
+      <p>Top 30 most important entries in <code>src/utils/</code>:</p>
+      <pre class="dir-tree">
+<span class="dir">src/utils/</span>
+├── <span class="file">api.ts</span>                      ← Anthropic API client
+├── <span class="file">auth.ts</span>                     ← Authentication management
+├── <span class="file">authPortable.ts</span>             ← Portable auth (cross-platform)
+├── <span class="file">aws.ts</span>                      ← AWS credential handling
+├── <span class="file">billing.ts</span>                  ← Cost calculation &amp; tracking
+├── <span class="file">agentContext.ts</span>             ← Agent session context
+├── <span class="file">analyzeContext.ts</span>           ← Context analysis helpers
+├── <span class="file">attachments.ts</span>              ← File attachment handling
+├── <span class="file">Shell.ts</span>                    ← Shell session management
+├── <span class="file">ShellCommand.ts</span>             ← Command abstraction layer
+├── <span class="file">claudemd.ts</span>                 ← CLAUDE.md parser
+├── <span class="file">classifierApprovals.ts</span>      ← Permission classifier
+├── <span class="file">autoModeDenials.ts</span>          ← Auto-mode denial rules
+├── <span class="file">autoUpdater.ts</span>              ← Version update manager
+├── <span class="file">CircularBuffer.ts</span>           ← Ring buffer implementation
+├── <span class="file">Cursor.ts</span>                   ← Cursor/iterator utility
+├── <span class="file">array.ts</span>                    ← Array helper functions
+├── <span class="file">bufferedWriter.ts</span>           ← Buffered output writer
+├── <span class="file">ansiToPng.ts</span>                ← ANSI → PNG converter
+├── <span class="file">ansiToSvg.ts</span>                ← ANSI → SVG converter
+├── <span class="file">browser.ts</span>                  ← Browser launch utilities
+├── <span class="file">caCerts.ts</span>                  ← CA certificate handling
+├── <span class="file">cachePaths.ts</span>               ← Cache directory resolution
+├── <span class="dir">bash/</span>                       ← Bash execution engine
+│   ├── <span class="file">bashExecutor.ts</span>
+│   ├── <span class="file">bashSandbox.ts</span>
+│   └── <span class="file">bashTimeout.ts</span>
+├── <span class="dir">settings/</span>                   ← Settings hierarchy
+│   ├── <span class="file">userSettings.ts</span>
+│   ├── <span class="file">projectSettings.ts</span>
+│   └── <span class="file">managedSettings.ts</span>
+├── <span class="dir">background/</span>                 ← Background tasks
+├── <span class="dir">swarm/</span>                      ← Multi-agent coordination
+└── <span class="dir">claudeInChrome/</span>             ← Chrome extension bridge
+      </pre>
+    </section>
+
+    <!-- ===== Configuration ===== -->
+    <section class="section">
+      <h2>⚙️ Configuration</h2>
+      <p>Key configuration points managed by the Utils module:</p>
+      <table class="config-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Key</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>API Endpoints</td>
+            <td><code>ANTHROPIC_BASE_URL</code></td>
+            <td>Base URL for Anthropic API requests (supports proxies)</td>
+          </tr>
+          <tr>
+            <td>API Endpoints</td>
+            <td><code>API_TIMEOUT_MS</code></td>
+            <td>HTTP request timeout for API calls (default: 120s)</td>
+          </tr>
+          <tr>
+            <td>Auth Methods</td>
+            <td><code>ANTHROPIC_API_KEY</code></td>
+            <td>Direct API key authentication</td>
+          </tr>
+          <tr>
+            <td>Auth Methods</td>
+            <td><code>CLAUDE_CODE_OAUTH_TOKEN</code></td>
+            <td>OAuth bearer token for authenticated sessions</td>
+          </tr>
+          <tr>
+            <td>Settings Paths</td>
+            <td><code>~/.claude/settings.json</code></td>
+            <td>User-level settings file</td>
+          </tr>
+          <tr>
+            <td>Settings Paths</td>
+            <td><code>.claude/settings.json</code></td>
+            <td>Project-level settings file</td>
+          </tr>
+          <tr>
+            <td>Bash</td>
+            <td><code>BASH_TIMEOUT_MS</code></td>
+            <td>Default timeout for bash command execution</td>
+          </tr>
+          <tr>
+            <td>Bash</td>
+            <td><code>BASH_MAX_OUTPUT</code></td>
+            <td>Maximum output bytes captured from bash commands</td>
+          </tr>
+          <tr>
+            <td>Cache</td>
+            <td><code>CLAUDE_CACHE_DIR</code></td>
+            <td>Override path for the local cache directory</td>
+          </tr>
+          <tr>
+            <td>Swarm</td>
+            <td><code>SWARM_BACKEND</code></td>
+            <td>Backend selection for multi-agent coordination</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== Glossary ===== -->
+    <section class="section">
+      <h2>📚 Glossary</h2>
+      <div class="glossary-grid">
+        <div class="glossary-item">
+          <dl>
+            <dt>MDM (Managed Device Management)</dt>
+            <dd>Enterprise-level settings layer that takes precedence over user and project settings, enforced by IT administrators.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>Prompt Caching</dt>
+            <dd>Anthropic feature that caches system prompts server-side, reducing input token costs on subsequent requests with the same prefix.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>PTY (Pseudo-Terminal)</dt>
+            <dd>Virtual terminal device used by the bash engine to run commands with full terminal emulation, including ANSI escape codes.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>Swarm</dt>
+            <dd>Multi-agent coordination pattern where multiple Claude instances work in parallel on sub-tasks, coordinated by a lead agent.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>Settings Hierarchy</dt>
+            <dd>Three-tier configuration system: user settings → project settings → managed (MDM) settings, with managed having highest precedence.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>Classifier Approvals</dt>
+            <dd>Auto-mode system that uses an LLM classifier to determine whether a tool operation should be auto-approved or require user confirmation.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>Circular Buffer</dt>
+            <dd>Fixed-size data structure that overwrites oldest entries when full — used for bounded output capture and rolling log windows.</dd>
+          </dl>
+        </div>
+        <div class="glossary-item">
+          <dl>
+            <dt>SigV4 (Signature Version 4)</dt>
+            <dd>AWS request signing protocol used when Claude Code connects through Amazon Bedrock instead of the direct Anthropic API.</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="page-footer">
+      <p>
+        Generated by claude-code-wiki · neutra-ip theme · Source: <code>src/utils/</code> ·
+        SHA <code>a8a678c</code> · 2026-04-01
+      </p>
+      <p style="margin-top: 4px;">
+        Claude Code Internal Wiki — L1 Module Overview
+      </p>
+    </footer>
+
+  </div><!-- .page-wrapper -->
+
+  <!-- ===== Theme Toggle Script ===== -->
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('wiki-theme', next);
+    }
+
+    // Restore saved theme
+    (function () {
+      const saved = localStorage.getItem('wiki-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
+
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      securityLevel: 'loose'
+    });
+  </script>
+
+</body>
+</html>
