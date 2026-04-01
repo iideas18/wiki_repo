@@ -342,7 +342,7 @@ nodes = get_analyst_nodes()
       el.id = 'mermaid-' + i;
     });
     mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
-    mermaid.run({ querySelector: '.mermaid' });
+    try{mermaid.run({ querySelector: '.mermaid' });}catch(e){console.warn('mermaid:',e)}
   }
 
   setTheme(getTheme());
@@ -408,6 +408,8 @@ nodes = get_analyst_nodes()
 
   hljs.highlightAll();
 })();
+
+(function(){var _ov=document.getElementById('diagram-overlay');var _c=document.getElementById('diagram-overlay-inner');if(!_ov||!_c)return;_ov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_c.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_c.dataset.scale=s;_c.style.transform='scale('+s+')';},{passive:false});}());
 </script>
 </body>
 </html>

@@ -527,7 +527,7 @@ function renderMermaid(){
     el.textContent=src;
     el.removeAttribute('data-processed');
   });
-  mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});
+  try{mermaid.run({nodes:document.querySelectorAll('.mermaid:not([data-processed])')});}catch(e){console.warn('mermaid:',e)}
 }
 renderMermaid();
 /* Re-render on theme change */

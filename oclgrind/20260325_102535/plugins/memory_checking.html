@@ -289,7 +289,7 @@ th{background:var(--surface);color:var(--heading)}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
 mermaid.initialize({startOnLoad:false,theme:'neutral'});
-function renderMermaid(){document.querySelectorAll('pre.mermaid').forEach(async(el,i)=>{const id='mm-'+Date.now()+'-'+i;const{svg}=await mermaid.render(id,el.textContent.trim());el.innerHTML=svg;el.classList.add('rendered')})}
+function renderMermaid(){document.querySelectorAll('pre.mermaid').forEach(async(el,i)=>{const id='mm-'+Date.now()+'-'+i;try{const{svg}=await mermaid.render(id,el.textContent.trim());}catch(e){console.warn('mermaid:',e)}el.innerHTML=svg;el.classList.add('rendered')})}
 renderMermaid();
 
 function toggleTheme(){const t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('neutra-ip-theme',t)}
@@ -302,6 +302,8 @@ function closeOverlay(){document.getElementById('overlay').classList.remove('act
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOverlay()});
 
 window.addEventListener('scroll',()=>{document.getElementById('btt').style.display=window.scrollY>400?'block':'none'});
+
+document.getElementById('overlay').addEventListener('wheel',function(e){e.preventDefault();if(!this.classList.contains('active'))return;var inner=document.getElementById('overlayContent')||document.querySelector('.inner');if(!inner)return;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});
 </script>
 </body>
 </html>

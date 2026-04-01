@@ -373,7 +373,7 @@ document.querySelectorAll('pre.mermaid,.mermaid').forEach(function(el){if(!el.ge
       el.removeAttribute('data-processed');
       el.textContent = mermaidSources.get(el);
     });
-    mermaid.run();
+    try{mermaid.run();}catch(e){console.warn('mermaid:',e)}
   }
   renderMermaid();
 

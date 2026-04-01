@@ -289,7 +289,9 @@ function toggleTheme(){const t=document.documentElement.dataset.theme==="dark"?"
 (function(){const t=localStorage.getItem("neutra-ip-theme");if(t)document.documentElement.dataset.theme=t})();
 window.addEventListener("scroll",()=>{document.getElementById("back-to-top").style.display=scrollY>300?"block":"none"});
 document.querySelectorAll("pre:not(.mermaid)").forEach(p=>{const b=document.createElement("button");b.className="copy-btn";b.textContent="Copy";b.onclick=()=>{navigator.clipboard.writeText(p.textContent.replace(/^Copy/,""));b.textContent="✓";setTimeout(()=>b.textContent="Copy",1500)};p.appendChild(b)});
-(async function renderMermaid(){const{default:mermaid}=await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");mermaid.initialize({startOnLoad:false,theme:document.documentElement.dataset.theme==="dark"?"dark":"default"});await mermaid.run({querySelector:".mermaid"});document.querySelectorAll(".mermaid-wrap").forEach(w=>{w.addEventListener("click",()=>{const o=document.getElementById("overlay");o.innerHTML=w.querySelector("svg").outerHTML;o.classList.add("show")})})})();
+(async function renderMermaid(){const{default:mermaid}=await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");mermaid.initialize({startOnLoad:false,theme:document.documentElement.dataset.theme==="dark"?"dark":"default"});try{await mermaid.run({querySelector:".mermaid"});}catch(e){console.warn('mermaid:',e)}document.querySelectorAll(".mermaid-wrap").forEach(w=>{w.addEventListener("click",()=>{const o=document.getElementById("overlay");(function(){var _s=w.querySelector('svg');o.innerHTML='';if(_s)o.appendChild(_s.cloneNode(true))})();o.classList.add("show")})})})();
+
+(function(){var _ov=document.getElementById('overlay');if(!_ov)return;var _c=_ov.querySelector('div')||_ov;_ov.addEventListener('wheel',function(e){e.preventDefault();var s=parseFloat(_c.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));_c.dataset.scale=s;_c.style.transform='scale('+s+')';},{passive:false});}());
 </script>
 </body>
 </html>

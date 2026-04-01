@@ -9,6 +9,8 @@ issues produced by the wiki generator:
   3. Missing data-source preservation before mermaid.run()
   4. Missing null-guard on overlay element access
   5. Wrong localStorage theme key (should be 'neutra-ip-theme')
+  6. Overlay click handler missing e.target check (click propagation bug)
+  7. mermaid.run() / mermaid.render() without try-catch (silent errors)
 
 Usage:
     python3 fix_wiki_html.py                      # scan & fix all projects
@@ -39,9 +41,9 @@ class FileFixer:
 
     # ── Fix 1: svg.outerHTML → cloneNode(true) ──────────────
     def fix_outerhtml(self):
-        """Replace svg.outerHTML patterns with cloneNode(true)."""
-        if "cloneNode" in self.text:
-            return  # already uses cloneNode
+        """Replace outerHTML patterns with cloneNode(true)."""
+        if ".outerHTML" not in self.text:
+            return
 
         # Pattern A: zoomInner.innerHTML = svg.outerHTML
         old = "zoomInner.innerHTML = svg.outerHTML"
@@ -64,14 +66,41 @@ class FileFixer:
             self.text = self.text.replace(old3, new3)
             self._log("fix outerHTML → cloneNode (overlayInner pattern)")
 
-        # Pattern D: Generic X.innerHTML=svg.outerHTML  or  X.innerHTML = svg.outerHTML
-        if "svg.outerHTML" in self.text and "cloneNode" not in self.text:
+        # Pattern D: Generic X.innerHTML=Y.outerHTML (covers svg.outerHTML, w.outerHTML, etc.)
+        if ".outerHTML" in self.text and "cloneNode" not in self.text:
             self.text = re.sub(
-                r"(\w+(?:\.\w+)*)\.innerHTML\s*=\s*svg\.outerHTML",
-                lambda m: f"{m.group(1)}.innerHTML='';{m.group(1)}.appendChild(svg.cloneNode(true))",
+                r"(\w+(?:\.\w+)*)\.innerHTML\s*=\s*(\w+(?:\.\w+)*)\.outerHTML",
+                lambda m: f"{m.group(1)}.innerHTML='';{m.group(1)}.appendChild({m.group(2)}.cloneNode(true))",
                 self.text,
             )
-            self._log("fix outerHTML → cloneNode (generic pattern)")
+            if ".outerHTML" not in self.text:
+                self._log("fix outerHTML → cloneNode (generic pattern)")
+
+        # Pattern E: X.innerHTML=Y.querySelector("svg").outerHTML
+        if ".outerHTML" in self.text and "cloneNode" not in self.text:
+            self.text = re.sub(
+                r'(\w+(?:\.\w+)*)\.innerHTML\s*=\s*(\w+(?:\.\w+)*)\.querySelector\(\s*["\']svg["\']\s*\)\.outerHTML',
+                lambda m: (
+                    f"(function(){{var _s={m.group(2)}.querySelector('svg');"
+                    f"{m.group(1)}.innerHTML='';if(_s){m.group(1)}.appendChild(_s.cloneNode(true))}})()"
+                ),
+                self.text,
+            )
+            if ".outerHTML" not in self.text:
+                self._log("fix outerHTML → cloneNode (querySelector pattern)")
+
+        # Pattern F: X.querySelector(sel).innerHTML=Y.outerHTML
+        if ".outerHTML" in self.text:
+            self.text = re.sub(
+                r"(\w+(?:\.\w+)*)\.querySelector\(\s*(['\"][^'\"]+['\"])\s*\)\.innerHTML\s*=\s*(\w+)\.outerHTML",
+                lambda m: (
+                    f"(function(){{var _t={m.group(1)}.querySelector({m.group(2)});"
+                    f"_t.innerHTML='';_t.appendChild({m.group(3)}.cloneNode(true))}})()"
+                ),
+                self.text,
+            )
+            if ".outerHTML" not in self.text:
+                self._log("fix outerHTML → cloneNode (querySelector target pattern)")
 
     # ── Fix 2: Add wheel zoom where missing ──────────────────
     def fix_missing_wheel_zoom(self):
@@ -184,8 +213,12 @@ class FileFixer:
             m = re.search(r'getElementById\([\'"](\w*[Oo]verlay\w*?)[\'"]\)', self.text)
             if m:
                 ov_id = m.group(1)
-                mc = re.search(r'getElementById\([\'"](\w*[Cc]ontent\w*?)[\'"]\)', self.text)
-                content_id = mc.group(1) if mc else None
+                # Look for inner content element (Content, Inner, etc.)
+                mc = re.search(
+                    r'getElementById\([\'"](\w*(?:[Cc]ontent|[Ii]nner)\w*?)[\'"]\)',
+                    self.text,
+                )
+                content_id = mc.group(1) if mc and mc.group(1) != ov_id else None
                 target = content_id or ov_id
                 wheel_code = (
                     f"\nvar _wov=document.getElementById('{ov_id}');"
@@ -202,6 +235,62 @@ class FileFixer:
                 if last_script_close > 0:
                     self.text = self.text[:last_script_close] + wheel_code + self.text[last_script_close:]
                     self._log("inject wheel-zoom (diagram-wrap pattern)")
+                    return
+
+        # Pattern E: Hyphenated overlay id (e.g. 'diagram-overlay')
+        m_hyp = re.search(r'getElementById\([\'"]([a-zA-Z][\w-]*overlay[\w-]*)[\'"]\)', self.text)
+        if m_hyp:
+            ov_id = m_hyp.group(1)
+            # Find inner content element
+            inner_match = re.search(
+                r'getElementById\([\'"](' + re.escape(ov_id) + r'-inner|' + re.escape(ov_id) + r'Inner)[\'"]\)',
+                self.text,
+            )
+            if inner_match:
+                inner_id = inner_match.group(1)
+            else:
+                inner_id = None
+
+            target = inner_id or ov_id
+            wheel_code = (
+                f"\n(function(){{var _ov=document.getElementById('{ov_id}');"
+                + (f"var _c=document.getElementById('{target}');" if inner_id else "var _c=_ov.querySelector('div')||_ov;")
+                + "if(!_ov||!_c)return;"
+                "_ov.addEventListener('wheel',function(e){"
+                "e.preventDefault();"
+                "var s=parseFloat(_c.dataset.scale||'1');"
+                "s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));"
+                "_c.dataset.scale=s;"
+                "_c.style.transform='scale('+s+')';"
+                "},{passive:false});}());\n"
+            )
+            last_script_close = self.text.rfind("</script>")
+            if last_script_close > 0:
+                self.text = self.text[:last_script_close] + wheel_code + self.text[last_script_close:]
+                self._log("inject wheel-zoom (hyphenated overlay pattern)")
+                return
+
+        # Pattern F: Generic overlay by class (e.g. class="overlay" or class="zoom-overlay")
+        m_cls = re.search(r'id="([^"]*overlay[^"]*)"', self.text, re.IGNORECASE)
+        if m_cls:
+            ov_id = m_cls.group(1)
+            wheel_code = (
+                f"\n(function(){{var _ov=document.getElementById('{ov_id}');"
+                "if(!_ov)return;"
+                "var _c=_ov.querySelector('div')||_ov;"
+                "_ov.addEventListener('wheel',function(e){"
+                "e.preventDefault();"
+                "var s=parseFloat(_c.dataset.scale||'1');"
+                "s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));"
+                "_c.dataset.scale=s;"
+                "_c.style.transform='scale('+s+')';"
+                "},{passive:false});}());\n"
+            )
+            last_script_close = self.text.rfind("</script>")
+            if last_script_close > 0:
+                self.text = self.text[:last_script_close] + wheel_code + self.text[last_script_close:]
+                self._log("inject wheel-zoom (generic overlay pattern)")
+                return
 
     # ── Fix 3: Add data-source saving before mermaid.run() ───
     def fix_missing_data_source(self):
@@ -277,6 +366,155 @@ class FileFixer:
         self.fix_missing_data_source()
         self.fix_overlay_null_guard()
         self.fix_theme_key()
+        self.fix_overlay_click_propagation()
+        self.fix_mermaid_silent_errors()
+
+    # ── Fix 6: Overlay click handler missing e.target check ──
+    def fix_overlay_click_propagation(self):
+        """Add e.target check to overlay click handlers that close without it.
+
+        Without the check, clicking *inside* the zoomed diagram (on the SVG)
+        bubbles up and closes the overlay immediately.
+        """
+        pattern_a = re.compile(
+            r"((\w+)\.addEventListener\(\s*'click'\s*,\s*function\s*\(\s*\)\s*\{\s*)"
+            r"(\2\.classList\.remove\(\s*'(?:active|show)'\s*\)\s*;?\s*)"
+            r"(\}\s*\))"
+        )
+        def _repl_a(m):
+            return (
+                f"{m.group(2)}.addEventListener('click',function(e){{"
+                f"if(e.target==={m.group(2)}){m.group(3)}"
+                f"}})"
+            )
+        new_text = pattern_a.sub(_repl_a, self.text)
+        if new_text != self.text:
+            self.text = new_text
+            self._log("fix overlay click propagation (add e.target check)")
+
+    # ── Fix 7: Wrap mermaid.run / mermaid.render in try-catch ─
+    def fix_mermaid_silent_errors(self):
+        """Wrap bare mermaid.run() and mermaid.render() calls in try-catch.
+
+        Prevents rendering failures from silently breaking the page.
+        """
+        if "mermaid" not in self.text:
+            return
+
+        def _inside_try_block(text, pos):
+            """Return True if *pos* sits between a try{ and its }catch."""
+            depth = 0
+            i = pos - 1
+            while i >= 0:
+                ch = text[i]
+                if ch == '{':
+                    depth += 1
+                    if depth == 1:
+                        # Check for "try" before the opening brace (with optional whitespace)
+                        pre = text[max(0, i - 10):i].rstrip()
+                        if pre.endswith('try'):
+                            return True
+                elif ch == '}':
+                    depth -= 1
+                i -= 1
+            return False
+
+        def _find_call_end(text, open_paren_pos):
+            """Find the position after the closing ')' and optional ';'."""
+            depth = 0
+            i = open_paren_pos
+            while i < len(text):
+                ch = text[i]
+                if ch == '(':
+                    depth += 1
+                elif ch == ')':
+                    depth -= 1
+                    if depth == 0:
+                        # skip optional whitespace and semicolon
+                        j = i + 1
+                        while j < len(text) and text[j] in ' \t':
+                            j += 1
+                        if j < len(text) and text[j] == ';':
+                            return j + 1
+                        return i + 1
+                i += 1
+            return -1
+
+        changed_before = self.text
+
+        # Collect all mermaid.run( positions and wrap them
+        # Process in reverse order to preserve positions
+        run_starts = [m.start() for m in re.finditer(r"mermaid\.run\(", self.text)]
+        for pos in reversed(run_starts):
+            paren_pos = self.text.index("(", pos)
+            end = _find_call_end(self.text, paren_pos)
+            if end == -1:
+                continue
+
+            # Determine statement start (include optional prefix)
+            stmt_start = pos
+            # Check for await prefix
+            pre = self.text[max(0, pos - 20):pos]
+            await_match = re.search(r"await\s+$", pre)
+            if await_match:
+                stmt_start = pos - len(pre) + await_match.start()
+            # Check for if(window.mermaid) prefix
+            pre2 = self.text[max(0, stmt_start - 25):stmt_start]
+            if pre2.endswith("if(window.mermaid)"):
+                stmt_start -= len("if(window.mermaid)")
+
+            if _inside_try_block(self.text, stmt_start):
+                continue
+
+            stmt = self.text[stmt_start:end]
+            self.text = (
+                self.text[:stmt_start]
+                + f"try{{{stmt}}}catch(e){{console.warn('mermaid:',e)}}"
+                + self.text[end:]
+            )
+
+        # --- .then(...) without .catch() on mermaid.render ---
+        self.text = re.sub(
+            r"(mermaid\.render\([^)]*\)\.then\([^)]*\))"
+            r"(?!\.catch)",
+            r"\1.catch(function(e){console.warn('mermaid:',e)})",
+            self.text,
+        )
+
+        # --- const{svg}=await mermaid.render(...); without try-catch ---
+        render_starts = [m.start() for m in re.finditer(
+            r"(?:const|var|let)\s*\{[^}]*\}\s*=\s*await\s+mermaid\.render\(",
+            self.text,
+        )]
+        for pos in reversed(render_starts):
+            paren_pos = self.text.index("(", self.text.index("mermaid.render(", pos))
+            end = _find_call_end(self.text, paren_pos)
+            if end == -1:
+                continue
+            if _inside_try_block(self.text, pos):
+                continue
+            stmt = self.text[pos:end]
+            self.text = (
+                self.text[:pos]
+                + f"try{{{stmt}}}catch(e){{console.warn('mermaid:',e)}}"
+                + self.text[end:]
+            )
+
+        # Logging
+        if self.text != changed_before:
+            old_try = len(re.findall(r"try\{", changed_before))
+            new_try = len(re.findall(r"try\{", self.text))
+            old_catch_chain = len(re.findall(r"\.catch\(", changed_before))
+            new_catch_chain = len(re.findall(r"\.catch\(", self.text))
+            added_try = new_try - old_try
+            added_catch = new_catch_chain - old_catch_chain
+            parts = []
+            if added_try:
+                parts.append(f"{added_try} try-catch block(s)")
+            if added_catch:
+                parts.append(f"{added_catch} .catch() chain(s)")
+            if parts:
+                self._log(f"add mermaid error handling: {', '.join(parts)}")
 
     def changed(self) -> bool:
         return self.text != self.original
@@ -309,6 +547,52 @@ def scan_issues(path: Path, text: str) -> list[str]:
         theme_keys = [k for k in keys if "theme" in k.lower()]
         if theme_keys and not all(k == REQUIRED_THEME_KEY for k in theme_keys):
             issues.append(f"{rel}: wrong theme key: {set(theme_keys)}")
+
+    # Check for overlay click handler missing e.target guard
+    if re.search(
+        r"\w+\.addEventListener\(\s*'click'\s*,\s*function\s*\(\s*\)\s*\{"
+        r"\s*\w+\.classList\.remove\(\s*'(?:active|show)'\s*\)",
+        text,
+    ):
+        issues.append(f"{rel}: overlay click handler missing e.target check")
+
+    # Check for mermaid.run / mermaid.render without try-catch
+    if "mermaid.run" in text or "mermaid.render" in text:
+        def _inside_try(text, pos):
+            depth = 0
+            i = pos - 1
+            while i >= 0:
+                ch = text[i]
+                if ch == '{':
+                    depth += 1
+                    if depth == 1:
+                        pre = text[max(0, i - 10):i].rstrip()
+                        if pre.endswith('try'):
+                            return True
+                elif ch == '}':
+                    depth -= 1
+                i -= 1
+            return False
+
+        has_unguarded = False
+        for m in re.finditer(r"(?:await\s+)?mermaid\.run\(", text):
+            if not _inside_try(text, m.start()):
+                has_unguarded = True
+                break
+        if not has_unguarded and re.search(
+            r"mermaid\.render\([^)]*\)\.then\([^)]*\)(?!\.catch)", text
+        ):
+            has_unguarded = True
+        if not has_unguarded:
+            for m in re.finditer(
+                r"(?:const|var|let)\s*\{[^}]*\}\s*=\s*await\s+mermaid\.render\(",
+                text,
+            ):
+                if not _inside_try(text, m.start()):
+                    has_unguarded = True
+                    break
+        if has_unguarded:
+            issues.append(f"{rel}: mermaid call(s) without error handling")
 
     return issues
 
