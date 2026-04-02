@@ -1,0 +1,53 @@
+# Core Modules Research
+
+## Root-Level Files
+- main.tsx: CLI entry point, REPL bootstrap, arg parsing, telemetry init
+- setup.ts: System init (worktrees, terminal backups, hooks, permissions)
+- commands.ts: Slash command registry (100+ commands), getCommands(), findCommand()
+- tools.ts: Tool registry, getAllBaseTools(), getTools(), assembleToolPool(), filterToolsByDenyRules()
+- tasks.ts: Task type registry, getAllTasks(), getTaskByType()
+- context.ts: System/user context injection, getSystemContext(), getUserContext(), getGitStatus()
+- query.ts: Core query engine, API calls, message processing, tool execution, streaming, compaction
+- QueryEngine.ts: Message builder and API orchestration
+- history.ts: Prompt history persistence, addToHistory(), getHistory()
+- Task.ts: Task types (local_bash, local_agent, remote_agent, dream), TaskStatus
+- Tool.ts: Core tool interface, ToolPermissionContext, ToolUseContext, buildTool()
+- ink.ts: Terminal UI rendering wrapper (Ink React with theme provider)
+- cost-tracker.ts: Token/cost accounting per model
+- costHook.ts: React hook for cost summary display
+- projectOnboardingState.ts: First-time project setup progress tracking
+- dialogLaunchers.tsx: Dialog/modal launcher functions
+- replLauncher.tsx: Lazy REPL component loader
+- interactiveHelpers.tsx: UI rendering utilities, setup screens
+
+## Small Modules
+- hooks/ (104 files): React hooks for REPL state (useLogMessages, useCommandQueue, useArrowKeyHistory, useInputBuffer, useDiffData, useVirtualScroll)
+- ink/ (96 files): Terminal UI lib (render, reconciler, optimizer, Box, Text, Button, Link, focus mgmt)
+- bridge/ (31 files): Remote Control integration (claude.ai cloud sessions, JWT, permissions)
+- cli/ (19 files): CLI output formatting, structured I/O (NDJSON), exit codes
+- tasks/ (12 files): Background task management (bash, agents, workflows)
+- skills/ (20 files): Custom skill/macro system, bundled skills, MCP skill builders
+- constants/ (21 files): Tools, prompts, messages, system, apiLimits, betas, xml constants
+- keybindings/ (14 files): Keyboard shortcuts (vim/emacs defaults, parser, resolver, schema)
+- types/ (11 files): Shared types (message, permissions, command, hooks, ids, plugin)
+- migrations/ (11 files): Data schema migrations (model defaults, settings restructure)
+- context/ (9 files): React Context providers (AppState, Mailbox, Notifications, Voice, FPS)
+- entrypoints/ (8 files): App init, CLI renderer, MCP server bootstrap
+- memdir/ (8 files): In-memory MEMORY.md file management
+- state/ (6 files): Zustand store + React Context (AppStateStore, selectors)
+- buddy/ (6 files): AI companion sprite/UI
+- remote/ (4 files): Remote session management (CCR)
+- server/ (3 files): Direct Connect server mode
+- screens/ (3 files): REPL, ResumeConversation, Doctor screens
+- vim/ (5 files): Vim mode (motions, operators, text objects, transitions)
+- plugins/ (2 files): Plugin system bootstrap
+- native-ts/ (4 files): Native TypeScript LSP integration
+- upstreamproxy/ (2 files): HTTP proxy relay for MCP
+- schemas/ (1 file): JSON Schema for hooks
+- voice/ (1 file): Voice mode feature gate
+- assistant/ (1 file): Assistant session history
+- bootstrap/ (1 file): Runtime singleton state
+- coordinator/ (1 file): Coordinator agent mode
+- moreright/ (1 file): Right-side panel hook
+- outputStyles/ (1 file): Output style definitions
+- query/ (4 files): Query config, token budget, stop hooks

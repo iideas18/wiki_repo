@@ -185,7 +185,7 @@ fi
 
 # === Timestamps & paths ===
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-OUTPUT_DIR="${OUTPUT_BASE}/${PROJECT_NAME}_${TIMESTAMP}"
+OUTPUT_DIR="${OUTPUT_BASE}/${PROJECT_NAME}/${TIMESTAMP}"
 LOG_FILE="${LOG_DIR}/wiki_gen_${PROJECT_NAME}_${TIMESTAMP}.log"
 
 # === Phase 1 cache check ===
@@ -194,10 +194,15 @@ CACHE_DIR=""
 CACHE_STATUS="MISS"
 
 find_latest_cache() {
-  _pattern="${OUTPUT_BASE}/${PROJECT_NAME}_*"
-  for dir in $(ls -dt $_pattern 2>/dev/null); do
+  _proj_dir="${OUTPUT_BASE}/${PROJECT_NAME}"
+  if [ ! -d "$_proj_dir" ]; then return 1; fi
+  for dir in $(ls -dt "$_proj_dir"/[0-9]*_[0-9]* 2>/dev/null); do
     if [ -f "$dir/docs/_research/_manifest.json" ]; then
       echo "$dir/docs"
+      return 0
+    fi
+    if [ -f "$dir/_research/_manifest.json" ]; then
+      echo "$dir"
       return 0
     fi
   done
@@ -285,6 +290,7 @@ fi
   echo "  Clone dir:   $CLONE_DIR"
   fi
   echo "  Copilot:     $COPILOT_BIN"
+  echo "  Prompt:      $PROMPT"
   echo "---"
 } >> "$LOG_FILE"
 
@@ -312,15 +318,30 @@ find "$LOG_DIR" -name "wiki_gen_*.log" -mtime +"$LOG_RETENTION_DAYS" -delete 2>/
 
 # === Prune old wiki snapshots ===
 if [ "$KEEP_SNAPSHOTS" -gt 0 ]; then
-  ls -dt "${OUTPUT_BASE}/${PROJECT_NAME}_"* 2>/dev/null \
-    | tail -n +"$((KEEP_SNAPSHOTS + 1))" \
-    | xargs rm -rf 2>/dev/null || true
+  _proj_dir="${OUTPUT_BASE}/${PROJECT_NAME}"
+  if [ -d "$_proj_dir" ]; then
+    ls -dt "$_proj_dir"/[0-9]*_[0-9]* 2>/dev/null \
+      | tail -n +"$((KEEP_SNAPSHOTS + 1))" \
+      | xargs rm -rf 2>/dev/null || true
+  fi
 fi
 
 # === Summary ===
 if [ $EXIT_CODE -eq 0 ]; then
   PAGE_COUNT=$(find "$OUTPUT_DIR" -name '*.html' 2>/dev/null | wc -l)
   echo "[OK] Wiki generated: $OUTPUT_DIR ($PAGE_COUNT pages)"
+
+  # === Post-generation: update versions.json and inject version switcher ===
+  GEN_VERSIONS="${OUTPUT_BASE}/generate_versions.py"
+  INJ_SWITCHER="${OUTPUT_BASE}/inject_version_switcher.py"
+  if [ -f "$GEN_VERSIONS" ]; then
+    echo "[INFO] Regenerating versions.json for $PROJECT_NAME ..."
+    python3 "$GEN_VERSIONS" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
+  fi
+  if [ -f "$INJ_SWITCHER" ]; then
+    echo "[INFO] Injecting version switcher for $PROJECT_NAME ..."
+    python3 "$INJ_SWITCHER" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
+  fi
 else
   echo "[FAIL] Wiki generation failed (exit $EXIT_CODE). See $LOG_FILE" >&2
 fi

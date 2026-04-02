@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="claude-code-sourcemap/restored-src/src/tools/BashTool">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>tools BashTool — Shell Command Execution Tool</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../../index.html">Claude Code</a> &rsaquo; <a title="tools — Agent Tool Framework" href="../index.html">tools</a> &rsaquo; <span>BashTool</span></nav>
+
+<main id="main">
+<h1><a title="tools — Agent Tool Framework" href="../index.html">tools</a>/BashTool/ &mdash; Shell Command Execution Tool</h1>
+<div class="hero">
+  <p class="subtitle">Executes shell <a title="commands — Slash Command System" href="../../commands_doc/index.html">commands</a> in the user&rsquo;s terminal with streaming output and security validation</p>
+  <p>Core of the agentic coding workflow &mdash; runs builds, tests, <a title="utils git — Git Operations Utilities" href="../../utils_doc/git/index.html">git</a> commands, file operations, and arbitrary shell invocations. Handles streaming output, timeouts, working directory management, sandboxing, and a multi-layered security stack that validates every command before execution.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">18</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">60+</div><div class="label">Exported Functions</div></div>
+  <div class="stat-box"><div class="num">~10.9k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">7</div><div class="label">Validation Layers</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>BashTool is the primary way Claude Code interacts with the user&rsquo;s operating system. When the AI needs to run a build, execute tests, install packages, or perform any shell operation, it invokes BashTool. The tool streams output back in real-time, handles timeouts for long-running processes, and enforces strict security rules to prevent destructive or malicious commands.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of BashTool as a remote control for your terminal &mdash; the AI can press buttons, but security guards (permission layers) check each command first. Just like a hotel concierge who can call any department on your behalf, but only after verifying your room key and making sure you&rsquo;re not asking them to open someone else&rsquo;s safe. The concierge (BashTool) can run errands in the background, report back with results, and even switch departments (working directories), but always within the boundaries of what&rsquo;s allowed.</p>
+</details>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  A["AgentLoop / Model"] -->|"tool_use: Bash"| B["BashTool.call()"]
+  B --> C{"validateInput()"}
+  C -->|"invalid"| D["Return error + errorCode"]
+  C -->|"valid"| E{"checkPermissions()"}
+  E -->|"deny"| F["Permission denied"]
+  E -->|"ask"| G["User confirmation dialog"]
+  E -->|"allow"| H["runShellCommand()"]
+  G -->|"approved"| H
+  H --> I["Streaming output via async generator"]
+  I --> J{"Timeout / background?"}
+  J -->|"background"| K["Register background task"]
+  J -->|"complete"| L["interpretCommandResult()"]
+  L --> M["Format + return stdout/stderr"]
+</pre>
+</div>
+
+<h3 id="security-stack">Security Validation Stack</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  CMD["Command string"] --> MV["modeValidation"]
+  MV --> PV["pathValidation"]
+  PV --> SV["sedValidation"]
+  SV --> RO["readOnlyValidation"]
+  RO --> CS["commandSemantics"]
+  CS --> OP["operatorPermissions"]
+  OP --> SB{"shouldUseSandbox?"}
+  SB -->|"yes"| SX["Sandbox execution"]
+  SB -->|"no"| DX["Direct execution"]
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>BashTool</code></td><td>BashTool.tsx</td><td>Main tool definition via <code>buildTool()</code>; defines input/output schema, call(), validateInput(), checkPermissions()</td></tr>
+  <tr><td><code>bashToolHasPermission()</code></td><td>bashPermissions.ts</td><td>Primary permission entry point combining mode checks, classifier, exact/wildcard matching, subcommand analysis</td></tr>
+  <tr><td><code>checkCommandAndSuggestRules()</code></td><td>bashPermissions.ts</td><td>Evaluates command against permission rules and suggests new rules for compound commands</td></tr>
+  <tr><td><code>bashCommandIsSafeAsync_DEPRECATED()</code></td><td>bashSecurity.ts</td><td>Async safety validation with 23+ injection detection checks (zsh attacks, escape sequences, IFS injection)</td></tr>
+  <tr><td><code>checkCommandOperatorPermissions()</code></td><td>bashCommandHelpers.ts</td><td>Validates pipes, <code>&amp;&amp;</code>, <code>||</code> operators; detects cd+git across pipe segments</td></tr>
+  <tr><td><code>interpretCommandResult()</code></td><td>commandSemantics.ts</td><td><a href="../../types/index.html" title="types — Shared TypeScript Definitions" class="xref">Command</a>-specific exit code mapping (grep: 1=no matches; diff: 1=differs; test: 1=false)</td></tr>
+  <tr><td><code>checkPermissionMode()</code></td><td>modeValidation.ts</td><td>Mode-based auto-approval for safe filesystem commands (mkdir, touch, rm, cp, sed)</td></tr>
+  <tr><td><code>checkPathConstraints()</code></td><td>pathValidation.ts</td><td>Validates file paths for 35+ commands; blocks dangerous paths like <code>rm -rf /</code></td></tr>
+  <tr><td><code>parseSedEditCommand()</code></td><td>sedEditParser.ts</td><td>Parses sed commands, converts BRE to ERE regex, supports -i and -E flags</td></tr>
+  <tr><td><code>sedCommandIsAllowedByAllowlist()</code></td><td>sedValidation.ts</td><td>Allowlists safe sed patterns: print commands and substitutions with safe flags only</td></tr>
+  <tr><td><code>checkReadOnlyConstraints()</code></td><td>readOnlyValidation.ts</td><td>Flag whitelisting for git, docker, gh, pyright, ripgrep in read-only mode</td></tr>
+  <tr><td><code>shouldUseSandbox()</code></td><td>shouldUseSandbox.ts</td><td>Multi-level <a title="utils sandbox — Sandbox Isolation System" href="../../utils_doc/sandbox/index.html">sandbox</a> decision: system setting &rarr; override &rarr; dynamic <a title="commands config — Configuration Management Commands" href="../../commands_doc/config/index.html">config</a> &rarr; user config</td></tr>
+  <tr><td><code>getSimplePrompt()</code></td><td>prompt.ts</td><td>System prompt with background task usage, commit instructions, sandbox rules</td></tr>
+  <tr><td><code>formatOutput()</code></td><td><a title="utils — Core Utility Library" href="../../utils_doc/index.html">utils</a>.ts</td><td>Truncates output to max length with line count; strips empty lines</td></tr>
+  <tr><td><code>resetCwdIfOutsideProject()</code></td><td>utils.ts</td><td>Validates and resets working directory if it escaped project boundaries</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th><a href="../AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Type</a></th><th>Name</th><th>Description</th></tr>
+  <tr><td><a href="../AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Input</a> schema</td><td><code>command</code></td><td>Shell command string to execute</td></tr>
+  <tr><td>Input schema</td><td><code>timeout</code></td><td>Optional execution timeout in milliseconds</td></tr>
+  <tr><td>Input schema</td><td><code>description</code></td><td>Human-readable description of command intent</td></tr>
+  <tr><td>Input schema</td><td><code>run_in_background</code></td><td>Boolean flag for background task execution</td></tr>
+  <tr><td>Input schema</td><td><code>dangerouslyDisableSandbox</code></td><td>Override flag to skip sandboxing</td></tr>
+  <tr><td><a href="../AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Output</a></td><td><code>stdout / stderr</code></td><td>Captured command output streams</td></tr>
+  <tr><td>Output</td><td><code>interrupted</code></td><td>Whether command was terminated by timeout</td></tr>
+  <tr><td>Output</td><td><code>returnCodeInterpretation</code></td><td>Semantic meaning of exit code per command type</td></tr>
+  <tr><td>Output</td><td><code>backgroundTaskId</code></td><td>Task ID if moved to background execution</td></tr>
+  <tr><td>Enum</td><td><code>PermissionResult</code></td><td><code>allow | deny | ask</code> &mdash; permission check outcome</td></tr>
+  <tr><td><a title="constants — Centralized Constant Definitions" href="../../constants/index.html">Constants</a></td><td><code>BASH_SEARCH_COMMANDS</code></td><td>8 commands classified as search operations (grep, rg, find, etc.)</td></tr>
+  <tr><td>Constants</td><td><code>BASH_READ_COMMANDS</code></td><td>15 commands classified as read-only file operations</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td>Shell / exec</td><td><code>runShellCommand()</code></td><td>Executes command in user&rsquo;s shell via async generator, yielding streaming output</td></tr>
+  <tr><td>&rarr;</td><td>Sandbox adapter</td><td><code>sandbox-adapter.js</code></td><td>Routes risky commands to container-based sandbox for safe execution</td></tr>
+  <tr><td>&rarr;</td><td>Permission system</td><td><code>ToolPermissionContext</code></td><td>Queries allow/deny rules, user confirmation dialogs</td></tr>
+  <tr><td>&rarr;</td><td>Git tracking</td><td><code>gitOperationTracking.ts</code></td><td>Records commits, branch actions, PR operations performed via bash</td></tr>
+  <tr><td>&rarr;</td><td>Analytics</td><td><code>logEvent()</code></td><td>Telemetry for command execution, permission outcomes</td></tr>
+  <tr><td>&larr;</td><td>AgentLoop</td><td><code>tool_use</code> block</td><td>Receives command invocation from model&rsquo;s tool call</td></tr>
+  <tr><td>&larr;</td><td><a title="tools AgentTool — Sub-Agent Orchestration Tool" href="../AgentTool/index.html">AgentTool</a></td><td><code>filterToolsForAgent()</code></td><td>Sub-<a title="components agents — Agent UI Components" href="../../components_doc/agents/index.html">agents</a> may include BashTool in their filtered tool set</td></tr>
+  <tr><td>&rarr;</td><td>Task system</td><td><code>LocalAgentTask</code></td><td>Background commands registered as async <a title="tasks — Background Task Management" href="../../tasks/index.html">tasks</a> with progress streaming</td></tr>
+  <tr><td>&rarr;</td><td><a title="tools FileEditTool — Intelligent File Editing Tool" href="../FileEditTool/index.html">FileEditTool</a></td><td><code>sedEditParser</code></td><td>Sed edits can be simulated via <a href="../FileEditTool/index.html" title="tools FileEditTool — Intelligent File Editing Tool" class="xref">FileEditTool</a> for diff-tracked modifications</td></tr>
+</table>
+
+<h3 id="permission-flow">Permission Resolution Flow</h3>
+<p>The permission system uses a fail-closed strategy where commands must be explicitly allowed. The resolution order is:</p>
+<ol>
+<li><strong>Mode auto-approval</strong> &mdash; In <code>acceptEdits</code> mode, safe filesystem commands (mkdir, touch, rm, rmdir, mv, cp, sed) are auto-approved</li>
+<li><strong>Classifier evaluation</strong> &mdash; Async risk assessment classifier evaluates command semantics</li>
+<li><strong>Exact rule matching</strong> &mdash; User-defined rules checked for exact command string match</li>
+<li><strong>Wildcard/prefix matching</strong> &mdash; Glob-style pattern rules evaluated against normalized command</li>
+<li><strong>Operator decomposition</strong> &mdash; Compound commands (<code>&&</code>, <code>||</code>, pipes) split and each segment validated</li>
+<li><strong>Subcommand analysis</strong> &mdash; Up to 50 subcommands analyzed with suggested rules for compounds</li>
+<li><strong>User confirmation</strong> &mdash; If no rule matches, prompt user for explicit approval</li>
+</ol>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>timeout</code></td><td>60s</td><td>Default command execution timeout; configurable per invocation</td></tr>
+  <tr><td><code>PROGRESS_THRESHOLD</code></td><td>2000ms</td><td>Minimum interval between streaming progress updates to UI</td></tr>
+  <tr><td><code>ASSISTANT_BLOCKING_BUDGET</code></td><td>15000ms</td><td>Max time before auto-backgrounding a long-running command</td></tr>
+  <tr><td><code>MAX_SUBCOMMANDS_FOR_SECURITY_CHECK</code></td><td>50</td><td>Maximum subcommands analyzed in compound command security check</td></tr>
+  <tr><td><code>MAX_SUGGESTED_RULES_FOR_COMPOUND</code></td><td>5</td><td>Maximum permission rules suggested for compound commands</td></tr>
+  <tr><td><code>maxResultSizeChars</code></td><td>30KB</td><td>Output exceeding this is persisted to disk; model gets preview + path</td></tr>
+  <tr><td><code>shouldUseSandbox()</code></td><td>dynamic</td><td>Multi-level: system &rarr; override flag &rarr; dynamic config &rarr; user config</td></tr>
+  <tr><td><code>acceptEdits</code> mode commands</td><td>6 commands</td><td>Auto-approved in acceptEdits mode: mkdir, touch, rm, rmdir, mv, cp, sed</td></tr>
+  <tr><td><code>ZSH_DANGEROUS_COMMANDS</code></td><td>30+ commands</td><td>Blocked zsh builtins: zmodload, sysopen, sysread, ztcp, zsocket, zpty, etc.</td></tr>
+  <tr><td><code>BASH_SILENT_COMMANDS</code></td><td>11 commands</td><td>Commands whose output is collapsed in the UI for cleaner display</td></tr>
+  <tr><td><code>CLAUDE_CODE_SIMPLE</code></td><td>false</td><td>Env var: when true, restricts to Bash/Read/Edit tools only</td></tr>
+  <tr><td><code>_simulatedSedEdit</code></td><td>unset</td><td>Internal input field: routes sed edits through FileEditTool for diff tracking</td></tr>
+</table>
+
+<h3 id="exit-code-semantics">Command-Specific Exit Code Semantics</h3>
+<p>BashTool interprets exit codes differently depending on the command, preventing false &ldquo;error&rdquo; reports for commands where non-zero codes are normal:</p>
+<table>
+  <tr><th>Command</th><th>Exit 0</th><th>Exit 1</th><th>Exit &ge;2</th></tr>
+  <tr><td><code>grep</code> / <code>rg</code></td><td>Matches found</td><td>No matches (not an error)</td><td>Actual error</td></tr>
+  <tr><td><code>diff</code></td><td>Files identical</td><td>Files differ (expected)</td><td>Actual error</td></tr>
+  <tr><td><code>test</code> / <code>[</code></td><td>Condition true</td><td>Condition false</td><td>Actual error</td></tr>
+  <tr><td><code>find</code></td><td>Success</td><td>Partial results</td><td>Actual error</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for BashTool</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>BashTool/
+├── BashTool.tsx                  ← Main tool definition: call(), validateInput(), checkPermissions()
+├── BashToolResultMessage.tsx     ← React component for rendering command output in UI
+├── UI.tsx                        ← Tool use message rendering, user-facing name logic
+├── bashCommandHelpers.ts         ← Operator permission checking for pipes, &&, ||
+├── bashPermissions.ts            ← Primary permission layer (2621 LOC): rule matching, classifier
+├── bashSecurity.ts               ← Injection detection (2592 LOC): 23+ async safety checks
+├── commandSemantics.ts           ← Exit code interpretation per command type (grep, diff, test)
+├── commentLabel.ts               ← UI label generation for command display
+├── destructiveCommandWarning.ts  ← Warning messages for destructive operations
+├── modeValidation.ts             ← Permission mode auto-approval for safe filesystem commands
+├── pathValidation.ts             ← File path validation for 35+ commands (1303 LOC)
+├── prompt.ts                     ← System prompt: background tasks, git, sandbox instructions
+├── readOnlyValidation.ts         ← Flag whitelisting for read-only mode (1990 LOC)
+├── sedEditParser.ts              ← Sed command parsing, BRE→ERE regex conversion
+├── sedValidation.ts              ← Sed pattern allowlisting (print + substitution only)
+├── shouldUseSandbox.ts           ← Multi-level sandboxing decision logic
+├── toolName.ts                   ← Tool name constant and aliases
+└── utils.ts                      ← Output formatting, image handling, CWD reset
+</code></pre>
+</details>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core mechanisms from BashTool have been extracted into dedicated focus pages for in-depth exploration. Each page covers one algorithm, protocol, or subsystem with diagrams, code walks, and configuration details.</p>
+<h4>Deep-Dive Pages</h4>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="permission_system/index.html" title="Permission System — Deep Dive">
+    <h4>Permission System <span class="focus-badge">Focus</span></h4>
+    <p>Multi-layer permission checking: mode validation, classifier evaluation, exact/wildcard rule matching, subcommand analysis, and rule suggestion generation.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="security_validation/index.html" title="Security Validation — Deep Dive">
+    <h4>Security &amp; Injection Detection <span class="focus-badge">Focus</span></h4>
+    <p>23+ async safety checks: command substitution, zsh attacks, escape sequences, IFS injection, unicode whitespace, and process substitution detection.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="sandbox_execution/index.html" title="Sandbox Execution — Deep Dive">
+    <h4>Sandbox Execution <span class="focus-badge">Focus</span></h4>
+    <p>Container-based sandboxing decision logic, exclusion patterns, wrapper stripping, and the multi-level configuration cascade from system to user settings.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="streaming_output/index.html" title="Streaming Output — Deep Dive">
+    <h4>Streaming &amp; Background Tasks <span class="focus-badge">Focus</span></h4>
+    <p>Async generator-based output streaming, progress throttling, auto-background after blocking budget, large output persistence to disk, and image data URI handling.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+</div>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Permission Flow Entry Point</h3>
+<pre><code class="language-typescript">// bashPermissions.ts — Main permission entry point
+export async function bashToolHasPermission(
+  input: { command: string; timeout?: number },
+  context: ToolPermissionContext,
+): Promise&lt;PermissionResult&gt; {
+  // 1. Mode-based auto-approval (acceptEdits allows mkdir, touch, rm, etc.)
+  const modeResult = checkPermissionMode(input.command, context);
+  if (modeResult) return modeResult;
+
+  // 2. Async classifier evaluation for risk assessment
+  const classifierResult = await evaluateClassifier(input, context);
+  if (classifierResult.behavior === 'deny') return classifierResult;
+
+  // 3. Exact command matching against user-defined rules
+  const exactMatch = matchExactRule(input.command, context.rules);
+  if (exactMatch) return exactMatch;
+
+  // 4. Operator permission checking (pipes, &&, ||)
+  const operatorResult = checkCommandOperatorPermissions(input.command, context);
+  if (operatorResult.behavior !== 'allow') return operatorResult;
+
+  // 5. Subcommand analysis for compound commands
+  return checkCommandAndSuggestRules(input.command, context);
+}
+</code></pre>
+
+<h3>Example: Command Exit Code Interpretation</h3>
+<pre><code class="language-typescript">// commandSemantics.ts — Semantic exit code mapping
+export function interpretCommandResult(
+  command: string,
+  exitCode: number,
+): string | undefined {
+  const baseCmd = command.split(/\s+/)[0];
+  switch (baseCmd) {
+    case 'grep': case 'rg':
+      // 0 = matches found, 1 = no matches (not an error), ≥2 = real error
+      if (exitCode === 1) return 'No matches found (not an error)';
+      if (exitCode >= 2) return 'Error occurred during search';
+      break;
+    case 'diff':
+      // 0 = identical, 1 = differences found, ≥2 = error
+      if (exitCode === 1) return 'Files differ (expected behavior)';
+      break;
+    case 'test': case '[':
+      // 0 = condition true, 1 = condition false, ≥2 = error
+      if (exitCode === 1) return 'Condition evaluated to false';
+      break;
+  }
+  return undefined;
+}
+</code></pre>
+
+<div class="footer"><a title="tools — Agent Tool Framework" href="../index.html">&larr; Back to tools Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "source_sha": "a8a678c",
+  "source_file_count": 1902,
+  "source_path": ".git-clones/claude-code-sourcemap/restored-src/src",
+  "cache_date": "2026-04-01",
+  "depth": "3-level",
+  "lang": "typescript",
+  "modules": ["tools","commands","services","components","utils","hooks","ink","bridge","cli","tasks","skills","constants","keybindings","types","state","context","entrypoints","memdir","migrations","server","screens","remote","buddy","vim","plugins","native-ts","upstreamproxy","schemas","voice","assistant","bootstrap","coordinator","moreright","outputStyles","query"]
+}

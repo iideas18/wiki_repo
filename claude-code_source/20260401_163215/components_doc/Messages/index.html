@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="src/components/Messages/">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>components Messages — Message Rendering System</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../../index.html">Claude Code</a> &rsaquo; <a title="components — Terminal UI Component Library" href="../index.html">components</a> &rsaquo; <span>Messages</span></nav>
+
+<main id="main">
+<h1><a title="components — Terminal UI Component Library" href="../index.html">components</a>/Messages/ &mdash; Message Rendering System</h1>
+<div class="hero">
+  <p class="subtitle">Renders the conversation thread with virtual scrolling and streaming support</p>
+  <p>The Messages system is a sophisticated React component hierarchy that normalizes, groups, virtualizes, and renders every message in the Claude Code REPL. It handles 15+ message <a title="types — Shared TypeScript Definitions" href="../../types/index.html">types</a>, streaming tool output, collapsible groups, and incremental search across conversations of any size.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">15+</div><div class="label">Message Types</div></div>
+  <div class="stat-box"><div class="num">8</div><div class="label">Core Files</div></div>
+  <div class="stat-box"><div class="num">~3.4 k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">60</div><div class="label">Virtual Window</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The Messages system takes raw <a title="services api — Anthropic API Client Service" href="../../services_doc/api/index.html">API</a> responses and turns them into the scrollable conversation you see in the terminal. It merges streaming partial updates with stored messages, groups related tool operations together, and uses virtual scrolling so even a 2,800-message conversation stays smooth. Think of it as the display engine that translates the AI's internal data into something a human can read and interact with.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine a live news ticker on a TV screen. Raw feeds arrive from dozens of reporters (message types), a producer groups related stories (message grouping), the ticker only shows a few lines at a time but you can scroll back (virtual scrolling), and breaking news appears letter-by-letter as it streams in (streaming deltas). The Messages system is that entire broadcast pipeline—from raw wire feeds to polished, scrollable on-screen text.</p>
+</details>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<p>The Messages system follows a pipeline architecture: raw API messages flow through normalization, grouping, and synthesis stages before reaching the renderer. The decision between virtualized and static rendering is made based on message count.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  API["Raw API Messages"] --> N["normalizeMessages()"]
+  SD["Streaming Deltas"] --> SYN["syntheticStreamingToolUseMessages"]
+  N --> GRP["applyGrouping()\ncollapseReadSearchGroups()"]
+  SYN --> GRP
+  GRP --> RM["renderableMessages[]"]
+  RM --> VML["VirtualMessageList\n(~60 visible items)"]
+  RM --> MAP[".map() fallback\n(< 200 messages)"]
+  VML --> MR["MessageRow\n(React.memo)"]
+  MAP --> MR
+  MR --> MSG["Message\n(type dispatcher)"]
+  MSG --> ATM["AssistantTextMessage"]
+  MSG --> ATH["AssistantThinkingMessage"]
+  MSG --> ATU["AssistantToolUseMessage"]
+  MSG --> UTM["UserTextMessage"]
+  MSG --> CRS["CollapsedReadSearchContent"]
+  MSG --> GTC["GroupedToolUseContent"]
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<p>The Messages system is composed of highly optimized React components that work together to render, virtualize, and manage user interactions with the conversation thread.</p>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>Messages</code></td><td>Messages.tsx</td><td>Container: normalizes, groups, synthesizes, and renders the full message list</td></tr>
+  <tr><td><code>VirtualMessageList</code></td><td>VirtualMessageList.tsx</td><td>Virtualized renderer with incremental search, cursor nav, and sticky prompt header</td></tr>
+  <tr><td><code>MessageRow</code></td><td>MessageRow.tsx</td><td>Per-message wrapper with metadata computation and custom memo comparator</td></tr>
+  <tr><td><code>Message</code></td><td>Message.tsx</td><td><a href="../../tools_doc/AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Type</a> dispatcher routing to 7+ specialized message renderers via switch</td></tr>
+  <tr><td><code>MessageResponse</code></td><td>MessageResponse.tsx</td><td>Indents tool results with ⎿ character; context prevents double-nesting</td></tr>
+  <tr><td><code>MessageActionsBar</code></td><td>messageActions.tsx</td><td>Keyboard action dispatch: copy, edit, expand messages via j/k/Enter/c</td></tr>
+  <tr><td><code>hasContentAfterIndex</code></td><td>MessageRow.tsx</td><td>Forward scanner computing whether "real" content follows a given message</td></tr>
+  <tr><td><code>filterForBriefTool</code></td><td>Messages.tsx</td><td>Brief-mode filtering: suppresses non-essential tool output</td></tr>
+  <tr><td><code>computeSliceStart</code></td><td>Messages.tsx</td><td>Calculates where to start rendering when conversation is collapsed</td></tr>
+  <tr><td><code>hasThinkingContent</code></td><td>Message.tsx</td><td>Checks if a message contains thinking/redacted_thinking content blocks</td></tr>
+  <tr><td><code>areMessagePropsEqual</code></td><td>Message.tsx</td><td>Custom React.memo comparator avoiding prop spreading (saves ~1-2 MB)</td></tr>
+  <tr><td><code>JumpHandle</code></td><td>VirtualMessageList.tsx</td><td>Imperative API: jumpToIndex, setSearchQuery, nextMatch, prevMatch, warmSearchIndex</td></tr>
+  <tr><td><code>MessageSelector</code></td><td>MessageSelector.tsx</td><td><a href="../index.html" title="components — Terminal UI Component Library" class="xref">Dialog</a> for restoring, continuing from, or summarizing historical messages</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<p>The Messages system uses a rich type hierarchy to represent the 15+ message types that flow through the rendering pipeline. The <code>RenderableMessage</code> union type is the primary abstraction consumed by the renderer.</p>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>union</td><td><code>RenderableMessage</code></td><td>NormalizedUserMessage | <a href="../../types/index.html" title="types — Shared TypeScript Definitions" class="xref">AssistantMessage</a> | AttachmentMessage | SystemMessage | GroupedToolUseMessage | CollapsedReadSearchGroup</td></tr>
+  <tr><td>interface</td><td><code>Props</code> (Message)</td><td>26-field props including message, lookups, <a title="tools — Agent Tool Framework" href="../../tools_doc/index.html">tools</a>, inProgressToolUseIDs, shouldAnimate</td></tr>
+  <tr><td>type</td><td><code>StreamingToolUse</code></td><td>Partial tool_use with streaming JSON input and content block metadata</td></tr>
+  <tr><td>type</td><td><code>JumpHandle</code></td><td>Imperative ref API for search navigation: jumpToIndex, warmSearchIndex, nextMatch</td></tr>
+  <tr><td>type</td><td><code>MessageActionsState</code></td><td>Cursor <a title="state — Zustand State Management" href="../../state/index.html">state</a>: { uuid, msgType, expanded, toolName? }</td></tr>
+  <tr><td>type</td><td><code>NavigableType</code></td><td>Union of message types eligible for cursor navigation</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<p>The Messages system interacts with multiple upstream and downstream modules. It consumes raw messages and streaming state, and delegates rendering, navigation, and user actions to specialized sub-components.</p>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&larr;</td><td>ConversationEngine</td><td><code>messages[]</code></td><td>Receives raw message array from API/state</td></tr>
+  <tr><td>&larr;</td><td>StreamingState</td><td><code>streamingToolUses</code></td><td>Partial tool-use deltas merged into synthetic messages</td></tr>
+  <tr><td>&rarr;</td><td>MessageResponse</td><td><code>MessageResponseContext</code></td><td>Provides nesting context to prevent double ⎿ indentation</td></tr>
+  <tr><td>&rarr;</td><td>messageActions</td><td><code>MessageActionsNav</code></td><td>Cursor navigation and action dispatch for keyboard users</td></tr>
+  <tr><td>&rarr;</td><td>ScrollBox (<a title="ink — Terminal Rendering Engine" href="../../ink/index.html">Ink</a>)</td><td><code>scrollRef</code></td><td>Controls terminal scroll position for auto-scroll and jump</td></tr>
+  <tr><td>&rarr;</td><td>MessageSelector</td><td><code>onRestoreMessage()</code></td><td>Restores conversation from a historical user message</td></tr>
+</table>
+
+<h2 id="streaming">Streaming Data Flow</h2>
+<p>The streaming pipeline is the most complex aspect of the Messages system. Raw API deltas arrive as partial JSON chunks that must be merged with existing messages in real-time without causing layout thrashing or excessive re-renders.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant API as Anthropic API
+  participant MS as Messages.tsx
+  participant SYN as Synthetic Generator
+  participant VML as VirtualMessageList
+  participant MR as MessageRow
+
+  API->>MS: streamingToolUses (partial JSON)
+  MS->>SYN: Generate synthetic MessageRow entries
+  API->>MS: streamingThinking (text chunks)
+  MS->>MS: normalizeMessages() + applyGrouping()
+  MS->>VML: renderableMessages[]
+  VML->>MR: Render visible ~60 items
+  MR->>MR: areMessageRowPropsEqual() memo check
+  Note over VML: Height cache (WeakMap) invalidated on column change
+</pre>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<p>The Messages system exposes several configuration knobs that control rendering behavior, virtualization thresholds, and display modes. Most are set at the container level and propagated to child components via props.</p>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>VIRTUAL_THRESHOLD</code></td><td>~200</td><td>Message count above which virtualization activates</td></tr>
+  <tr><td><code>VISIBLE_WINDOW</code></td><td>~60</td><td>Number of items rendered simultaneously in virtual mode</td></tr>
+  <tr><td><code>REACT_COMPILER_SLOTS</code></td><td>94</td><td>Cache slots allocated by React Compiler for Message dispatcher</td></tr>
+  <tr><td><code>verbose</code></td><td>false</td><td>Shows additional metadata (timestamps, models) in transcript mode</td></tr>
+  <tr><td><code>style</code></td><td>normal</td><td>Can be set to <code>'condensed'</code> for tighter message spacing</td></tr>
+  <tr><td><code>isTranscriptMode</code></td><td>false</td><td>Enables timestamp and model display per message</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<p>The Messages components are spread across the top-level <code>components/</code> directory rather than a dedicated subdirectory. The files are logically grouped by their role in the rendering pipeline.</p>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for Messages</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>components/
+├── Messages.tsx                ← Container: normalization, grouping, synthesis, rendering
+├── Message.tsx                 ← Type dispatcher: routes to 7+ specialized renderers
+├── MessageRow.tsx              ← Per-message wrapper: metadata, memo, streaming state
+├── MessageResponse.tsx         ← Tool result indentation with ⎿ and nesting guard
+├── VirtualMessageList.tsx      ← Virtualized renderer: search, cursor nav, sticky header
+├── MessageTimestamp.tsx        ← HH:MM AM/PM display for transcript mode
+├── MessageModel.tsx            ← Model name display for transcript mode
+├── messageActions.tsx          ← Keyboard navigation and action dispatch (copy/edit/expand)
+└── MessageSelector.tsx         ← Historical message restore/summarize dialog
+</code></pre>
+</details>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core mechanisms from this sub-module have been extracted into dedicated focus pages for in-depth exploration. Each page covers one algorithm, protocol, or subsystem with diagrams, code walks, and configuration details.</p>
+<h4>Deep-Dive Pages</h4>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="virtualization/index.html" title="Virtual Scrolling — Deep Dive">
+    <h4>Virtual Scrolling Engine <span class="focus-badge">Focus</span></h4>
+    <p>useVirtualScroll hook, append-only key arrays, WeakMap height cache, and GC optimization reducing closure allocations by 16%.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="message-grouping/index.html" title="Message Grouping — Deep Dive">
+    <h4>Message Grouping &amp; Collapsing <span class="focus-badge">Focus</span></h4>
+    <p>How applyGrouping(), collapseReadSearchGroups(), and brief-mode filtering merge related tool operations.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="streaming-sync/index.html" title="Streaming Synchronization — Deep Dive">
+    <h4>Streaming Synchronization <span class="focus-badge">Focus</span></h4>
+    <p>Synthetic message generation, partial JSON delta merging, and the append-only streaming pipeline.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+</div>
+
+<h2 id="performance">Performance Optimizations</h2>
+<h3 id="perf-compiler">React Compiler Integration</h3>
+<p>All message components use the React Compiler's <code>_c(N)</code> pattern for automated memoization. The Message dispatcher allocates 94 cache slots, while MessageRow uses 64. This eliminates manual useMemo/useCallback boilerplate while achieving equivalent or better performance. The compiler detects prop changes at a granular level and only re-executes the affected code paths.</p>
+
+<h3 id="perf-virtual">Virtualization Strategy</h3>
+<p>VirtualMessageList renders only ~60 items at a time using the <code>useVirtualScroll</code> hook. This strategy is critical for conversations exceeding 200 messages, where full DOM rendering would cause noticeable frame drops.</p>
+<p>Key optimizations include:</p>
+<ul style="margin:.6rem 0;padding-left:1.5rem;">
+  <li><strong>Append-only key arrays</strong> — New messages are pushed without reallocating the full array</li>
+  <li><strong>WeakMap height cache</strong> — Measured heights are cached per message and invalidated only on terminal column change</li>
+  <li><strong>Stable callbacks via itemKey threading</strong> — Reduced closure allocations by 16% of GC time during fast scroll</li>
+  <li><strong>Incremental search index</strong> — <code>warmSearchIndex()</code> pre-lowers all text in a single pass for O(1) per-keystroke matching</li>
+</ul>
+
+<h3 id="perf-memo">Custom Memo Comparators</h3>
+<p>Both MessageRow and Messages use custom <code>React.memo</code> comparators instead of the default shallow equality. This prevents prop spreading from pinning full message arrays in the compiler's cache, which would accumulate ~1-2 MB over a 7-turn conversation session. The custom comparator checks only the specific fields that affect rendering.</p>
+
+<h3 id="perf-search">Search Index Pre-Warming</h3>
+<p>The <code>warmSearchIndex()</code> API pre-lowers all message text into a single searchable index. This is performed once when the user opens the search UI, and subsequent keystrokes perform O(1) lookups against the pre-built index rather than re-scanning all messages. The warm call returns elapsed milliseconds for performance diagnostics.</p>
+
+<h3 id="perf-logo">Logo Deep Memoization</h3>
+<p>The LogoHeader component uses deep memoization to prevent cascade re-renders. In a 2,800-message session, naive re-rendering caused 150K+ writes per frame. Deep memoization of the logo component eliminated this overhead entirely.</p>
+
+<h2 id="message-types">Supported Message Types</h2>
+<p>The Message dispatcher routes to specialized renderers based on the message <code>type</code> field. Each renderer is optimized for its specific content format.</p>
+<table>
+  <tr><th>Type</th><th>Renderer</th><th>Description</th></tr>
+  <tr><td><code>assistant (text)</code></td><td>AssistantTextMessage</td><td>Markdown-rendered AI response text</td></tr>
+  <tr><td><code>assistant (thinking)</code></td><td>AssistantThinkingMessage</td><td>Thinking/reasoning blocks (collapsible)</td></tr>
+  <tr><td><code>assistant (tool_use)</code></td><td>AssistantToolUseMessage</td><td>Tool invocation display with parameters</td></tr>
+  <tr><td><code>user (text)</code></td><td>UserTextMessage</td><td>User's typed prompt</td></tr>
+  <tr><td><code>user (image)</code></td><td>UserImageMessage</td><td>Pasted or attached images</td></tr>
+  <tr><td><code>user (tool_result)</code></td><td>UserToolResultMessage</td><td>Tool execution results</td></tr>
+  <tr><td><code>system</code></td><td>SystemTextMessage</td><td>API errors, rate limits, metrics, boundaries</td></tr>
+  <tr><td><code>attachment</code></td><td>AttachmentMessage</td><td>Queued <a title="commands — Slash Command System" href="../../commands_doc/index.html">commands</a>, diagnostics, hook errors</td></tr>
+  <tr><td><code>grouped_tool_use</code></td><td>GroupedToolUseContent</td><td>Multiple related tool operations collapsed</td></tr>
+  <tr><td><code>collapsed_read_search</code></td><td>CollapsedReadSearchContent</td><td>Merged read/search operations</td></tr>
+  <tr><td><code>advisor</code></td><td>AdvisorMessage</td><td>Sub-agent advisory messages</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Custom Memo Comparator (MessageRow)</h3>
+<pre><code class="language-typescript">// Custom memo comparator avoids prop spreading that would pin
+// full message arrays in React Compiler cache (~1-2 MB over 7 turns)
+function areMessageRowPropsEqual(
+  prev: Props,
+  next: Props,
+): boolean {
+  return (
+    prev.message === next.message &&
+    prev.hasContentAfter === next.hasContentAfter &&
+    prev.isUserContinuation === next.isUserContinuation &&
+    prev.inProgressToolUseIDs === next.inProgressToolUseIDs &&
+    prev.streamingToolUseIDs === next.streamingToolUseIDs &&
+    prev.columns === next.columns &&
+    prev.isLoading === next.isLoading &&
+    prev.lastThinkingBlockId === next.lastThinkingBlockId
+  );
+}
+
+export const MessageRow = memo(MessageRowImpl, areMessageRowPropsEqual);
+</code></pre>
+
+<h3>Example: Forward Scanner for UI State</h3>
+<pre><code class="language-typescript">// Determines whether meaningful content exists after a given index
+// Used to decide if collapsed groups should show "loading" state
+export function hasContentAfterIndex(
+  messages: RenderableMessage[],
+  index: number,
+  tools: Tools,
+  streamingToolUseIDs: Set&lt;string&gt;,
+): boolean {
+  for (let i = index + 1; i &lt; messages.length; i++) {
+    const msg = messages[i]!;
+    // Skip thinking blocks, collapsible tool results, and tool_result
+    if (msg.type === 'assistant' &amp;&amp; hasThinkingContent(msg)) continue;
+    if (isCollapsibleToolUse(msg, tools)) continue;
+    return true; // Found real content
+  }
+  return false;
+}
+</code></pre>
+
+<h3>Example: Brief Mode Filtering</h3>
+<pre><code class="language-typescript">// Brief mode suppresses non-essential tool output for cleaner display
+export function filterForBriefTool&lt;T extends { type: string }&gt;(
+  messages: T[],
+  briefToolNames: Set&lt;string&gt;,
+): T[] {
+  return messages.filter(msg => {
+    if (msg.type !== 'grouped_tool_use') return true;
+    const toolMsg = msg as unknown as GroupedToolUseMessage;
+    // Keep message only if at least one tool is not in brief list
+    return toolMsg.toolUses.some(
+      tu => !briefToolNames.has(tu.name),
+    );
+  });
+}
+
+// dropTextInBriefTurns removes assistant text between brief tool uses
+export function dropTextInBriefTurns&lt;T extends { type: string }&gt;(
+  messages: T[],
+  briefToolNames: Set&lt;string&gt;,
+): T[] {
+  // Identifies "brief turns" and drops text-only assistant
+  // messages within them, keeping the conversation concise
+  return messages.filter((msg, i) => {
+    if (msg.type !== 'assistant') return true;
+    const prevIsBrief = i > 0 &amp;&amp; isBriefTool(messages[i - 1]!);
+    const nextIsBrief = i &lt; messages.length - 1 &amp;&amp; isBriefTool(messages[i + 1]!);
+    return !(prevIsBrief &amp;&amp; nextIsBrief);
+  });
+}
+</code></pre>
+
+<div class="footer"><a title="components — Terminal UI Component Library" href="../index.html">&larr; Back to components Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}
+    else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);});
+(function(){
+  var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

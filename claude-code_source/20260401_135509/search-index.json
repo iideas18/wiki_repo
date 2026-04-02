@@ -1,0 +1,336 @@
+[
+  {
+    "title": "Bridge \u2014 Remote Session Protocol",
+    "path": "bridge/index.html",
+    "excerpt": "Bridge \u2014 Remote Session Protocol Skip to content \u263e \u21e7 Claude Code \u203a Bridge Bridge \u2014 Remote Session Protocol Remote Session Protocol The Bridge module implements Claude Code\u2019s remote session infrastructure \u2014 enabling users on claude.ai to connect to long-running Claude Code sessions on developer machines. It handles environment registration, session spawning, message routing, and crash recovery across WebSocket, SSE, and HTTP transports. 31 Source Files 12.6k Lines of Code 5 Subsystems TypeScript ",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Exports",
+      "Directory Map",
+      "Configuration",
+      "Transport Version Comparison",
+      "Message Type Routing",
+      "Feature Gates",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "CLI \u2014 Transport & Session Layer",
+    "path": "cli/index.html",
+    "excerpt": "CLI \u2014 Transport & Session Layer Skip to content \u263e \u21e7 Claude Code \u203a CLI CLI \u2014 Transport & Session Layer Transport & Session Layer The CLI module owns the I/O boundary between Claude Code\u2019s core loop and the outside world. It provides pluggable transport implementations (WebSocket, SSE, Hybrid), a structured bidirectional SDK protocol, the main headless session loop, and CLI subcommand handlers for auth, plugins, agents, and updates. 19 Source Files 13.3k Lines of Code 4 Transport Types TypeScript ",
+    "headings": [
+      "Architecture",
+      "Transport Selection",
+      "Key Exports",
+      "Directory Map",
+      "Configuration",
+      "Environment Variables",
+      "Reconnect Strategy",
+      "SerialBatchEventUploader Behavior",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Commands \u2014 Slash Command System",
+    "path": "commands_doc/index.html",
+    "excerpt": "Commands \u2014 Slash Command System Skip to content \u263e \u21e7 Claude Code \u203a Commands Commands \u2014 Slash Command System Slash Command System The commands module implements 86 slash commands that users can invoke in the Claude Code CLI. Commands range from simple utilities (/help, /clear) to complex workflows (/review, /install-github-app, /plugin). Each command exports a definition object with name, description, argument schema, and execution handler. 86 Commands 189 Files 86 Sub-modules TypeScript Language ",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Components \u2014 Terminal UI Components",
+    "path": "components_doc/index.html",
+    "excerpt": "Components \u2014 Terminal UI Components Skip to content \u263e \u21e7 Claude Code \u203a Components Components \u2014 Terminal UI Components Terminal UI Components The components module provides 31 React component groups totaling 389 files that power Claude Code's terminal user interface. Built on the custom Ink renderer, these components handle everything from permission dialogs and message rendering to agent task views and design system primitives. 31 Component Groups 389 Files React/Ink Framework TypeScript Language",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Constants \u2014 Centralized Configuration Hub",
+    "path": "constants/index.html",
+    "excerpt": "Constants \u2014 Centralized Configuration Hub Skip to content \u263e \u21e7 Claude Code \u203a Constants Constants \u2014 Centralized Configuration Hub Centralized Configuration Hub The Constants module is the dependency-leaf of the Claude Code DAG \u2014 a flat collection of 21 TypeScript files that define API limits, beta headers, system prompts, OAuth configuration, tool availability matrices, Unicode figures, and XML tag vocabularies. By design it imports nothing from the rest of the codebase, preventing circular depend",
+    "headings": [
+      "Architecture",
+      "System Prompt Generation Flow",
+      "Key Exports",
+      "Directory Map",
+      "API Limits",
+      "OAuth Configuration",
+      "Beta Headers Matrix",
+      "Tool Availability Matrices",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Context \u2014 React Context Providers",
+    "path": "context/index.html",
+    "excerpt": "Context \u2014 React Context Providers Skip to content \u263e \u21e7 Claude Code \u203a Context Context \u2014 React Context Providers React Context Providers The Context module provides a composable set of React context providers that supply global capabilities to the Ink-based terminal UI. Each file follows a consistent Provider/Hook pattern \u2014 wrapping state, subscriptions, and utilities behind clean React hooks for notifications, overlays, voice input, metrics collection, and inter-component messaging. 9 Source Files",
+    "headings": [
+      "Architecture",
+      "Notification Queue System",
+      "Key Exports",
+      "Directory Map",
+      "Configuration Constants",
+      "State Management Tiers",
+      "Voice State Machine",
+      "Overlay Registration System",
+      "Stats Metric Types",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Entrypoints \u2014 Public API Surface",
+    "path": "entrypoints/index.html",
+    "excerpt": "Entrypoints \u2014 Public API Surface Skip to content \u263e \u21e7 Claude Code \u203a Entrypoints Entrypoints \u2014 Public API Surface Public API Surface The entrypoints module defines the public API surface for Claude Code with 8 files across CLI, SDK, and MCP protocol exports. It provides the main entry points for starting the CLI application, embedding Claude Code as an SDK, and exposing the MCP protocol interface \u2014 ensuring clean boundaries between internal implementation and external consumers. 8 Files 3 Entry Mo",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Directory Map",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Hooks \u2014 React Hooks & Event System",
+    "path": "hooks_doc/index.html",
+    "excerpt": "Hooks \u2014 React Hooks & Event System Skip to content \u263e \u21e7 Claude Code \u203a Hooks Hooks \u2014 React Hooks & Event System React Hooks & Event System The hooks module provides 104 React hooks and event handlers across the notification system and tool permission management. These hooks integrate deeply with the Ink rendering layer to provide reactive state management for tool permissions, user notifications, clipboard operations, and terminal events. 104 Files 2 Sub-modules React Hooks Pattern TypeScript Lang",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Claude Code \u2014 AI-Powered Terminal Coding Assistant",
+    "path": "index.html",
+    "excerpt": "Claude Code \u2014 AI-Powered Terminal Coding Assistant Skip to content \u263e \u21e7 Claude Code AI-Powered Terminal Coding Assistant Claude Code is a full-featured AI coding assistant that runs in your terminal. It provides intelligent code editing, shell command execution, multi-agent task orchestration, and rich terminal UI \u2014 all powered by Anthropic's Claude models. The architecture is modular with 35+ modules spanning tools, components, services, utilities, and a custom React-based terminal renderer. Typ",
+    "headings": [
+      "System Architecture",
+      "Navigation Guide",
+      "How a User Query Flows Through the System",
+      "Directory Map",
+      "Build & Tech Stack"
+    ]
+  },
+  {
+    "title": "Ink \u2014 Custom Terminal UI Renderer",
+    "path": "ink_doc/index.html",
+    "excerpt": "Ink \u2014 Custom Terminal UI Renderer Skip to content \u263e \u21e7 Claude Code \u203a Ink Ink \u2014 Custom Terminal UI Renderer Custom Terminal UI Renderer The ink module implements a custom React-based terminal UI rendering engine with 96 files across 5 subdirectories. It provides a complete pipeline from React reconciliation through Yoga layout calculation to ANSI terminal output, with support for focus management, keyboard/mouse events, text measurement, and animation frames. 5 Sub-modules 96 Files React Reconcile",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Keybindings \u2014 Keyboard Shortcut System",
+    "path": "keybindings/index.html",
+    "excerpt": "Keybindings \u2014 Keyboard Shortcut System Skip to content \u263e \u21e7 Claude Code \u203a Keybindings Keybindings \u2014 Keyboard Shortcut System Keyboard Shortcut System The keybindings module implements a customizable keyboard shortcut system with 14 files. It provides keystroke parsing, chord sequences, configurable bindings with defaults and overrides, validation, and React integration \u2014 enabling users to remap every shortcut in Claude Code. 14 Files 18 Contexts 70+ Actions TS TypeScript Chord Sequences Hot Reloa",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Directory Map",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Memdir \u2014 Memory Context & CLAUDE.md Management",
+    "path": "memdir/index.html",
+    "excerpt": "Memdir \u2014 Memory Context & CLAUDE.md Management Skip to content \u263e \u21e7 Claude Code \u203a Memdir Memdir \u2014 Memory Context & CLAUDE.md Management Memory Context & CLAUDE.md Management The memdir module (8 files) manages memory context for the AI assistant \u2014 loading, scanning, and assembling CLAUDE.md files from user, project, and team layers into coherent memory prompts that ground every conversation turn. 8 Files 3 Memory Layers ~15 Exports TypeScript Language \ud83d\udcda Memory Management \ud83d\udd0c Context Injection \ud83e\udd1d Tea",
+    "headings": [
+      "Architecture",
+      "Memory Layers",
+      "Narrated Walkthrough",
+      "Key Classes & Types",
+      "Cross-Module Connections",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Migrations \u2014 Idempotent Data Migration System",
+    "path": "migrations/index.html",
+    "excerpt": "Migrations \u2014 Idempotent Data Migration System Skip to content \u263e \u21e7 Claude Code \u203a Migrations Migrations \u2014 Idempotent Data Migration System Idempotent Data Migration System The migrations module (11 files) handles data migration for user settings, model preferences, and configuration changes across Claude Code versions. Each migration reads config, checks if work is needed, updates the target, logs an analytics event, and marks itself complete. All migrations are idempotent\u2014safe to re-run without s",
+    "headings": [
+      "Architecture",
+      "Migration Categories",
+      "Key Functions",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Query \u2014 Core AI Query Processing Pipeline",
+    "path": "query/index.html",
+    "excerpt": "Query \u2014 Core AI Query Processing Pipeline Skip to content \u263e \u21e7 Claude Code \u203a Query Query \u2014 Core AI Query Processing Pipeline Core AI Query Processing Pipeline The query module implements the complete query processing pipeline \u2014 sending user messages to the Claude API, handling streaming responses, executing tools, managing token budgets, and running post-turn stop hooks. Six files across the query/ directory and root orchestrate every interaction from input to final response. 6 Files 3 Core Abstr",
+    "headings": [
+      "Introduction",
+      "Architecture",
+      "Query Lifecycle",
+      "Narrated Walkthrough",
+      "Key Classes & Types",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Remote \u2014 Cloud Container Runtime Session Bridge",
+    "path": "remote/index.html",
+    "excerpt": "Remote \u2014 Cloud Container Runtime Session Bridge Skip to content \u263e \u21e7 Claude Code \u203a Remote Remote \u2014 Cloud Container Runtime Session Bridge Cloud Container Runtime Session Bridge The remote module (4 files) implements remote session execution \u2014 connecting the local CLI to a Cloud Container Runtime (CCR) backend via WebSocket for remote tool execution and permission bridging. 4 Files 2 Core Classes WebSocket Transport TypeScript Language Remote Execution WebSocket Permission Bridge CCR Introduction ",
+    "headings": [
+      "Introduction",
+      "Architecture",
+      "WebSocket Protocol",
+      "Narrated Walkthrough",
+      "Key Classes & Types",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Screens \u2014 Top-Level React Screen Components",
+    "path": "screens/index.html",
+    "excerpt": "Screens \u2014 Top-Level React Screen Components Skip to content \u263e \u21e7 Claude Code \u203a Screens Screens \u2014 Top-Level React Screen Components Top-Level React Screen Components The screens module provides the 3 top-level React screen components that power Claude Code's terminal interface. Built on the Ink renderer (React for CLI), these screens orchestrate the entire user experience \u2014 from diagnostics to interactive conversation to session resumption. 3 Screens React/Ink Framework ~50 Hooks Used TypeScript L",
+    "headings": [
+      "Architecture",
+      "Screen Lifecycle",
+      "Narrated Walkthrough",
+      "Key Components & Types",
+      "Screen Details",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Server \u2014 Direct-Connect WebSocket Session Management",
+    "path": "server/index.html",
+    "excerpt": "Server \u2014 Direct-Connect WebSocket Session Management Skip to content \ud83c\udf13 \u2191 Claude Code \u203a Server Direct-Connect WebSocket Session Management Server A compact module that establishes direct-connect sessions between clients and a Claude Code server, managing the full lifecycle from HTTP handshake through persistent WebSocket communication. WebSocket Session Management Zod Validation 3 Files 2 Core Classes 6 Types TS TypeScript Contents Introduction \ud83d\udca1 Think of it like a hotel front desk The server mod",
+    "headings": [
+      "Introduction",
+      "Architecture",
+      "Data Flow",
+      "Walkthrough: Session Creation & First Message",
+      "Usage Example",
+      "Key Classes & Types",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Services \u2014 Backend Service Layer",
+    "path": "services_doc/index.html",
+    "excerpt": "Services \u2014 Backend Service Layer Skip to content \u263e \u21e7 Claude Code \u203a Services Services \u2014 Backend Service Layer Backend Service Layer The services module provides 20 backend service implementations totaling 130 files. These services handle API communication with Claude models, MCP server lifecycle management, session compaction, analytics tracking, LSP integration, OAuth authentication, and plugin management. 20 Services 130 Files API/MCP Core Integrations TypeScript Language \ud83d\udd35 API Client \ud83d\udfe2 MCP Ser",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Services",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Skills \u2014 Extensible Prompt & Skill System",
+    "path": "skills/index.html",
+    "excerpt": "Skills \u2014 Extensible Prompt & Skill System Skip to content \u263e \u21e7 Claude Code \u203a Skills Skills \u2014 Extensible Prompt & Skill System Extensible Prompt & Skill System The Skills module is Claude Code\u2019s plugin engine for prompt-driven capabilities. It discovers, loads, validates, and registers skill definitions from bundled sources, user directories, project directories, and MCP servers \u2014 forming a dynamic library of AI-invokable commands. \ud83d\udca1 Think of it like\u2026 A package manager for AI prompts . Just as npm",
+    "headings": [
+      "Architecture",
+      "Data Flow \u2014 Skill Discovery Lifecycle",
+      "Key Classes & Functions",
+      "Configuration",
+      "Code Examples",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "State \u2014 Central State Management",
+    "path": "state/index.html",
+    "excerpt": "State \u2014 Central State Management Skip to content \u263e \u21e7 Claude Code \u203a State State \u2014 Central State Management Central State Management The State module implements Claude Code\u2019s single-store state management system. A generic createStore factory powers an immutable AppState object with 100+ properties, wrapped in React Context for component access. Centralized side-effect handling via onChangeAppState ensures permission mode sync, config persistence, and auth cache clearing all flow through a single ",
+    "headings": [
+      "Architecture",
+      "Permission Mode Sync Flow",
+      "Key Exports",
+      "Directory Map",
+      "AppState Property Categories",
+      "Side Effects Handled by onChangeAppState",
+      "Input Routing via Selectors",
+      "Agent Viewing Lifecycle",
+      "Speculation State",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Tasks \u2014 Multi-Task Execution Engine",
+    "path": "tasks/index.html",
+    "excerpt": "Tasks \u2014 Multi-Task Execution Engine Skip to content \u263e \u21e7 Claude Code \u203a Tasks Tasks \u2014 Multi-Task Execution Engine Multi-Task Execution Engine The Tasks module manages the lifecycle of background and foreground work items in Claude Code. It orchestrates shell commands, local agents, remote cloud sessions, in-process teammates, and autonomous dream (memory consolidation) tasks \u2014 all with progress tracking, abort control, and UI notification. \ud83d\udca1 Think of it like\u2026 An operating system process scheduler ",
+    "headings": [
+      "Architecture",
+      "Task State Machine",
+      "Key Classes & Functions",
+      "Configuration",
+      "Code Examples",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Tools \u2014 AI Agent Tool Implementations",
+    "path": "tools_doc/index.html",
+    "excerpt": "Tools \u2014 AI Agent Tool Implementations Skip to content \u263e \u21e7 Claude Code \u203a Tools Tools \u2014 AI Agent Tool Implementations AI Agent Tool Implementations The tools module provides 42 tool implementations that give Claude the ability to interact with the filesystem, execute shell commands, manage agents, search the web, and more. Each tool extends the base Tool interface with input validation, permission checks, and streaming output. 42 Tools 184 Files 42 Sub-modules TypeScript Language File Operations S",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map",
+      "Deep Dives"
+    ]
+  },
+  {
+    "title": "Types \u2014 Central Type Definitions",
+    "path": "types/index.html",
+    "excerpt": "Types \u2014 Central Type Definitions Skip to content \u263e \u21e7 Claude Code \u203a Types Types \u2014 Central Type Definitions Central Type Definitions The Types module is the shared type foundation for Claude Code. It defines the canonical shapes for commands, hooks, permissions, plugins, session logging, text input, and branded identifiers \u2014 consumed by virtually every other module in the codebase. \ud83d\udca1 Think of it like\u2026 A data dictionary for a relational database . Just as a database schema defines every table, colu",
+    "headings": [
+      "Architecture \u2014 Type Domain Map",
+      "Type Relationships \u2014 Cross-Domain Dependencies",
+      "Key Types & Interfaces",
+      "Configuration \u2014 Permission Modes",
+      "Code Examples",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Utils \u2014 Shared Utility Library",
+    "path": "utils_doc/index.html",
+    "excerpt": "Utils \u2014 Shared Utility Library Skip to content \u263e \u21e7 Claude Code \u203a Utils Utils \u2014 Shared Utility Library Shared Utility Library The utils module is the largest module in Claude Code with 564 files across 31 subdirectories. It provides essential infrastructure including bash command parsing, permission management, plugin loading, settings management, shell operations, multi-agent swarm orchestration, secure storage, telemetry, and model configuration. 31 Sub-modules 564 Files Cross-cutting Scope Typ",
+    "headings": [
+      "Architecture",
+      "Data Flow",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "Vim \u2014 Vim Mode State Machine & Keybindings",
+    "path": "vim/index.html",
+    "excerpt": "Vim \u2014 Vim Mode State Machine & Keybindings Skip to content \u263e \u21e7 Claude Code \u203a Vim Vim \u2014 Vim Mode State Machine & Keybindings Vim Mode State Machine & Keybindings The Vim module implements a complete vim-mode keybinding layer for the Claude Code CLI input. It provides a full state machine with motions, operators, text objects, and mode transitions \u2014 giving power users the muscle-memory efficiency of vim-style editing directly inside the terminal prompt. 5 Files 12 States ~30 Motions TypeScript Lan",
+    "headings": [
+      "State Machine",
+      "Data Flow",
+      "Narrated Walkthrough",
+      "Key Types & Functions",
+      "Constants & Configuration",
+      "Supported Motions Reference",
+      "Design Principles",
+      "Directory Map"
+    ]
+  }
+]

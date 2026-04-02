@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="src/keybindings">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>keybindings — Keyboard Shortcut Configuration</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../index.html">Claude Code</a> &rsaquo; <span>keybindings</span></nav>
+
+<main id="main">
+<h1>keybindings &mdash; Keyboard Shortcut Configuration</h1>
+<div class="hero">
+  <p class="subtitle">Keyboard Shortcut Configuration</p>
+  <p>Full keyboard shortcut system with Vim and Emacs mode defaults, user-customizable bindings, a React context provider, key event parser, resolver that matches keypresses to <a title="commands — Slash Command System" href="../commands_doc/index.html">commands</a>, schema validation, and a <code>useKeybinding</code> React hook for component integration.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">14</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">2</div><div class="label">Default Modes</div></div>
+  <div class="stat-box"><div class="num">40+</div><div class="label">Bindings</div></div>
+  <div class="stat-box"><div class="num">TS</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">🔵 Vim Mode</span>
+  <span class="badge green">🟢 Emacs Mode</span>
+  <span class="badge yellow">🟡 Custom Bindings</span>
+  <span class="badge red">🔴 React Hook</span>
+</p>
+
+<!-- Intro box -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">💡 What is this?</h3>
+<p>The <strong>keybindings</strong> module provides the complete keyboard shortcut infrastructure for Claude Code's terminal UI. It supports Vim and Emacs presets out of the box, lets users override any binding, and exposes a React hook so <a title="components — Terminal UI Component Library" href="../components_doc/index.html">components</a> can respond to key events.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">🧩 Analogy: Think of it like VS Code's keybinding system</summary>
+<p style="margin-top:.5rem;color:var(--text-muted);">Just as VS Code has a <code>keybindings.json</code> where users override defaults, and a resolver that maps key chords to commands, this module provides the same layered approach: default presets (Vim/Emacs), user overrides (<a title="commands config — Configuration Management Commands" href="../commands_doc/config/index.html">config</a> file), a parser that normalizes key events, and a resolver that produces the final command to execute.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<!-- Architecture Diagram -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Defaults["Default Presets"]
+    VIM["Vim Bindings<br/>defaultBindings.ts"]
+    EMACS["Emacs Bindings<br/>defaultBindings.ts"]
+  end
+  subgraph Config["User Config"]
+    PARSE["Parser<br/>parse.ts"]
+    SCHEMA["Schema Validator<br/>schema.ts"]
+  end
+  subgraph Runtime["Runtime Resolution"]
+    CTX["KeybindingProvider<br/>Setup.tsx"]
+    RES["Resolver<br/>resolver.ts"]
+    HOOK["useKeybinding<br/>hook.ts"]
+  end
+  VIM --> CTX
+  EMACS --> CTX
+  PARSE --> SCHEMA
+  SCHEMA --> CTX
+  CTX --> RES
+  RES --> HOOK
+  HOOK --> |Command| UI["React Components"]
+</pre>
+</div>
+
+<!-- Data Flow Diagram -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  A["User presses key combo<br/>e.g., Ctrl+K"] --> B["KeyEvent captured<br/>by React"]
+  B --> C["Parser normalizes event<br/>parse.ts"]
+  C --> D["Resolver searches bindings<br/>resolver.ts"]
+  D --> E{"Match found?"}
+  E -->|Yes| F["Execute command<br/>e.g., clearScreen"]
+  E -->|No| G["Pass to default<br/>input handler"]
+  F --> H["Update UI state<br/>via useKeybinding"]
+</pre>
+</div>
+
+<!-- Narrated Walkthrough -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">🚶 Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>Ctrl+K keypress</strong> through the keybinding pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Key Event</strong> — Browser/terminal emits a <code>keydown</code> event with <code>ctrlKey: true, key: "k"</code>.</li>
+<li><strong>React Capture</strong> — The <code>KeybindingProvider</code> context wrapper captures the raw key event.</li>
+<li><strong>Normalization</strong> — <code>parse.ts</code> normalizes the event into a canonical string: <code>"ctrl+k"</code>.</li>
+<li><strong>Mode Selection</strong> — The resolver checks the active mode (Vim, Emacs, or Custom).</li>
+<li><strong>User Override Check</strong> — User config is checked first; if <code>"ctrl+k"</code> has a custom binding, it wins.</li>
+<li><strong>Default Lookup</strong> — If no user override, the default preset for the active mode is consulted.</li>
+<li><strong><a href="../types/index.html" title="types — Shared TypeScript Definitions" class="xref">Command</a> Resolution</strong> — The matched binding returns a command name, e.g., <code>"clearScreen"</code>.</li>
+<li><strong>Hook Notification</strong> — <code>useKeybinding("clearScreen")</code> fires its callback in the subscribed component.</li>
+<li><strong>Action Execution</strong> — The component handler clears the screen and re-renders the REPL.</li>
+</ol>
+</div>
+
+<!-- Key Classes/Functions Table -->
+<h2 id="key-classes-functions">Key Classes &amp; Functions</h2>
+<table>
+<thead><tr><th>Name</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>defaultBindings</code></td><td>defaultBindings.ts</td><td>Exports Vim and Emacs default binding maps (key combo → command name)</td></tr>
+<tr><td><code>KeybindingProvider</code></td><td>KeybindingProviderSetup.tsx</td><td>React context provider that wraps the app and captures key events</td></tr>
+<tr><td><code>parseKeyCombo</code></td><td>parse.ts</td><td>Normalizes raw key events into canonical combo strings like <code>"ctrl+shift+p"</code></td></tr>
+<tr><td><code>resolveBinding</code></td><td>resolver.ts</td><td>Matches a normalized key combo against all binding layers, returns command</td></tr>
+<tr><td><code>validateBindings</code></td><td>schema.ts</td><td>Validates user binding config against JSON schema, returns validation errors</td></tr>
+<tr><td><code>useKeybinding</code></td><td>hook.ts</td><td>React hook: subscribes a component to fire a callback when a command triggers</td></tr>
+<tr><td><code>KeybindingContext</code></td><td>context.ts</td><td>React context object holding current bindings and the active mode</td></tr>
+<tr><td><code>loadUserBindings</code></td><td>loader.ts</td><td>Reads user keybinding config from <code>.claude/keybindings.json</code></td></tr>
+<tr><td><code>mergeBindings</code></td><td>merge.ts</td><td>Merges user overrides on top of default presets, user wins on conflict</td></tr>
+<tr><td><code>KeyCombo</code></td><td><a title="types — Shared TypeScript Definitions" href="../types/index.html">types</a>.ts</td><td>TypeScript type for a normalized key combination string</td></tr>
+<tr><td><code>BindingMap</code></td><td>types.ts</td><td><a href="../tools_doc/AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Type</a> for the full binding map: <code>Record&lt;KeyCombo, CommandName&gt;</code></td></tr>
+<tr><td><code>CommandName</code></td><td>types.ts</td><td>Union type of all valid command name strings</td></tr>
+</tbody>
+</table>
+
+<!-- Configuration Table -->
+<h2 id="configuration">Configuration</h2>
+<table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>mode</code></td><td><code>"vim"</code></td><td>Active keybinding mode: <code>"vim"</code>, <code>"emacs"</code>, or <code>"custom"</code></td></tr>
+<tr><td><code>configPath</code></td><td><code>.claude/keybindings.json</code></td><td>Path to user keybinding override file</td></tr>
+<tr><td><code>enableRepeat</code></td><td><code>true</code></td><td>Whether held keys repeat their bound command</td></tr>
+<tr><td><code>repeatDelay</code></td><td><code>500</code></td><td>Initial delay in ms before key repeat starts</td></tr>
+<tr><td><code>repeatRate</code></td><td><code>50</code></td><td>Interval in ms between repeated key events</td></tr>
+<tr><td><code>strictMode</code></td><td><code>false</code></td><td>When true, unrecognized key combos are silently ignored</td></tr>
+<tr><td><code>allowChords</code></td><td><code>true</code></td><td>Whether multi-key chords (e.g., <code>Ctrl+K Ctrl+C</code>) are supported</td></tr>
+<tr><td><code>chordTimeout</code></td><td><code>1000</code></td><td>Max ms between chord keystrokes before chord resets</td></tr>
+</tbody>
+</table>
+
+<!-- Default Bindings Reference -->
+<h2 id="default-bindings">Default Bindings (Vim Mode)</h2>
+<table>
+<thead><tr><th>Key Combo</th><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>Ctrl+C</code></td><td><code>cancel</code></td><td>Cancel current operation or clear input</td></tr>
+<tr><td><code>Ctrl+D</code></td><td><code>exit</code></td><td>Exit the REPL <a title="commands session — Session Management Commands" href="../commands_doc/session/index.html">session</a></td></tr>
+<tr><td><code>Ctrl+L</code></td><td><code>clearScreen</code></td><td>Clear the terminal screen</td></tr>
+<tr><td><code>Ctrl+K</code></td><td><code>killLine</code></td><td>Delete from cursor to end of line</td></tr>
+<tr><td><code>Ctrl+U</code></td><td><code>clearLine</code></td><td>Delete entire input line</td></tr>
+<tr><td><code>Ctrl+R</code></td><td><code>searchHistory</code></td><td>Search backwards through command history</td></tr>
+<tr><td><code>Escape</code></td><td><code>normalMode</code></td><td>Switch to Vim normal mode from insert</td></tr>
+<tr><td><code>Tab</code></td><td><code>autocomplete</code></td><td>Trigger slash command autocompletion</td></tr>
+</tbody>
+</table>
+
+<!-- Directory Map -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for keybindings</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>keybindings/
+├── index.ts                        ← Public API barrel export
+├── defaultBindings.ts              ← Vim &amp; Emacs default binding maps
+├── KeybindingProviderSetup.tsx     ← React context provider wrapper
+├── context.ts                      ← React context definition
+├── hook.ts                         ← useKeybinding React hook
+├── parse.ts                        ← Key event normalizer/parser
+├── resolver.ts                     ← Binding resolution engine
+├── schema.ts                       ← JSON schema for user config
+├── loader.ts                       ← User config file reader
+├── merge.ts                        ← Binding merge logic
+├── types.ts                        ← TypeScript type definitions
+├── __tests__/
+│   ├── parse.test.ts               ← Parser normalization tests
+│   ├── resolver.test.ts            ← Resolution priority tests
+│   └── defaultBindings.test.ts     ← Default binding coverage
+</code></pre>
+</details>
+
+<!-- Sample Code -->
+<h2 id="code-example">Code Example</h2>
+<pre><code class="language-typescript">import { useKeybinding } from "./keybindings/hook";
+import { KeybindingProvider } from "./keybindings/KeybindingProviderSetup";
+
+// Wrap app with provider
+function App() {
+  return (
+    &lt;KeybindingProvider mode="vim"&gt;
+      &lt;ReplView /&gt;
+    &lt;/KeybindingProvider&gt;
+  );
+}
+
+// In a component, subscribe to a command
+function ReplView() {
+  useKeybinding("clearScreen", () => {
+    clearTerminal();
+  });
+
+  useKeybinding("submitInput", () => {
+    handleSubmit(currentInput);
+  });
+
+  return &lt;div&gt;{/* REPL UI */}&lt;/div&gt;;
+}
+</code></pre>
+
+<!-- Footer -->
+<div class="footer">
+  <p>keybindings Wiki &mdash; Generated from source analysis</p>
+  <p><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../index.html">&larr; Back to Claude Code</a></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}
+    else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){
+  var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

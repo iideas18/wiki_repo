@@ -14,6 +14,7 @@ import re
 import glob
 import sys
 import html as html_mod
+import subprocess
 from pathlib import Path
 from datetime import date
 
@@ -281,9 +282,24 @@ def main():
 
     if not new_projects:
         print("No new projects to add — index.html is up to date.")
-        return
+    else:
+        append_projects(new_projects)
 
-    append_projects(new_projects)
+    # Regenerate versions.json and inject version switcher for all projects
+    if not list_only:
+        _run_post_scripts(args)
+
+
+def _run_post_scripts(project_args: list[str]):
+    """Run generate_versions.py and inject_version_switcher.py."""
+    gen = WIKI_DIR / "generate_versions.py"
+    inj = WIKI_DIR / "inject_version_switcher.py"
+    for script in (gen, inj):
+        if not script.is_file():
+            continue
+        cmd = [sys.executable, str(script)] + project_args
+        print(f"\nRunning {script.name} ...")
+        subprocess.run(cmd, cwd=str(WIKI_DIR))
 
 
 if __name__ == "__main__":

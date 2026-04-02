@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="restored-src/src/vim">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>Vim — Vim Mode State Machine &amp; Keybindings</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Claude Code</a> &rsaquo; <span>Vim</span></nav>
+
+<main id="main">
+<h1>Vim &mdash; Vim Mode State Machine &amp; Keybindings</h1>
+<div class="hero">
+  <p class="subtitle">Vim Mode State Machine &amp; Keybindings</p>
+  <p>The Vim module implements a complete vim-mode keybinding layer for the Claude Code CLI input. It provides a full state machine with motions, operators, text objects, and mode transitions &mdash; giving power users the muscle-memory efficiency of vim-style editing directly inside the terminal prompt.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">5</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">12</div><div class="label">States</div></div>
+  <div class="stat-box"><div class="num">~30</div><div class="label">Motions</div></div>
+  <div class="stat-box"><div class="num">TypeScript</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">Vim Emulation</span>
+  <span class="badge green">State Machine</span>
+  <span class="badge yellow">Pure Functions</span>
+  <span class="badge red">Grapheme-Safe</span>
+</p>
+
+<!-- Intro box with analogy -->
+<div style="background:var(--surface);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:1.2rem 1.4rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128161; Think of it like&hellip; a Combination Lock</h3>
+<p>The Vim module works like a combination lock &mdash; each keypress advances the state machine through stages (<code>idle</code> &rarr; <code>operator</code> &rarr; <code>motion</code> &rarr; <code>execute</code>). The <code>types.ts</code> file is the blueprint of all possible dial positions, <code>transitions.ts</code> is the mechanism that clicks each tumbler into place, and the remaining files (<code>motions.ts</code>, <code>operators.ts</code>, <code>textObjects.ts</code>) are the individual dial faces that resolve <em>where</em> to move and <em>what</em> to do when the lock opens.</p>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="state-machine">State Machine</h2>
+<p>The <code>CommandState</code> union in <code>types.ts</code> defines 12 possible states.
+The <code>transition()</code> function in <code>transitions.ts</code> dispatches each keypress
+to the appropriate next state, eventually reaching an <code>execute</code> callback
+that mutates text or moves the cursor. Every path through the diagram
+below terminates by returning to <code>idle</code> with an optional side-effect.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> idle
+  idle --> count : digit 1-9
+  idle --> operator : d / c / y
+  idle --> find : f / F / t / T
+  idle --> g : g prefix
+  idle --> replace : r
+  idle --> indent : &gt; / &lt;
+  count --> operator : d / c / y
+  count --> idle : motion key (execute)
+  operator --> operatorCount : digit 1-9
+  operator --> operatorFind : f / F / t / T
+  operator --> operatorTextObj : i / a scope
+  operator --> idle : motion key (execute)
+  operatorCount --> idle : motion key (execute)
+  operatorFind --> idle : char (execute)
+  operatorTextObj --> idle : obj type (execute)
+  find --> idle : char (execute)
+  g --> idle : g / j / k (execute)
+  replace --> idle : char (execute)
+  indent --> idle : motion / repeat (execute)
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>Every keypress in normal mode enters through <code>transition()</code>, which
+consults the current <code>CommandState</code>, delegates to the appropriate
+resolver, and returns a <code>TransitionResult</code> containing the next state
+and an optional <code>execute</code> callback. The architecture keeps
+side-effect-free resolution (motions, text objects) separated from
+mutation (operators), making each layer independently testable.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Input["User Input"]
+    Key["Key Press"]
+  end
+  subgraph Core["transitions.ts"]
+    TR["transition()"]
+  end
+  subgraph Resolvers["Pure Resolvers"]
+    M["motions.resolveMotion()"]
+    O["operators.execute*()"]
+    T["textObjects.findTextObject()"]
+  end
+  subgraph Output["Result"]
+    CU["Cursor Update"]
+    TM["Text Mutation"]
+  end
+  Key --> TR
+  TR --> M
+  TR --> O
+  TR --> T
+  M --> CU
+  O --> TM
+  T --> O
+</pre>
+</div>
+
+<h2 id="walkthrough">Narrated Walkthrough</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Executing <code>d2w</code> &mdash; Delete 2 Words</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow the keypresses <kbd>d</kbd> <kbd>2</kbd> <kbd>w</kbd> as they flow through the state machine:</p>
+<ol style="line-height:2;">
+<li><strong>Initial State</strong> &mdash; <code>VimState</code> is <code>NORMAL</code> with <code>CommandState = idle</code>. The cursor sits at position <em>n</em> in the input text.</li>
+<li><strong><kbd>d</kbd> pressed</strong> &mdash; <code>transition()</code> sees <code>d</code> in <code>OPERATORS</code>. State advances to <code>operator { op: "delete", count: 1 }</code>. No execute callback yet.</li>
+<li><strong><kbd>2</kbd> pressed</strong> &mdash; <code>transition()</code> detects a digit in operator state. State advances to <code>operatorCount { op: "delete", count: 2 }</code>. The count accumulates (respecting <code>MAX_VIM_COUNT</code>).</li>
+<li><strong><kbd>w</kbd> pressed</strong> &mdash; <code>transition()</code> recognizes <code>w</code> as a motion in <code>SIMPLE_MOTIONS</code>. It calls <code>resolveMotion("w", 2, cursor, text)</code> which advances past 2 word boundaries. <code>isInclusiveMotion("w")</code> returns <code>false</code> (exclusive).</li>
+<li><strong>Operator Execution</strong> &mdash; <code>executeOperatorMotion()</code> is invoked with the <code>OperatorContext</code>, the resolved range <code>[cursor, target)</code>, and operator <code>"delete"</code>. It slices the text, calls <code>setText()</code>, updates the cursor via <code>setOffset()</code>, and stores the deleted text in the register via <code>register.write()</code>.</li>
+<li><strong>Change Recording</strong> &mdash; A <code>RecordedChange</code> is saved via <code>recordChange()</code> so the dot command (<code>.</code>) can replay the deletion.</li>
+<li><strong>Return to Idle</strong> &mdash; <code>TransitionResult.next</code> is <code>idle</code>. The state machine resets, ready for the next command sequence.</li>
+</ol>
+</div>
+
+<h2 id="key-types">Key Types &amp; Functions</h2>
+<p>The module exports a rich set of types and pure functions. Types define
+the state space; functions resolve motions, execute operators, and find
+text object boundaries. All operator functions accept an
+<code>OperatorContext</code> bag that provides the text buffer, cursor, mutation
+callbacks, and register access.</p>
+<table>
+<tr><th>Name</th><th>File</th><th>Kind</th><th>Description</th></tr>
+<tr><td><code>VimState</code></td><td>types.ts</td><td>Type</td><td>Top-level union: <code>INSERT</code> (tracks insertedText) or <code>NORMAL</code> (holds CommandState)</td></tr>
+<tr><td><code>CommandState</code></td><td>types.ts</td><td>Type</td><td>Discriminated union of 12 states: idle, count, operator, operatorCount, operatorFind, operatorTextObj, find, g, operatorG, replace, indent</td></tr>
+<tr><td><code>Operator</code></td><td>types.ts</td><td>Type</td><td>Operator literals: <code>"delete" | "change" | "yank"</code></td></tr>
+<tr><td><code>FindType</code></td><td>types.ts</td><td>Type</td><td>Find command variants: <code>"f" | "F" | "t" | "T"</code></td></tr>
+<tr><td><code>TextObjScope</code></td><td>types.ts</td><td>Type</td><td>Text object scope: <code>"inner" | "around"</code></td></tr>
+<tr><td><code>resolveMotion</code></td><td>motions.ts</td><td>Function</td><td>Resolves a motion key + count to a target cursor position</td></tr>
+<tr><td><code>isInclusiveMotion</code></td><td>motions.ts</td><td>Function</td><td>Returns whether a motion includes the target character in the range</td></tr>
+<tr><td><code>isLinewiseMotion</code></td><td>motions.ts</td><td>Function</td><td>Returns whether a motion operates on whole lines (e.g. <code>j</code>, <code>k</code>, <code>G</code>)</td></tr>
+<tr><td><code>OperatorContext</code></td><td>operators.ts</td><td>Type</td><td>Context bag: cursor, text, setText, setOffset, enterInsert, register ops, find ops, recordChange</td></tr>
+<tr><td><code>executeOperatorMotion</code></td><td>operators.ts</td><td>Function</td><td>Applies an operator over a motion-resolved range</td></tr>
+<tr><td><code>executeOperatorFind</code></td><td>operators.ts</td><td>Function</td><td>Applies an operator over an f/F/t/T find-resolved range</td></tr>
+<tr><td><code>executeOperatorTextObj</code></td><td>operators.ts</td><td>Function</td><td>Applies an operator over a text-object-resolved range</td></tr>
+<tr><td><code>findTextObject</code></td><td>textObjects.ts</td><td>Function</td><td>Dispatches to findWordObject, findQuoteObject, or findBracketObject</td></tr>
+<tr><td><code>TextObjectRange</code></td><td>textObjects.ts</td><td>Type</td><td>Result tuple: <code>[start, end]</code> boundary of the matched text object</td></tr>
+<tr><td><code>transition</code></td><td>transitions.ts</td><td>Function</td><td>Main dispatch &mdash; maps (state, key) to <code>TransitionResult</code></td></tr>
+<tr><td><code>TransitionResult</code></td><td>transitions.ts</td><td>Type</td><td>Return type: <code>{ next: CommandState, execute?: () =&gt; void }</code></td></tr>
+<tr><td><code>RecordedChange</code></td><td>operators.ts</td><td>Type</td><td>Captured operation for dot-repeat replay</td></tr>
+</table>
+
+<h2 id="constants">Constants &amp; Configuration</h2>
+<p>All constants live in <code>types.ts</code> except <code>PAIRS</code> which is co-located with
+the bracket/quote matching logic in <code>textObjects.ts</code>.</p>
+<table>
+<tr><th>Constant</th><th>File</th><th>Description</th></tr>
+<tr><td><code>SIMPLE_MOTIONS</code></td><td>types.ts</td><td>Set of single-key motion characters: h, l, j, k, w, b, e, W, B, E, 0, ^, $, G</td></tr>
+<tr><td><code>OPERATORS</code></td><td>types.ts</td><td>Set of operator keys: d, c, y</td></tr>
+<tr><td><code>FIND_KEYS</code></td><td>types.ts</td><td>Set of find-command keys: f, F, t, T</td></tr>
+<tr><td><code>TEXT_OBJ_TYPES</code></td><td>types.ts</td><td>Set of text object type characters: w, W, &quot;, &apos;, `, (, ), {, }, [, ], &lt;, &gt;</td></tr>
+<tr><td><code>TEXT_OBJ_SCOPES</code></td><td>types.ts</td><td>Scope selectors: i (inner), a (around)</td></tr>
+<tr><td><code>MAX_VIM_COUNT</code></td><td>types.ts</td><td>Upper bound for numeric count prefix to prevent runaway repeats</td></tr>
+<tr><td><code>PAIRS</code></td><td>textObjects.ts</td><td>Delimiter mapping for bracket/quote text objects (e.g. <code>(</code> &harr; <code>)</code>)</td></tr>
+</table>
+
+<h2 id="supported-motions">Supported Motions Reference</h2>
+<p>The following motions are recognized by <code>resolveMotion()</code> and can be
+combined with any operator or used standalone in normal mode:</p>
+<table>
+<tr><th>Motion</th><th>Category</th><th>Inclusive</th><th>Linewise</th><th>Description</th></tr>
+<tr><td><code>h</code></td><td>Character</td><td>No</td><td>No</td><td>Move left one character</td></tr>
+<tr><td><code>l</code></td><td>Character</td><td>No</td><td>No</td><td>Move right one character</td></tr>
+<tr><td><code>j</code></td><td>Line</td><td>No</td><td>Yes</td><td>Move down one line</td></tr>
+<tr><td><code>k</code></td><td>Line</td><td>No</td><td>Yes</td><td>Move up one line</td></tr>
+<tr><td><code>gj</code></td><td>Display</td><td>No</td><td>Yes</td><td>Move down one display line (soft-wrap aware)</td></tr>
+<tr><td><code>gk</code></td><td>Display</td><td>No</td><td>Yes</td><td>Move up one display line (soft-wrap aware)</td></tr>
+<tr><td><code>w</code></td><td>Word</td><td>No</td><td>No</td><td>Move to start of next word</td></tr>
+<tr><td><code>b</code></td><td>Word</td><td>No</td><td>No</td><td>Move to start of previous word</td></tr>
+<tr><td><code>e</code></td><td>Word</td><td>Yes</td><td>No</td><td>Move to end of current/next word</td></tr>
+<tr><td><code>W</code></td><td>WORD</td><td>No</td><td>No</td><td>Move to start of next WORD (whitespace-delimited)</td></tr>
+<tr><td><code>B</code></td><td>WORD</td><td>No</td><td>No</td><td>Move to start of previous WORD</td></tr>
+<tr><td><code>E</code></td><td>WORD</td><td>Yes</td><td>No</td><td>Move to end of current/next WORD</td></tr>
+<tr><td><code>0</code></td><td>Line</td><td>No</td><td>No</td><td>Move to first column of line</td></tr>
+<tr><td><code>^</code></td><td>Line</td><td>No</td><td>No</td><td>Move to first non-blank character of line</td></tr>
+<tr><td><code>$</code></td><td>Line</td><td>Yes</td><td>No</td><td>Move to end of line</td></tr>
+<tr><td><code>G</code></td><td>Jump</td><td>No</td><td>Yes</td><td>Move to last line (or line N with count)</td></tr>
+<tr><td><code>gg</code></td><td>Jump</td><td>No</td><td>Yes</td><td>Move to first line (via g prefix state)</td></tr>
+</table>
+
+<h2 id="design-principles">Design Principles</h2>
+<div style="background:var(--surface);border-left:4px solid var(--accent2);border-radius:0 10px 10px 0;padding:1.2rem 1.4rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">Pure Functions Everywhere</h4>
+<p>Motion resolution and text object detection are pure functions &mdash; they
+take text and a position, and return a new position or range. This
+makes them trivially unit-testable without mocking any UI state.</p>
+<h4>Single Dispatch Entry Point</h4>
+<p>All keypress handling flows through one function: <code>transition()</code>. This
+makes it easy to trace, debug, and extend the state machine without
+hunting through scattered event handlers.</p>
+<h4>Grapheme Safety</h4>
+<p>Text object iteration in <code>textObjects.ts</code> is grapheme-aware, correctly
+handling multi-byte Unicode characters and combining marks so that
+cursor positioning never lands in the middle of a visual character.</p>
+<h4>Scannable Transition Table</h4>
+<p>The <code>transitions.ts</code> file acts as a single source of truth for all
+state transitions. Each <code>CommandState</code> variant has a clearly delineated
+branch, making the full behavior of the state machine readable in one
+pass without jumping between files.</p>
+</div>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for Vim</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>vim/
+├── types.ts          ← Complete state machine types: VimState, CommandState (12 variants), constants
+├── transitions.ts    ← State transition table &amp; dispatch: transition() → TransitionResult
+├── motions.ts        ← Pure motion resolvers: resolveMotion(), isInclusiveMotion(), isLinewiseMotion()
+├── operators.ts      ← Operator execution: delete, change, yank, plus indent/join/paste/replace helpers
+└── textObjects.ts    ← Text object boundaries: iw, aw, i&quot;, a(, etc. with grapheme-safe iteration
+</code></pre>
+</details>
+
+<div class="footer">
+  <p>Vim Wiki &mdash; Generated from source analysis on 2026-04-01 &mdash; rev <code>a8a678c</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

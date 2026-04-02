@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="src/skills">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>skills — Custom Skill &amp; Macro System</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../index.html">Claude Code</a> &rsaquo; <span>skills</span></nav>
+
+<main id="main">
+<h1>skills &mdash; Custom Skill &amp; Macro System</h1>
+<div class="hero">
+  <p class="subtitle">Custom Skill &amp; Macro System</p>
+  <p>Extensible command system enabling user-defined skills from <code>.claude/skills/</code> directories, bundled skills like <code>/quick-diff</code>, and <a title="commands mcp — MCP Server Management Commands" href="../commands_doc/mcp/index.html">MCP</a> skill builders. Skills are prompt-based <a title="commands — Slash Command System" href="../commands_doc/index.html">commands</a> that the model can invoke to extend its capabilities.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">20</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~4k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">Skill Sources</div></div>
+  <div class="stat-box"><div class="num">TS</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">🔵 User Skills</span>
+  <span class="badge green">🟢 Bundled Skills</span>
+  <span class="badge yellow">🟡 MCP Integration</span>
+  <span class="badge red">🔴 Prompt-Based</span>
+</p>
+
+<!-- Intro box -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">💡 What is this?</h3>
+<p>The <strong>skills</strong> module is the extensibility backbone of Claude Code. It allows users and the system to register prompt-based commands that the AI model can discover and invoke at runtime, turning the <a title="cli — CLI Output Formatting" href="../cli/index.html">CLI</a> into a fully extensible platform.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">🧩 Analogy: Think of it like browser extensions</summary>
+<p style="margin-top:.5rem;color:var(--text-muted);">Just as browser extensions add new capabilities to a browser without modifying its core, skills add new prompt-based commands to Claude Code. User skills are like personal extensions installed from local files, bundled skills are like pre-installed extensions that ship with the browser, and MCP skills are like extensions fetched from a remote marketplace.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<!-- Architecture Diagram -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Sources["Skill Sources"]
+    US["User Skills<br/>.claude/skills/"]
+    BS["Bundled Skills<br/>bundledSkills.ts"]
+    MCP["MCP Skills<br/>mcpSkillBuilders.ts"]
+  end
+  subgraph Loader["Skill Loader"]
+    LD["loadSkillsDir.ts"]
+    REG["SkillRegistry"]
+    VAL["Validation &amp; Schema"]
+  end
+  subgraph Runtime["Runtime"]
+    RES["Skill Resolver"]
+    EXE["Skill Executor"]
+    CTX["Prompt Context"]
+  end
+  US --> LD
+  BS --> REG
+  MCP --> REG
+  LD --> REG
+  REG --> RES
+  RES --> EXE
+  EXE --> CTX
+</pre>
+</div>
+
+<!-- Data Flow Diagram -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  A["User types /skill-name<br/>or model invokes skill"] --> B["SkillRegistry.lookup()"]
+  B --> C{"Source?"}
+  C -->|User| D["Load from .claude/skills/"]
+  C -->|Bundled| E["Load from bundledSkills map"]
+  C -->|MCP| F["Fetch from MCP server"]
+  D --> G["Parse skill prompt template"]
+  E --> G
+  F --> G
+  G --> H["Inject context variables"]
+  H --> I["Append to conversation<br/>as system prompt"]
+  I --> J["Model executes<br/>skill instructions"]
+</pre>
+</div>
+
+<!-- Narrated Walkthrough -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">🚶 Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>user skill invocation</strong> as it flows through the skills pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Trigger</strong> — User <a title="types — Shared TypeScript Definitions" href="../types/index.html">types</a> <code>/my-skill</code> in the REPL or the model decides to invoke a registered skill.</li>
+<li><strong>Registry Lookup</strong> — <code>SkillRegistry</code> searches all three sources (user, bundled, MCP) for a matching skill name.</li>
+<li><strong>Directory Scan</strong> — For user skills, <code>loadSkillsDir.ts</code> reads <code>.claude/skills/</code> and parses the skill definition YAML/markdown.</li>
+<li><strong>Validation</strong> — The skill schema is validated: required fields (name, prompt), optional fields (description, parameters).</li>
+<li><strong>Template Parsing</strong> — The skill prompt template is loaded, with placeholder tokens identified for variable injection.</li>
+<li><strong>Context Injection</strong> — Runtime context (current file, selection, project root) is injected into the prompt template.</li>
+<li><strong>Prompt Assembly</strong> — The finalized skill prompt is appended to the conversation as a system-level message.</li>
+<li><strong>Model Execution</strong> — The AI model receives the enriched prompt and executes the skill instructions.</li>
+<li><strong>Result Capture</strong> — <a href="../tools_doc/AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Output</a> from the skill execution is captured and displayed to the user in the REPL.</li>
+</ol>
+</div>
+
+<!-- Key Classes/Functions Table -->
+<h2 id="key-classes-functions">Key Classes &amp; Functions</h2>
+<table>
+<thead><tr><th>Name</th><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>loadSkillsDir</code></td><td>loadSkillsDir.ts</td><td>Scans <code>.claude/skills/</code> directory tree, parses skill definitions, returns skill objects</td></tr>
+<tr><td><code>bundledSkills</code></td><td>bundledSkills.ts</td><td>Static map of built-in skills shipped with Claude Code (e.g., <code>/quick-diff</code>)</td></tr>
+<tr><td><code>mcpSkillBuilders</code></td><td>mcpSkillBuilders.ts</td><td>Factory functions that create skill objects from MCP server capabilities</td></tr>
+<tr><td><code>SkillRegistry</code></td><td>registry.ts</td><td>Central registry aggregating all skill sources, provides lookup by name</td></tr>
+<tr><td><code>SkillResolver</code></td><td>resolver.ts</td><td>Resolves a skill name to a concrete skill object with loaded prompt template</td></tr>
+<tr><td><code>SkillExecutor</code></td><td>executor.ts</td><td>Executes a resolved skill by injecting context and appending to conversation</td></tr>
+<tr><td><code>parseSkillDef</code></td><td>parser.ts</td><td>Parses YAML/markdown skill definition files into structured skill objects</td></tr>
+<tr><td><code>validateSkillSchema</code></td><td>schema.ts</td><td>Validates skill definitions against the expected schema, returns errors</td></tr>
+<tr><td><code>injectContext</code></td><td>context.ts</td><td>Replaces template placeholders with runtime context (file path, selection, etc.)</td></tr>
+<tr><td><code>SkillDefinition</code></td><td>types.ts</td><td>TypeScript interface defining the shape of a skill (name, prompt, params)</td></tr>
+<tr><td><code>listAvailableSkills</code></td><td>list.ts</td><td>Aggregates and returns all available skills from every source for display</td></tr>
+<tr><td><code>getSkillPrompt</code></td><td>prompt.ts</td><td>Reads and returns the raw prompt template string for a given skill</td></tr>
+</tbody>
+</table>
+
+<!-- Configuration Table -->
+<h2 id="configuration">Configuration</h2>
+<table>
+<thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>skillsDir</code></td><td><code>.claude/skills/</code></td><td>Directory to scan for user-defined skill files</td></tr>
+<tr><td><code>enableBundledSkills</code></td><td><code>true</code></td><td>Whether to load built-in bundled skills</td></tr>
+<tr><td><code>enableMcpSkills</code></td><td><code>true</code></td><td>Whether to load skills from MCP servers</td></tr>
+<tr><td><code>skillFileExtensions</code></td><td><code>[".md", ".yaml"]</code></td><td>File extensions recognized as skill definitions</td></tr>
+<tr><td><code>maxSkillPromptLength</code></td><td><code>8192</code></td><td>Maximum character length for a skill prompt template</td></tr>
+<tr><td><code>skillTimeout</code></td><td><code>30000</code></td><td>Timeout in ms for MCP skill fetch operations</td></tr>
+</tbody>
+</table>
+
+<!-- Directory Map -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for skills</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>skills/
+├── loadSkillsDir.ts           ← Scans user skill directories
+├── bundledSkills.ts           ← Built-in skill definitions
+├── mcpSkillBuilders.ts        ← MCP skill factory functions
+├── registry.ts                ← Central skill registry
+├── resolver.ts                ← Resolves skill name → skill object
+├── executor.ts                ← Executes skills with context
+├── parser.ts                  ← Parses skill definition files
+├── schema.ts                  ← Schema validation for skills
+├── context.ts                 ← Runtime context injection
+├── types.ts                   ← TypeScript type definitions
+├── list.ts                    ← Lists all available skills
+├── prompt.ts                  ← Reads skill prompt templates
+├── index.ts                   ← Public API barrel export
+├── __tests__/
+│   ├── loadSkillsDir.test.ts  ← Tests for directory scanning
+│   ├── registry.test.ts       ← Tests for skill registry
+│   ├── parser.test.ts         ← Tests for definition parsing
+│   ├── executor.test.ts       ← Tests for skill execution
+│   └── schema.test.ts         ← Tests for schema validation
+└── fixtures/
+    └── sample-skill.md        ← Test fixture skill file
+</code></pre>
+</details>
+
+<!-- Sample Code -->
+<h2 id="code-example">Code Example</h2>
+<pre><code class="language-typescript">import { SkillRegistry } from "./registry";
+import { loadSkillsDir } from "./loadSkillsDir";
+import { bundledSkills } from "./bundledSkills";
+import { mcpSkillBuilders } from "./mcpSkillBuilders";
+
+// Initialize registry with all skill sources
+const registry = new SkillRegistry();
+registry.registerAll(bundledSkills);
+registry.registerAll(await loadSkillsDir(".claude/skills/"));
+registry.registerAll(await mcpSkillBuilders.build(mcpServers));
+
+// Resolve and execute a skill
+const skill = registry.lookup("quick-diff");
+if (skill) {
+  const prompt = skill.resolve({ filePath: "src/index.ts" });
+  await executor.run(prompt, conversationContext);
+}
+</code></pre>
+
+<!-- Footer -->
+<div class="footer">
+  <p>skills Wiki &mdash; Generated from source analysis</p>
+  <p><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../index.html">&larr; Back to Claude Code</a></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

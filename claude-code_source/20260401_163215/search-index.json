@@ -1,0 +1,617 @@
+[
+  {
+    "title": "bridge — Remote Control Integration",
+    "path": "bridge/index.html",
+    "excerpt": "bridge — Remote Control Integration Skip to content ☾ ⇧ Claude Code › bridge bridge — Remote Control Integration Remote Control Integration Connects local Claude Code instances to claude.ai cloud sessions. Handles JWT-based authentication, permission delegation to cloud, WebSocket transport for real-time messaging, and session compatibility negotiation. 31 Files 13k Lines JWT Auth TS TypeScript 🔵 claude.ai Bridge 🟢 JWT Auth 🟡 WebSocket 🔴 Permission Delegation 📚 What is this? The bridge module…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Walkthrough: Remote command execution",
+      "Key Classes & Functions",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "cli — CLI Output Formatting",
+    "path": "cli/index.html",
+    "excerpt": "cli — CLI Output Formatting Skip to content ☾ ⇧ Claude Code › cli cli — CLI Output Formatting CLI Output Formatting Structured I/O layer for machine-readable output. Provides NDJSON streaming for MCP and plugin integrations, normalized exit points, pretty-printing for human users, and remote output routing for headless sessions. 19 Files 12k Lines NDJSON Protocol TS TypeScript 🔵 Structured I/O 🟢 NDJSON 🟡 Exit Codes 🔴 Remote Routing 📚 What is this? The cli module is the output formatting layer…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Walkthrough: NDJSON output for an MCP tool call",
+      "Key Classes & Functions",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "commands config — Configuration Management Commands",
+    "path": "commands_doc/config/index.html",
+    "excerpt": "commands config — Configuration Management Commands Skip to content ☾ ⇧ Claude Code › commands › config commands /config/ — Configuration Management Commands Interactive settings panel for all Claude Code preferences The /config command opens a full-screen React ( Ink ) panel with 38+ settings spanning models, themes, permissions , output styles, notifications, and more. Settings are searchable, navigable by keyboard, and changes revert on Escape. 2 Files 38 Settings 8 Submenus ~2.4 k Lines 📚…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "State & Persistence Flow",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Settings Categories (38 items)",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example 1: Command Entry Point & Registration",
+      "Example 2: Model Change Handler with Analytics",
+      "Example 3: Revert on Escape (Snapshot Restore)"
+    ]
+  },
+  {
+    "title": "commands — Slash Command System",
+    "path": "commands_doc/index.html",
+    "excerpt": "commands — Slash Command System Skip to content ☾ ⇧ Claude Code › commands commands — Slash Command System Slash Command System 80+ slash commands orchestrating the complete command lifecycle from registration through parsing to execution. Three command types : PromptCommand (model-invoked skills ), LocalJSXCommand (React UI), LocalCommand (pure function). Extensible via skills, plugins, and MCP . 87 Commands 207 Files 3 Types (Prompt / JSX / Local) TS TypeScript 🔵 Slash Commands 🟢 Skills &…",
+    "headings": [
+      "Architecture",
+      "Data Flow — /commit Command",
+      "🚶 Step-by-Step: /config Through the Full Lifecycle",
+      "Key Components",
+      "Configuration & Feature Flags",
+      "Sub-Modules",
+      "Directory Map",
+      "Code Example — Registering a Command"
+    ]
+  },
+  {
+    "title": "commands mcp — MCP Server Management Commands",
+    "path": "commands_doc/mcp/index.html",
+    "excerpt": "commands mcp — MCP Server Management Commands Skip to content ☾ ⇧ Claude Code › commands › mcp commands /mcp/ — MCP Server Management Commands Commands for managing Model Context Protocol servers Provides /mcp UI and claude mcp add CLI for registering, enabling, disabling, and authenticating MCP servers. Handles scope management (local/user/project), OAuth flows, XAA enterprise auth, and server approval workflows. 4 Files 12 Commands 6 Transport Types 6 Config Scopes 📚 What is this & why does…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Command Routing",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example 1: Registering an MCP Server via CLI",
+      "Example 2: Toggling MCP Servers in the UI",
+      "Example 3: XAA IdP Setup"
+    ]
+  },
+  {
+    "title": "commands session — Session Management Commands",
+    "path": "commands_doc/session/index.html",
+    "excerpt": "commands session — Session Management Commands Skip to content ☾ ⇧ Claude Code › commands › session commands /session/ — Session Management Commands Remote session display, conversation persistence, and cross-session navigation The /session command displays a QR code and URL for the active remote session. The broader session ecosystem includes /resume , /export , and /branch commands for listing, resuming, exporting, and forking conversation sessions stored as JSONL transcripts. 2 Files 4…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Session Lifecycle",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example 1: Command Registration (Conditional Visibility)",
+      "Example 2: SessionInfo Component with QR Generation",
+      "Example 3: Session Identifier Parsing"
+    ]
+  },
+  {
+    "title": "components Messages — Message Rendering System",
+    "path": "components_doc/Messages/index.html",
+    "excerpt": "components Messages — Message Rendering System Skip to content ☾ ⇧ Claude Code › components › Messages components /Messages/ — Message Rendering System Renders the conversation thread with virtual scrolling and streaming support The Messages system is a sophisticated React component hierarchy that normalizes, groups, virtualizes, and renders every message in the Claude Code REPL. It handles 15+ message types , streaming tool output, collapsible groups, and incremental search across…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Streaming Data Flow",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Performance Optimizations",
+      "React Compiler Integration",
+      "Virtualization Strategy",
+      "Custom Memo Comparators",
+      "Supported Message Types",
+      "Code Examples",
+      "Example: Custom Memo Comparator (MessageRow)",
+      "Example: Forward Scanner for UI State",
+      "Example: Brief Mode Filtering"
+    ]
+  },
+  {
+    "title": "components PromptInput — User Input Component",
+    "path": "components_doc/PromptInput/index.html",
+    "excerpt": "components PromptInput — User Input Component Skip to content ☾ ⇧ Claude Code › components › PromptInput components /PromptInput/ — User Input Component The main text input where users type prompts and commands Handles multi-line input, slash command autocomplete, history navigation, paste handling, and keyboard shortcuts. This is the primary human-to-AI interface surface in the Claude Code REPL, managing everything from simple text entry to complex mode switching and command dispatch. 8…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Lifecycle Diagram",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Performance Notes",
+      "Input Debouncing",
+      "History Memory",
+      "Paste Detection",
+      "Error Handling",
+      "Keyboard Shortcuts",
+      "Code Examples",
+      "Example: Handling Submit with History Push",
+      "Example: Autocomplete Filtering",
+      "Example: History Navigation Hook"
+    ]
+  },
+  {
+    "title": "components agents — Agent UI Components",
+    "path": "components_doc/agents/index.html",
+    "excerpt": "components agents — Agent UI Components Skip to content ☾ ⇧ Claude Code › components › agents components /agents/ — Agent UI Components UI components for multi-agent workflows and agent management The agents module provides the complete user interface for creating, viewing, editing, and deleting custom agents. It includes a multi-step creation wizard, property editors ( tools , color, model), agent listing with source grouping, AI-powered agent generation, and comprehensive validation. 15…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "State Machine",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Creation Wizard Steps",
+      "Validation Rules",
+      "Agent Sources",
+      "Code Examples",
+      "Example: Agent Validation",
+      "Example: Tool Bucket Categorization",
+      "Example: Agent File Format (Markdown with YAML)"
+    ]
+  },
+  {
+    "title": "components — Terminal UI Component Library",
+    "path": "components_doc/index.html",
+    "excerpt": "components — Terminal UI Component Library Skip to content ☾ ⇧ Claude Code › components components — Terminal UI Component Library Terminal UI Component Library 389 React (Ink) components powering the terminal UI. From low-level design system primitives to complex interactive dialogs. Includes PromptInput, Messages rendering, StructuredDiff viewer, model/theme pickers, MCP server dialogs, agent status views, and full settings panels. 31 Groups 389 Files ~82k Lines TS/TSX Language 🔵 Ink (React…",
+    "headings": [
+      "🏢 Think of It Like a Building",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Sub-Modules",
+      "Configuration",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "constants — Centralized Constant Definitions",
+    "path": "constants/index.html",
+    "excerpt": "constants — Centralized Constant Definitions Skip to content ☾ ⇧ Claude Code › constants constants — Centralized Constant Definitions Centralized Constant Definitions Global constants imported across the entire Claude Code codebase. Houses permission constants, prompt templates, message type definitions, system prompt sections, API rate limit thresholds, Anthropic beta feature flags, XML tag constants, and common formatting values. 21 Files 8 Categories 200+ Exports TS Language 🔵 Global…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Constants & Exports",
+      "Constant Categories",
+      "Directory Map",
+      "Code Example"
+    ]
+  },
+  {
+    "title": "hooks — REPL State Hooks",
+    "path": "hooks/index.html",
+    "excerpt": "hooks — REPL State Hooks Skip to content ☾ ⇧ Claude Code › hooks hooks — REPL State Hooks REPL State Hooks React hooks powering the interactive REPL experience. Manages transcript logging, command queuing, input history, prompt text buffering, diff display, large-list virtualization, model selection, and cancellation flows. 104 Hooks 19k Lines REPL State TS TypeScript 🔵 React Hooks 🟢 REPL State 🟡 Virtual Scrolling 🔴 Input Management 📚 What is this? The hooks module is the reactive state…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Walkthrough: User submits a prompt",
+      "Key Hooks & Functions",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "Claude Code — AI-Powered Terminal Assistant Source Wiki",
+    "path": "index.html",
+    "excerpt": "Claude Code — AI-Powered Terminal Assistant Source Wiki Skip to content ☾ ⇧ Claude Code AI-Powered Terminal Assistant — Source Code Wiki Claude Code is Anthropic's agentic coding tool that lives in your terminal. It understands your codebase, executes commands , edits files, and manages complex development workflows through natural language. This wiki documents the internal TypeScript source architecture. 💻 Terminal REPL 🤖 Agentic Tool Use 🔌 MCP Integration 🔒 Permission System 35 Modules 1,902…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "System Architecture",
+      "Request Lifecycle",
+      "tools",
+      "commands",
+      "services",
+      "components",
+      "hooks",
+      "ink",
+      "utils",
+      "bridge",
+      "state",
+      "cli",
+      "skills",
+      "tasks",
+      "keybindings",
+      "constants",
+      "types",
+      "Navigation Guide",
+      "How the Core Engine Connects",
+      "Directory Map",
+      "Build & Tech Stack"
+    ]
+  },
+  {
+    "title": "ink — Terminal Rendering Engine",
+    "path": "ink/index.html",
+    "excerpt": "ink — Terminal Rendering Engine Skip to content ☾ ⇧ Claude Code › ink ink — Terminal Rendering Engine Terminal Rendering Engine Custom Ink fork providing React-based terminal rendering. Implements a reconciler, output optimizer, and screen writer alongside a rich component library for building interactive terminal UIs. 96 Files 20k Lines 12 Components TS TypeScript 🔵 React Reconciler 🟢 Terminal Output 🟡 Focus Management 🔴 Custom Fork 📚 What is this? The ink module is a custom fork of the Ink…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Walkthrough: Rendering a <Box> update",
+      "Key Classes & Functions",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "keybindings — Keyboard Shortcut Configuration",
+    "path": "keybindings/index.html",
+    "excerpt": "keybindings — Keyboard Shortcut Configuration Skip to content ☾ ⇧ Claude Code › keybindings keybindings — Keyboard Shortcut Configuration Keyboard Shortcut Configuration Full keyboard shortcut system with Vim and Emacs mode defaults, user-customizable bindings, a React context provider, key event parser, resolver that matches keypresses to commands , schema validation, and a useKeybinding React hook for component integration. 14 Files 2 Default Modes 40+ Bindings TS Language 🔵 Vim Mode 🟢 Emacs…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Functions",
+      "Configuration",
+      "Default Bindings (Vim Mode)",
+      "Directory Map",
+      "Code Example"
+    ]
+  },
+  {
+    "title": "services api — Anthropic API Client Service",
+    "path": "services_doc/api/index.html",
+    "excerpt": "services api — Anthropic API Client Service Skip to content ☾ ⇧ Claude Code › services › api services /api/ — Anthropic API Client Service HTTP client for the Anthropic Claude API Handles streaming responses, retry logic with exponential backoff, error classification, rate-limit awareness, token counting, and multi-provider support (Bedrock, Vertex AI, Azure Foundry). The core communication layer between Claude Code and the model. 21 Files ~10.5 k Lines 4 Providers 10 Retry Strategies 📚 What is…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Request Lifecycle",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Gateway Detection",
+      "Code Examples",
+      "Example 1: Creating a Multi-Provider Client",
+      "Example 2: Resilient Retry with Model Fallback",
+      "Example 3: File Upload with Retry"
+    ]
+  },
+  {
+    "title": "services — Backend Service Layer",
+    "path": "services_doc/index.html",
+    "excerpt": "services — Backend Service Layer Skip to content ☾ ⇧ Claude Code › services services — Backend Service Layer Backend Service Layer Comprehensive backend integration and lifecycle management. Orchestrates API communication, MCP protocol, LSP language servers, session memory, message compaction, OAuth authentication, rate limiting, analytics/telemetry, and remote settings. 20 Services 130 Files ~54k Lines TypeScript Language 🔵 API Integration 🟢 MCP Protocol 🟡 OAuth & Rate Limiting 🔴 Telemetry 💡…",
+    "headings": [
+      "Architecture",
+      "API Call Sequence",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "services lsp — Language Server Protocol Service",
+    "path": "services_doc/lsp/index.html",
+    "excerpt": "services lsp — Language Server Protocol Service Skip to content ☾ ⇧ Claude Code › services › lsp services /lsp/ — Language Server Protocol Service Code intelligence via Language Server Protocol Manages multiple language server processes, provides go-to-definition, find-references, hover info, and real-time diagnostics. Uses a factory-function architecture with closures for state management, routing requests to the correct server based on file extensions. The eyes and ears that let Claude Code…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Server Instance State Machine",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Capabilities Negotiated",
+      "Diagnostic Severity Mapping",
+      "Code Examples",
+      "Example 1: Server Instance with Transient Error Retry",
+      "Example 2: File Synchronization Protocol",
+      "Example 3: Diagnostic Collection with Deduplication"
+    ]
+  },
+  {
+    "title": "services mcp — Model Context Protocol Service",
+    "path": "services_doc/mcp/index.html",
+    "excerpt": "services mcp — Model Context Protocol Service Skip to content ☾ ⇧ Claude Code › services › mcp services /mcp/ — Model Context Protocol Service MCP protocol client for tool & resource integration Manages MCP server connections across six transport types (stdio, SSE, HTTP, WebSocket, SDK, claudeai-proxy), discovers tools and resources, handles OAuth authentication with XAA token exchange, and enforces enterprise permission policies. The extensibility backbone of Claude Code. 23 Files ~12.2 k…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Connection Lifecycle",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Transport Comparison",
+      "Tool Naming Convention",
+      "Code Examples",
+      "Example 1: Multi-Scope Config Aggregation",
+      "Example 2: MCP Tool Execution with OAuth Retry",
+      "Example 3: Environment Variable Expansion in Config"
+    ]
+  },
+  {
+    "title": "skills — Custom Skill & Macro System",
+    "path": "skills/index.html",
+    "excerpt": "skills — Custom Skill & Macro System Skip to content ☾ ⇧ Claude Code › skills skills — Custom Skill & Macro System Custom Skill & Macro System Extensible command system enabling user-defined skills from .claude/skills/ directories, bundled skills like /quick-diff , and MCP skill builders. Skills are prompt-based commands that the model can invoke to extend its capabilities. 20 Files ~4k Lines of Code 3 Skill Sources TS Language 🔵 User Skills 🟢 Bundled Skills 🟡 MCP Integration 🔴 Prompt-Based 💡…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Functions",
+      "Configuration",
+      "Directory Map",
+      "Code Example"
+    ]
+  },
+  {
+    "title": "state — Zustand State Management",
+    "path": "state/index.html",
+    "excerpt": "state — Zustand State Management Skip to content ☾ ⇧ Claude Code › state state — Zustand State Management Zustand State Management Redux-like state store powered by Zustand. The single source of truth for all REPL UI state — conversation history, agent status, input buffer, permission prompts, and tool execution state. Provides a React Context provider, typed selectors, change notifiers, and agent state utilities. 6 Files 1 Store 15+ Selectors TS Language 🔵 Zustand Store 🟢 React Context 🟡…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Functions",
+      "State Shape Reference",
+      "Directory Map",
+      "Code Example"
+    ]
+  },
+  {
+    "title": "Wiki Coverage Dashboard",
+    "path": "stats.html",
+    "excerpt": "Wiki Coverage Dashboard ☾ 📊 Wiki Coverage Dashboard Generated 2026-04-01 17:10 — claude-code-sourcemap_restored-src_src_20260401_163215 32 Total Pages 12,936 Total Lines 48,637 Total Words 64 Diagrams 0 Focus Pages 0 Stale Pages 0 Thin Pages Level Distribution Level Count L0 1 L1 15 L2 15 search 1 Per-Module Breakdown Module Pages Avg Lines Diagrams Focus Words Content (relative) bridge 1 307 2 0 939 cli 1 307 2 0 964 commands 4 460 8 0 6,707 components 4 452 8 0 7,146 constants 1 353 2 0 1,174…",
+    "headings": [
+      "Level Distribution",
+      "Per-Module Breakdown",
+      "⚠️ Stale Pages (>30 days)",
+      "⚠️ Thin Pages (<218 lines)",
+      "⚠️ Missing Intro Boxes"
+    ]
+  },
+  {
+    "title": "tasks — Background Task Management",
+    "path": "tasks/index.html",
+    "excerpt": "tasks — Background Task Management Skip to content ☾ ⇧ Claude Code › tasks tasks — Background Task Management Background Task Management Manages the full lifecycle of background tasks including shell commands , sub- agents , cloud agents, and dream processes. Provides unified status tracking, output capture, and graceful termination across all task types . 12 Files 3k Lines 5 Task Types TS TypeScript 🔵 Task Lifecycle 🟢 5 Task Types 🟡 Output Capture 🔴 Sub-Agents 📚 What is this? The tasks module…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow: Task Status Machine",
+      "🚶 Step-by-Step Walkthrough: Running a LocalShellTask",
+      "Key Types & Functions",
+      "Directory Map",
+      "Configuration"
+    ]
+  },
+  {
+    "title": "tools AgentTool — Sub-Agent Orchestration Tool",
+    "path": "tools_doc/AgentTool/index.html",
+    "excerpt": "tools AgentTool — Sub-Agent Orchestration Tool Skip to content ☾ ⇧ Claude Code › tools › AgentTool tools /AgentTool/ — Sub-Agent Orchestration Tool Spawns child agent tasks for parallel or delegated work Creates sub- agents that can independently use tools, process queries, and return results. Core of the multi-agent architecture (swarms). Manages agent lifecycle, configuration loading, memory persistence, prompt caching, and result aggregation across built-in, custom, and plugin agent types .…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Agent Type Hierarchy",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Agent Source Priority",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: Agent Tool Resolution with Wildcards",
+      "Example: Fork Message Building for Cache Sharing"
+    ]
+  },
+  {
+    "title": "tools BashTool — Shell Command Execution Tool",
+    "path": "tools_doc/BashTool/index.html",
+    "excerpt": "tools BashTool — Shell Command Execution Tool Skip to content ☾ ⇧ Claude Code › tools › BashTool tools /BashTool/ — Shell Command Execution Tool Executes shell commands in the user’s terminal with streaming output and security validation Core of the agentic coding workflow — runs builds, tests, git commands, file operations, and arbitrary shell invocations. Handles streaming output, timeouts, working directory management, sandboxing, and a multi-layered security stack that validates every…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Security Validation Stack",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Permission Resolution Flow",
+      "Configuration",
+      "Command-Specific Exit Code Semantics",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: Permission Flow Entry Point",
+      "Example: Command Exit Code Interpretation"
+    ]
+  },
+  {
+    "title": "tools FileEditTool — Intelligent File Editing Tool",
+    "path": "tools_doc/FileEditTool/index.html",
+    "excerpt": "tools FileEditTool — Intelligent File Editing Tool Skip to content ☾ ⇧ Claude Code › tools › FileEditTool tools /FileEditTool/ — Intelligent File Editing Tool Applies precise edits to source files using old_str/new_str replacement The primary way the AI modifies code. Validates edits against current file state , handles curly-quote normalization, supports multi-edit batching via replace_all , produces structured diffs, integrates with LSP for live diagnostics, and maintains staleness detection…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Edit Validation Error Codes",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Atomicity & Critical Section",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: Quote-Aware String Matching",
+      "Example: Atomic Edit Pipeline"
+    ]
+  },
+  {
+    "title": "tools — Agent Tool Framework",
+    "path": "tools_doc/index.html",
+    "excerpt": "tools — Agent Tool Framework Skip to content ☾ ⇧ Claude Code › tools tools — Agent Tool Framework Agent Tool Framework Plugin architecture with 40+ tool implementations. Each tool defines a JSON schema, input validation, permission requirements, and execution logic. Tools are the “hands” of the AI agent — they read files, edit code, run commands, search, and interact with external services. 42 Tool Types 184 Files ~51k Lines TS TypeScript 🔵 Plugin Architecture 🟢 JSON Schema Validation 🟡…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map",
+      "Configuration & Knobs",
+      "Core Types",
+      "Tool Invocation Lifecycle"
+    ]
+  },
+  {
+    "title": "types — Shared TypeScript Definitions",
+    "path": "types/index.html",
+    "excerpt": "types — Shared TypeScript Definitions Skip to content ☾ ⇧ Claude Code › types types — Shared TypeScript Definitions Shared TypeScript Definitions Central type hub for the entire Claude Code codebase. Defines the Message union type (User, Assistant, System), permission mode types and rules, the Command interface, hook progress types, branded ID types ( SessionId , AgentId ), and plugin definitions. Every module imports its core types from here. 11 Files 50+ Type Exports 6 Branded IDs TS Language…",
+    "headings": [
+      "💡 What is this?",
+      "Architecture",
+      "Type Relationship Diagram",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Types & Interfaces",
+      "Branded ID Reference",
+      "Directory Map",
+      "Code Example"
+    ]
+  },
+  {
+    "title": "utils git — Git Operations Utilities",
+    "path": "utils_doc/git/index.html",
+    "excerpt": "utils git — Git Operations Utilities Skip to content ☾ ⇧ Claude Code › utils › git utils /git/ — Git Operations Utilities Git integration utilities for repository state , diffs, and filesystem-level operations A comprehensive git integration layer spanning 6 files and ~2,500 lines. Provides repository detection, branch management, diff generation (PR-style and working-tree), config parsing, gitignore management, and a high-performance filesystem-based caching system that avoids spawning git…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Caching Strategy",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Security Considerations",
+      "Ref Name Validation",
+      "SHA Validation",
+      "URL Normalization",
+      "Worktree Support",
+      "Diff Engine Limits",
+      "Code Examples",
+      "Example: Reading HEAD Without Subprocess",
+      "Example: Normalizing Remote URLs",
+      "Example: Two-Phase Diff with Quick Probe"
+    ]
+  },
+  {
+    "title": "utils — Core Utility Library",
+    "path": "utils_doc/index.html",
+    "excerpt": "utils — Core Utility Library Skip to content ☾ ⇧ Claude Code › utils utils — Core Utility Library Core Utility Library Massive 300+ utility library providing foundational functions for every other module. Categories include: git operations, file system helpers, token counting/estimation, permissions engine, sandbox isolation, config management, session storage, telemetry, MCP validation, shell execution, diff processing, and more. 30 Categories 564 Files ~180k Lines TypeScript Language 🔵…",
+    "headings": [
+      "Architecture",
+      "Data Flow — Git Operation Trace",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Sub-Modules",
+      "Configuration",
+      "Directory Map",
+      "Design Patterns"
+    ]
+  },
+  {
+    "title": "utils permissions — Permission Engine",
+    "path": "utils_doc/permissions/index.html",
+    "excerpt": "utils permissions — Permission Engine Skip to content ☾ ⇧ Claude Code › utils › permissions utils /permissions/ — Permission Engine Security layer controlling what tools can do and when user approval is required A 24-file permission system implementing rule-based access control for all tool operations. Manages permission modes (default, plan, acceptEdits, bypassPermissions, auto), path-based filesystem restrictions, shell command classification, dangerous pattern detection, and an AI-powered…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Permission Decision Flow",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Permission Mode Details",
+      "Rule Source Precedence",
+      "Dangerous Pattern Categories",
+      "Code Examples",
+      "Example: Permission Rule Matching for Shell Commands",
+      "Example: Permission Mode Cycling",
+      "Example: Denial Tracking Circuit Breaker"
+    ]
+  },
+  {
+    "title": "utils sandbox — Sandbox Isolation System",
+    "path": "utils_doc/sandbox/index.html",
+    "excerpt": "utils sandbox — Sandbox Isolation System Skip to content ☾ ⇧ Claude Code › utils › sandbox utils /sandbox/ — Sandbox Isolation System OS-level isolation for tool execution restricting filesystem, network, and command access The sandbox module wraps the @anthropic-ai/sandbox-runtime library with Claude Code-specific settings integration. It enforces filesystem read/write restrictions, network domain allowlists, git bare-repo exploit protection, and platform-specific sandboxing via bubblewrap on…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Structures",
+      "Interactions",
+      "Configuration Merge Flow",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Platform Support",
+      "Security Protections",
+      "Settings File Escape Prevention",
+      "Git Bare-Repo Exploit Defense",
+      "Skills Directory Protection",
+      "Managed Domain Policy",
+      "Sandbox Lifecycle",
+      "Code Examples",
+      "Example: Path Pattern Resolution for Sandbox",
+      "Example: Hardcoded Write Protections",
+      "Example: Detecting Git Worktree for Sandbox"
+    ]
+  }
+]

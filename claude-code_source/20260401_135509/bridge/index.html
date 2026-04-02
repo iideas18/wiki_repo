@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="restored-src/src/bridge">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>Bridge — Remote Session Protocol</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Claude Code</a> &rsaquo; <span>Bridge</span></nav>
+
+<main id="main">
+<h1>Bridge &mdash; Remote Session Protocol</h1>
+<div class="hero">
+  <p class="subtitle">Remote Session Protocol</p>
+  <p>The Bridge module implements Claude Code&rsquo;s remote session infrastructure &mdash; enabling users on claude.ai to connect to long-running Claude Code sessions on developer machines. It handles environment registration, session spawning, message routing, and crash recovery across WebSocket, SSE, and HTTP transports.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">31</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">12.6k</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">Subsystems</div></div>
+  <div class="stat-box"><div class="num">TypeScript</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">Remote Control</span>
+  <span class="badge green">Multi-Session</span>
+  <span class="badge yellow">Crash Recovery</span>
+  <span class="badge red">Feature-Gated</span>
+</p>
+
+<!-- Intro box with analogy -->
+<div style="background:var(--surface);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:1.2rem 1.4rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128161; Think of it like&hellip; an Airport Control Tower</h3>
+<p>The Bridge module works like an airport control tower managing multiple runways (sessions). It <strong>registers landing strips</strong> (environments) with the central authority, <strong>polls for incoming flights</strong> (work items), <strong>acknowledges clearance</strong>, and <strong>routes cockpit communications</strong> (messages) between pilots (web users) and ground crew (local Claude Code processes). If a storm hits (crash), a pointer beacon lets the next controller resume operations.</p>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph WebUI["claude.ai / Web"]
+    User["User Browser"]
+  end
+  subgraph Infra["Cloud Infrastructure"]
+    API["Environments API"]
+    Ingress["Session Ingress"]
+  end
+  subgraph Local["Developer Machine"]
+    BM["bridgeMain"]
+    RB["replBridge"]
+    SR["sessionRunner"]
+    Child["Child claude process"]
+  end
+  User --> Ingress
+  Ingress --> API
+  API --> BM
+  BM --> SR --> Child
+  RB --> Ingress
+  Child --> SR --> BM
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant W as Web User
+  participant API as Environments API
+  participant BM as bridgeMain
+  participant SR as sessionRunner
+  participant C as Child Process
+  W->>API: Start session
+  API->>BM: pollForWork() returns WorkData
+  BM->>API: acknowledgeWork()
+  BM->>SR: spawn(sessionId, sdkUrl)
+  SR->>C: fork child with --sdk-url
+  C->>SR: NDJSON stdout activities
+  SR->>BM: onActivity callback
+  W->>API: Send message
+  API->>BM: ingress via transport
+  BM->>C: stdin message
+  C->>BM: stdout response
+  BM->>API: write to session
+  API->>W: Display response
+</pre>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>remote session lifecycle</strong> as it flows through the Bridge pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Registration</strong> &mdash; <code>bridgeMain</code> calls <code>registerBridgeEnvironment()</code> to register with the Environments API, receiving an <code>environmentId</code>.</li>
+<li><strong>Polling</strong> &mdash; The bridge enters a capacity-aware poll loop via <code>pollForWork()</code>, sleeping longer at full capacity.</li>
+<li><strong>Work Arrival</strong> &mdash; A <code>WorkData</code> item arrives; the bridge calls <code>acknowledgeWork()</code> and decodes the <code>WorkSecret</code>.</li>
+<li><strong>Session Spawn</strong> &mdash; <code>sessionRunner</code> forks a child process with the SDK URL, sandbox flags, and permission mode.</li>
+<li><strong>Ingress Routing</strong> &mdash; <code>bridgeMessaging.handleIngressMessage()</code> routes incoming messages, deduplicating echoes via <code>BoundedUUIDSet</code>.</li>
+<li><strong>Activity Tracking</strong> &mdash; Child stdout is parsed by <code>extractActivities()</code> into a ring buffer (max 10) for the terminal UI.</li>
+<li><strong>Permission Round-Trip</strong> &mdash; Child emits <code>control_request</code>; the bridge forwards it to the API; the web user approves; a <code>control_response</code> returns.</li>
+<li><strong>Token Refresh</strong> &mdash; <code>createTokenRefreshScheduler()</code> decodes the JWT expiry and schedules refresh 5 minutes before expiry.</li>
+<li><strong>Crash Recovery</strong> &mdash; <code>writeBridgePointer()</code> persists <code>{sessionId, environmentId}</code> to disk; <code>readBridgePointerAcrossWorktrees()</code> restores it within the 4-hour TTL.</li>
+<li><strong>Teardown</strong> &mdash; On session completion, <code>archiveSession()</code> is called and the bridge pointer is cleared.</li>
+</ol>
+</div>
+
+<h2 id="key-exports">Key Exports</h2>
+<table>
+<tr><th>Export</th><th>File</th><th>Kind</th><th>Description</th></tr>
+<tr><td><code>createBridgeApiClient</code></td><td>bridgeApi.ts</td><td>Function</td><td>Factory for the HTTP client with OAuth + token refresh</td></tr>
+<tr><td><code>bridgeMain</code></td><td>bridgeMain.ts</td><td>Function</td><td>Multi-session standalone bridge entry point (up to 32 sessions)</td></tr>
+<tr><td><code>replBridge</code></td><td>replBridge.ts</td><td>Function</td><td>Single persistent REPL-integrated bridge for interactive use</td></tr>
+<tr><td><code>handleIngressMessage</code></td><td>bridgeMessaging.ts</td><td>Function</td><td>Routes inbound messages with echo-dedup and attachment resolution</td></tr>
+<tr><td><code>createSessionSpawner</code></td><td>sessionRunner.ts</td><td>Function</td><td>Spawns child Claude processes with activity and permission callbacks</td></tr>
+<tr><td><code>trustedDevice</code></td><td>trustedDevice.ts</td><td>Module</td><td>Trusted device token management for elevated auth enforcement</td></tr>
+<tr><td><code>BoundedUUIDSet</code></td><td>bridgeMessaging.ts</td><td>Class</td><td>FIFO-bounded set (2000 cap) for echo and re-delivery dedup</td></tr>
+<tr><td><code>FlushGate</code></td><td>flushGate.ts</td><td>Class</td><td>Coordinates initial message batch sync before persistent connection</td></tr>
+<tr><td><code>createBridgeLogger</code></td><td>bridgeUI.ts</td><td>Function</td><td>Terminal status display with QR codes and shimmer animation</td></tr>
+<tr><td><code>decodeWorkSecret</code></td><td>workSecret.ts</td><td>Function</td><td>Base64url decodes work secrets; builds SDK and CCR v2 URLs</td></tr>
+<tr><td><code>createTokenRefreshScheduler</code></td><td>jwtUtils.ts</td><td>Function</td><td>Schedules JWT refresh before expiry with configurable buffer</td></tr>
+<tr><td><code>createCapacityWake</code></td><td>capacityWake.ts</td><td>Function</td><td>AbortController-based wake signal for capacity-aware polling</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for Bridge</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>bridge/
+├── types.ts                     ← Core type system (WorkData, BridgeConfig, SessionHandle)
+├── bridgeApi.ts                 ← HTTP client for Environments API with OAuth
+├── bridgeConfig.ts              ← Auth &amp; URL resolution
+├── bridgeEnabled.ts             ← Feature gating via GrowthBook
+├── bridgeMain.ts                ← Multi-session standalone bridge
+├── replBridge.ts                ← REPL-integrated persistent bridge
+├── remoteBridgeCore.ts          ← Env-based bridge core (v1)
+├── initReplBridge.ts            ← Bootstrap wrapper for REPL bridge
+├── createSession.ts             ← Session creation &amp; management API
+├── sessionRunner.ts             ← Child process spawning &amp; lifecycle
+├── replBridgeTransport.ts       ← Transport abstraction (v1 Hybrid / v2 SSE)
+├── replBridgeHandle.ts          ← Global handle to active REPL bridge
+├── bridgeMessaging.ts           ← Ingress routing, echo-dedup, control requests
+├── bridgePermissionCallbacks.ts ← Permission request/response types
+├── inboundMessages.ts           ← Message extraction &amp; image normalization
+├── inboundAttachments.ts        ← File attachment resolution
+├── flushGate.ts                 ← Message flush coordination
+├── codeSessionApi.ts            ← CCR v2 code-session HTTP wrappers
+├── sessionIdCompat.ts           ← cse_*/session_* ID translation
+├── bridgePointer.ts             ← Crash-recovery pointer (4h TTL)
+├── jwtUtils.ts                  ← Token refresh scheduling
+├── envLessBridgeConfig.ts       ← Env-less (v2) bridge configuration
+├── pollConfig.ts                ← GrowthBook poll interval config
+├── pollConfigDefaults.ts        ← Poll interval defaults
+├── capacityWake.ts              ← Capacity-aware poll loop signaling
+├── workSecret.ts                ← Work secret decoding &amp; SDK URL building
+├── bridgeUI.ts                  ← Terminal status display with QR codes
+├── bridgeStatusUtil.ts          ← Status formatting utilities
+├── bridgeDebug.ts               ← Fault injection for testing
+├── trustedDevice.ts             ← Trusted device token management
+└── debugUtils.ts                ← Debug logging &amp; error extraction
+</code></pre>
+</details>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+<tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>maxSessions</code></td><td>32</td><td>Maximum concurrent sessions per bridge environment</td></tr>
+<tr><td><code>spawnMode</code></td><td><code>single-session</code></td><td>Session isolation: <code>single-session</code>, <code>worktree</code>, or <code>same-dir</code></td></tr>
+<tr><td><code>sessionTimeoutMs</code></td><td>86,400,000 (24h)</td><td>Per-session timeout before automatic termination</td></tr>
+<tr><td><code>poll_interval_ms_not_at_capacity</code></td><td>2,000</td><td>Poll frequency when seeking work</td></tr>
+<tr><td><code>poll_interval_ms_at_capacity</code></td><td>600,000 (10m)</td><td>Poll frequency when all slots are full</td></tr>
+<tr><td><code>BRIDGE_POINTER_TTL_MS</code></td><td>14,400,000 (4h)</td><td>Staleness TTL for crash-recovery pointer</td></tr>
+<tr><td><code>token_refresh_buffer_ms</code></td><td>300,000 (5m)</td><td>Refresh JWT this many ms before expiry</td></tr>
+<tr><td><code>uuid_dedup_buffer_size</code></td><td>2,000</td><td>Capacity of echo-dedup ring buffer</td></tr>
+<tr><td><code>heartbeat_interval_ms</code></td><td>20,000</td><td>Heartbeat cadence for keep-alive</td></tr>
+<tr><td><code>reclaim_older_than_ms</code></td><td>5,000</td><td>Reclaim unacknowledged work older than this</td></tr>
+</table>
+
+<h2 id="transport-versions">Transport Version Comparison</h2>
+<table>
+<tr><th>Aspect</th><th>v1 (HybridTransport)</th><th>v2 (SSE + CCR)</th></tr>
+<tr><td>Read Channel</td><td>WebSocket</td><td>Server-Sent Events</td></tr>
+<tr><td>Write Channel</td><td>HTTP POST (serialized)</td><td>HTTP POST (batched)</td></tr>
+<tr><td>Keepalive</td><td>WS ping (10s)</td><td>SSE <code>:keepalive</code> (15s)</td></tr>
+<tr><td>State Management</td><td>N/A</td><td>WorkerStateUploader (RFC 7396)</td></tr>
+<tr><td>Session Token</td><td>OAuth header</td><td>JWT with auto-refresh</td></tr>
+<tr><td>Reconnect Budget</td><td>10 minutes</td><td>10 minutes</td></tr>
+<tr><td>Echo Dedup</td><td>BoundedUUIDSet (2000)</td><td>BoundedUUIDSet (2000)</td></tr>
+</table>
+
+<h2 id="message-types">Message Type Routing</h2>
+<table>
+<tr><th>Message Type</th><th>Direction</th><th>Handler</th></tr>
+<tr><td><code>user</code></td><td>Inbound</td><td><code>handleIngressMessage</code> &rarr; child stdin</td></tr>
+<tr><td><code>control_request</code></td><td>Outbound (child)</td><td>Forwarded to API for web user</td></tr>
+<tr><td><code>control_response</code></td><td>Inbound</td><td><code>handleServerControlRequest</code></td></tr>
+<tr><td><code>stream_event</code></td><td>Outbound</td><td>Batched via transport write</td></tr>
+<tr><td><code>result</code></td><td>Outbound</td><td><code>makeResultMessage</code> for archival</td></tr>
+</table>
+
+<h2 id="feature-gates">Feature Gates</h2>
+<table>
+<tr><th>Gate</th><th>Purpose</th></tr>
+<tr><td><code>tengu_ccr_bridge</code></td><td>Remote Control availability</td></tr>
+<tr><td><code>tengu_bridge_repl_v2</code></td><td>Env-less bridge for REPL mode</td></tr>
+<tr><td><code>tengu_ccr_bridge_multi_session</code></td><td>Multi-session spawn modes</td></tr>
+<tr><td><code>tengu_cobalt_harbor</code></td><td>Auto-connect default</td></tr>
+<tr><td><code>tengu_sessions_elevated_auth_enforcement</code></td><td>Trusted device requirement</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="example-api-client">Creating a Bridge API Client</h3>
+<pre><code class="language-typescript">import { createBridgeApiClient } from "./bridge/bridgeApi";
+
+const client = createBridgeApiClient({
+  apiBaseUrl: "https://api.claude.ai",
+  getAccessToken: () =&gt; oauthTokenStore.getToken(),
+  onTokenRefresh: (newToken) =&gt; oauthTokenStore.save(newToken),
+  onDebug: (msg) =&gt; logger.debug(msg),
+});
+
+// Register environment and start polling
+const envId = await client.registerBridgeEnvironment(bridgeConfig);
+const work = await client.pollForWork(envId, secret, signal, 5000);
+await client.acknowledgeWork(envId, work.id, work.token);
+</code></pre>
+
+<h3 id="example-crash-recovery">Crash Recovery via Bridge Pointer</h3>
+<pre><code class="language-typescript">import {
+  writeBridgePointer,
+  readBridgePointerAcrossWorktrees,
+  clearBridgePointer,
+} from "./bridge/bridgePointer";
+
+// Persist pointer immediately after session creation
+writeBridgePointer(projectDir, {
+  sessionId: "cse_abc123",
+  environmentId: "env_xyz789",
+  source: "repl",
+});
+
+// On restart, recover session (checks staleness &lt; 4h)
+const pointer = await readBridgePointerAcrossWorktrees(projectDir);
+if (pointer) {
+  await client.reconnectSession(pointer.environmentId, pointer.sessionId);
+}
+
+// Clean shutdown
+clearBridgePointer(projectDir);
+</code></pre>
+
+<h3 id="example-capacity">Capacity-Aware Polling</h3>
+<pre><code class="language-typescript">import { createCapacityWake } from "./bridge/capacityWake";
+
+const capacityWake = createCapacityWake(outerAbortSignal);
+
+// Poll loop sleeps longer when at capacity
+while (!signal.aborted) {
+  if (activeSessionCount &gt;= maxSessions) {
+    // Sleep at capacity interval; wakes early when session freed
+    await sleep(600_000, capacityWake.signal());
+  } else {
+    const work = await client.pollForWork(envId, secret, signal, 5000);
+    if (work) {
+      activeSessionCount++;
+      spawnSession(work);
+    }
+    await sleep(2_000, signal);
+  }
+}
+
+// Called when a session completes — wakes the poll loop
+function onSessionComplete() {
+  activeSessionCount--;
+  capacityWake.wake();
+}
+</code></pre>
+
+<div class="footer">
+  <p>Bridge Wiki &mdash; Generated from source analysis on 2026-04-01 &mdash; rev <code>a8a678c</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

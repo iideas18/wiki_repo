@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": "20260401_163215",
+    "date": "2026-04-01",
+    "rev": "a8a678c",
+    "pages": 33,
+    "latest": true
+  },
+  {
+    "timestamp": "20260401_161810",
+    "date": "2026-04-01",
+    "rev": "a8a678c",
+    "pages": 24,
+    "latest": false
+  },
+  {
+    "timestamp": "20260401_135509",
+    "date": "2026-04-01",
+    "rev": "a8a678c",
+    "pages": 26,
+    "latest": false
+  }
+]

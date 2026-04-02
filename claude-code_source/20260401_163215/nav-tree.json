@@ -1,0 +1,166 @@
+{
+  "label": "Claude Code",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "bridge",
+      "path": "bridge/index.html",
+      "children": []
+    },
+    {
+      "label": "cli",
+      "path": "cli/index.html",
+      "children": []
+    },
+    {
+      "label": "commands",
+      "path": "commands_doc/index.html",
+      "children": [
+        {
+          "label": "commands config",
+          "path": "commands_doc/config/index.html",
+          "children": []
+        },
+        {
+          "label": "commands mcp",
+          "path": "commands_doc/mcp/index.html",
+          "children": []
+        },
+        {
+          "label": "commands session",
+          "path": "commands_doc/session/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "components",
+      "path": "components_doc/index.html",
+      "children": [
+        {
+          "label": "components Messages",
+          "path": "components_doc/Messages/index.html",
+          "children": []
+        },
+        {
+          "label": "components PromptInput",
+          "path": "components_doc/PromptInput/index.html",
+          "children": []
+        },
+        {
+          "label": "components agents",
+          "path": "components_doc/agents/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "constants",
+      "path": "constants/index.html",
+      "children": []
+    },
+    {
+      "label": "hooks",
+      "path": "hooks/index.html",
+      "children": []
+    },
+    {
+      "label": "ink",
+      "path": "ink/index.html",
+      "children": []
+    },
+    {
+      "label": "keybindings",
+      "path": "keybindings/index.html",
+      "children": []
+    },
+    {
+      "label": "services",
+      "path": "services_doc/index.html",
+      "children": [
+        {
+          "label": "services api",
+          "path": "services_doc/api/index.html",
+          "children": []
+        },
+        {
+          "label": "services lsp",
+          "path": "services_doc/lsp/index.html",
+          "children": []
+        },
+        {
+          "label": "services mcp",
+          "path": "services_doc/mcp/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "skills",
+      "path": "skills/index.html",
+      "children": []
+    },
+    {
+      "label": "state",
+      "path": "state/index.html",
+      "children": []
+    },
+    {
+      "label": "tasks",
+      "path": "tasks/index.html",
+      "children": []
+    },
+    {
+      "label": "tools",
+      "path": "tools_doc/index.html",
+      "children": [
+        {
+          "label": "tools AgentTool",
+          "path": "tools_doc/AgentTool/index.html",
+          "children": []
+        },
+        {
+          "label": "tools BashTool",
+          "path": "tools_doc/BashTool/index.html",
+          "children": []
+        },
+        {
+          "label": "tools FileEditTool",
+          "path": "tools_doc/FileEditTool/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "types",
+      "path": "types/index.html",
+      "children": []
+    },
+    {
+      "label": "utils",
+      "path": "utils_doc/index.html",
+      "children": [
+        {
+          "label": "utils git",
+          "path": "utils_doc/git/index.html",
+          "children": []
+        },
+        {
+          "label": "utils permissions",
+          "path": "utils_doc/permissions/index.html",
+          "children": []
+        },
+        {
+          "label": "utils sandbox",
+          "path": "utils_doc/sandbox/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Search",
+      "path": "search.html",
+      "children": []
+    }
+  ]
+}

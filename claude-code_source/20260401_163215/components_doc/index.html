@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="components/">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>components — Terminal UI Component Library</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Intro box === */
+.intro-box{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!-- Breadcrumb: 3-level (project → module) -->
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb">
+  <a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../index.html">Claude Code</a> &rsaquo; <span>components</span>
+</nav>
+
+<main id="main">
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<h1>components &mdash; Terminal UI Component Library</h1>
+<div class="hero">
+  <p class="subtitle">Terminal UI Component Library</p>
+  <p>389 React (Ink) components powering the terminal UI. From low-level design system primitives
+     to complex interactive dialogs. Includes PromptInput, Messages rendering, StructuredDiff viewer,
+     model/theme pickers, MCP server dialogs, agent status views, and full settings panels.</p>
+</div>
+
+<!-- ============================================================ -->
+<!--  STAT ROW                                                    -->
+<!-- ============================================================ -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">31</div><div class="label">Groups</div></div>
+  <div class="stat-box"><div class="num">389</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~82k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">TS/TSX</div><div class="label">Language</div></div>
+</div>
+
+<!-- ============================================================ -->
+<!--  BADGES                                                      -->
+<!-- ============================================================ -->
+<p>
+  <span class="badge blue">&#128309; Ink (React Terminal)</span>
+  <span class="badge green">&#128994; Design System</span>
+  <span class="badge yellow">&#128993; Virtual Scrolling</span>
+  <span class="badge red">&#128308; Accessibility</span>
+</p>
+
+<!-- ============================================================ -->
+<!--  TABLE OF CONTENTS (auto-generated by footer JS)             -->
+<!-- ============================================================ -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ============================================================ -->
+<!--  INTRO BOX — Analogy                                         -->
+<!-- ============================================================ -->
+<div class="intro-box">
+  <h3>&#127970; Think of It Like a Building</h3>
+  <p>If Claude Code were a building, the <strong>components</strong> module is every room and piece of
+     furniture inside it. The <strong>design-system</strong> primitives (Dialog, Tabs, Pane, ThemedText)
+     are the standardized building materials&mdash;walls, doors, and light switches that every room shares.
+     <strong>PromptInput</strong> is the front desk where visitors (users) speak. <strong>Messages</strong>
+     is the main hall displaying the conversation. <strong>FullscreenLayout</strong> is the blueprint
+     that decides where the hall, front desk, and side rooms go. Specialized rooms like
+     <strong>permissions</strong>, <strong>mcp</strong>, and <strong>Settings</strong> are offices where
+     specific business gets handled. And <strong>VirtualMessageList</strong> is the clever concierge who
+     only turns on the lights in rooms that guests can actually see, keeping energy costs (render cycles) low.</p>
+</div>
+
+<!-- ============================================================ -->
+<!--  ARCHITECTURE DIAGRAM                                        -->
+<!-- ============================================================ -->
+<h2 id="architecture">Architecture</h2>
+<p>Component hierarchy from <code>App.tsx</code> root through layout, messages, and input layers:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  App["App.tsx\n(Root Providers)"]
+  App --> FPS["FpsMetricsProvider"]
+  App --> Stats["StatsProvider"]
+  App --> AppState["AppStateProvider"]
+
+  AppState --> FSLayout["FullscreenLayout\n(ScrollBox + Sticky Header)"]
+
+  FSLayout --> Logo["LogoV2/\n(Header + Status)"]
+  FSLayout --> MsgList["VirtualMessageList\n(Virtual Scroll)"]
+  FSLayout --> Prompt["PromptInput/\n(REPL Input)"]
+  FSLayout --> ModalOverlay["Modal Overlay"]
+
+  MsgList --> Messages["Messages.tsx\n(Normalize + Group)"]
+  Messages --> Message["Message.tsx\n(Route by Type)"]
+
+  Message --> UserText["UserTextMessage"]
+  Message --> AssistantText["AssistantTextMessage"]
+  Message --> ToolUse["ToolUseMessage\n+ Progress"]
+  Message --> Thinking["ThinkingMessage"]
+  Message --> System["SystemMessage"]
+
+  ModalOverlay --> Dialog["design-system/Dialog"]
+  ModalOverlay --> FuzzyPicker["design-system/FuzzyPicker"]
+  ModalOverlay --> PermReq["permissions/\nPermissionRequest"]
+  ModalOverlay --> SlashCmd["Slash Command Pane"]
+
+  Prompt --> TextInput["TextInput\n(Cursor + Vim)"]
+  Prompt --> Typeahead["Typeahead\n(@-mentions)"]
+  Prompt --> HistSearch["History Search\n(Ctrl+R)"]
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<!--  DATA FLOW / SEQUENCE DIAGRAM                                -->
+<!-- ============================================================ -->
+<h2 id="data-flow">Data Flow</h2>
+<p>Sequence of events when the user types a message and sees the response rendered:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant User as User (Keyboard)
+  participant TI as TextInput
+  participant PI as PromptInput
+  participant REPL as REPL Engine
+  participant API as Claude API
+  participant Msgs as Messages.tsx
+  participant VML as VirtualMessageList
+  participant Ink as Ink Renderer
+
+  User->>TI: Keystroke events
+  TI->>PI: onChange(buffer)
+  PI->>PI: Typeahead / History hooks
+  User->>PI: Enter (submit)
+  PI->>REPL: onSubmit(userMessage)
+  REPL->>API: Stream request
+  API-->>REPL: Token chunks
+  REPL->>Msgs: Append message blocks
+  Msgs->>Msgs: Normalize, collapse, group
+  Msgs->>VML: Updated message list
+  VML->>VML: Binary search visible range
+  VML->>Ink: Render visible messages only
+  Ink->>User: Terminal output (blit-optimized)
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<!--  NARRATED WALKTHROUGH                                        -->
+<!-- ============================================================ -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>user message from typing to rendered response</strong> as it flows through the components pipeline:</p>
+<ol style="line-height:2;">
+  <li><strong>Keystroke Capture</strong> &mdash; The user presses a key. Ink&rsquo;s <code>useInput</code> hook fires inside <code>TextInput.tsx</code>, updating the internal buffer and cursor position. In vim mode the keystroke is routed through the vim state machine first.</li>
+  <li><strong>PromptInput Processing</strong> &mdash; <code>PromptInput.tsx</code> (2,338 lines) receives the updated buffer. If the character is <code>@</code>, the typeahead menu opens via <code>useTypeahead</code>. Arrow keys trigger <code>useArrowKeyHistory</code> to cycle through past inputs.</li>
+  <li><strong>Suggestion Overlay</strong> &mdash; <code>usePromptSuggestion</code> queries model-powered completions. If matches exist, a <code>FuzzyPicker</code> overlay appears in the modal slot, navigable with arrow keys.</li>
+  <li><strong>Submit</strong> &mdash; User presses Enter. <code>PromptInput</code> calls <code>onSubmit(userMessage)</code>, passing the text to the REPL engine. The input buffer is cleared and the prompt resets.</li>
+  <li><strong>API Streaming</strong> &mdash; The REPL engine sends the message to the Claude API. Token chunks arrive via streaming. Each chunk is appended to the in-progress <code>AssistantMessage</code> in state.</li>
+  <li><strong>Message Normalization</strong> &mdash; <code>Messages.tsx</code> (833 lines) receives the updated message array. It collapses consecutive same-type blocks, groups tool_use/tool_result pairs, and filters for brief mode if active.</li>
+  <li><strong>Lookup Tables</strong> &mdash; <code>buildMessageLookups()</code> creates indices: tool name &rarr; block, UUID &rarr; message index, in-progress tool IDs. These are passed as props to avoid re-computation in children.</li>
+  <li><strong>Virtual Scroll Calculation</strong> &mdash; <code>VirtualMessageList</code> uses cached heights (WeakMap) and cumulative sums. A binary search finds the first visible message index given the current <code>scrollTop</code>. Only messages in the viewport plus a small buffer are rendered.</li>
+  <li><strong>Message Routing</strong> &mdash; Each visible message hits <code>Message.tsx</code> (626 lines), which routes by type: <code>UserTextMessage</code>, <code>AssistantTextMessage</code>, <code>ToolUseMessage</code> (with spinner while <code>shouldAnimate=true</code>), or <code>ThinkingMessage</code>.</li>
+  <li><strong>Terminal Render</strong> &mdash; Ink compiles the React tree to terminal escape sequences. Blit caching ensures only changed cells are redrawn. Memoized subtrees (LogoHeader, completed Messages) produce zero writes, keeping the frame budget under 16ms even for 2,800-message transcripts.</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<!--  KEY COMPONENTS TABLE                                        -->
+<!-- ============================================================ -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <thead>
+    <tr><th>Component</th><th>File</th><th>Lines</th><th>Role</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>App</code></td><td>App.tsx</td><td>~55</td><td>Root provider wrapper: FpsMetrics, Stats, AppState contexts</td></tr>
+    <tr><td><code>FullscreenLayout</code></td><td>FullscreenLayout.tsx</td><td>~350</td><td>Layout manager: scrollable area, sticky header, modal overlay, floating companion</td></tr>
+    <tr><td><code>Messages</code></td><td>Messages.tsx</td><td>833</td><td>Memoized transcript renderer: normalizes, collapses, groups, filters messages</td></tr>
+    <tr><td><code>Message</code></td><td>Message.tsx</td><td>626</td><td>Single message router: dispatches to UserText, AssistantText, ToolUse, etc.</td></tr>
+    <tr><td><code>VirtualMessageList</code></td><td>VirtualMessageList.tsx</td><td>~500</td><td>Virtual scroll: binary search visible range, height caching, search indexing</td></tr>
+    <tr><td><code>PromptInput</code></td><td>PromptInput/PromptInput.tsx</td><td>2,338</td><td>Primary REPL input: vim/normal/voice modes, history, typeahead, buddy notifications</td></tr>
+    <tr><td><code>TextInput</code></td><td>TextInput.tsx</td><td>~280</td><td>Base text field: cursor rendering, voice waveform, animation frame support</td></tr>
+    <tr><td><code>Dialog</code></td><td>design-system/Dialog.tsx</td><td>~150</td><td>Modal dialog: title/subtitle, Esc to cancel, Enter to confirm keybindings</td></tr>
+    <tr><td><code>Tabs</code></td><td>design-system/Tabs.tsx</td><td>~200</td><td>Tabbed interface: keyboard nav, fixed content height, tab index tracking</td></tr>
+    <tr><td><code>FuzzyPicker</code></td><td>design-system/FuzzyPicker.tsx</td><td>~300</td><td>Search dropdown: async filtering, cursor nav, preview pane, multi-action</td></tr>
+    <tr><td><code>ThemeProvider</code></td><td>design-system/ThemeProvider.tsx</td><td>~120</td><td>Theme context: auto/dark/light modes, live OSC 11 terminal watching</td></tr>
+    <tr><td><code>ThemedText</code></td><td>design-system/ThemedText.tsx</td><td>~60</td><td>Color-aware text: theme color lookup, hover color context</td></tr>
+    <tr><td><code>Pane</code></td><td>design-system/Pane.tsx</td><td>~80</td><td>Command pane wrapper: colored top divider, padding, modal-aware rendering</td></tr>
+    <tr><td><code>PermissionRequest</code></td><td>permissions/PermissionRequest.tsx</td><td>~250</td><td>Tool permission dispatcher: routes Bash, FileEdit, WebFetch to specialized dialogs</td></tr>
+    <tr><td><code>Spinner</code></td><td>Spinner.tsx</td><td>~85</td><td>Loading spinner: frame-based animation, emoji rotation, custom patterns</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<!--  SUB-MODULE CARDS                                            -->
+<!-- ============================================================ -->
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+
+  <a title="components PromptInput — User Input Component" class="card" href="PromptInput/index.html">
+    <h4>PromptInput/</h4>
+    <p>Primary REPL input system &mdash; 21 files handling all user input modalities.</p>
+    <ul>
+      <li>Normal, Vim, and Voice input modes</li>
+      <li>Arrow-key history &amp; Ctrl+R search</li>
+      <li>@-mention typeahead &amp; prompt suggestions</li>
+      <li>Multiline editing &amp; inline paste</li>
+    </ul>
+  </a>
+
+  <a title="components Messages — Message Rendering System" class="card" href="Messages/index.html">
+    <h4>Messages/</h4>
+    <p>Message rendering pipeline &mdash; 33+ files for all block types and transcript display.</p>
+    <ul>
+      <li>Normalization, collapsing &amp; grouping</li>
+      <li>VirtualMessageList (lazy render + binary search)</li>
+      <li>Specialized renderers: text, tool use, thinking, attachments</li>
+      <li>Brief mode filtering &amp; transcript mode</li>
+    </ul>
+  </a>
+
+  <a title="components agents — Agent UI Components" class="card" href="agents/index.html">
+    <h4>agents/</h4>
+    <p>Agent task status views &mdash; 13 files for coordinator and sub-agent tracking.</p>
+    <ul>
+      <li>Agent task progress &amp; status badges</li>
+      <li>Coordinator hierarchy display</li>
+      <li>Parallel task monitoring</li>
+    </ul>
+  </a>
+
+  <a class="card" href="design-system/index.html">
+    <h4>design-system/</h4>
+    <p>Core terminal UI primitives &mdash; 16 files providing the shared component vocabulary.</p>
+    <ul>
+      <li>Dialog, Tabs, Pane, ProgressBar</li>
+      <li>FuzzyPicker, ThemedText, ThemeProvider</li>
+      <li>Color tokens &amp; layout utilities</li>
+    </ul>
+  </a>
+
+  <a class="card" href="permissions/index.html">
+    <h4>permissions/</h4>
+    <p>Tool permission dialogs &mdash; 15 files gating bash, file edit, web fetch, and more.</p>
+    <ul>
+      <li>Risk assessment display</li>
+      <li>Approve / Reject keybinding flow</li>
+      <li>Sticky footer for scroll-aware prompts</li>
+    </ul>
+  </a>
+
+  <a class="card" href="mcp/index.html">
+    <h4>mcp/</h4>
+    <p>MCP server management &mdash; 12 files for server connections and approval dialogs.</p>
+    <ul>
+      <li>Server connection status</li>
+      <li>Approval workflows</li>
+      <li>Tool discovery &amp; listing</li>
+    </ul>
+  </a>
+
+</div>
+
+<!-- ============================================================ -->
+<!--  CONFIGURATION TABLE                                         -->
+<!-- ============================================================ -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <thead>
+    <tr><th>Setting</th><th>Type</th><th>Default</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>theme</code></td><td><code>'dark' | 'light' | 'auto'</code></td><td><code>'auto'</code></td><td>UI theme; <code>auto</code> watches terminal via OSC 11 escape sequence</td></tr>
+    <tr><td><code>mode</code> (PromptInput)</td><td><code>'normal' | 'vim' | 'voice'</code></td><td><code>'normal'</code></td><td>Input editing mode</td></tr>
+    <tr><td><code>multiline</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Enable multi-line prompt editing (Shift+Enter for newline)</td></tr>
+    <tr><td><code>visibleCount</code> (FuzzyPicker)</td><td><code>number</code></td><td><code>10</code></td><td>Max items visible in the picker dropdown</td></tr>
+    <tr><td><code>direction</code> (FuzzyPicker)</td><td><code>'down' | 'up'</code></td><td><code>'down'</code></td><td>Dropdown direction relative to input</td></tr>
+    <tr><td><code>contentHeight</code> (Tabs)</td><td><code>number</code></td><td>auto</td><td>Fixed height for tab content area (prevents layout shift)</td></tr>
+    <tr><td><code>borderStyle</code> (Box)</td><td><code>'single' | 'double' | 'round' | 'bold'</code></td><td><code>'single'</code></td><td>Border style for Ink Box components</td></tr>
+    <tr><td><code>isCancelActive</code> (Dialog)</td><td><code>boolean</code></td><td><code>true</code></td><td>Whether Esc/Ctrl-C close the dialog (disable when editing text inside)</td></tr>
+    <tr><td><code>style</code> (Message)</td><td><code>'condensed' | undefined</code></td><td><code>undefined</code></td><td>Condensed rendering for compact views</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<!--  DIRECTORY MAP                                               -->
+<!-- ============================================================ -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for components</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code class="language-typescript">components/
+├── App.tsx                        ← Root provider wrapper
+├── FullscreenLayout.tsx           ← Layout: scroll + sticky header + modals
+├── Messages.tsx                   ← Transcript normalizer &amp; renderer (833 LOC)
+├── Message.tsx                    ← Single message router (626 LOC)
+├── VirtualMessageList.tsx         ← Virtual scroll with binary search
+├── TextInput.tsx                  ← Base text field with cursor &amp; vim
+├── Spinner.tsx                    ← Animated loading indicators
+├── HighlightedCode/               ← Syntax highlighting wrapper
+├── StructuredDiff/                ← Side-by-side diff viewer
+│
+├── PromptInput/                   ← REPL input system (21 files)
+│   ├── PromptInput.tsx            ← Main input component (2,338 LOC)
+│   ├── inputModes.ts              ← Normal / Vim / Voice state machines
+│   └── ...
+│
+├── messages/                      ← Message block renderers (33 files)
+│   ├── UserTextMessage.tsx        ← User input display
+│   ├── AssistantTextMessage.tsx   ← Assistant response display
+│   ├── ToolUseMessage.tsx         ← Tool invocation + progress
+│   ├── ThinkingMessage.tsx        ← Thinking block (collapsible)
+│   └── ...
+│
+├── design-system/                 ← UI primitives (16 files)
+│   ├── Dialog.tsx                 ← Modal dialogs
+│   ├── Tabs.tsx                   ← Tabbed interface
+│   ├── FuzzyPicker.tsx            ← Search dropdown
+│   ├── Pane.tsx                   ← Command pane wrapper
+│   ├── ThemedText.tsx             ← Color-aware text
+│   ├── ThemeProvider.tsx          ← Theme context + OSC 11 watching
+│   └── ProgressBar.tsx            ← Progress indicators
+│
+├── agents/                        ← Agent status views (13 files)
+├── permissions/                   ← Tool permission dialogs (15 files)
+├── mcp/                           ← MCP server management (12 files)
+├── tasks/                         ← Task progress tracking (12 files)
+├── Spinner/                       ← Spinner variants (12 files)
+├── CustomSelect/                  ← Dropdown menus (10 files)
+├── FeedbackSurvey/                ← In-app surveys (9 files)
+├── LogoV2/                        ← Branding &amp; status feeds (15 files)
+├── hooks/                         ← Hook mode dialogs (6 files)
+├── wizard/                        ← Multi-step setup flows (5 files)
+├── sandbox/                       ← Sandbox interactions (5 files)
+├── shell/                         ← Shell output display (4 files)
+├── Settings/                      ← Configuration dialogs (4 files)
+├── HelpV2/                        ← Help system UI (3 files)
+├── diff/                          ← Diff/patch rendering (3 files)
+├── ui/                            ← Tree select, ordered lists (3 files)
+├── memory/                        ← Memory context indicators (2 files)
+├── teams/                         ← Team/swarm management (2 files)
+├── TrustDialog/                   ← Trust &amp; security decisions (2 files)
+├── ManagedSettingsSecurityDialog/  ← Security policy enforcement (2 files)
+├── grove/                         ← Code grove integration (1 file)
+├── skills/                        ← Skill management (1 file)
+├── ClaudeCodeHint/                ← Tutorial hint popover (1 file)
+├── DesktopUpsell/                 ← Desktop app marketing (1 file)
+├── LspRecommendation/             ← LSP server suggestions (1 file)
+└── Passes/                        ← Guest pass management (1 file)
+</code></pre>
+</details>
+
+<!-- ============================================================ -->
+<!--  FOOTER                                                      -->
+<!-- ============================================================ -->
+<div class="footer">
+  <p>components Wiki &mdash; Generated from source analysis &mdash; 2026-04-01</p>
+</div>
+
+</main>
+
+<!-- Diagram overlay (zoom on click) -->
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+
+// Reading time estimate
+(function(){
+  var m=document.querySelector('main');if(!m)return;
+  var words=m.textContent.trim().split(/\s+/).length;
+  var mins=Math.ceil(words/200);
+  var hero=document.querySelector('.hero');
+  if(hero){
+    var rt=document.createElement('p');
+    rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';
+    rt.textContent='\u23F1 ~'+mins+' min read';
+    hero.appendChild(rt);
+  }
+})();
+
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+
+// Theme toggle with localStorage key: neutra-ip-theme
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{
+      mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});
+      mermaid.run();
+    }catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){
+    applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
+  });
+})();
+
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';
+  btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){
+    navigator.clipboard.writeText(block.textContent).then(function(){
+      btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);
+    });
+  });
+  pre.appendChild(btn);
+});
+
+// Diagram zoom with scroll-wheel support
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){
+      var clone=svg.cloneNode(true);
+      clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';
+      content.appendChild(clone);
+    }else{content.innerHTML=dc.innerHTML;}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){
+    dc.addEventListener('click',function(){openOverlay(dc);});
+  });
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay){overlay.classList.remove('active');resetZoom();}
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}
+  });
+  content.addEventListener('wheel',function(e){
+    if(!overlay.classList.contains('active'))return;
+    e.preventDefault();
+    var d=e.deltaY>0?-0.1:0.1;
+    scale=Math.min(5,Math.max(0.5,scale+d));
+    content.style.transform='scale('+scale+')';
+  },{passive:false});
+})();
+
+// Back to top
+(function(){
+  var b=document.getElementById('backToTop');
+  window.addEventListener('scroll',function(){
+    b.classList.toggle('visible',window.scrollY>400);
+  });
+  b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+
+// Keyboard navigation: j/k scroll H2
+(function(){
+  var h2s=Array.from(document.querySelectorAll('h2[id]'));
+  function currentIdx(){
+    var scrollY=window.scrollY;
+    for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}
+    return -1;
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;
+    if(e.key==='j'){
+      var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});
+      e.preventDefault();
+    }else if(e.key==='k'){
+      var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});
+      e.preventDefault();
+    }
+  });
+})();
+
+hljs.highlightAll();
+</script>
+</body>
+</html>

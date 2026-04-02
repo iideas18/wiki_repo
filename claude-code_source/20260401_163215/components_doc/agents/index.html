@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="src/components/agents/">
+<meta name="wiki-source-rev" content="a8a678c">
+<title>components agents — Agent UI Components</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Claude Code — AI-Powered Terminal Assistant Source Wiki" href="../../index.html">Claude Code</a> &rsaquo; <a title="components — Terminal UI Component Library" href="../index.html">components</a> &rsaquo; <span>agents</span></nav>
+
+<main id="main">
+<h1><a title="components — Terminal UI Component Library" href="../index.html">components</a>/agents/ &mdash; Agent UI Components</h1>
+<div class="hero">
+  <p class="subtitle">UI components for multi-agent workflows and agent management</p>
+  <p>The agents module provides the complete user interface for creating, viewing, editing, and deleting custom agents. It includes a multi-step creation wizard, property editors (<a title="tools — Agent Tool Framework" href="../../tools_doc/index.html">tools</a>, color, model), agent listing with source grouping, AI-powered agent generation, and comprehensive validation.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">15</div><div class="label">Components</div></div>
+  <div class="stat-box"><div class="num">18</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~3.2 k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">7</div><div class="label">FSM Modes</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The agents UI module lets you manage your collection of AI sub-agents—specialized helpers that Claude Code can spawn for specific <a title="tasks — Background Task Management" href="../../tasks/index.html">tasks</a>. You can browse existing agents grouped by where they live (user, project, built-in, plugin), create new ones step-by-step or with AI assistance, edit their tools and colors, and delete ones you no longer need. It is the control panel for the multi-agent system.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of it like an HR department dashboard for a company. You can view employee profiles (agent detail), hire new staff through a structured interview process (creation wizard) or a recruitment agency (AI generation), assign roles and tools to each person (tool selector), give them a color-coded badge (color picker), and terminate their employment (delete). The dashboard groups staff by department (source: user, project, built-in) and prevents you from creating duplicate positions.</p>
+</details>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  AM["AgentsMenu\n(State machine root)"] --> AL["AgentsList\n(Browse by source)"]
+  AM --> AD["AgentDetail\n(Read-only view)"]
+  AM --> AE["AgentEditor\n(Edit tools/color/model)"]
+  AM --> CW["CreateAgentWizard\n(Multi-step creation)"]
+  AM --> DC["Delete Confirm\n(Confirmation dialog)"]
+
+  AE --> TS["ToolSelector\n(5 tool buckets)"]
+  AE --> CP["ColorPicker\n(Agent colors)"]
+  AE --> MS["ModelSelector\n(Claude models)"]
+
+  CW --> LS["LocationStep"]
+  CW --> MTS["MethodStep"]
+  CW --> GS["GenerateStep\n(AI generation)"]
+  CW --> TYS["TypeStep"]
+  CW --> PS["PromptStep"]
+  CW --> DS["DescriptionStep"]
+  CW --> CS["ConfirmStep"]
+
+  GS --> GA["generateAgent()\n(Claude API call)"]
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>AgentsMenu</code></td><td>AgentsMenu.tsx</td><td>Root <a title="state — Zustand State Management" href="../../state/index.html">state</a> machine orchestrating all agent management modes</td></tr>
+  <tr><td><code>AgentsList</code></td><td>AgentsList.tsx</td><td>Selectable list of agents grouped by source with override warnings</td></tr>
+  <tr><td><code>AgentDetail</code></td><td>AgentDetail.tsx</td><td>Read-only view of agent <a title="commands config — Configuration Management Commands" href="../../commands_doc/config/index.html">config</a>: description, tools, memory, model, color</td></tr>
+  <tr><td><code>AgentEditor</code></td><td>AgentEditor.tsx</td><td>Menu-driven editing of agent tools, color, and model properties</td></tr>
+  <tr><td><code>CreateAgentWizard</code></td><td>new-agent-creation/CreateAgentWizard.tsx</td><td>11-step wizard for creating new agents (manual or AI-generated)</td></tr>
+  <tr><td><code>ToolSelector</code></td><td>ToolSelector.tsx</td><td>Interactive tool picker organizing tools into 5 buckets (Read, Edit, Exec, <a title="commands mcp — MCP Server Management Commands" href="../../commands_doc/mcp/index.html">MCP</a>, Other)</td></tr>
+  <tr><td><code>ColorPicker</code></td><td>ColorPicker.tsx</td><td>Arrow-key color selection with real-time @agentName preview</td></tr>
+  <tr><td><code>ModelSelector</code></td><td>ModelSelector.tsx</td><td>Claude model selection with descriptions of reasoning/speed tradeoffs</td></tr>
+  <tr><td><code>generateAgent</code></td><td>generateAgent.ts</td><td>AI-powered agent generation using Claude with specialized system prompt</td></tr>
+  <tr><td><code>validateAgent</code></td><td>validateAgent.ts</td><td>Validates agent type (3-50 chars, alphanumeric), description, tools, and prompt</td></tr>
+  <tr><td><code>formatAgentAsMarkdown</code></td><td>agentFileUtils.ts</td><td>Serializes agent definition to YAML-in-markdown file format</td></tr>
+  <tr><td><code>saveAgentToFile</code></td><td>agentFileUtils.ts</td><td>Writes agent markdown file to the correct source directory</td></tr>
+  <tr><td><code>ModeState</code></td><td><a title="types — Shared TypeScript Definitions" href="../../types/index.html">types</a>.ts</td><td>Discriminated union FSM: main-menu | list-agents | view-agent | edit-agent | create-agent | delete-confirm</td></tr>
+  <tr><td><code>AgentNavigationFooter</code></td><td>AgentNavigationFooter.tsx</td><td>Footer displaying ↑↓/Enter/Esc navigation hints and Ctrl+D exit</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th><a href="../../tools_doc/AgentTool/index.html" title="tools AgentTool — Sub-Agent Orchestration Tool" class="xref">Type</a></th><th>Name</th><th>Description</th></tr>
+  <tr><td>union</td><td><code>ModeState</code></td><td>7-variant discriminated union driving the agent management state machine</td></tr>
+  <tr><td>type</td><td><code>AgentDefinition</code></td><td>Core agent config: agentType, whenToUse, systemPrompt, tools, color, model, memory, source</td></tr>
+  <tr><td>type</td><td><code>AgentValidationResult</code></td><td><code>{ isValid: boolean, errors: string[], warnings: string[] }</code></td></tr>
+  <tr><td>type</td><td><code>ToolBuckets</code></td><td>5 named buckets: READ_ONLY, EDIT, EXECUTION, MCP, OTHER — each with toolNames Set</td></tr>
+  <tr><td>type</td><td><code>GeneratedAgent</code></td><td>AI-generated result: <code>{ identifier, whenToUse, systemPrompt }</code></td></tr>
+  <tr><td>const</td><td><code>AGENT_PATHS</code></td><td><code>{ FOLDER_NAME: '.claude', AGENTS_DIR: 'agents' }</code></td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td><a title="tools AgentTool — Sub-Agent Orchestration Tool" href="../../tools_doc/AgentTool/index.html">AgentTool</a></td><td><code>loadAgentsDir()</code></td><td>Loads agent definitions from .claude/agents/ directories</td></tr>
+  <tr><td>&rarr;</td><td>agentColorManager</td><td><code>getAgentColor()</code></td><td>Resolves color names to theme colors for display</td></tr>
+  <tr><td>&rarr;</td><td>agentToolUtils</td><td><code>resolveAgentTools()</code></td><td>Resolves tool names to tool instances for the agent</td></tr>
+  <tr><td>&rarr;</td><td><a href="../../commands_doc/config/index.html" title="commands config — Configuration Management Commands" class="xref">Settings</a></td><td><code>updateSettingsForSource()</code></td><td>Persists agent files to user/project/local directories</td></tr>
+  <tr><td>&rarr;</td><td>Anthropic <a title="services api — Anthropic API Client Service" href="../../services_doc/api/index.html">API</a></td><td><code>generateAgent()</code></td><td>Calls Claude to generate agent configuration from user description</td></tr>
+  <tr><td>&rarr;</td><td>promptEditor</td><td><code>editFileInEditor()</code></td><td>Opens agent markdown file in the user's default editor</td></tr>
+</table>
+
+<h2 id="state-machine">State Machine</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> main_menu
+  main_menu --> list_agents: Select source
+  list_agents --> agent_menu: Select agent
+  list_agents --> create_agent: Create new
+  agent_menu --> view_agent: View details
+  agent_menu --> edit_agent: Edit agent
+  agent_menu --> delete_confirm: Delete agent
+  view_agent --> agent_menu: Back
+  edit_agent --> agent_menu: Save/Cancel
+  delete_confirm --> list_agents: Confirmed
+  delete_confirm --> agent_menu: Cancelled
+  create_agent --> list_agents: Completed
+</pre>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>AGENT_PATHS.FOLDER_NAME</code></td><td>.claude</td><td>Directory name where agent files are stored</td></tr>
+  <tr><td><code>AGENT_PATHS.AGENTS_DIR</code></td><td>agents</td><td>Subdirectory within .claude for agent markdown files</td></tr>
+  <tr><td><code>agentType length</code></td><td>3-50 chars</td><td>Allowed identifier length (alphanumeric + hyphens)</td></tr>
+  <tr><td><code>description min</code></td><td>10 chars</td><td>Minimum whenToUse description length (warning)</td></tr>
+  <tr><td><code>systemPrompt min</code></td><td>20 chars</td><td>Minimum system prompt length (error below this)</td></tr>
+  <tr><td><code>systemPrompt warn</code></td><td>10,000 chars</td><td>Warning threshold for overly long system prompts</td></tr>
+  <tr><td><code>AGENT_COLORS</code></td><td>8 colors</td><td>Named color palette for agent badges (plus 'automatic')</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for agents</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>components/agents/
+├── AgentsMenu.tsx              ← State machine root: mode dispatch and coordination
+├── AgentsList.tsx              ← Browsable list grouped by source (user/project/built-in)
+├── AgentDetail.tsx             ← Read-only agent profile view
+├── AgentEditor.tsx             ← Edit agent tools, color, model via sub-menus
+├── AgentNavigationFooter.tsx   ← Navigation hint footer (↑↓ Enter Esc)
+├── ColorPicker.tsx             ← Interactive color selector with preview
+├── ModelSelector.tsx           ← Claude model dropdown with descriptions
+├── ToolSelector.tsx            ← 5-bucket tool picker (Read/Edit/Exec/MCP/Other)
+├── types.ts                    ← ModeState union, AGENT_PATHS, validation types
+├── utils.ts                    ← Display name helpers for agent sources
+├── validateAgent.ts            ← Agent definition validation (type, prompt, tools)
+├── agentFileUtils.ts           ← File I/O: save, update, delete, format as markdown
+├── generateAgent.ts            ← AI-powered agent generation via Claude API
+└── new-agent-creation/
+    ├── CreateAgentWizard.tsx    ← 11-step wizard orchestrator
+    └── wizard-steps/
+        ├── TypeStep.tsx         ← Agent identifier input with validation
+        ├── LocationStep.tsx     ← Source selection (user/project/local)
+        ├── MethodStep.tsx       ← Manual vs AI-generated creation choice
+        ├── GenerateStep.tsx     ← AI generation loading and result handling
+        ├── PromptStep.tsx       ← System prompt editor
+        ├── DescriptionStep.tsx  ← When-to-use description editor
+        ├── ToolsStep.tsx        ← Tool selection via ToolSelector
+        ├── ModelStep.tsx        ← Model selection via ModelSelector
+        ├── ColorStep.tsx        ← Color selection via ColorPicker
+        ├── MemoryStep.tsx       ← Memory scope configuration
+        └── ConfirmStep.tsx      ← Review and save confirmation
+</code></pre>
+</details>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core mechanisms from this sub-module have been extracted into dedicated focus pages for in-depth exploration.</p>
+<h4>Deep-Dive Pages</h4>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="creation-wizard/index.html" title="Creation Wizard — Deep Dive">
+    <h4>Agent Creation Wizard <span class="focus-badge">Focus</span></h4>
+    <p>11-step wizard flow with location selection, AI generation, tool bucketing, validation, and file persistence.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="tool-bucketing/index.html" title="Tool Bucketing — Deep Dive">
+    <h4>Tool Bucketing System <span class="focus-badge">Focus</span></h4>
+    <p>How tools are categorized into Read-only, Edit, Execution, MCP, and Other buckets with server-aware grouping.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="ai-generation/index.html" title="AI Agent Generation — Deep Dive">
+    <h4>AI-Powered Agent Generation <span class="focus-badge">Focus</span></h4>
+    <p>Claude-based generation using AGENT_CREATION_SYSTEM_PROMPT to produce expert persona configurations from user descriptions.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+</div>
+
+<h2 id="wizard-steps">Creation Wizard Steps</h2>
+<table>
+  <tr><th>#</th><th>Step</th><th>Component</th><th>Description</th></tr>
+  <tr><td>1</td><td>Location</td><td>LocationStep</td><td>Choose where to save: user (~/.claude/agents/), project, or local</td></tr>
+  <tr><td>2</td><td>Method</td><td>MethodStep</td><td>Manual entry or AI-generated from a description</td></tr>
+  <tr><td>3</td><td>Generate</td><td>GenerateStep</td><td>AI calls Claude with AGENT_CREATION_SYSTEM_PROMPT (if AI chosen)</td></tr>
+  <tr><td>4</td><td>Identifier</td><td>TypeStep</td><td>Enter agent identifier (3-50 chars, alphanumeric + hyphens)</td></tr>
+  <tr><td>5</td><td>Prompt</td><td>PromptStep</td><td>Write or edit the system prompt (min 20 chars)</td></tr>
+  <tr><td>6</td><td>Description</td><td>DescriptionStep</td><td>Write when-to-use description (min 10 chars)</td></tr>
+  <tr><td>7</td><td>Tools</td><td>ToolsStep</td><td>Select allowed tools from 5 buckets</td></tr>
+  <tr><td>8</td><td>Model</td><td>ModelStep</td><td>Choose Claude model (reasoning/speed tradeoff)</td></tr>
+  <tr><td>9</td><td>Color</td><td>ColorStep</td><td>Pick badge color (8 named + automatic)</td></tr>
+  <tr><td>10</td><td>Memory</td><td>MemoryStep</td><td>Configure memory scope (if auto-memory enabled)</td></tr>
+  <tr><td>11</td><td>Confirm</td><td>ConfirmStep</td><td>Review all settings, save to file, update app state</td></tr>
+</table>
+
+<h2 id="validation-rules">Validation Rules</h2>
+<table>
+  <tr><th>Field</th><th>Constraint</th><th>Severity</th></tr>
+  <tr><td><code>agentType</code></td><td>3-50 characters</td><td>Error</td></tr>
+  <tr><td><code>agentType</code></td><td>Alphanumeric + hyphens only</td><td>Error</td></tr>
+  <tr><td><code>agentType</code></td><td>Must start/end with alphanumeric</td><td>Error</td></tr>
+  <tr><td><code>agentType</code></td><td>No duplicate across sources (except self during edit)</td><td>Error</td></tr>
+  <tr><td><code>whenToUse</code></td><td>Required, non-empty</td><td>Error</td></tr>
+  <tr><td><code>whenToUse</code></td><td>Minimum 10 characters</td><td>Warning</td></tr>
+  <tr><td><code>whenToUse</code></td><td>Maximum 5,000 characters</td><td>Warning</td></tr>
+  <tr><td><code>systemPrompt</code></td><td>Required, minimum 20 characters</td><td>Error</td></tr>
+  <tr><td><code>systemPrompt</code></td><td>Maximum 10,000 characters</td><td>Warning</td></tr>
+  <tr><td><code>tools</code></td><td>Must be array or undefined</td><td>Error</td></tr>
+  <tr><td><code>tools</code></td><td>No invalid tool references</td><td>Warning</td></tr>
+</table>
+
+<h2 id="agent-sources">Agent Sources</h2>
+<p>Agents can be defined in multiple locations with override precedence:</p>
+<table>
+  <tr><th>Source</th><th>Path</th><th>Scope</th></tr>
+  <tr><td><code>user</code></td><td><code>~/.claude/agents/*.md</code></td><td>All projects for this user</td></tr>
+  <tr><td><code>project</code></td><td><code>.claude/agents/*.md</code></td><td>This project only (committed)</td></tr>
+  <tr><td><code>local</code></td><td><code>.claude/agents/*.local.md</code></td><td>This project, this machine only</td></tr>
+  <tr><td><code>built-in</code></td><td>Bundled with Claude Code</td><td>Always available</td></tr>
+  <tr><td><code>plugin</code></td><td>MCP server-provided</td><td>When MCP server is connected</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Agent Validation</h3>
+<pre><code class="language-typescript">// Validates an agent definition before saving
+const result = validateAgent(
+  {
+    agentType: 'code-reviewer',
+    whenToUse: 'Use when reviewing pull requests for bugs and style issues',
+    systemPrompt: 'You are an expert code reviewer. Focus on correctness, security...',
+    tools: ['FileRead', 'Grep', 'Glob'],
+  },
+  availableTools,
+  existingAgents,
+);
+
+if (!result.isValid) {
+  result.errors.forEach(err => console.error(err));
+}
+result.warnings.forEach(warn => console.warn(warn));
+</code></pre>
+
+<h3>Example: Tool Bucket Categorization</h3>
+<pre><code class="language-typescript">// Tools are organized into 5 buckets for the selector UI
+const buckets: ToolBuckets = {
+  READ_ONLY: {
+    name: 'Read-only',
+    toolNames: new Set(['FileRead', 'Grep', 'Glob', 'LSP']),
+  },
+  EDIT: {
+    name: 'Edit',
+    toolNames: new Set(['FileEdit', 'FileWrite', 'NotebookEdit']),
+  },
+  EXECUTION: {
+    name: 'Execution',
+    toolNames: new Set(['Bash', 'WebFetch', 'WebSearch']),
+  },
+  MCP: {
+    name: 'MCP Tools',
+    toolNames: getMcpServerBuckets(tools),
+    isMcp: true,
+  },
+  OTHER: {
+    name: 'Other',
+    toolNames: new Set(['Agent', 'TaskOutput']),
+  },
+};
+</code></pre>
+
+<h3>Example: Agent File Format (Markdown with YAML)</h3>
+<pre><code class="language-typescript">// formatAgentAsMarkdown() produces this format for agent files:
+function formatAgentAsMarkdown(
+  agentType: string,
+  whenToUse: string,
+  tools: string[] | undefined,
+  systemPrompt: string,
+  color?: string,
+  model?: string,
+): string {
+  const lines: string[] = [
+    '---',
+    `agent: ${agentType}`,
+  ];
+
+  if (tools) {
+    lines.push('tools:');
+    tools.forEach(t => lines.push(`  - ${t}`));
+  }
+  if (color) lines.push(`color: ${color}`);
+  if (model) lines.push(`model: ${model}`);
+
+  lines.push('---', '', `# ${agentType}`, '');
+  lines.push('## When to use', '', whenToUse, '');
+  lines.push('## System prompt', '', systemPrompt);
+
+  return lines.join('\n');
+}
+</code></pre>
+
+<div class="footer"><a title="components — Terminal UI Component Library" href="../index.html">&larr; Back to components Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}
+    else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);});
+(function(){
+  var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}
+  function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-01">
+<meta name="wiki-source" content="restored-src/src">
+<meta name="wiki-source-rev" content="a8a678c">
+<!--
+  L0 Project Hub — Claude Code
+  AI-Powered Terminal Coding Assistant
+  Generated: 2026-04-01 | Rev: a8a678c
+-->
+<title>Claude Code — AI-Powered Terminal Coding Assistant</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:1.4rem;margin:1.5rem 0 2rem}
+.intro-box h3{color:var(--accent);margin:0 0 .5rem}
+.intro-box p{color:var(--text-muted);font-size:.95rem;margin:.4rem 0}
+.more-modules{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.more-modules span{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.3rem .8rem;font-size:.85rem;color:var(--text-muted)}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>Claude Code</h1>
+<div class="hero">
+  <div class="subtitle">AI-Powered Terminal Coding Assistant</div>
+  <p>Claude Code is a full-featured AI coding assistant that runs in your terminal. It provides intelligent code editing, shell command execution, multi-agent task orchestration, and rich terminal UI — all powered by Anthropic's Claude models. The architecture is modular with 35+ modules spanning tools, components, services, utilities, and a custom React-based terminal renderer.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">TypeScript</span>
+    <span class="badge green">35+ Modules</span>
+    <span class="badge yellow">1,884 Files</span>
+    <span class="badge red">React / Ink</span>
+  </p>
+</div>
+
+<!-- Intro box -->
+<div class="intro-box">
+  <h3>&#128218; What is this?</h3>
+  <p>This wiki is an auto-generated developer guide for the <strong>Claude Code</strong> source tree. Think of it like a city map: this hub page is the satellite view showing all districts (modules), each module overview zooms into a neighborhood, and the deep-dive pages walk you through individual buildings (source files). Use the module cards below to jump into any area of the codebase.</p>
+  <p>The project is organized into <strong>17 primary modules</strong> plus 7 smaller ones, grouped into four categories: Core Pipeline, User Interface, Infrastructure, and Platform &amp; Config.</p>
+</div>
+
+<!-- SYSTEM ARCHITECTURE -->
+<h2>System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph Input["User Input Layer"]
+    CLI["CLI Transport"]
+    KB["Keybindings"]
+  end
+  subgraph Core["Core Pipeline"]
+    CMD["Commands"]
+    CTX["Context Builder"]
+    QE["QueryEngine"]
+    TOOLS["Tools"]
+  end
+  subgraph UI["User Interface"]
+    INK["Ink Renderer"]
+    COMP["Components"]
+    HOOKS["Hooks"]
+  end
+  subgraph Infra["Infrastructure"]
+    STATE["State"]
+    BRIDGE["Bridge"]
+    UTILS["Utils"]
+  end
+  subgraph Platform["Platform Services"]
+    SVC["Services\n(API, MCP, Analytics)"]
+    TASKS["Tasks\n(Multi-Agent)"]
+    SKILLS["Skills"]
+  end
+
+  CLI --> CMD
+  KB --> CMD
+  CMD --> CTX
+  CTX --> QE
+  QE --> TOOLS
+  TOOLS --> STATE
+  STATE --> INK
+  INK --> COMP
+  COMP --> HOOKS
+  QE -.->|API calls| SVC
+  SVC -.-> QE
+  TOOLS -.-> UTILS
+  BRIDGE -.->|remote sessions| QE
+  TASKS -.->|spawn agents| QE
+  SKILLS -.->|prompt injection| CTX
+  INK -->|Terminal Output| CLI
+</pre>
+</div>
+
+<!-- MODULE CARDS -->
+<p class="section-label">Core Pipeline</p>
+<div class="module-grid">
+  <a href="tools_doc/index.html" class="module-card">
+    <h3>tools</h3>
+    <div class="tagline">42 tool implementations — the hands of the AI</div>
+    <p>Every action Claude can take: BashTool, FileEditTool, FileWriteTool, AgentTool, WebFetchTool, GlobTool, GrepTool, and more. Each tool defines input schemas, permission rules, and execution logic.</p>
+    <div class="stats"><span>184 files</span><span>42 tools</span><span>Core execution</span></div>
+  </a>
+  <a href="commands_doc/index.html" class="module-card">
+    <h3>commands</h3>
+    <div class="tagline">86 slash commands for user interaction</div>
+    <p>User-facing CLI commands: <code>/help</code>, <code>/mcp</code>, <code>/plugin</code>, <code>/config</code>, <code>/model</code>, and dozens more. Includes command parsing, argument validation, and autocompletion.</p>
+    <div class="stats"><span>189 files</span><span>86 commands</span><span>User-facing</span></div>
+  </a>
+  <a href="services_doc/index.html" class="module-card">
+    <h3>services</h3>
+    <div class="tagline">20 service modules powering the backend</div>
+    <p>API client for Claude models, MCP server management, analytics and telemetry, conversation compaction, cost tracking, and auth. The nervous system connecting tools to the outside world.</p>
+    <div class="stats"><span>130 files</span><span>20 services</span><span>API &amp; infra</span></div>
+  </a>
+</div>
+
+<p class="section-label">User Interface</p>
+<div class="module-grid">
+  <a href="components_doc/index.html" class="module-card">
+    <h3>components</h3>
+    <div class="tagline">31 UI component groups for terminal rendering</div>
+    <p>Permissions dialogs, message rendering, agent status views, tool result displays, markdown renderers, and input areas. Built with React and rendered via Ink.</p>
+    <div class="stats"><span>389 files</span><span>31 groups</span><span>React/Ink</span></div>
+  </a>
+  <a href="ink_doc/index.html" class="module-card">
+    <h3>ink</h3>
+    <div class="tagline">Custom terminal UI renderer</div>
+    <p>A custom React reconciler that renders components to ANSI terminal output. Includes a Yoga-based layout engine, text measurement, color handling, and incremental screen updates.</p>
+    <div class="stats"><span>96 files</span><span>Reconciler</span><span>Layout engine</span></div>
+  </a>
+  <a href="hooks_doc/index.html" class="module-card">
+    <h3>hooks</h3>
+    <div class="tagline">React hooks &amp; notification system</div>
+    <p>Custom React hooks for tool permissions, notifications, input handling, and state management. Bridges the gap between React component lifecycle and the tool execution pipeline.</p>
+    <div class="stats"><span>104 files</span><span>Hooks</span><span>State glue</span></div>
+  </a>
+</div>
+
+<p class="section-label">Infrastructure</p>
+<div class="module-grid">
+  <a href="utils_doc/index.html" class="module-card">
+    <h3>utils</h3>
+    <div class="tagline">31 utility modules — cross-cutting concerns</div>
+    <p>Bash command parsing, permission enforcement, plugin loading, user settings, shell operations, file I/O helpers, JSON schemas, and error handling. Used by virtually every other module.</p>
+    <div class="stats"><span>564 files</span><span>31 modules</span><span>Cross-cutting</span></div>
+  </a>
+  <a href="bridge/index.html" class="module-card">
+    <h3>bridge</h3>
+    <div class="tagline">Remote session bridge protocol</div>
+    <p>Enables Claude Code to operate over remote connections. Implements session handshake, message framing, reconnection logic, and state synchronization for headless environments.</p>
+    <div class="stats"><span>31 files</span><span>Protocol</span></div>
+  </a>
+  <a href="cli/index.html" class="module-card">
+    <h3>cli</h3>
+    <div class="tagline">CLI transport layer</div>
+    <p>Structured I/O for terminal communication. WebSocket and SSE transports, message serialization, and the entry-point argument parser that bootstraps everything.</p>
+    <div class="stats"><span>19 files</span><span>Transport</span></div>
+  </a>
+  <a href="state/index.html" class="module-card">
+    <h3>state</h3>
+    <div class="tagline">Central state management</div>
+    <p>Single source of truth for conversation history, tool results, task status, and UI state. Implements immutable updates with subscriber notifications.</p>
+    <div class="stats"><span>6 files</span><span>State store</span></div>
+  </a>
+  <a href="context/index.html" class="module-card">
+    <h3>context</h3>
+    <div class="tagline">React context providers</div>
+    <p>Provides app-wide React contexts for theme, permissions, tool registry, and conversation state. Ensures child components can access shared data without prop drilling.</p>
+    <div class="stats"><span>9 files</span><span>Providers</span></div>
+  </a>
+</div>
+
+<p class="section-label">Platform &amp; Config</p>
+<div class="module-grid">
+  <a href="tasks/index.html" class="module-card">
+    <h3>tasks</h3>
+    <div class="tagline">Multi-task execution engine</div>
+    <p>Spawns and manages parallel tasks: local shell processes, sub-agents, remote agents, and dream tasks. Each task has a lifecycle (pending → running → completed/failed) with abort support.</p>
+    <div class="stats"><span>12 files</span><span>Task types</span></div>
+  </a>
+  <a href="skills/index.html" class="module-card">
+    <h3>skills</h3>
+    <div class="tagline">Skill &amp; prompt system</div>
+    <p>Bundled skill definitions and MCP skill builders. Skills inject domain-specific prompts and tool configurations into conversations, extending Claude's capabilities on demand.</p>
+    <div class="stats"><span>20 files</span><span>Skills</span></div>
+  </a>
+  <a href="constants/index.html" class="module-card">
+    <h3>constants</h3>
+    <div class="tagline">Configuration &amp; constants</div>
+    <p>Model lists, default settings, environment variable mappings, feature flags, and version strings. The single place to change global configuration values.</p>
+    <div class="stats"><span>21 files</span><span>Config</span></div>
+  </a>
+  <a href="types/index.html" class="module-card">
+    <h3>types</h3>
+    <div class="tagline">Central type definitions</div>
+    <p>Shared TypeScript interfaces and type aliases used across the entire codebase: message formats, API response shapes, tool schemas, and state types.</p>
+    <div class="stats"><span>11 files</span><span>Types</span></div>
+  </a>
+  <a href="keybindings/index.html" class="module-card">
+    <h3>keybindings</h3>
+    <div class="tagline">Keyboard shortcuts</div>
+    <p>Maps keyboard input sequences to actions: navigation, command execution, editor operations, and modal dismiss. Supports customizable key bindings via user config.</p>
+    <div class="stats"><span>14 files</span><span>Key maps</span></div>
+  </a>
+  <a href="entrypoints/index.html" class="module-card">
+    <h3>entrypoints</h3>
+    <div class="tagline">Public API exports</div>
+    <p>The public surface area of Claude Code. Re-exports key types, functions, and classes that external integrations and plugins depend on.</p>
+    <div class="stats"><span>8 files</span><span>Exports</span></div>
+  </a>
+</div>
+
+<!-- More Modules -->
+<h3>More Modules</h3>
+<p style="color:var(--text-muted);font-size:.9rem;">Smaller modules with focused responsibilities:</p>
+<div class="more-modules">
+  <span>server</span>
+  <span>memdir</span>
+  <span>migrations</span>
+  <span>screens</span>
+  <span>query</span>
+  <span>remote</span>
+  <span>vim</span>
+</div>
+
+<!-- NAVIGATION GUIDE -->
+<h2>Navigation Guide</h2>
+<table style="max-width:700px">
+  <tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+  <tr><td><strong>0 — Project Hub</strong> (this page)</td><td>Project overview, module map, architecture diagrams</td><td>Getting started, finding the right module</td></tr>
+  <tr><td><strong>1 — Module Overview</strong></td><td>Module architecture, key components, sub-module cards</td><td>Understanding a module's purpose and structure</td></tr>
+  <tr><td><strong>2 — Sub-Module Deep Dive</strong></td><td>Source-level types, algorithms, data flows, configs</td><td>Implementing, debugging, or extending code</td></tr>
+</table>
+
+<!-- CROSS-MODULE CONNECTION DIAGRAM -->
+<h2>How a User Query Flows Through the System</h2>
+<p>This sequence shows the full lifecycle of a user prompt — from terminal input to rendered output:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant CLI as CLI Transport
+    participant CMD as Commands
+    participant QE as QueryEngine
+    participant BT as Tool (BashTool)
+    participant PERM as Permissions (Utils)
+    participant SH as Shell Process
+    participant ST as State
+    participant INK as Ink Renderer
+    participant T as Terminal
+
+    U->>CLI: Type prompt + Enter
+    CLI->>CMD: Parse input
+    CMD->>QE: Build context & query
+    QE->>BT: Select tool, invoke
+    BT->>PERM: Check permission rules
+    PERM-->>BT: Approved
+    BT->>SH: Execute shell command
+    SH-->>BT: stdout / stderr
+    BT->>ST: Update state with result
+    ST->>INK: Notify subscribers
+    INK->>T: Render ANSI output
+    T-->>U: Display result
+</pre>
+</div>
+<blockquote>
+<strong>Key insight:</strong> The QueryEngine is the central coordinator — it receives parsed commands, selects appropriate tools, and manages the conversation loop. Tools never render output directly; they write to State, and the Ink renderer picks up changes via subscriptions. This separation keeps tool logic testable and the UI layer swappable.
+</blockquote>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">src/ — top-level source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/
+├── bridge/                    ← Remote session bridge protocol
+├── cli/                       ← CLI transport layer (WebSocket, SSE)
+├── commands/                  ← 86 slash commands (/help, /mcp, /plugin …)
+├── components/                ← 31 UI component groups (React/Ink)
+├── constants/                 ← Configuration values &amp; feature flags
+├── context/                   ← React context providers
+├── entrypoints/               ← Public API re-exports
+├── hooks/                     ← React hooks &amp; notification system
+├── ink/                       ← Custom terminal renderer (reconciler + layout)
+├── keybindings/               ← Keyboard shortcut maps
+├── memdir/                    ← In-memory directory abstraction
+├── migrations/                ← Data migration scripts
+├── query/                     ← Query parsing utilities
+├── remote/                    ← Remote connection helpers
+├── screens/                   ← Full-screen UI modes
+├── server/                    ← HTTP/WebSocket server
+├── services/                  ← 20 service modules (API, MCP, analytics)
+├── skills/                    ← Skill/prompt system &amp; builders
+├── state/                     ← Central state management
+├── tasks/                     ← Multi-task execution (agents, shell, dream)
+├── tools/                     ← 42 tool implementations
+├── types/                     ← Shared TypeScript type definitions
+├── utils/                     ← 31 cross-cutting utility modules
+├── vim/                       ← Vim-mode input handling
+├── main.tsx                   ← Application entry point
+├── QueryEngine.ts             ← Core conversation loop &amp; tool dispatch
+├── Task.ts                    ← Task lifecycle types &amp; factories
+└── Tool.ts                    ← Tool interface, buildTool() factory
+</code></pre>
+</details>
+
+<!-- BUILD & TECH STACK -->
+<h2>Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>TypeScript</h4><p>Primary language. Strict mode with extensive type definitions across 1,884 source files. Compiled via <code>tsc</code> with ESM output.</p></div>
+  <div class="card"><h4>React (Ink)</h4><p>UI framework using a custom React reconciler (<code>ink/</code>) that renders components to ANSI terminal sequences via Yoga layout.</p></div>
+  <div class="card"><h4>Node.js</h4><p>Runtime environment. Leverages <code>child_process</code>, <code>fs</code>, <code>net</code>, and <code>crypto</code> for shell execution, file ops, networking, and task IDs.</p></div>
+  <div class="card"><h4>Mermaid</h4><p>All architecture and flow diagrams in this wiki are rendered client-side using Mermaid.js. Click any diagram to zoom.</p></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer"><a href="search.html">Search</a> &nbsp;|&nbsp; Claude Code Wiki &nbsp;|&nbsp; Generated 2026-04-01 &nbsp;|&nbsp; Rev <code>a8a678c</code></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+
+<!-- VERSION_SWITCHER_START -->
+<style>.version-switcher{display:inline-flex;align-items:center;gap:8px;margin-top:1rem;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:8px;padding:6px 14px}
+.version-label{color:var(--text-muted,#8b949e);font-size:.85rem}
+.version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
+@media print{.version-switcher{display:none!important}}</style>
+<script>(function(){
+  var versionsUrl='../versions.json';
+  fetch(versionsUrl).then(function(r){return r.json()}).then(function(versions){
+    if(!versions||versions.length<2)return;
+    var parts=location.pathname.replace(/\/$/,'').split('/');
+    var curTs=parts[parts.length-1]||parts[parts.length-2];
+    /* Build UI */
+    var wrap=document.createElement('div');
+    wrap.className='version-switcher';
+    var lbl=document.createElement('span');
+    lbl.className='version-label';
+    lbl.textContent='Version:';
+    var sel=document.createElement('select');
+    sel.className='version-select';
+    sel.setAttribute('aria-label','Switch wiki version');
+    versions.forEach(function(v){
+      var o=document.createElement('option');
+      o.value=v.timestamp;
+      var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+      o.textContent=v.date+rev+(v.latest?' (latest)':'');
+      if(v.timestamp===curTs)o.selected=true;
+      sel.appendChild(o);
+    });
+    wrap.appendChild(lbl);
+    wrap.appendChild(sel);
+    var hero=document.querySelector('.hero');
+    if(hero)hero.appendChild(wrap);
+    /* Version switch handler */
+    sel.addEventListener('change',function(){
+      var newTs=this.value;
+      if(newTs===curTs)return;
+      var newUrl='../'+newTs+'/index.html';
+      fetch(newUrl).then(function(r){return r.text()}).then(function(html){
+        var parser=new DOMParser();
+        var doc=parser.parseFromString(html,'text/html');
+        var newMain=doc.querySelector('#main')||doc.querySelector('main');
+        if(!newMain){location.href=newUrl;return}
+        var base='../'+newTs+'/';
+        newMain.querySelectorAll('[href]').forEach(function(el){
+          var h=el.getAttribute('href');
+          if(h&&!/^(https?:|mailto:|#|\/\/)/.test(h)&&!h.startsWith('/'))
+            el.setAttribute('href',base+h);
+        });
+        newMain.querySelectorAll('[src]').forEach(function(el){
+          var s=el.getAttribute('src');
+          if(s&&!/^(https?:|data:|blob:|\/\/)/.test(s)&&!s.startsWith('/'))
+            el.setAttribute('src',base+s);
+        });
+        var cur=document.querySelector('#main')||document.querySelector('main');
+        if(cur)cur.innerHTML=newMain.innerHTML;
+        /* Re-render mermaid diagrams in the new content */
+        var diagrams=document.querySelectorAll('pre.mermaid');
+        if(diagrams.length&&window.mermaid){
+          diagrams.forEach(function(el){
+            if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);
+            var src=el.getAttribute('data-source');
+            if(src){el.removeAttribute('data-processed');el.textContent=src;}
+          });
+          var t=document.documentElement.getAttribute('data-theme')||'dark';
+          try{
+            mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});
+            mermaid.run();
+          }catch(e){console.warn('mermaid re-render:',e);}
+        }
+        curTs=newTs;
+        var newHero=document.querySelector('.hero');
+        if(newHero){
+          for(var i=0;i<sel.options.length;i++)
+            sel.options[i].selected=(sel.options[i].value===newTs);
+          newHero.appendChild(wrap);
+        }
+        window.scrollTo({top:0,behavior:'smooth'});
+        history.pushState({version:newTs},'',newUrl);
+      }).catch(function(){location.href=newUrl});
+    });
+    window.addEventListener('popstate',function(){location.reload()});
+  }).catch(function(){});
+})();</script>
+<!-- VERSION_SWITCHER_END -->
+</body></html>
