@@ -1,0 +1,1393 @@
+[
+ {
+  "title": "OpenClaw \u2014 Search Wiki",
+  "path": "search.html",
+  "excerpt": "OpenClaw \u2014 Search Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Search Search Wiki No matching pages found. Try different keywords. &larr; Back to OpenClaw Wiki",
+  "headings": []
+ },
+ {
+  "title": "OpenClaw \u2014 Personal AI Assistant Platform",
+  "path": "index.html",
+  "excerpt": "OpenClaw \u2014 Personal AI Assistant Platform Skip to content &#9790; &#8679; OpenClaw Personal AI Assistant Platform OpenClaw is a self-hosted, multi-channel AI assistant that runs on your own devices. It connects to 25+ messaging platforms (WhatsApp, Telegram, Slack, Discord, Signal, iMessage, and more), orchestrates LLM-powered conversations with tool use, and supports an extensible plugin ecosystem. The gateway is the control plane &mdash; the product is the assistant. &#128026; TypeScript / Nod",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "System Architecture",
+   "Agents",
+   "Gateway",
+   "Commands",
+   "Channels",
+   "Extensions",
+   "Plugins",
+   "Infrastructure",
+   "Message Flow: Channel to Agent"
+  ]
+ },
+ {
+  "title": "Infrastructure &mdash; Core Runtime Services",
+  "path": "infra_doc/index.html",
+  "excerpt": "Infrastructure &mdash; Core Runtime Services Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure Infrastructure &mdash; Core Runtime Services Core Runtime Services The Infrastructure module provides the foundational runtime layer for OpenClaw: data store abstractions (SQLite and atomic JSON persistence), an in-memory caching layer with TTL-based eviction, a cron-style heartbeat scheduler, process supervision across Linux/macOS/Windows, a resilient outbound delivery pipeline, and sys",
+  "headings": [
+   "Architecture",
+   "Data Flow",
+   "How Infrastructure Connects to Config &amp; Commands",
+   "&#128694; Step-by-Step Narrated Walkthrough",
+   "Key Types &amp; Interfaces",
+   "Configuration Parameters",
+   "Sub-Modules",
+   "Code Overview",
+   "Atomic JSON Write Pattern",
+   "Heartbeat Summary Resolution"
+  ]
+ },
+ {
+  "title": "Infrastructure/Store &mdash; Unified Persistence Layer",
+  "path": "infra_doc/store/index.html",
+  "excerpt": "Infrastructure/Store &mdash; Unified Persistence Layer Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; store Infrastructure/store/ &mdash; Unified Persistence Layer Atomic file I/O, sandboxed access, and multi-backend data storage The store sub-module provides all data persistence for OpenClaw. It abstracts whether data lives in synchronous JSON files, async atomic JSON, or SQLite&mdash;exposing a unified API surface. Every write is atomic (UUID-temp-file &rarr; rename)",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Data Flow &mdash; Atomic Write Lifecycle",
+   "Delivery Queue Flow",
+   "Key Classes &amp; Functions",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Directory Map"
+  ]
+ },
+ {
+  "title": "store &mdash; Query Builder",
+  "path": "infra_doc/store/query_builder/index.html",
+  "excerpt": "store &mdash; Query Builder Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; store &rsaquo; Query Builder Query Builder Focus Deep-Dive Atomic I/O operations and safe file access patterns Every read and write in the store layer passes through these primitives. They guarantee atomicity, prevent directory traversal attacks, and provide crash-safe persistence. &#128218; What is this &amp; why does it matter? The query builder abstracts all read/write operations behind safe,",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Simple JSON I/O (json-file.ts)",
+   "Atomic JSON/Text I/O (json-files.ts)",
+   "Safe File Access (fs-safe.ts)",
+   "Safe Open Validation Chain",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "store &mdash; Data Models",
+  "path": "infra_doc/store/data_models/index.html",
+  "excerpt": "store &mdash; Data Models Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; store &rsaquo; Data Models Data Models Focus Deep-Dive Core persistence type system for OpenClaw&rsquo;s infrastructure layer Every value that OpenClaw writes to disk or holds in memory conforms to one of these types. Understanding them is the fastest way to navigate the codebase. &#128218; What is this &amp; why does it matter? Data models define the shape of everything persisted to disk or held ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Device Auth Store",
+   "Delivery Queue Models",
+   "Session Entry",
+   "Execution Approvals",
+   "Utility Types"
+  ]
+ },
+ {
+  "title": "store &mdash; State Migrations",
+  "path": "infra_doc/store/migrations/index.html",
+  "excerpt": "store &mdash; State Migrations Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; store &rsaquo; Migrations State Migrations Focus Deep-Dive Legacy state detection and automated migration pipeline When OpenClaw&rsquo;s on-disk layout evolves, the migration system ensures existing installations upgrade seamlessly without losing data or configuration. &#128218; What is this &amp; why does it matter? As OpenClaw evolves, its on-disk layout changes&mdash;config keys are rename",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Legacy Detection",
+   "Session Store Parsing",
+   "Copy Plan Computation",
+   "Config Validation Pipeline",
+   "Migration Detection Algorithm"
+  ]
+ },
+ {
+  "title": "Infrastructure caching \u2014 In-Memory State &amp; Rate Limiting",
+  "path": "infra_doc/caching/index.html",
+  "excerpt": "Infrastructure caching \u2014 In-Memory State &amp; Rate Limiting Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; caching Infrastructure/caching/ &mdash; In-Memory State &amp; Rate Limiting In-memory caching, heartbeat coordination, and fixed-window rate limiting for OpenClaw services The caching sub-module manages in-memory state maps, session-scoped event queues, heartbeat event coordination, and rate limiting. It prevents redundant work, deduplicates payloads, and protect",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Classes &amp; Functions",
+   "Data Structures",
+   "Interaction Flow",
+   "Interactions",
+   "Configuration",
+   "Directory Map",
+   "Deep-Dive Highlights"
+  ]
+ },
+ {
+  "title": "Memory Management \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/caching/memory_management/index.html",
+  "excerpt": "Memory Management \u2014 OpenClaw Infrastructure Skip to content OpenClaw &rsaquo; Infrastructure &rsaquo; caching &rsaquo; Memory Management \ud83c\udf19 Theme Focus Page Memory Management Fixed-window rate limiting, bounded queues, and memory pressure controls \ud83d\udcc5 2026-04-02 \ud83d\udcd6 \u2013 min read \ud83d\udd16 src/infra/ \ud83d\udd17 047b701859 Contents Overview Fixed-Window Rate Limiter Bounded Collections Rate Limit Retry Runners Backoff Policy Memory Safety &amp; Fatal Errors Session Disk Budget Architecture Diagrams Overview \ud83c\udfaf What &amp; ",
+  "headings": [
+   "Contents",
+   "Overview",
+   "Fixed-Window Rate Limiter",
+   "Bounded Collections",
+   "Rate Limit Retry Runners",
+   "Backoff Policy",
+   "Memory Safety &amp; Fatal Errors",
+   "Session Disk Budget",
+   "Architecture Diagrams",
+   "Rate Limiter Decision Flow"
+  ]
+ },
+ {
+  "title": "Cache Strategies \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/caching/cache_strategies/index.html",
+  "excerpt": "Cache Strategies \u2014 OpenClaw Infrastructure Skip to content OpenClaw &rsaquo; Infrastructure &rsaquo; caching &rsaquo; Cache Strategies \ud83c\udf19 Theme Focus Page Cache Strategies In-memory caching patterns and Symbol-based singleton management \ud83d\udcc5 2026-04-02 \ud83d\udcd6 \u2013 min read \ud83d\udd16 src/infra/ \ud83d\udd17 047b701859 Contents Overview Symbol-Based Singletons System Presence Cache Heartbeat Event Cache Session-Scoped Ephemeral Events Cache Read/Write Patterns Architecture Diagrams Overview \ud83c\udfaf What &amp; Why Cache strategies det",
+  "headings": [
+   "Contents",
+   "Overview",
+   "Symbol-Based Singletons",
+   "Heartbeat Event State",
+   "Session Queue Singletons",
+   "System Presence Cache",
+   "Heartbeat Event Cache",
+   "Session-Scoped Ephemeral Events",
+   "Cache Read/Write Patterns",
+   "Architecture Diagrams"
+  ]
+ },
+ {
+  "title": "Cache Invalidation \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/caching/invalidation/index.html",
+  "excerpt": "Cache Invalidation \u2014 OpenClaw Infrastructure Skip to content OpenClaw &rsaquo; Infrastructure &rsaquo; caching &rsaquo; Invalidation \ud83c\udf19 Theme Focus Page Cache Invalidation TTL expiry, event-driven purge, and delivery acknowledgment patterns \ud83d\udcc5 2026-04-02 \ud83d\udcd6 \u2013 min read \ud83d\udd16 src/infra/ \ud83d\udd17 047b701859 Contents Overview TTL-Based Invalidation Event-Driven Invalidation Delivery Queue Invalidation Approval Invalidation Config &amp; Session Invalidation Decision Diagrams Overview \ud83c\udfaf What &amp; Why Cache invalid",
+  "headings": [
+   "Contents",
+   "Overview",
+   "TTL-Based Invalidation",
+   "Event-Driven Invalidation",
+   "Delivery Queue Invalidation",
+   "Approval Invalidation",
+   "Config &amp; Session Invalidation",
+   "Decision Diagrams",
+   "TTL Check \u2192 Evict \u2192 Repopulate Flow",
+   "Delivery Invalidation Decision Tree"
+  ]
+ },
+ {
+  "title": "Scheduling &mdash; Time-Dependent Operations &amp; Retry Orchestration",
+  "path": "infra_doc/scheduling/index.html",
+  "excerpt": "Scheduling &mdash; Time-Dependent Operations &amp; Retry Orchestration Skip to content &#9790; &#8679; OpenClaw &rsaquo; Infrastructure &rsaquo; scheduling Infrastructure/Scheduling/ &mdash; Time-Dependent Operations &amp; Retry Orchestration Heartbeats, graceful restarts, and delivery-queue recovery The scheduling sub-module orchestrates every time-dependent operation in OpenClaw: periodic heartbeat messages that keep channels alive, coordinated process restarts that avoid losing in-flight mess",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Data Flow",
+   "Heartbeat Pipeline",
+   "heartbeat-runner.ts",
+   "Supporting Modules",
+   "Restart Coordination",
+   "restart.ts",
+   "process-respawn.ts"
+  ]
+ },
+ {
+  "title": "Task Lifecycle \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/scheduling/task_lifecycle/index.html",
+  "excerpt": "Task Lifecycle \u2014 OpenClaw Infrastructure Skip to main content OpenClaw &rsaquo; Infrastructure &rsaquo; scheduling &rsaquo; Task Lifecycle \ud83c\udf13 Theme Focus Task Lifecycle Process supervision, graceful restarts, and cross-platform daemon management Table of Contents Overview &amp; Motivation Process supervision ensures the OpenClaw gateway stays running across crashes, config changes, and planned restarts. The lifecycle handles graceful shutdown (waiting for in-flight work), cross-platform daemon ma",
+  "headings": [
+   "Overview &amp; Motivation",
+   "Restart Controller \u2014 restart.ts",
+   "Core Types",
+   "Authorization Flow",
+   "Deferral &amp; Cooldown",
+   "Code Walk \u2014 Restart Scheduling with Cooldown",
+   "Process Respawn \u2014 process-respawn.ts",
+   "Supervisor Detection",
+   "Gateway Lock \u2014 gateway-lock.ts",
+   "Restart Lifecycle Diagram"
+  ]
+ },
+ {
+  "title": "Cron Expressions \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/scheduling/cron_expressions/index.html",
+  "excerpt": "Cron Expressions \u2014 OpenClaw Infrastructure Skip to main content OpenClaw &rsaquo; Infrastructure &rsaquo; scheduling &rsaquo; Cron Expressions \ud83c\udf13 Theme Focus Cron Expressions Heartbeat interval resolution and active-hours time gating Table of Contents Overview &amp; Motivation Cron expressions define when and how often heartbeats fire. The resolution pipeline considers multiple factors: global enable state, per-agent config, active hours, reason kind, and channel visibility. This multi-layered ap",
+  "headings": [
+   "Overview &amp; Motivation",
+   "Heartbeat Interval Resolution",
+   "Code Walk \u2014 Interval Resolution",
+   "Active Hours Gating",
+   "Reason Classification",
+   "Visibility Rules",
+   "Resolution Pipeline",
+   "Heartbeat State Lifecycle",
+   "Wake Handlers",
+   "Enable / Disable Toggles"
+  ]
+ },
+ {
+  "title": "Job Queue \u2014 OpenClaw Infrastructure",
+  "path": "infra_doc/scheduling/job_queue/index.html",
+  "excerpt": "Job Queue \u2014 OpenClaw Infrastructure Skip to main content OpenClaw &rsaquo; Infrastructure &rsaquo; scheduling &rsaquo; Job Queue \ud83c\udf13 Theme Focus Job Queue Persistent delivery queue with exponential backoff and permanent error detection Table of Contents Overview &amp; Motivation The job queue ensures no message is lost even if the gateway crashes mid-delivery. Every outbound message is persisted to disk before sending. Failed deliveries are automatically retried with increasing delays. Permanent e",
+  "headings": [
+   "Overview &amp; Motivation",
+   "Queue Storage \u2014 delivery-queue-storage.ts",
+   "Payload Types",
+   "Code Walk \u2014 Atomic Enqueue",
+   "Recovery Engine \u2014 delivery-queue-recovery.ts",
+   "Backoff Tiers",
+   "Permanent Error Detection",
+   "Retry Utilities \u2014 retry.ts",
+   "Backoff Policy \u2014 backoff.ts",
+   "Error Classification \u2014 unhandled-rejections.ts"
+  ]
+ },
+ {
+  "title": "Gateway &mdash; Control Plane &amp; Authentication",
+  "path": "gateway_doc/index.html",
+  "excerpt": "Gateway &mdash; Control Plane &amp; Authentication Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway Gateway &mdash; Control Plane &amp; Authentication The Front Door of OpenClaw Gateway is the control plane that manages every connection entering the system &mdash; from device authentication and rate limiting to boot orchestration, message routing, session lifecycle, and assistant identity resolution. It is the single entry point through which all client traffic flows before reaching age",
+  "headings": [
+   "What Is This &amp; Why Does It Exist?",
+   "Table of Contents",
+   "Architecture Overview",
+   "Data Flow",
+   "Narrated Walkthrough",
+   "Step 1 &mdash; Client Initiates Connection",
+   "Step 2 &mdash; Credential Resolution",
+   "Step 3 &mdash; Auth Mode Resolution",
+   "Step 4 &mdash; Rate Limit Check",
+   "Step 5 &mdash; Authentication"
+  ]
+ },
+ {
+  "title": "Gateway/Boot &mdash; Startup Orchestration",
+  "path": "gateway_doc/boot/index.html",
+  "excerpt": "Gateway/Boot &mdash; Startup Orchestration Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Boot Boot &mdash; Startup Orchestration Gateway Initialization Pipeline The Boot subsystem orchestrates Gateway startup &mdash; executing the one-shot bootstrap sequence from BOOT.md , negotiating mobile node capabilities, coordinating health checks, and restoring session state from previous runs. 3 Boot Statuses 1 Boot File 4+ Lifecycle Phases 25+ Context Fields Initialization TypeScrip",
+  "headings": [
+   "What Is This &amp; Why Does It Exist?",
+   "Table of Contents",
+   "Architecture",
+   "Data Flow",
+   "Key Types &amp; Functions",
+   "GatewayRequestContext Fields",
+   "Code Examples",
+   "Running the Boot Sequence",
+   "Building Request Context",
+   "Configuration"
+  ]
+ },
+ {
+  "title": "Gateway/Boot &mdash; Capability Negotiation",
+  "path": "gateway_doc/boot/capability_negotiation/index.html",
+  "excerpt": "Gateway/Boot &mdash; Capability Negotiation Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Boot &rsaquo; Capability Negotiation Capability Negotiation Focus Mobile Node Capability Registration Capability negotiation is the process by which mobile nodes (Android/iOS clients) register their supported features with the Gateway during connection. The NodeRegistry tracks each node's capabilities, expiration times, and connection metadata to enable feature-aware routing. Client Typ",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Capability Registration Flow",
+   "GatewayWsClient Type",
+   "ConnectParams Structure",
+   "Parse Connection Parameters",
+   "Validate Client Version",
+   "Register in NodeRegistry",
+   "Capability Expiration &amp; Renewal",
+   "Class Relationship Diagram"
+  ]
+ },
+ {
+  "title": "Gateway/Boot &mdash; Startup Sequence",
+  "path": "gateway_doc/boot/startup_sequence/index.html",
+  "excerpt": "Gateway/Boot &mdash; Startup Sequence Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Boot &rsaquo; Startup Sequence Startup Sequence Focus Gateway Process Initialization The startup sequence describes how the Gateway process boots from cold start to fully operational. The runBootOnce() function orchestrates every phase &mdash; from reading BOOT.md instructions to initializing services, restoring sessions, and broadcasting readiness. Entry Point runBootOnce() in boot.ts Boot M",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Boot Phases Flowchart",
+   "BOOT.md Instruction File",
+   "The runBootOnce() Function",
+   "Acquire Boot Lock",
+   "Build GatewayRequestContext",
+   "Initialize Core Services",
+   "Restore Session State",
+   "Startup Timeline"
+  ]
+ },
+ {
+  "title": "Gateway/Boot &mdash; Health Checks",
+  "path": "gateway_doc/boot/health_checks/index.html",
+  "excerpt": "Gateway/Boot &mdash; Health Checks Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Boot &rsaquo; Health Checks Health Checks Focus Gateway Health Monitoring System The health check subsystem continuously monitors the Gateway's operational status. It exposes cached health summaries via getHealthCache() , tracks versions with getHealthVersion() , and provides structured error logging through the logHealth interface &mdash; all integrated with the GatewayRequestContext and schedu",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Health Check Cycle",
+   "HealthSummary Type",
+   "How It Works",
+   "Register Health Probes",
+   "Schedule with CronService",
+   "Expose via HTTP Endpoint",
+   "Handle Health Errors with logHealth",
+   "Health Check Sequence"
+  ]
+ },
+ {
+  "title": "Gateway/Auth &mdash; Authentication &amp; Access Control",
+  "path": "gateway_doc/auth/index.html",
+  "excerpt": "Gateway/Auth &mdash; Authentication &amp; Access Control Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Auth Auth &mdash; Authentication &amp; Access Control Gateway Security Layer The Auth subsystem guards every connection entering the Gateway. It resolves auth modes from configuration, validates credentials across six methods, enforces rate limiting with sliding-window counters, manages device-token pairing, and applies install-time auth policies. 6 Auth Methods 4 Rate Limi",
+  "headings": [
+   "What Is This &amp; Why Does It Exist?",
+   "Table of Contents",
+   "Architecture",
+   "Data Flow",
+   "Key Classes &amp; Types",
+   "Auth Methods",
+   "Rate Limit Scopes",
+   "Code Examples",
+   "Resolving Auth Mode",
+   "Creating a Rate Limiter"
+  ]
+ },
+ {
+  "title": "Gateway/Auth &mdash; Device Pairing Flow",
+  "path": "gateway_doc/auth/pairing_flow/index.html",
+  "excerpt": "Gateway/Auth &mdash; Device Pairing Flow Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Auth &rsaquo; Pairing Flow Device Pairing Flow Focus Persistent Device Authentication The device pairing flow enables mobile and IoT devices to establish persistent authentication without sharing static secrets. Once paired, a device token allows reconnection without re-entering credentials. Auth Method device-token in GatewayAuthResult.method Rate Limit Scope AUTH_RATE_LIMIT_SCOPE_DEVICE_",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Pairing Protocol",
+   "How It Works",
+   "Pairing Code Generation",
+   "New Device Submits Code",
+   "Token Exchange",
+   "Subsequent Connections",
+   "Pairing State Machine",
+   "Edge Cases &amp; Error Handling"
+  ]
+ },
+ {
+  "title": "Gateway/Auth &mdash; Install Policies",
+  "path": "gateway_doc/auth/install_policies/index.html",
+  "excerpt": "Gateway/Auth &mdash; Install Policies Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Auth &rsaquo; Install Policies Install Policies Focus Install-Time &amp; Auth-Mode Policies Install policies enforce security requirements during initial deployment. They determine whether a gateway token is required at install time and prevent ambiguous auth configurations where both token and password are set without an explicit mode declaration. Install Policy auth-install-policy.ts Mode P",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Install Policy Decision Flow",
+   "How It Works",
+   "Install Policy Check",
+   "Auth Mode Ambiguity Detection",
+   "Config Utilities for Password Management",
+   "Auth Mode Policy State",
+   "Function Reference",
+   "Edge Cases"
+  ]
+ },
+ {
+  "title": "Gateway/Auth &mdash; Rate Limiting",
+  "path": "gateway_doc/auth/rate_limiting/index.html",
+  "excerpt": "Gateway/Auth &mdash; Rate Limiting Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Auth &rsaquo; Rate Limiting Rate Limiting Focus Sliding-Window Auth Protection The AuthRateLimiter protects the Gateway from brute-force credential attacks using a per-IP sliding-window counter with configurable lockouts, scope-based isolation, and automatic stale-entry pruning. Interface AuthRateLimiter from auth-rate-limit.ts Factory createAuthRateLimiter(config?) Algorithm Sliding window with",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Algorithm",
+   "How It Works",
+   "IP Normalization",
+   "Sliding Window Check",
+   "Failure Recording",
+   "Automatic Pruning",
+   "Data Structures",
+   "Rate Limit Scopes"
+  ]
+ },
+ {
+  "title": "Gateway/Routing &mdash; Message Dispatch &amp; Session Management",
+  "path": "gateway_doc/routing/index.html",
+  "excerpt": "Gateway/Routing &mdash; Message Dispatch &amp; Session Management Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Routing Routing &mdash; Message Dispatch &amp; Session Management Traffic Controller for OpenClaw The Routing subsystem dispatches authenticated RPC requests to the correct handler, manages session lifecycles across 32+ fields of state, resolves assistant identities, and coordinates broadcast events to connected clients via WebSocket. 32+ Session Fields 5 Session S",
+  "headings": [
+   "What Is This &amp; Why Does It Exist?",
+   "Table of Contents",
+   "Architecture",
+   "Data Flow",
+   "Key Types &amp; Functions",
+   "Session Kinds",
+   "Session Row Key Fields",
+   "Code Examples",
+   "Defining a Request Handler",
+   "Resolving Assistant Identity"
+  ]
+ },
+ {
+  "title": "Gateway/Routing &mdash; Message Dispatch",
+  "path": "gateway_doc/routing/message_dispatch/index.html",
+  "excerpt": "Gateway/Routing &mdash; Message Dispatch Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Routing &rsaquo; Message Dispatch Message Dispatch Focus RPC Request Routing &amp; Handler Resolution The message dispatch subsystem receives incoming RPC request frames, validates their structure against 80+ protocol validators, resolves the matching handler from the handler registry, and invokes it with a fully-typed options object. Every request flows through a deterministic pipeline of",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Core Types",
+   "GatewayRequestHandler",
+   "GatewayRequestHandlerOptions",
+   "RespondFn",
+   "Protocol Frames",
+   "Dispatch Pipeline",
+   "Request Validation",
+   "Validator Categories"
+  ]
+ },
+ {
+  "title": "Gateway/Routing &mdash; Assistant Identity",
+  "path": "gateway_doc/routing/assistant_identity/index.html",
+  "excerpt": "Gateway/Routing &mdash; Assistant Identity Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Routing &rsaquo; Assistant Identity Assistant Identity Focus Name, Avatar &amp; Emoji Resolution The assistant identity subsystem resolves the display name, avatar, and emoji for each assistant in a session. It follows a priority chain &mdash; workspace configuration files take precedence over global config, which falls back to built-in defaults. Strict size limits and normalization ensu",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "Core Types",
+   "AssistantIdentity",
+   "DEFAULT_ASSISTANT_IDENTITY",
+   "Size Limit Constants",
+   "Resolution Priority",
+   "resolveAssistantIdentity",
+   "Function Signature &amp; Parameters",
+   "Workspace File Reading"
+  ]
+ },
+ {
+  "title": "Gateway/Routing &mdash; Session Management",
+  "path": "gateway_doc/routing/session_management/index.html",
+  "excerpt": "Gateway/Routing &mdash; Session Management Skip to content &#9790; &#8679; OpenClaw &rsaquo; Gateway &rsaquo; Routing &rsaquo; Session Management Session Management Focus Full Session Lifecycle &amp; State Tracking The session management subsystem controls the entire lifecycle of gateway sessions &mdash; from creation through active use to termination. It tracks 32+ fields per session including token usage, cost estimation, runtime metrics, and message previews. Sessions transition through a wel",
+  "headings": [
+   "Table of Contents",
+   "Overview",
+   "GatewaySessionRow",
+   "Identity &amp; Classification Fields",
+   "Token &amp; Cost Metrics",
+   "Timing Fields",
+   "SessionRunStatus",
+   "Session State Machine",
+   "GatewaySessionsDefaults",
+   "Session Lifecycle"
+  ]
+ },
+ {
+  "title": "Channels &mdash; Multi-Platform Messaging Abstraction",
+  "path": "channels_doc/index.html",
+  "excerpt": "Channels &mdash; Multi-Platform Messaging Abstraction Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels Channels &mdash; Multi-Platform Messaging Abstraction Unified Messaging for 25+ Platforms &mdash; WhatsApp, Telegram, Slack, Discord &amp; More The Channels module provides a single abstraction layer that normalizes messaging across 25+ platforms. It handles inbound/outbound message routing, sender allowlists, command gating, acknowledgement reactions, typing indicators, thread bindin",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Architecture",
+   "Data Flow",
+   "&#128694; Step-by-Step Narrated Walkthrough",
+   "Key Types &amp; Interfaces",
+   "Configuration Knobs",
+   "Core Algorithms",
+   "Allowlist Matching",
+   "Status Reaction State Machine",
+   "Typing Indicator with TTL Safety"
+  ]
+ },
+ {
+  "title": "Channels/Allowlists &mdash; Access Control Engine",
+  "path": "channels_doc/allowlists/index.html",
+  "excerpt": "Channels/Allowlists &mdash; Access Control Engine Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Allowlists Channels/Allowlists &mdash; Access Control Engine Pattern-Based Sender Filtering &amp; Command Authorization The Allowlists sub-module controls who can interact with the OpenClaw agent. It compiles sender identity patterns into fast lookup sets, resolves DM and group allowFrom sources, gates slash commands behind access groups, and enforces mention requirements in grou",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Architecture",
+   "Allowlist Matching Pipeline",
+   "Match Sources",
+   "Compilation",
+   "AllowFrom Source Resolution",
+   "Command Gating",
+   "Mention Gating",
+   "Focus Deep-Dives"
+  ]
+ },
+ {
+  "title": "Channels/Allowlists &mdash; AllowFrom Rules",
+  "path": "channels_doc/allowlists/allow_from_rules/index.html",
+  "excerpt": "Channels/Allowlists &mdash; AllowFrom Rules Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Allowlists &rsaquo; AllowFrom Rules Channels/Allowlists &mdash; AllowFrom Rules Focus Deep-Dive DM/Group Source Merging &amp; Sender ID Validation AllowFrom rules determine which sender identities are merged into the final allowlist for DM and group contexts. They handle policy-driven source selection, store-backed allowlists, fallback strategies, and raw sender ID validation. DM Polic",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "DM AllowFrom Merging",
+   "Group AllowFrom Resolution",
+   "Sender ID Validation",
+   "Utility: firstDefined",
+   "Decision Matrix",
+   "Input Normalization"
+  ]
+ },
+ {
+  "title": "Channels/Allowlists &mdash; Command Gating",
+  "path": "channels_doc/allowlists/command_gating/index.html",
+  "excerpt": "Channels/Allowlists &mdash; Command Gating Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Allowlists &rsaquo; Command Gating Channels/Allowlists &mdash; Command Gating Focus Deep-Dive Slash Command Authorization &amp; Access Group Enforcement Command gating restricts which users can execute slash commands ( /reset , /model , /continue , etc.). It combines access group membership with per-authorizer configuration to produce a binary allow/block decision for each control comma",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Type System",
+   "Resolution Algorithm",
+   "Control Command Gate",
+   "Dual-Text Control Command Gate",
+   "Gating Modes Comparison",
+   "Interaction with Mention Gating"
+  ]
+ },
+ {
+  "title": "Channels/Allowlists &mdash; Allowlist Matching",
+  "path": "channels_doc/allowlists/allowlist_matching/index.html",
+  "excerpt": "Channels/Allowlists &mdash; Allowlist Matching Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Allowlists &rsaquo; Allowlist Matching Channels/Allowlists &mdash; Allowlist Matching Focus Deep-Dive Compiled Set Matching with Ordered Candidate Resolution The allowlist matching engine is the core access control primitive. It compiles allowlist entries into an immutable ReadonlySet , resolves sender identity candidates in priority order, and returns a typed match result that trac",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Type System",
+   "AllowlistMatchSource",
+   "AllowlistMatch&lt;T&gt;",
+   "CompiledAllowlist",
+   "Compilation Pipeline",
+   "Resolution Algorithm",
+   "Diagnostics",
+   "Extended Resolution Variants"
+  ]
+ },
+ {
+  "title": "Channels/Messaging &mdash; Message Processing Pipeline",
+  "path": "channels_doc/messaging/index.html",
+  "excerpt": "Channels/Messaging &mdash; Message Processing Pipeline Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Messaging Channels/Messaging &mdash; Message Processing Pipeline Status Reactions, Typing Indicators &amp; Message Normalization The Messaging sub-module handles the user-visible feedback loop: acknowledgement reactions that confirm message receipt, a status reaction state machine that shows agent progress via emoji, typing indicators with keepalive loops and TTL safety, and",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Architecture",
+   "Acknowledgement Reactions",
+   "Status Reaction State Machine",
+   "Default Emoji Map",
+   "Timing Defaults",
+   "Typing Indicators",
+   "Tool-Specific Emoji Resolution",
+   "Focus Deep-Dives"
+  ]
+ },
+ {
+  "title": "Channels/Messaging &mdash; Message Normalization",
+  "path": "channels_doc/messaging/message_normalization/index.html",
+  "excerpt": "Channels/Messaging &mdash; Message Normalization Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Messaging &rsaquo; Message Normalization Channels/Messaging &mdash; Message Normalization Focus Deep-Dive Platform-Specific Format Normalization &amp; Context Extraction Message normalization transforms the diverse message formats from 25+ platforms into a single internal representation. It extracts sender identity, chat metadata, thread context, media references, and command dete",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Normalization Pipeline",
+   "MsgContext Structure",
+   "Sender Identity Extraction",
+   "Session Recording",
+   "Last Route Tracking",
+   "Debounce Policy Integration",
+   "Markdown Capability"
+  ]
+ },
+ {
+  "title": "Channels/Messaging &mdash; Ack Reactions",
+  "path": "channels_doc/messaging/ack_reactions/index.html",
+  "excerpt": "Channels/Messaging &mdash; Ack Reactions Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Messaging &rsaquo; Ack Reactions Channels/Messaging &mdash; Ack Reactions Focus Deep-Dive Acknowledgement Reaction Scope Gating &amp; WhatsApp Specialization Ack reactions provide visual confirmation that the agent received a message. This module implements scope-based gating that considers chat type, mention status, and platform-specific behaviors (particularly WhatsApp&rsquo;s unique re",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Scope Types",
+   "Gate Parameters",
+   "Decision Flow",
+   "WhatsApp Specialization",
+   "Decision Matrix"
+  ]
+ },
+ {
+  "title": "Channels/Messaging &mdash; Media Handling",
+  "path": "channels_doc/messaging/media_handling/index.html",
+  "excerpt": "Channels/Messaging &mdash; Media Handling Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Messaging &rsaquo; Media Handling Channels/Messaging &mdash; Media Handling Focus Deep-Dive Cross-Platform Media Attachment Processing &amp; Format Conversion Media handling manages the ingestion, validation, and conversion of media attachments (images, audio, video, documents) across all supported channels. Each platform has different size limits, supported formats, and delivery mechani",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Channel Media Capabilities",
+   "Media Processing Flow",
+   "Platform-Specific Limits",
+   "Media Normalization",
+   "Interaction with Debounce Policy",
+   "Outbound Media Formatting"
+  ]
+ },
+ {
+  "title": "Channels/Config &mdash; Channel Configuration System",
+  "path": "channels_doc/config/index.html",
+  "excerpt": "Channels/Config &mdash; Channel Configuration System Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Config Channels/Config &mdash; Channel Configuration System Per-Channel Config Resolution, Presence Detection &amp; Chat Type Normalization The Config sub-module handles how OpenClaw discovers which channels are configured, resolves per-channel settings with cascading fallback (direct &rarr; parent &rarr; wildcard), normalizes chat types, and detects channel presence from both",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Architecture",
+   "Config Resolution Pipeline",
+   "Match Sources",
+   "Slug Normalization",
+   "Channel Presence Detection",
+   "Environment Variable Prefixes",
+   "Chat Type Normalization",
+   "Focus Deep-Dives"
+  ]
+ },
+ {
+  "title": "Channels/Config &mdash; Config Presence",
+  "path": "channels_doc/config/config_presence/index.html",
+  "excerpt": "Channels/Config &mdash; Config Presence Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Config &rsaquo; Config Presence Channels/Config &mdash; Config Presence Focus Deep-Dive Auto-Detection of Configured Channels from Config, Env &amp; OAuth The config presence module scans three sources &mdash; config file entries, environment variable prefixes, and OAuth credential files &mdash; to build a list of potentially configured channel IDs. This enables the system to auto-discover",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Detection Sources",
+   "Config File Scanning",
+   "Meaningful Config Detection",
+   "Environment Variable Scanning",
+   "WhatsApp OAuth Detection",
+   "Main Function",
+   "Edge Cases"
+  ]
+ },
+ {
+  "title": "Channels/Config &mdash; Channel Capabilities",
+  "path": "channels_doc/config/channel_capabilities/index.html",
+  "excerpt": "Channels/Config &mdash; Channel Capabilities Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Config &rsaquo; Channel Capabilities Channels/Config &mdash; Channel Capabilities Focus Deep-Dive Config Entry Matching with Cascading Fallback Resolution The channel capabilities system resolves per-channel configuration using a three-tier fallback strategy: direct key match, parent key match, and wildcard. It normalizes channel slugs, generates candidate keys, and tracks which resol",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Core Types",
+   "Resolution Pipeline",
+   "Key Candidate Generation",
+   "Slug Normalization",
+   "Direct Match",
+   "Match Meta Application",
+   "Resolution Examples"
+  ]
+ },
+ {
+  "title": "Channels/Config &mdash; Chat Types",
+  "path": "channels_doc/config/chat_types/index.html",
+  "excerpt": "Channels/Config &mdash; Chat Types Skip to content &#9790; &#8679; OpenClaw &rsaquo; Channels &rsaquo; Config &rsaquo; Chat Types Channels/Config &mdash; Chat Types Focus Deep-Dive DM, Group &amp; Channel Type Normalization The chat type system normalizes platform-specific conversation type strings into a canonical three-value union. This normalization drives routing decisions, mention gating behavior, and allowlist context selection throughout the channels module. 3 Types Normalization Routing ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Type Definition",
+   "Normalization Function",
+   "Input Mapping Table",
+   "Routing Impact",
+   "Built-in Channel IDs",
+   "Thread vs. Chat Type"
+  ]
+ },
+ {
+  "title": "Extensions &mdash; Modular Plugin Ecosystem",
+  "path": "extensions/index.html",
+  "excerpt": "Extensions &mdash; Modular Plugin Ecosystem Skip to content &#9790; &#8679; OpenClaw &rsaquo; Extensions Extensions &mdash; Modular Plugin Ecosystem 91 extensions &middot; 8 categories &middot; One unified Plugin SDK The Extensions directory is OpenClaw&rsquo;s entire integration surface &mdash; every AI provider, messaging channel, search engine, voice service, and utility tool lives here as a self-contained plugin package discovered through definePluginEntry() and registered via OpenClawPlugin",
+  "headings": [
+   "&#128218; What is the Extensions ecosystem?",
+   "Architecture",
+   "Extension Registration Flow",
+   "&#128694; Step-by-Step: Loading the OpenAI Extension",
+   "Extension Categories",
+   "AI Providers",
+   "Messaging Channels",
+   "Search &amp; Web",
+   "Media &amp; Voice",
+   "Utilities"
+  ]
+ },
+ {
+  "title": "Extensions &mdash; Extension Contract",
+  "path": "extensions/extension_contract/index.html",
+  "excerpt": "Extensions &mdash; Extension Contract Skip to content &#9790; &#8679; OpenClaw &rsaquo; Extensions &rsaquo; Extension Contract Extension Contract Focus Deep-Dive The shared interface every extension implements Every extension in OpenClaw &mdash; whether it adds an AI provider, a messaging channel, or a utility tool &mdash; follows the same discovery-and-registration contract built on definePluginEntry() , manifest-driven discovery, and the OpenClawPluginApi registration surface. &#128218; What i",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1: Manifest Discovery",
+   "Phase 2: Entry Point Definition",
+   "Phase 2b: Channel Entry Point (Alternative)",
+   "Phase 3: Registration",
+   "Lifecycle State Machine"
+  ]
+ },
+ {
+  "title": "Extensions &mdash; Channel Extensions",
+  "path": "extensions/channel_extensions/index.html",
+  "excerpt": "Extensions &mdash; Channel Extensions Skip to content &#9790; &#8679; OpenClaw &rsaquo; Extensions &rsaquo; Channel Extensions Channel Extensions Focus Deep-Dive How messaging channel plugins connect users to the AI agent Channel extensions implement the ChannelPlugin interface &mdash; a comprehensive adapter-based contract with 15+ pluggable adapters covering messaging, outbound delivery, security, threading, groups, gateway HTTP methods, and agent integration. Each channel (Telegram, Discord, ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "The ChannelPlugin Interface",
+   "Core Structure",
+   "Channel Metadata",
+   "Capabilities Declaration",
+   "Adapter Architecture",
+   "Message Lifecycle"
+  ]
+ },
+ {
+  "title": "Extensions &mdash; Provider Adapters",
+  "path": "extensions/provider_adapters/index.html",
+  "excerpt": "Extensions &mdash; Provider Adapters Skip to content &#9790; &#8679; OpenClaw &rsaquo; Extensions &rsaquo; Provider Adapters Provider Adapters Focus Deep-Dive How AI provider extensions connect models to the agent engine Provider adapters implement the ProviderPlugin interface &mdash; a rich contract covering authentication, model discovery, transport normalization, stream processing, and capability declaration. Each provider extension (OpenAI, Anthropic, Ollama, etc.) builds one or more Provide",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "The ProviderPlugin Interface",
+   "Authentication Chain",
+   "Model Resolution Pipeline",
+   "Stream Processing",
+   "Request Lifecycle"
+  ]
+ },
+ {
+  "title": "Plugins \u2014 Extensible Plugin Ecosystem | OpenClaw Wiki",
+  "path": "plugins_doc/index.html",
+  "excerpt": "Plugins \u2014 Extensible Plugin Ecosystem | OpenClaw Wiki Skip to content \ud83c\udf19 OpenClaw \u203a Plugins Plugins \u2014 Extensible Plugin Ecosystem Manifest-driven plugin discovery, capability registration, and MCP tool bridging 286 Files 337 SDK Files 25+ Hook Types TypeScript Language \ud83d\udd35 Manifest-Driven \ud83d\udfe2 Lazy Loading \ud83d\udfe1 Hook Pipeline \ud83d\udd34 MCP Bridge \ud83d\udca1 What is this? The plugins module is the extensibility backbone of OpenClaw. It manages how plugins are discovered, loaded, configured, and wired into the assistant lif",
+  "headings": [
+   "\ud83d\udca1 What is this?",
+   "Table of Contents",
+   "Architecture",
+   "Plugin Lifecycle",
+   "Key Types",
+   "Hook Execution Pipeline",
+   "Sub-modules",
+   "Directory Map",
+   "Code Examples",
+   "Plugin Registration"
+  ]
+ },
+ {
+  "title": "MCP Bridge &mdash; Model Context Protocol Tool Bridging | OpenClaw Wiki",
+  "path": "plugins_doc/mcp-bridge/index.html",
+  "excerpt": "MCP Bridge &mdash; Model Context Protocol Tool Bridging | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; MCP Bridge MCP Bridge &mdash; Model Context Protocol Tool Bridging Focus Deep-Dive MCP server discovery, configuration extraction, and tool serving for bundled plugins 6 Core Files 3 Server Formats ~800 LOC TypeScript &#128309; MCP Protocol &#128994; Stdio Servers &#128993; Config Merging &#128308; Runtime Support &#128218; What is this &amp; why does it matt",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Architecture",
+   "Key Types",
+   "MCP Config Resolution",
+   "Deep-Dive Highlights",
+   "Directory Map",
+   "Code Examples"
+  ]
+ },
+ {
+  "title": "Tool Serving &mdash; MCP Tool Exposure to Agent | OpenClaw Wiki",
+  "path": "plugins_doc/mcp-bridge/tool_serving/index.html",
+  "excerpt": "Tool Serving &mdash; MCP Tool Exposure to Agent | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; MCP Bridge &rsaquo; Tool Serving Tool Serving Deep Dive How MCP server tools are exposed to the agent tool registry The tool serving pipeline resolves plugin-provided tools and MCP server tools, filters them through allowlists, handles name conflicts, and delivers a flattened AnyAgentTool[] ready for the agent orchestrator to invoke. Tool Resolution Allowlist Filteri",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Stage 1: Entry &amp; Fast Path",
+   "Stage 2: Registry Resolution",
+   "Stage 3: Factory Invocation &amp; Metadata",
+   "Stage 4: Allowlist &amp; Conflict Filtering",
+   "Tool Resolution Sequence",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Channel Bridge &mdash; Channel Plugin MCP Integration | OpenClaw Wiki",
+  "path": "plugins_doc/mcp-bridge/channel_bridge/index.html",
+  "excerpt": "Channel Bridge &mdash; Channel Plugin MCP Integration | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; MCP Bridge &rsaquo; Channel Bridge Channel Bridge Deep Dive Bridging channel-specific plugins with MCP tool capabilities and conversation binding The channel bridge connects channel adapters (Discord, Slack, WhatsApp, and 20+ more) with the MCP tool system. It resolves which plugin owns a given channel, binds the plugin&rsquo;s identity to the gateway request s",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Stage 1: Channel Registration",
+   "Stage 2: Identity Resolution",
+   "Stage 3: Scope Binding",
+   "Message Flow Sequence",
+   "Annotated Code Walkthrough",
+   "Edge Cases &amp; Error Handling"
+  ]
+ },
+ {
+  "title": "Plugin Tools &mdash; Tool Resolution &amp; Conflict Management | OpenClaw Wiki",
+  "path": "plugins_doc/mcp-bridge/plugin_tools/index.html",
+  "excerpt": "Plugin Tools &mdash; Tool Resolution &amp; Conflict Management | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; MCP Bridge &rsaquo; Plugin Tools Plugin Tools Deep Dive Tool resolution, allowlists, name normalization, and conflict management The plugin tools module manages the full lifecycle of plugin-provided tools &mdash; from registration through name normalization to conflict handling. It uses WeakMap-based metadata tracking to annotate tools without modifyin",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Mechanism 1: Name Normalization",
+   "Mechanism 2: Allowlist Matching",
+   "Mechanism 3: WeakMap Metadata",
+   "Mechanism 4: Conflict Detection",
+   "Tool Lifecycle State Machine",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Bundling \u2014 Plugin Bundle Discovery &amp; Packaging | OpenClaw Wiki",
+  "path": "plugins_doc/bundling/index.html",
+  "excerpt": "Bundling \u2014 Plugin Bundle Discovery &amp; Packaging | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; Bundling Bundling &mdash; Plugin Bundle Discovery &amp; Packaging Manifest parsing, command discovery, and MCP config for Codex/Claude/Cursor bundles The bundling sub-module handles plugin bundles &mdash; pre-packaged plugin directories that follow Codex, Claude, or Cursor conventions. It reads bundle manifest files ( .codex-plugin/plugin.json , .claude-plugin/plu",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Types",
+   "Data Flow",
+   "Deep-Dive Highlights",
+   "Directory Map",
+   "Code Examples",
+   "Example: Loading a Bundle Manifest"
+  ]
+ },
+ {
+  "title": "Bundle Manifest &mdash; Multi-Format Plugin Manifests | OpenClaw Wiki",
+  "path": "plugins_doc/bundling/bundle_manifest/index.html",
+  "excerpt": "Bundle Manifest &mdash; Multi-Format Plugin Manifests | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; Bundling &rsaquo; Bundle Manifest Bundle Manifest Deep Dive Multi-format manifest detection, loading, and normalization The bundle manifest system detects plugin descriptor files across three competing format conventions &mdash; Codex, Claude, and Cursor &mdash; reads their JSON manifests, and normalizes them into a single BundlePluginManifest type so the rest ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Step 1 &mdash; Format Detection",
+   "Step 2 &mdash; Secure File Reading",
+   "Step 3 &mdash; JSON Parsing",
+   "Step 4 &mdash; Field Normalization",
+   "Step 5 &mdash; Result Assembly",
+   "Behavior State Machine"
+  ]
+ },
+ {
+  "title": "Bundled Capabilities &mdash; Runtime Capability Registration | OpenClaw Wiki",
+  "path": "plugins_doc/bundling/bundled_capabilities/index.html",
+  "excerpt": "Bundled Capabilities &mdash; Runtime Capability Registration | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; Bundling &rsaquo; Bundled Capabilities Bundled Capabilities Deep Dive Runtime capability registration for bundled plugins with Vitest compatibility Bundled Capabilities bridges the gap between static plugin manifests and live runtime behavior. It takes a list of plugin IDs, constructs a loader configuration with SDK alias resolution and optional Vitest s",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Step 1 &mdash; Build Runtime Config",
+   "Step 2 &mdash; Enablement Compatibility",
+   "Step 3 &mdash; Vitest Detection",
+   "Step 4 &mdash; Build Alias Map",
+   "Step 5 &mdash; Create Jiti Loader",
+   "Step 6 &mdash; Import Plugin Modules"
+  ]
+ },
+ {
+  "title": "Bundle Commands &mdash; Markdown Command Discovery | OpenClaw Wiki",
+  "path": "plugins_doc/bundling/bundle_commands/index.html",
+  "excerpt": "Bundle Commands &mdash; Markdown Command Discovery | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; Bundling &rsaquo; Bundle Commands Bundle Commands Deep Dive Markdown-based command discovery with frontmatter parsing Bundle commands turn plain Markdown files into interactive slash commands. Each .md file contains YAML frontmatter with metadata (name, description, enabled state) and a body that becomes the prompt template. The discovery engine scans configured d",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Step 1 &mdash; Resolve Command Root Directories",
+   "Step 2 &mdash; Recursive Markdown Discovery",
+   "Step 3 &mdash; Frontmatter Parsing",
+   "Step 4 &mdash; Strip Frontmatter",
+   "Step 5 &mdash; Assemble Command Specs",
+   "Behavior Sequence"
+  ]
+ },
+ {
+  "title": "SDK \u2014 Plugin Development API | OpenClaw Wiki",
+  "path": "plugins_doc/sdk/index.html",
+  "excerpt": "SDK \u2014 Plugin Development API | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; SDK SDK &mdash; Plugin Development API Public API surface for building plugins, channels, providers, and tool extensions The Plugin SDK ( src/plugin-sdk/ ) is the public API surface that plugin developers use to build extensions. It provides typed interfaces for every extensibility point: channels, providers, memory engines, tools, hooks, commands, and services. The SDK follows a re-ex",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Types",
+   "Plugin Contract Flow",
+   "Deep-Dive Highlights",
+   "Directory Map",
+   "Code Examples",
+   "Example: Registering a Channel Plugin"
+  ]
+ },
+ {
+  "title": "Capability Registration &mdash; Tool, Hook &amp; Channel Registration | OpenClaw Wiki",
+  "path": "plugins_doc/sdk/capability_registration/index.html",
+  "excerpt": "Capability Registration &mdash; Tool, Hook &amp; Channel Registration | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; SDK &rsaquo; Capability Registration Capability Registration Deep Dive How tools, hooks, channels, and providers are registered into the plugin registry 6 Registration Types Validation Layer Conflict Detection TypeScript &#128218; What is this &amp; why does it matter? Capability Registration is the process by which plugins wire their tools, hoo",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "registerTool()",
+   "registerHook()",
+   "registerChannel()",
+   "registerProvider()",
+   "registerCommand()",
+   "registerHttpRoute()"
+  ]
+ },
+ {
+  "title": "API Builder &mdash; Plugin Registration Facade | OpenClaw Wiki",
+  "path": "plugins_doc/sdk/api_builder/index.html",
+  "excerpt": "API Builder &mdash; Plugin Registration Facade | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; SDK &rsaquo; API Builder API Builder Deep Dive How buildPluginApi() constructs the plugin registration facade Facade Pattern 20+ Methods Noop Fallbacks TypeScript &#128218; What is this &amp; why does it matter? The API Builder is the factory that constructs the OpenClawPluginApi object every plugin receives inside its register() function. It wires together handler ov",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Accepting Build Parameters",
+   "Handler Resolution",
+   "Identity Binding",
+   "API Composition",
+   "Behavior Sequence",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Plugin Contract &mdash; OpenClawPluginDefinition Lifecycle | OpenClaw Wiki",
+  "path": "plugins_doc/sdk/plugin_contract/index.html",
+  "excerpt": "Plugin Contract &mdash; OpenClawPluginDefinition Lifecycle | OpenClaw Wiki Skip to content &#9790; &#8679; OpenClaw &rsaquo; Plugins &rsaquo; SDK &rsaquo; Plugin Contract Plugin Contract Deep Dive The OpenClawPluginDefinition interface and register() lifecycle Contract Interface Jiti Loader Config Schema TypeScript &#128218; What is this &amp; why does it matter? The Plugin Contract defines the shape every OpenClaw plugin must satisfy: a module that exports an OpenClawPluginDefinition with a reg",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "How It Works",
+   "Module Import via Jiti",
+   "Export Resolution",
+   "The register() Call",
+   "Config Schema Validation",
+   "Optional setup() Hook",
+   "Lifecycle State Machine"
+  ]
+ },
+ {
+  "title": "Commands \u2014 Command Processing &amp; Dispatch",
+  "path": "commands_doc/index.html",
+  "excerpt": "Commands \u2014 Command Processing &amp; Dispatch Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands Commands &mdash; Command Processing &amp; Dispatch Command Processing &amp; Dispatch The Commands module implements the CLI command interface for all OpenClaw operations. It routes user-facing commands through a dispatch system with support for both interactive wizards and non-interactive batch modes, handling agent management, channel configuration, model selection, diagnostics, and system he",
+  "headings": [
+   "Architecture",
+   "Data Flow",
+   "&#128694; Step-by-Step Narrated Walkthrough",
+   "Key Types &amp; Interfaces",
+   "Sub-Modules",
+   "Directory Map"
+  ]
+ },
+ {
+  "title": "Commands/Slash Commands \u2014 Parsing &amp; Dispatch",
+  "path": "commands_doc/slash-commands/index.html",
+  "excerpt": "Commands/Slash Commands \u2014 Parsing &amp; Dispatch Skip to content &#9790; &#8679; Commands &rsaquo; Slash Commands Commands/Slash Commands/ &mdash; Parsing &amp; Dispatch Slash command parsing, routing, and dispatch infrastructure The Slash Commands sub-module implements the core command processing pipeline for OpenClaw. It parses user input into structured command objects, resolves them against a registry of handlers, manages command aliases, and dispatches execution through the agent binding sy",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Classes",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Directory Map",
+   "Deep-Dive Highlights",
+   "Code Examples"
+  ]
+ },
+ {
+  "title": "Commands/Slash Commands \u2014 Command Aliases",
+  "path": "commands_doc/slash-commands/command_aliases/index.html",
+  "excerpt": "Commands/Slash Commands \u2014 Command Aliases Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Slash Commands &rsaquo; Command Aliases Command Aliases Focus Deep-Dive Provider-specific native names and alias resolution for plugin commands When a plugin registers a command like /summarize , it can simultaneously declare platform-specific aliases via the nativeNames property \u2014 for example /tldr on Telegram and /recap on Discord. The alias resolution layer ensures that every invocati",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Registration &amp; Validation",
+   "Phase 2 \u2014 Invocation Key Collection",
+   "Phase 3 \u2014 Runtime Alias Resolution",
+   "Alias Resolution Flow"
+  ]
+ },
+ {
+  "title": "Commands/Slash Commands \u2014 Command Parsing",
+  "path": "commands_doc/slash-commands/command_parsing/index.html",
+  "excerpt": "Commands/Slash Commands \u2014 Command Parsing Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Slash Commands &rsaquo; Command Parsing Command Parsing Focus Deep-Dive Extracting structured actions from raw user slash-command input When a user types /model set gpt-4 or a plugin defines /tts , the command parsing layer is the first code that touches the raw text. It validates the slash prefix, extracts the action keyword and trailing arguments, and returns a strongly-typed discrimin",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Slash Prefix Extraction",
+   "Phase 2 \u2014 Convenience Wrapper",
+   "Phase 3 \u2014 Plugin Command Matching",
+   "Edge Cases"
+  ]
+ },
+ {
+  "title": "Commands/Slash Commands \u2014 Command Registry",
+  "path": "commands_doc/slash-commands/command_registry/index.html",
+  "excerpt": "Commands/Slash Commands \u2014 Command Registry Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Slash Commands &rsaquo; Command Registry Command Registry Focus Deep-Dive Dual-layer registration: CLI core commands and runtime plugin commands OpenClaw maintains two command registries that work in concert. The CLI core registry lazy-loads 18 built-in commands on demand, while the plugin registry accepts dynamically registered commands from plugins at runtime. Together they form the c",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 CLI Core Registration",
+   "Phase 2 \u2014 On-Demand Lookup",
+   "Phase 3 \u2014 Plugin Command Registration",
+   "Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Commands/Admin \u2014 Administrative Commands &amp; Management",
+  "path": "commands_doc/admin/index.html",
+  "excerpt": "Commands/Admin \u2014 Administrative Commands &amp; Management Skip to content &#9790; &#8679; Commands &rsaquo; Admin Commands/Admin/ &mdash; Administrative Commands &amp; Management Permission gating, diagnostics, health checks, and system administration The Admin sub-module provides all system management capabilities for OpenClaw operators. It implements permission gating through DM policies and allowlists, runs doctor diagnostics to detect and auto-repair configuration and state integrity issues,",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Classes",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Directory Map",
+   "Deep-Dive Highlights",
+   "Code Examples"
+  ]
+ },
+ {
+  "title": "Commands/Admin \u2014 Permission Gating",
+  "path": "commands_doc/admin/permission_gating/index.html",
+  "excerpt": "Commands/Admin \u2014 Permission Gating Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Admin &rsaquo; Permission Gating Permission Gating Focus Deep-Dive Controlling who can execute commands through layered authorization Before any command handler runs, OpenClaw evaluates a multi-layer authorization pipeline. The CommandAuthorizer type, access group checks, allowlist policies, and plugin requireAuth flags work together to decide whether a sender is permitted to invoke a specific ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Command Gating Resolution",
+   "Phase 2 \u2014 Control Command Gate",
+   "Phase 3 \u2014 Allowlist Policy Evaluation",
+   "Authorization Flow"
+  ]
+ },
+ {
+  "title": "Commands/Admin \u2014 Diagnostics Commands",
+  "path": "commands_doc/admin/diagnostics_commands/index.html",
+  "excerpt": "Commands/Admin \u2014 Diagnostics Commands Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Admin &rsaquo; Diagnostics Commands Diagnostics Commands Focus Deep-Dive Health checks, status scanning, and automated repair flows The diagnostics subsystem provides three complementary views into system health: the health command for real-time gateway probes, the status command for deep runtime and session scanning, and the doctor flow for interactive config repair. Together they form the ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Health Command \u2014 Gateway Probing",
+   "Status Command \u2014 Runtime Scanning",
+   "Doctor Flow \u2014 Interactive Repair",
+   "Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Commands/Admin \u2014 Admin Operations",
+  "path": "commands_doc/admin/admin_operations/index.html",
+  "excerpt": "Commands/Admin \u2014 Admin Operations Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Admin &rsaquo; Admin Operations Admin Operations Focus Deep-Dive Config mutation, scoped resets, and system-state commands Admin operations are the privileged commands that modify OpenClaw&rsquo;s persistent configuration, credentials, and installed services. Every mutation &mdash; from changing a model default to a full factory reset &mdash; flows through the mutateConfigFile transactional pipe",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Config Mutation Lifecycle",
+   "Configure Command",
+   "Scoped Reset Flow",
+   "Multi-Scope Uninstall"
+  ]
+ },
+ {
+  "title": "Commands/Provider Switching \u2014 Model &amp; Provider Management",
+  "path": "commands_doc/provider-switching/index.html",
+  "excerpt": "Commands/Provider Switching \u2014 Model &amp; Provider Management Skip to content &#9790; &#8679; Commands &rsaquo; Provider Switching Commands/Provider Switching/ &mdash; Model &amp; Provider Management Model selection, authentication flows, and search provider configuration The Provider Switching sub-module manages the complete lifecycle of LLM provider interactions. It handles model selection with availability probing, orchestrates multi-strategy authentication flows (API key, OAuth, plugin provi",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Key Classes",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Directory Map",
+   "Deep-Dive Highlights",
+   "Code Examples"
+  ]
+ },
+ {
+  "title": "Commands/Provider Switching \u2014 Search Setup",
+  "path": "commands_doc/provider-switching/search_setup/index.html",
+  "excerpt": "Commands/Provider Switching \u2014 Search Setup Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Provider Switching &rsaquo; Search Setup Search Setup Focus Deep-Dive Configuring and selecting web search providers through the setup wizard When a user runs the search setup flow or types /docs search , the search setup module discovers all available search providers \u2014 both bundled and runtime-contributed \u2014 presents a selection prompt, handles API key credential input, and writes the ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Provider Discovery",
+   "Phase 2 \u2014 Selection Flow",
+   "Phase 3 \u2014 Credential Application",
+   "Provider Selection Without Credentials"
+  ]
+ },
+ {
+  "title": "Commands/Provider Switching \u2014 Provider Flow",
+  "path": "commands_doc/provider-switching/provider_flow/index.html",
+  "excerpt": "Commands/Provider Switching \u2014 Provider Flow Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Provider Switching &rsaquo; Provider Flow Provider Flow Focus Deep-Dive How OpenClaw resolves, probes, and selects provider authentication at runtime When a user invokes a model command or an agent needs to make an LLM call, OpenClaw must decide which provider to use and how to authenticate. The provider flow pipeline resolves configuration, builds a list of probe targets from profiles",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "AuthProbeResult &amp; AuthProbeStatus",
+   "AuthProbeSummary",
+   "ProviderAuthOverview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 &mdash; Auth Context Resolution"
+  ]
+ },
+ {
+  "title": "Commands/Provider Switching \u2014 Model Picker",
+  "path": "commands_doc/provider-switching/model_picker/index.html",
+  "excerpt": "Commands/Provider Switching \u2014 Model Picker Skip to content &#9790; &#8679; OpenClaw &rsaquo; Commands &rsaquo; Provider Switching &rsaquo; Model Picker Model Picker Focus Deep-Dive Discovering, filtering, and selecting AI models across providers When a user runs /model set gpt-4 or /model scan , the model picker subsystem is responsible for loading the full model registry, resolving configured entries (defaults, fallbacks, image models), presenting filterable rows, and persisting the user's sele",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Core Types",
+   "ConfiguredEntry",
+   "ModelRow",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Registry Loading",
+   "Phase 2 \u2014 Configured Entry Resolution"
+  ]
+ },
+ {
+  "title": "Agents &mdash; LLM Orchestration Engine",
+  "path": "agents_doc/index.html",
+  "excerpt": "Agents &mdash; LLM Orchestration Engine Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents Agents &mdash; LLM Orchestration Engine Multi-Provider LLM Orchestration, Tool Execution &amp; Agent Spawning The agents module is the execution engine of OpenClaw. It handles the full lifecycle of an AI agent command &mdash; from model resolution and auth profile management through streaming LLM responses, tool execution loops, context compaction, and cascading model fallback. It supports 12+ LLM pr",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Architecture",
+   "Data Flow",
+   "&#128694; Step-by-Step Narrated Walkthrough",
+   "Key Components",
+   "Sub-Modules",
+   "Module Interactions",
+   "Configuration",
+   "Directory Map"
+  ]
+ },
+ {
+  "title": "Agents Streaming &mdash; LLM Response Streaming Pipeline",
+  "path": "agents_doc/streaming/index.html",
+  "excerpt": "Agents Streaming &mdash; LLM Response Streaming Pipeline Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Streaming Agents/Streaming/ &mdash; LLM Response Streaming Pipeline Real-time LLM response streaming with provider-specific adapters The streaming sub-module manages the real-time flow of LLM responses from 12+ providers through a unified pipeline. Each provider has dedicated stream wrappers that normalize vendor-specific SSE formats into a common chunk protocol, handle thin",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Data Flow",
+   "Key Classes",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Directory Map",
+   "Deep-Dive Highlights"
+  ]
+ },
+ {
+  "title": "Agents/Streaming \u2014 Backpressure &amp; Flow Control",
+  "path": "agents_doc/streaming/backpressure/index.html",
+  "excerpt": "Agents/Streaming \u2014 Backpressure &amp; Flow Control Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Streaming &rsaquo; Backpressure Backpressure &amp; Flow Control Focus Deep-Dive Managing context window limits and adaptive compaction triggers As streaming conversations grow, accumulated tokens can approach the model's context window ceiling. This module detects impending overflow, triggers adaptive compaction to summarize older messages, truncates oversized tool results, and pr",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Layer 1 \u2014 Pre-Compaction Mitigations",
+   "Layer 2 \u2014 Adaptive Compaction",
+   "Summarization Strategy",
+   "Layer 3 \u2014 Session Truncation",
+   "Behavior Diagram"
+  ]
+ },
+ {
+  "title": "Agents/Streaming \u2014 Chunk Assembly",
+  "path": "agents_doc/streaming/chunk_assembly/index.html",
+  "excerpt": "Agents/Streaming \u2014 Chunk Assembly Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Streaming &rsaquo; Chunk Assembly Chunk Assembly Focus Deep-Dive Normalizing vendor SSE streams into unified response payloads Every LLM provider ships a different Server-Sent Events format. This module intercepts raw SSE, normalizes deltas into a common internal structure, routes content by type (text, tool call, thinking), and assembles the final payloads consumed by downstream agent logic. &#12",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Provider Normalization",
+   "Phase 2 \u2014 Content Routing",
+   "Phase 3 \u2014 Tool-Call Argument Repair",
+   "Phase 4 \u2014 Payload Construction",
+   "Behavior Diagram"
+  ]
+ },
+ {
+  "title": "Agents/Streaming \u2014 Error Recovery",
+  "path": "agents_doc/streaming/error_recovery/index.html",
+  "excerpt": "Agents/Streaming \u2014 Error Recovery Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Streaming &rsaquo; Error Recovery Error Recovery Focus Deep-Dive Categorizing, handling, and recovering from LLM streaming errors via model fallback When an LLM provider returns an error mid-stream \u2014 rate limit, context overflow, auth failure, or transient network issue \u2014 this module categorizes the error, selects the next model in the fallback chain, and retries transparently. If all models are e",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1 \u2014 Error Categorization",
+   "Phase 2 \u2014 Model Fallback Chain",
+   "Phase 3 \u2014 Cooldown Probing",
+   "Phase 4 \u2014 FallbackSummaryError",
+   "Abort Handling"
+  ]
+ },
+ {
+  "title": "Agents/Tool Use/ &mdash; Function Calling &amp; Tool Infrastructure",
+  "path": "agents_doc/tool-use/index.html",
+  "excerpt": "Agents/Tool Use/ &mdash; Function Calling &amp; Tool Infrastructure Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Tool Use Agents/Tool Use/ &mdash; Function Calling &amp; Tool Infrastructure 60+ agent tools and the infrastructure for LLM function calling The tool-use sub-module implements OpenClaw&rsquo;s complete library of agent tools and the infrastructure that enables LLMs to call them. It handles tool call normalization, argument validation and repair, parameter type che",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Data Flow",
+   "Key Classes",
+   "Data Structures",
+   "Tool Categories",
+   "Interactions",
+   "Configuration",
+   "Directory Map"
+  ]
+ },
+ {
+  "title": "Agents/Tool Use &mdash; MCP Bridge",
+  "path": "agents_doc/tool-use/mcp_bridge/index.html",
+  "excerpt": "Agents/Tool Use &mdash; MCP Bridge Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Tool Use &rsaquo; MCP Bridge MCP Bridge Focus Deep-Dive Connecting external MCP tool servers to the agent runtime The MCP (Model Context Protocol) bridge integrates external tool servers into the agent runtime. MCP tools are discovered, schema-validated, and dispatched through the same pipeline as built-in tools &mdash; the agent doesn&rsquo;t know or care whether a tool is native or remote. The ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Tool Runtime Initialization",
+   "Skill Snapshot System",
+   "Tool Allow/Deny Filtering",
+   "Runtime Extensions",
+   "Spawned Agent MCP Connections"
+  ]
+ },
+ {
+  "title": "Agents/Tool Use &mdash; Function Calling",
+  "path": "agents_doc/tool-use/function_calling/index.html",
+  "excerpt": "Agents/Tool Use &mdash; Function Calling Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Tool Use &rsaquo; Function Calling Function Calling Focus Deep-Dive The function calling protocol &mdash; validation, normalization, repair, and execution When an LLM decides to invoke a tool, it emits a tool_use block containing a function name and JSON arguments. OpenClaw&rsquo;s function calling pipeline validates that block against TypeBox schemas, normalizes format differences between ",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Tool Call Normalization",
+   "Schema Validation with TypeBox",
+   "Argument Repair",
+   "Tool Dispatch &amp; the AnyAgentTool Type",
+   "Parameter Validation Helpers"
+  ]
+ },
+ {
+  "title": "Agents/Tool Use &mdash; Sandbox Execution",
+  "path": "agents_doc/tool-use/sandbox_execution/index.html",
+  "excerpt": "Agents/Tool Use &mdash; Sandbox Execution Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Tool Use &rsaquo; Sandbox Execution Sandbox Execution Focus Deep-Dive Docker/SSH backends, workspace mounting, tool policies, and container lifecycle Sandbox execution isolates tool operations inside Docker containers or SSH sessions, preventing the agent from modifying the host system directly. The sandbox manages workspace mounting, tool allow-lists, browser automation bridges, container",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "SandboxConfig &amp; SandboxContext Types",
+   "Default Configuration Constants",
+   "Workspace Mounting",
+   "Container State Machine",
+   "Sandbox Scope"
+  ]
+ },
+ {
+  "title": "Agents Providers &mdash; Multi-Model Provider Adapters",
+  "path": "agents_doc/providers/index.html",
+  "excerpt": "Agents Providers &mdash; Multi-Model Provider Adapters Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Providers Agents/Providers/ &mdash; Multi-Model Provider Adapters Unified adapter layer for 12+ LLM providers with model fallback and auth management The providers sub-module handles all communication between OpenClaw agents and external LLM APIs. It abstracts provider differences behind a common interface&mdash;normalizing payload formats, managing API key rotation, implement",
+  "headings": [
+   "&#128218; What is this &amp; why does it exist?",
+   "Contents",
+   "Architecture",
+   "Auth Profile State Machine",
+   "Key Classes &amp; Functions",
+   "Data Structures",
+   "Interactions",
+   "Configuration",
+   "Error Categorization",
+   "Provider Capability Matrix"
+  ]
+ },
+ {
+  "title": "Agents/Providers &mdash; Model Selection",
+  "path": "agents_doc/providers/model_selection/index.html",
+  "excerpt": "Agents/Providers &mdash; Model Selection Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Providers &rsaquo; Model Selection Agents/Providers &mdash; Model Selection Focus Deep-Dive Model resolution, fallback chains &amp; context window sizing The model selection system resolves which LLM model to use for each agent run, implements cascading fallback strategies when models fail, and calculates effective context windows. It bridges agent configuration, plugin hooks, and runtime o",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1: Model Resolution",
+   "Phase 2: Context Window Sizing",
+   "Phase 3: Fallback Chains",
+   "Fallback Cascade State Diagram",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Agents/Providers &mdash; Adapter Pattern",
+  "path": "agents_doc/providers/adapter_pattern/index.html",
+  "excerpt": "Agents/Providers &mdash; Adapter Pattern Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Providers &rsaquo; Adapter Pattern Agents/Providers &mdash; Adapter Pattern Focus Deep-Dive Unified streaming interface across 12+ LLM providers The provider adapter architecture wraps every supported LLM provider behind a common streaming interface. Each provider ships a dedicated stream-wrapper file that normalizes vendor-specific SSE formats, manages auth quirks, and emits a uniform chun",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1: Model Resolution",
+   "Phase 2: Stream Wrapping",
+   "Phase 3: Output Normalization",
+   "Provider Wrapper Class Diagram",
+   "Annotated Code Walkthrough"
+  ]
+ },
+ {
+  "title": "Agents/Providers &mdash; Token Management",
+  "path": "agents_doc/providers/token_management/index.html",
+  "excerpt": "Agents/Providers &mdash; Token Management Skip to content &#9790; &#8679; OpenClaw &rsaquo; Agents &rsaquo; Providers &rsaquo; Token Management Agents/Providers &mdash; Token Management Focus Deep-Dive API key rotation, auth health monitoring &amp; cooldown tracking The token management system handles the lifecycle of API credentials across all providers. It stores multiple auth profiles per provider, monitors their health status, implements fair rotation with cooldown tracking, and synchronizes",
+  "headings": [
+   "&#128218; What is this &amp; why does it matter?",
+   "Contents",
+   "Overview",
+   "Decision Points",
+   "How It Works",
+   "Phase 1: Auth Profile Resolution",
+   "Phase 2: Health Monitoring",
+   "Phase 3: Cooldown &amp; Recovery",
+   "Auth Profile State Machine",
+   "Annotated Code Walkthrough"
+  ]
+ }
+]

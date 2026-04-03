@@ -163,13 +163,15 @@ def build_project(index_path: Path) -> dict | None:
     }
 
 
-def get_existing_hrefs() -> set[str]:
-    """Parse the current index.html and return the set of href values already present."""
+def get_existing_project_dirs() -> set[str]:
+    """Parse the current index.html and return the set of project dir names already present."""
     index_path = WIKI_DIR / "index.html"
     if not index_path.is_file():
         return set()
     content = index_path.read_text(encoding="utf-8")
-    return set(re.findall(r'<a class="card" href="([^"]+)"', content))
+    hrefs = re.findall(r'<a class="card" href="([^"]+)"', content)
+    # Extract the top-level project directory from each href
+    return set(h.split("/")[0] for h in hrefs)
 
 
 def render_card(p: dict) -> str:
@@ -239,11 +241,77 @@ def append_projects(new_projects: list[dict]):
         print(f"  + {p['name']} ({p['pages']} pages) → {p['href']}")
 
 
+def refresh_existing_cards(dirs: list[Path]):
+    """Update href, page count, and date for cards whose latest version changed."""
+    index_path = WIKI_DIR / "index.html"
+    if not index_path.is_file():
+        return
+    content = index_path.read_text(encoding="utf-8")
+    original = content
+    updated = []
+
+    for d in dirs:
+        if not d.is_dir():
+            continue
+        idx = resolve_wiki_index(d)
+        if idx is None:
+            continue
+
+        rel = idx.relative_to(WIKI_DIR).as_posix()
+        proj = build_project(idx)
+        if not proj:
+            continue
+
+        # Find existing card for this project directory (any timestamp)
+        project_prefix = d.name + "/"
+        pattern = rf'<a class="card" href="({re.escape(project_prefix)}[^"]*)"'
+        match = re.search(pattern, content)
+        if not match:
+            continue
+
+        old_href = match.group(1)
+        if old_href == rel:
+            continue  # already pointing to latest
+
+        # Update href
+        content = content.replace(f'href="{old_href}"', f'href="{rel}"')
+
+        # Update page count and date in this card
+        card_start = content.find(f'href="{rel}"')
+        if card_start == -1:
+            continue
+        card_end = content.find("</a>", card_start)
+        if card_end == -1:
+            continue
+        card_section = content[card_start:card_end]
+
+        new_section = re.sub(
+            r'&#128196; \d+ pages',
+            f'&#128196; {proj["pages"]} pages',
+            card_section,
+        )
+        new_section = re.sub(
+            r'&#128197; [^<]+',
+            f'&#128197; {html_mod.escape(proj["date"])}',
+            new_section,
+        )
+        content = content[:card_start] + new_section + content[card_end:]
+        updated.append(f"  ↻ {proj['name']}: {old_href} → {rel} ({proj['pages']} pages)")
+
+    if content != original:
+        content = update_stats(content)
+        index_path.write_text(content, encoding="utf-8")
+        for line in updated:
+            print(line)
+    else:
+        print("All existing cards already point to the latest versions.")
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     list_only = "--list" in sys.argv
 
-    existing_hrefs = get_existing_hrefs()
+    existing_dirs = get_existing_project_dirs()
     new_projects = []
 
     if args:
@@ -263,9 +331,8 @@ def main():
         if idx is None:
             continue
 
-        rel = idx.relative_to(WIKI_DIR).as_posix()
-        if rel in existing_hrefs:
-            continue  # already in index.html
+        if d.name in existing_dirs:
+            continue  # already in index.html (will be refreshed below)
 
         proj = build_project(idx)
         if proj:
@@ -281,12 +348,13 @@ def main():
         return
 
     if not new_projects:
-        print("No new projects to add — index.html is up to date.")
+        print("No new projects to add.")
     else:
         append_projects(new_projects)
 
-    # Regenerate versions.json and inject version switcher for all projects
+    # Refresh existing cards to point to latest versions
     if not list_only:
+        refresh_existing_cards(dirs)
         _run_post_scripts(args)
 
 

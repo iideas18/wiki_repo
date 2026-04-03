@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="openclaw">
+<meta name="wiki-source-rev" content="047b701859">
+<title>OpenClaw — Personal AI Assistant Platform</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>OpenClaw</h1>
+<div class="hero">
+  <div class="subtitle">Personal AI Assistant Platform</div>
+  <p>OpenClaw is a self-hosted, multi-channel AI assistant that runs on your own devices. It connects to 25+ messaging platforms (WhatsApp, Telegram, Slack, Discord, Signal, iMessage, and more), orchestrates LLM-powered conversations with tool use, and supports an extensible plugin ecosystem. The gateway is the control plane &mdash; the product is the assistant.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">&#128026; TypeScript / Node.js</span>
+    <span class="badge green">&#128172; 25+ Channels</span>
+    <span class="badge yellow">&#128268; 70+ Extensions</span>
+    <span class="badge red">&#129302; Multi-Model LLM</span>
+  </p>
+</div>
+
+<!-- INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>OpenClaw is an open-source personal AI assistant that you run on your own hardware. Unlike cloud-only assistants, OpenClaw gives you full control over your data, model providers, and integrations. It acts as a gateway between the messaging platforms you already use and any LLM provider, turning every chat app into an intelligent assistant interface.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of OpenClaw as a multilingual personal secretary who sits at a reception desk with 25 phone lines. Each phone line connects to a different communication channel (WhatsApp, Slack, Discord, etc.). When a message comes in on any line, the secretary understands the context, consults the right expert (LLM provider), uses available tools (web search, image generation, MCP servers), and responds in the caller's language and format. You control which experts the secretary consults and what tools are available.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">9,000+</div><div class="label">TypeScript Files</div></div>
+  <div class="stat-box"><div class="num">25+</div><div class="label">Channels Supported</div></div>
+  <div class="stat-box"><div class="num">70+</div><div class="label">Extensions</div></div>
+  <div class="stat-box"><div class="num">MIT</div><div class="label">License</div></div>
+</div>
+
+<!-- SYSTEM ARCHITECTURE -->
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph User["User Layer"]
+    CLI["CLI / TUI"]
+    WebUI["Web UI"]
+    MobileApps["Mobile Apps"]
+  end
+  subgraph Gateway["Gateway Control Plane"]
+    Boot["Boot / Init"]
+    Auth["Auth &amp; Rate Limiting"]
+    Router["Message Router"]
+    Sessions["Session Manager"]
+  end
+  subgraph Channels["Channel Layer"]
+    WA["WhatsApp"]
+    TG["Telegram"]
+    Slack["Slack"]
+    Discord["Discord"]
+    More["25+ more..."]
+  end
+  subgraph Core["Core Engine"]
+    Agents["Agent Orchestrator"]
+    Commands["Command Processor"]
+    AutoReply["Auto-Reply Engine"]
+    CtxEngine["Context Engine"]
+  end
+  subgraph AI["AI / LLM Layer"]
+    Providers["Provider Adapters"]
+    Tools["Tool Execution"]
+    MCP["MCP Bridge"]
+    ImgGen["Image Generation"]
+  end
+  subgraph Plugins["Plugin Ecosystem"]
+    PluginSDK["Plugin SDK"]
+    Bundled["Bundled Plugins"]
+    ExtDir["Extension Directory"]
+  end
+  subgraph Infra["Infrastructure"]
+    Config["Configuration"]
+    Store["Data Store"]
+    Cron["Cron Scheduler"]
+    Secrets["Secrets Vault"]
+  end
+
+  CLI --> Gateway
+  WebUI --> Gateway
+  MobileApps --> Gateway
+  Gateway --> Channels
+  Channels --> Core
+  Core --> AI
+  Core --> Plugins
+  AI --> Providers
+  Plugins --> MCP
+  Gateway --> Infra
+  Core --> Infra
+</pre>
+</div>
+
+<!-- MODULE CARDS: Core Engine -->
+<p class="section-label">Core Engine</p>
+<div class="module-grid">
+  <a href="agents_doc/index.html" class="module-card">
+    <h3>Agents</h3>
+    <div class="tagline">LLM orchestration, streaming, tool use, and multi-model reasoning</div>
+    <p>The execution engine of OpenClaw. Manages agent lifecycles, streams LLM responses, handles tool calls (function calling, MCP), patches, sandboxed code execution, and provider-specific adapters for OpenAI, Anthropic, Google, and 15+ more.</p>
+    <div class="stats"><span>1,083 TS files</span><span>Multi-provider</span><span>Streaming</span></div>
+  </a>
+  <a href="gateway_doc/index.html" class="module-card">
+    <h3>Gateway</h3>
+    <div class="tagline">Control plane: authentication, boot, routing, and session management</div>
+    <p>The central multiplexing server that handles client pairing, authentication, rate limiting, message routing, and Android/iOS node capability negotiation. Coordinates all other modules during startup.</p>
+    <div class="stats"><span>441 TS files</span><span>Auth + Rate Limit</span><span>Boot Orchestration</span></div>
+  </a>
+  <a href="commands_doc/index.html" class="module-card">
+    <h3>Commands</h3>
+    <div class="tagline">Slash commands, admin tools, and natural-language command processing</div>
+    <p>Parses and dispatches user commands (<code>/model</code>, <code>/image</code>, <code>/search</code>, <code>/admin</code>), manages command aliases, permission gating, and provider-switching workflows.</p>
+    <div class="stats"><span>448 TS files</span><span>50+ Commands</span><span>Admin &amp; User</span></div>
+  </a>
+</div>
+
+<!-- MODULE CARDS: Messaging & Channels -->
+<p class="section-label">Messaging &amp; Channels</p>
+<div class="module-grid">
+  <a href="channels_doc/index.html" class="module-card">
+    <h3>Channels</h3>
+    <div class="tagline">Unified multi-channel messaging abstraction layer</div>
+    <p>Provides the common interface for 25+ messaging platforms. Handles message normalization, allowlists, command gating, reaction acknowledgment, and channel-specific configuration (presence, chat types, media).</p>
+    <div class="stats"><span>202 TS files</span><span>25+ Platforms</span><span>Unified API</span></div>
+  </a>
+  <a href="extensions/index.html" class="module-card">
+    <h3>Extensions</h3>
+    <div class="tagline">70+ integrations: AI providers, channels, search, media, voice</div>
+    <p>Each extension implements the plugin contract to connect a specific service &mdash; from LLM providers (OpenAI, Anthropic, Ollama) to channels (WhatsApp, Telegram) to utilities (web search, image generation, voice calls).</p>
+    <div class="stats"><span>70+ extensions</span><span>1,927 TS files</span><span>Plugin Contract</span></div>
+  </a>
+</div>
+
+<!-- MODULE CARDS: Plugin System -->
+<p class="section-label">Plugin &amp; Extension System</p>
+<div class="module-grid">
+  <a href="plugins_doc/index.html" class="module-card">
+    <h3>Plugins</h3>
+    <div class="tagline">Plugin bundling, manifest parsing, MCP bridge, and SDK</div>
+    <p>Manages the lifecycle of bundled and user-installed plugins. Handles bundle discovery, manifest parsing, capability registration, LSP integration, MCP tool bridging, and the plugin SDK that extensions build against.</p>
+    <div class="stats"><span>623 TS files</span><span>Plugin SDK</span><span>MCP Bridge</span></div>
+  </a>
+</div>
+
+<!-- MODULE CARDS: Infrastructure -->
+<p class="section-label">Infrastructure</p>
+<div class="module-grid">
+  <a href="infra_doc/index.html" class="module-card">
+    <h3>Infrastructure</h3>
+    <div class="tagline">Data store, caching, scheduling, process management, and runtime utilities</div>
+    <p>Core runtime services including the data store abstraction (SQLite/Postgres), caching layer, cron scheduler, process supervision, logging pipeline, and system-level utilities shared across all modules.</p>
+    <div class="stats"><span>572 TS files</span><span>Store + Cache</span><span>Cron + Process</span></div>
+  </a>
+</div>
+
+<!-- CROSS-MODULE CONNECTION DIAGRAM -->
+<h2 id="message-flow">Message Flow: Channel to Agent</h2>
+<p>This sequence shows the complete lifecycle of an incoming user message, from arrival on a messaging channel through to the AI-generated response.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant User as User (WhatsApp/Telegram/...)
+    participant Ch as Channel Extension
+    participant GW as Gateway Router
+    participant Cmd as Command Processor
+    participant Agent as Agent Orchestrator
+    participant LLM as LLM Provider
+    participant Tool as Tool / MCP Server
+
+    User->>Ch: Send message
+    Ch->>GW: Normalized message (ChatMeta)
+    GW->>GW: Auth check + rate limit
+    GW->>Cmd: Route to command processor
+    Note over Cmd: Check for slash command prefix
+    alt Slash command (e.g. /model)
+        Cmd->>Cmd: Execute command handler
+        Cmd-->>Ch: Command response
+    else Natural language
+        Cmd->>Agent: Forward to agent
+        Agent->>Agent: Build context (history + system prompt)
+        Agent->>LLM: Stream request (OpenAI/Anthropic/...)
+        loop Streaming tokens
+            LLM-->>Agent: Token chunk
+            Agent-->>Ch: Forward chunk to user
+        end
+        opt Tool call requested
+            Agent->>Tool: Execute tool (MCP/function)
+            Tool-->>Agent: Tool result
+            Agent->>LLM: Continue with tool result
+            LLM-->>Agent: Final response
+        end
+        Agent-->>Ch: Complete response
+    end
+    Ch-->>User: Deliver response
+</pre>
+</div>
+<blockquote>
+<strong>Key insight:</strong> The Gateway owns authentication and routing. The Channel layer normalizes platform-specific messages into a unified format. The Agent orchestrator manages the LLM conversation lifecycle including streaming, tool use, and multi-turn context. Extensions implement the actual provider and channel connections.
+</blockquote>
+
+<!-- NAVIGATION GUIDE -->
+<h2 id="navigation">Navigation Guide</h2>
+<table style="max-width:700px">
+  <tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+  <tr><td><strong>0 &mdash; Project Hub</strong> (this page)</td><td>Project overview, module map, architecture diagrams</td><td>Getting started, finding the right module</td></tr>
+  <tr><td><strong>1 &mdash; Module Overview</strong></td><td>Architecture diagram, key components, sub-module cards, walkthrough</td><td>Understanding a module's purpose and structure</td></tr>
+  <tr><td><strong>2 &mdash; Sub-Module Deep Dive</strong></td><td>Source-level types, algorithms, configs, code examples</td><td>Implementing, debugging, or extending code</td></tr>
+  <tr><td><strong>Focus &mdash; Topic Deep Dive</strong></td><td>Single mechanism or algorithm explained in detail</td><td>Deep understanding of a specific feature</td></tr>
+</table>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>openclaw/
+├── src/
+│   ├── agents/                ← LLM orchestration, streaming, tool use
+│   ├── gateway/               ← Control plane, auth, boot, routing
+│   ├── channels/              ← Multi-channel messaging abstraction
+│   ├── commands/              ← Slash command processing
+│   ├── plugins/               ← Plugin bundling and lifecycle
+│   ├── plugin-sdk/            ← SDK for building extensions
+│   ├── infra/                 ← Data store, caching, scheduling
+│   ├── config/                ← Configuration management
+│   ├── cli/                   ← Command-line interface
+│   ├── mcp/                   ← Model Context Protocol bridge
+│   ├── auto-reply/            ← Auto-reply engine
+│   ├── context-engine/        ← Context management
+│   ├── flows/                 ← Setup wizards and flows
+│   ├── shared/                ← Shared utilities
+│   └── ...                    ← 20+ more sub-modules
+├── extensions/                ← 70+ channel/provider extensions
+│   ├── openai/                ← OpenAI provider adapter
+│   ├── anthropic/             ← Anthropic provider adapter
+│   ├── telegram/              ← Telegram channel
+│   ├── whatsapp/              ← WhatsApp channel
+│   ├── discord/               ← Discord channel
+│   └── ...                    ← 65+ more extensions
+├── packages/                  ← Standalone packages
+│   ├── clawdbot/              ← CLI bot package
+│   ├── moltbot/               ← Alternative bot
+│   └── memory-host-sdk/       ← Memory hosting SDK
+├── apps/                      ← Native applications
+│   ├── android/               ← Android app (Kotlin)
+│   ├── ios/                   ← iOS app (Swift)
+│   ├── macos/                 ← macOS app (Swift)
+│   └── shared/                ← Shared app logic (Swift)
+├── ui/                        ← Web UI (Vite + TypeScript)
+├── vendor/                    ← Vendored dependencies (a2ui)
+├── skills/                    ← Copilot skills
+├── test/                      ← Integration tests
+├── scripts/                   ← Build and utility scripts
+├── openclaw.mjs               ← CLI entry point
+├── package.json               ← Project manifest
+└── tsconfig.json              ← TypeScript configuration
+</code></pre>
+</details>
+
+<!-- BUILD & TECH STACK -->
+<h2 id="tech-stack">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>Languages</h4><p>TypeScript (primary), Swift (iOS/macOS), Kotlin (Android), Go (extensions)</p></div>
+  <div class="card"><h4>Runtime</h4><p>Node.js with ESM modules, pnpm workspace monorepo</p></div>
+  <div class="card"><h4>Build System</h4><p>tsdown (bundling), Vite (UI), Vitest (testing), pnpm workspaces</p></div>
+  <div class="card"><h4>Key Dependencies</h4><p>Mermaid, Highlight.js, SQLite (better-sqlite3), various LLM SDKs</p></div>
+  <div class="card"><h4>Deployment</h4><p>Docker, Fly.io, Render, self-hosted Node.js, Podman</p></div>
+  <div class="card"><h4>Testing</h4><p>Vitest with separate configs for unit, e2e, channels, contracts, extensions, gateway, live</p></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer"><a href="search.html">&#128269; Search</a> &nbsp;|&nbsp; OpenClaw Wiki &nbsp;|&nbsp; Generated 2026-04-02</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+
+<!-- VERSION_SWITCHER_START -->
+<style>.version-switcher{display:inline-flex;align-items:center;gap:8px;margin-top:1rem;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:8px;padding:6px 14px}
+.version-label{color:var(--text-muted,#8b949e);font-size:.85rem}
+.version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
+@media print{.version-switcher{display:none!important}}</style>
+<script>\
+(function(){
+  var dirPath=location.pathname.replace(/[^/]*$/,'');
+  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
+  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
+  var versionsUrl=projectBase+'versions.json';
+  fetch(versionsUrl).then(function(r){return r.json()}).then(function(versions){
+    if(!versions||versions.length<2)return;
+    var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
+    /* Build UI */
+    var wrap=document.createElement('div');
+    wrap.className='version-switcher';
+    var lbl=document.createElement('span');
+    lbl.className='version-label';
+    lbl.textContent='Version:';
+    var sel=document.createElement('select');
+    sel.className='version-select';
+    sel.setAttribute('aria-label','Switch wiki version');
+    versions.forEach(function(v){
+      var o=document.createElement('option');
+      o.value=v.timestamp;
+      var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+      o.textContent=v.date+rev+(v.latest?' (latest)':'');
+      if(v.timestamp===curTs)o.selected=true;
+      sel.appendChild(o);
+    });
+    wrap.appendChild(lbl);
+    wrap.appendChild(sel);
+    var hero=document.querySelector('.hero');
+    if(hero)hero.appendChild(wrap);
+    /* Version switch handler */
+    sel.addEventListener('change',function(){
+      var newTs=this.value;
+      if(newTs===curTs)return;
+      var newUrl=projectBase+newTs+'/index.html';
+      fetch(newUrl).then(function(r){return r.text()}).then(function(html){
+        var parser=new DOMParser();
+        var doc=parser.parseFromString(html,'text/html');
+        var newMain=doc.querySelector('#main')||doc.querySelector('main');
+        if(!newMain){location.href=newUrl;return}
+        var base=projectBase+newTs+'/';
+        newMain.querySelectorAll('[href]').forEach(function(el){
+          var h=el.getAttribute('href');
+          if(h&&!/^(https?:|mailto:|#|\\/\\/)/.test(h)&&!h.startsWith('/'))
+            el.setAttribute('href',base+h);
+        });
+        newMain.querySelectorAll('[src]').forEach(function(el){
+          var s=el.getAttribute('src');
+          if(s&&!/^(https?:|data:|blob:|\\/\\/)/.test(s)&&!s.startsWith('/'))
+            el.setAttribute('src',base+s);
+        });
+        var cur=document.querySelector('#main')||document.querySelector('main');
+        if(cur)cur.innerHTML=newMain.innerHTML;
+        /* Re-render mermaid diagrams in the new content */
+        var diagrams=document.querySelectorAll('pre.mermaid');
+        if(diagrams.length&&window.mermaid){
+          diagrams.forEach(function(el){
+            if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);
+            var src=el.getAttribute('data-source');
+            if(src){el.removeAttribute('data-processed');el.textContent=src;}
+          });
+          var t=document.documentElement.getAttribute('data-theme')||'dark';
+          try{
+            mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});
+            mermaid.run();
+          }catch(e){console.warn('mermaid re-render:',e);}
+        }
+        curTs=newTs;
+        var newHero=document.querySelector('.hero');
+        if(newHero){
+          for(var i=0;i<sel.options.length;i++)
+            sel.options[i].selected=(sel.options[i].value===newTs);
+          newHero.appendChild(wrap);
+        }
+        window.scrollTo({top:0,behavior:'smooth'});
+        history.pushState({version:newTs},'',newUrl);
+      }).catch(function(){location.href=newUrl});
+    });
+    window.addEventListener('popstate',function(){location.reload()});
+  }).catch(function(){});
+})();</script>
+<!-- VERSION_SWITCHER_END -->
+</body></html>

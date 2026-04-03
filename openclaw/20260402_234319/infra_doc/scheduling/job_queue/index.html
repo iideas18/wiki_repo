@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Job Queue — OpenClaw Infrastructure</title>
+<style>
+  :root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2129;--border:#30363d;--text:#e6edf3;--text-secondary:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.12);--success:#3fb950;--warning:#d29922;--danger:#f85149;--code-bg:#1c2129;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--focus-ring:0 0 0 3px rgba(88,166,255,.4)}
+  [data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-secondary:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.08);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(31,35,40,.12);--focus-ring:0 0 0 3px rgba(9,105,218,.3)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:4rem}
+  body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+  .skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:var(--radius);z-index:1000;font-weight:600}.skip-link:focus{top:1rem}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+  nav[aria-label="Breadcrumb"]{font-size:.875rem;color:var(--text-secondary)}
+  nav[aria-label="Breadcrumb"] a{color:var(--accent)}
+  nav[aria-label="Breadcrumb"] .sep{margin:0 .35rem;color:var(--text-secondary)}
+  .theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:.4rem .75rem;cursor:pointer;font-size:.875rem;transition:background .2s}.theme-toggle:hover{background:var(--accent-bg)}.theme-toggle:focus-visible{box-shadow:var(--focus-ring)}
+  .hero{max-width:52rem;margin:2rem auto;padding:0 2rem}
+  .focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:.75rem;font-weight:600;padding:.2rem .65rem;border-radius:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+  .hero h1{font-size:2rem;font-weight:700;margin-bottom:.4rem}
+  .hero .subtitle{color:var(--text-secondary);font-size:1.05rem;margin-bottom:.75rem}
+  .hero .reading-time{font-size:.8rem;color:var(--text-secondary)}
+  main{max-width:52rem;margin:0 auto 4rem;padding:0 2rem}
+  h2{font-size:1.4rem;font-weight:600;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+  h3{font-size:1.15rem;font-weight:600;margin:1.75rem 0 .75rem}
+  p{margin-bottom:1rem}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.5rem 0}
+  .summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+  .summary-grid .card h4{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:.35rem}
+  .summary-grid .card p{font-size:.9rem;color:var(--text-secondary);margin:0}
+  .callout{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.5rem 0}
+  .callout.analogy{border-left-color:var(--warning);background:rgba(210,153,34,.1)}
+  .callout.danger{border-left-color:var(--danger);background:rgba(248,81,73,.08)}
+  .callout.success{border-left-color:var(--success);background:rgba(63,185,80,.08)}
+  .callout strong{display:block;margin-bottom:.3rem}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative;font-size:.875rem;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  code{font-family:var(--font-mono);background:var(--code-bg);padding:.15rem .35rem;border-radius:4px;font-size:.85em}
+  .code-walk{margin:1.5rem 0}
+  .code-walk .step{display:flex;gap:1rem;margin-bottom:1.25rem;align-items:flex-start}
+  .code-walk .step-num{flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin-top:.15rem}
+  .code-walk .step-body{flex:1}
+  .code-walk .step-body p{margin-bottom:.4rem}
+  .mermaid-wrap{margin:1.5rem 0;cursor:pointer;position:relative}
+  .mermaid-wrap pre[data-source]{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow:auto}
+  .mermaid-wrap .expand-hint{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.15rem .45rem;font-size:.7rem;color:var(--text-secondary);opacity:0;transition:opacity .2s}.mermaid-wrap:hover .expand-hint{opacity:1}
+  .diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .25s}.diagram-overlay.active{opacity:1}
+  .diagram-overlay .inner{background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+  .diagram-overlay .close-btn{position:absolute;top:.5rem;right:.75rem;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+  .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1.5rem 0}
+  .toc summary{font-weight:600;cursor:pointer;font-size:.95rem}.toc ul{margin:.5rem 0 0 1.25rem;list-style:disc}.toc li{margin:.25rem 0;font-size:.9rem}
+  .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);border-radius:4px;padding:.2rem .5rem;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}
+  .back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:2.5rem;height:2.5rem;font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:50}
+  footer{max-width:52rem;margin:0 auto;padding:2rem;border-top:1px solid var(--border);text-align:center;color:var(--text-secondary);font-size:.85rem}
+  footer a{color:var(--accent)}
+  @media(max-width:600px){.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}header{padding:.75rem 1rem}}
+  @media print{header,.theme-toggle,.skip-link,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.callout{border-left-color:#333;background:#f5f5f5}pre{border-color:#ccc}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav aria-label="Breadcrumb">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">scheduling</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Job Queue</span>
+  </nav>
+  <button class="theme-toggle" aria-label="Toggle dark/light theme" id="themeToggle">🌓 Theme</button>
+</header>
+
+<section class="hero">
+  <span class="focus-label">Focus</span>
+  <h1>Job Queue</h1>
+  <p class="subtitle">Persistent delivery queue with exponential backoff and permanent error detection</p>
+  <p class="reading-time" id="readingTime"></p>
+</section>
+
+<main id="main">
+
+  <details class="toc" open>
+    <summary>Table of Contents</summary>
+    <ul id="tocList"></ul>
+  </details>
+
+  <h2 id="overview">Overview &amp; Motivation</h2>
+  <p>The job queue ensures no message is lost even if the gateway crashes mid-delivery. Every outbound
+    message is persisted to disk before sending. Failed deliveries are automatically retried with increasing
+    delays. Permanent errors (user blocked the bot, chat not found) are detected and moved aside to prevent
+    infinite retry loops.</p>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy — Registered Mail Service</strong>
+    <p>Think of the queue like a postal service with registered mail. Every letter (message) is logged in a
+      ledger (queue file) before leaving the post office. If delivery fails (address wrong), the postman
+      tries again tomorrow, then next week, then next month (exponential backoff). If the recipient moved
+      permanently (permanent error), the letter goes to the dead letter office (<code>failed/</code> dir).
+      After 5 attempts, it's flagged for human review.</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Queue Storage</h4>
+      <p>File-system backed queue with atomic writes via PID-stamped temp files</p>
+    </div>
+    <div class="card">
+      <h4>Recovery Engine</h4>
+      <p>5 retries, 4-tier backoff [5s, 25s, 120s, 600s], 14 permanent error patterns</p>
+    </div>
+    <div class="card">
+      <h4>Retry Utilities</h4>
+      <p>Generic retryAsync&lt;T&gt; with jitter, configurable min/max delay, abort support</p>
+    </div>
+    <div class="card">
+      <h4>Error Classification</h4>
+      <p>Deep error graph traversal across 25+ transient patterns and fatal codes</p>
+    </div>
+  </div>
+
+  <h2 id="queue-storage">Queue Storage — <code>delivery-queue-storage.ts</code></h2>
+  <p>The delivery queue stores each outbound message as a JSON file in
+    <code>$&#123;stateDir&#125;/delivery-queue/</code>. The payload captures every field needed to retry
+    delivery without re-resolving the recipient:</p>
+
+  <h3>Payload Types</h3>
+  <ul>
+    <li><code>QueuedDeliveryPayload</code> — the message envelope:
+      <code>{ channel, to, accountId?, payloads[], threadId?, replyToId?, bestEffort?, gifPlayback?,
+        forceDocument?, silent?, mirror?, gatewayClientScopes? }</code></li>
+    <li><code>QueuedDelivery</code> — extends with queue metadata:
+      <code>{ id, enqueuedAt, retryCount, lastAttemptAt?, lastError? }</code></li>
+  </ul>
+  <p>File operations use atomic writes: the payload is first written to
+    <code>$&#123;filePath&#125;.$&#123;pid&#125;.tmp</code>, then renamed into place. This prevents
+    partial reads if the process crashes mid-write.</p>
+
+  <div class="code-walk">
+    <h3>Code Walk — Atomic Enqueue</h3>
+    <div class="step">
+      <span class="step-num">1</span>
+      <div class="step-body">
+        <p>Generate a unique ID and construct the <code>QueuedDelivery</code> object with
+          <code>retryCount: 0</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <div class="step-body">
+        <p>Serialize to JSON and write to a PID-stamped temporary file for crash safety.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <div class="step-body">
+        <p>Atomically rename the temp file to the final queue path. If rename fails, clean up
+          the temp file.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <div class="step-body">
+        <p>Return the <code>QueuedDelivery</code> with its assigned ID for tracking.</p>
+      </div>
+    </div>
+  </div>
+
+  <pre><code class="language-typescript">interface QueuedDeliveryPayload {
+  channel: string;
+  to: string;
+  accountId?: string;
+  payloads: unknown[];
+  threadId?: string;
+  replyToId?: string;
+  bestEffort?: boolean;
+  gifPlayback?: boolean;
+  forceDocument?: boolean;
+  silent?: boolean;
+  mirror?: boolean;
+  gatewayClientScopes?: string[];
+}
+
+interface QueuedDelivery extends QueuedDeliveryPayload {
+  id: string;
+  enqueuedAt: number;
+  retryCount: number;
+  lastAttemptAt?: number;
+  lastError?: string;
+}
+
+async function enqueueDelivery(
+  payload: QueuedDeliveryPayload
+): Promise&lt;QueuedDelivery&gt; {
+  await ensureQueueDir();
+  const id = crypto.randomUUID();
+  const entry: QueuedDelivery = {
+    ...payload,
+    id,
+    enqueuedAt: Date.now(),
+    retryCount: 0,
+  };
+  const filePath = join(queueDir, `${id}.json`);
+  const tmpPath = `${filePath}.${process.pid}.tmp`;
+
+  await writeFile(tmpPath, JSON.stringify(entry, null, 2));
+  await rename(tmpPath, filePath);
+  return entry;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <h2 id="recovery-engine">Recovery Engine — <code>delivery-queue-recovery.ts</code></h2>
+  <p>The recovery engine (<code>recoverPendingDeliveries</code>) runs on a periodic timer and processes all
+    pending entries. Each entry is checked for eligibility: has it exceeded <code>MAX_RETRIES</code> (5)?
+    Is it within its backoff window? Is the last error permanent?</p>
+
+  <h3>Backoff Tiers</h3>
+  <p>The backoff schedule uses a fixed tier system rather than pure exponential, giving operators
+    predictable retry timing:</p>
+  <ul>
+    <li><strong>Tier 0</strong> — 5 seconds (first retry)</li>
+    <li><strong>Tier 1</strong> — 25 seconds</li>
+    <li><strong>Tier 2</strong> — 120 seconds (2 minutes)</li>
+    <li><strong>Tier 3</strong> — 600 seconds (10 minutes, used for retries 3+)</li>
+  </ul>
+
+  <h3>Permanent Error Detection</h3>
+  <p><code>isPermanentDeliveryError(error)</code> matches against 14 regex patterns that indicate
+    non-recoverable failures. These include:</p>
+  <ul>
+    <li>Chat/conversation not found</li>
+    <li>User not found or deactivated</li>
+    <li>Bot was blocked by user</li>
+    <li>Forbidden — insufficient permissions</li>
+    <li>Message too long / invalid format</li>
+  </ul>
+  <p>When a permanent error is detected, the entry is moved to
+    <code>$&#123;stateDir&#125;/delivery-queue/failed/</code> via <code>moveToFailed()</code> and no
+    further retries occur.</p>
+
+  <div class="callout success">
+    <strong>✅ Recovery Summary</strong>
+    <p>After each recovery cycle, a <code>RecoverySummary</code> is emitted:
+      <code>{ recovered, failed, skippedMaxRetries, deferredBackoff }</code>. This is logged and also
+      exposed via the <code>/api/queue/status</code> health endpoint for monitoring dashboards.</p>
+  </div>
+
+  <h2 id="retry-utilities">Retry Utilities — <code>retry.ts</code></h2>
+  <p>The generic <code>retryAsync&lt;T&gt;(fn, attemptsOrOptions)</code> function wraps any async operation
+    with configurable retry behavior. It is used throughout the codebase, not just by the delivery queue.</p>
+  <ul>
+    <li><strong>Defaults:</strong> 3 attempts, 300 ms min delay, 30 s max delay, 0 jitter</li>
+    <li><strong>Exponential factor:</strong> 2<sup>attempt</sup> multiplier on base delay</li>
+    <li><strong>Custom hooks:</strong> <code>shouldRetry?(error)</code> for selective retry,
+      <code>retryAfterMs?(error)</code> to honor server-sent Retry-After headers,
+      <code>onRetry?(error, attempt)</code> for logging</li>
+    <li><strong>Label:</strong> optional <code>label</code> string included in log messages</li>
+  </ul>
+
+  <h2 id="backoff-policy">Backoff Policy — <code>backoff.ts</code></h2>
+  <p>The <code>BackoffPolicy</code> interface defines the four parameters that control delay growth. The
+    <code>computeBackoff(policy, attempt)</code> function applies the formula:
+    <code>min(initialMs × factor<sup>attempt</sup> + jitter, maxMs)</code>.</p>
+  <p><code>sleepWithAbort(ms, abortSignal?)</code> wraps the delay in a promise that rejects immediately if
+    the abort signal fires, enabling clean cancellation of in-flight backoff waits during shutdown.</p>
+
+  <h2 id="error-classification">Error Classification — <code>unhandled-rejections.ts</code></h2>
+  <p>The error classification module performs deep graph traversal on error objects. An error is "transient"
+    if any node in its cause chain matches a known transient pattern. The module defines:</p>
+  <ul>
+    <li><strong>25+ transient network codes:</strong> ECONNRESET, ECONNREFUSED, ENOTFOUND, ETIMEDOUT,
+      EPIPE, EHOSTUNREACH, EAI_AGAIN, plus all <code>UND_*</code> undici error codes</li>
+    <li><strong>Transient SQLite codes:</strong> SQLITE_BUSY, SQLITE_LOCKED, SQLITE_CANTOPEN</li>
+    <li><strong>Fatal codes:</strong> ERR_OUT_OF_MEMORY, ERR_WORKER_OUT_OF_MEMORY</li>
+    <li><strong>Config codes:</strong> application-specific config validation failures</li>
+  </ul>
+  <p><code>isTransientNetworkError(err)</code> walks the full error cause chain (including
+    <code>.cause</code>, <code>.errors</code> arrays for <code>AggregateError</code>, and
+    <code>.reason</code> for promise rejections) and returns <code>true</code> if any node matches.</p>
+
+  <div class="callout danger">
+    <strong>⚠️ Deep Traversal Warning</strong>
+    <p>The error graph traversal has a depth limit of 10 and a visited-set guard to prevent infinite loops
+      with circular error references. If an error chain exceeds 10 levels, it is treated as transient
+      (fail-open) to avoid dropping messages.</p>
+  </div>
+
+  <h2 id="recovery-flowchart">Delivery Recovery Flowchart</h2>
+  <p>The following diagram shows the complete recovery loop, from loading pending entries through eligibility
+    checks, backoff computation, and the final delivery attempt with its three possible outcomes.</p>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="delivery-recovery-loop"><code class="language-mermaid">flowchart TD
+    A["recoverPendingDeliveries()"] --> B["loadPendingDeliveries()"]
+    B --> C{"For each entry"}
+    C --> D{"retryCount >= MAX_RETRIES?"}
+    D -->|yes| E["moveToFailed(entry)"]
+    D -->|no| F{"isPermanentDeliveryError?"}
+    F -->|yes| E
+    F -->|no| G{"isEntryEligibleForRecoveryRetry?"}
+    G -->|backoff not elapsed| H["deferredBackoff++"]
+    G -->|eligible| I["attemptDelivery(entry)"]
+    I -->|success| J["ackDelivery(entry.id)"]
+    I -->|transient error| K["entry.retryCount++\nentry.lastError = err"]
+    I -->|permanent error| E
+    J --> L["recovered++"]
+    K --> M["save updated entry"]
+    E --> N["failed++"]
+    C -->|done| O["emit RecoverySummary"]</code></pre>
+  </div>
+
+  <h2 id="queue-lifecycle">Queue Item Lifecycle</h2>
+  <p>Each queue item transitions through a well-defined set of states from initial enqueue to final
+    resolution. Items can be delivered successfully, moved to the failed directory after exhausting retries
+    or hitting a permanent error, or remain in the retrying loop within backoff windows.</p>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="queue-item-lifecycle"><code class="language-mermaid">stateDiagram-v2
+    [*] --> Queued: enqueueDelivery()
+    Queued --> Attempting: recovery cycle picks up
+    Attempting --> Delivered: success
+    Attempting --> Retrying: transient error
+    Attempting --> PermanentFailure: permanent error detected
+    Retrying --> BackoffWait: compute next delay
+    BackoffWait --> Attempting: backoff elapsed
+    Retrying --> MaxRetriesExceeded: retryCount >= 5
+    MaxRetriesExceeded --> MovedToFailed: moveToFailed()
+    PermanentFailure --> MovedToFailed: moveToFailed()
+    Delivered --> [*]: ackDelivery()
+    MovedToFailed --> [*]: archived in failed/ dir</code></pre>
+  </div>
+
+  <h2 id="recovery-code-walk">Recovery Loop Implementation</h2>
+
+  <div class="code-walk">
+    <h3>Code Walk — Recovery with Backoff</h3>
+    <div class="step">
+      <span class="step-num">1</span>
+      <div class="step-body">
+        <p>Load all pending JSON files from the queue directory.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <div class="step-body">
+        <p>Filter out entries that are still within their backoff window.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <div class="step-body">
+        <p>Attempt delivery. On success, acknowledge (delete file). On failure, update retry count.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <div class="step-body">
+        <p>Emit a <code>RecoverySummary</code> with counts for monitoring.</p>
+      </div>
+    </div>
+  </div>
+
+  <pre><code class="language-typescript">const MAX_RETRIES = 5;
+const BACKOFF_TIERS_MS = [5_000, 25_000, 120_000, 600_000];
+
+interface RecoverySummary {
+  recovered: number;
+  failed: number;
+  skippedMaxRetries: number;
+  deferredBackoff: number;
+}
+
+function computeBackoffMs(retryCount: number, baseMs?: number): number {
+  const tier = Math.min(retryCount, BACKOFF_TIERS_MS.length - 1);
+  return baseMs ?? BACKOFF_TIERS_MS[tier];
+}
+
+async function recoverPendingDeliveries(
+  opts?: { signal?: AbortSignal }
+): Promise&lt;RecoverySummary&gt; {
+  const entries = await loadPendingDeliveries();
+  const summary: RecoverySummary = {
+    recovered: 0, failed: 0,
+    skippedMaxRetries: 0, deferredBackoff: 0,
+  };
+
+  for (const entry of entries) {
+    if (opts?.signal?.aborted) break;
+
+    if (entry.retryCount &gt;= MAX_RETRIES) {
+      await moveToFailed(entry);
+      summary.skippedMaxRetries++;
+      continue;
+    }
+
+    if (entry.lastError &amp;&amp; isPermanentDeliveryError(entry.lastError)) {
+      await moveToFailed(entry);
+      summary.failed++;
+      continue;
+    }
+
+    const backoff = computeBackoffMs(entry.retryCount);
+    const elapsed = Date.now() - (entry.lastAttemptAt ?? entry.enqueuedAt);
+    if (elapsed &lt; backoff) {
+      summary.deferredBackoff++;
+      continue;
+    }
+
+    try {
+      await attemptDelivery(entry);
+      await ackDelivery(entry.id);
+      summary.recovered++;
+    } catch (err) {
+      entry.retryCount++;
+      entry.lastAttemptAt = Date.now();
+      entry.lastError = String(err);
+      await saveEntry(entry);
+    }
+  }
+  return summary;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <h2 id="operational-notes">Operational Notes</h2>
+  <div class="callout">
+    <strong>ℹ️ Queue Health Monitoring</strong>
+    <p>The <code>/api/queue/status</code> endpoint returns the current queue depth, number of items in
+      backoff, and the last <code>RecoverySummary</code>. Set up alerts on
+      <code>skippedMaxRetries &gt; 0</code> to catch delivery failures early.</p>
+  </div>
+  <div class="callout">
+    <strong>ℹ️ Manual Retry</strong>
+    <p>Items in <code>failed/</code> can be moved back to the queue directory for manual re-processing.
+      Reset the <code>retryCount</code> to 0 and remove <code>lastError</code> before moving the file.
+      The next recovery cycle will pick it up automatically.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p><a href="../index.html">← Back to scheduling</a></p>
+  <p>Generated on 2026-04-02 · OpenClaw Infrastructure Wiki</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="inner">
+    <button class="close-btn" aria-label="Close overlay">&times;</button>
+    <div class="overlay-content"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* Theme toggle */
+  const THEME_KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const stored = localStorage.getItem(THEME_KEY);
+  if(stored) root.setAttribute('data-theme', stored);
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  /* TOC generation */
+  const tocList = document.getElementById('tocList');
+  document.querySelectorAll('main h2[id]').forEach(h => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* Reading time */
+  const text = document.querySelector('main').textContent;
+  const words = text.trim().split(/\s+/).length;
+  const mins = Math.max(1, Math.round(words / 200));
+  document.getElementById('readingTime').textContent = mins + ' min read · ' + words + ' words';
+
+  /* Copy buttons */
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const code = btn.parentElement.querySelector('code');
+      await navigator.clipboard.writeText(code.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+
+  /* Mermaid init (startOnLoad:false) */
+  if(window.mermaid){
+    mermaid.initialize({ startOnLoad:false, theme: 'default' });
+  }
+  document.querySelectorAll('pre[data-source]').forEach(pre => {
+    const code = pre.querySelector('code');
+    if(!code) return;
+    const src = code.textContent;
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = src;
+    pre.parentNode.insertBefore(div, pre);
+    pre.style.display = 'none';
+    if(window.mermaid){ mermaid.run({ nodes: [div] }); }
+  });
+
+  /* Diagram overlay with cloneNode(true) */
+  const overlay = document.getElementById('diagramOverlay');
+  const overlayContent = overlay.querySelector('.overlay-content');
+  const closeBtn = overlay.querySelector('.close-btn');
+  document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
+    wrap.addEventListener('click', (e) => {
+      if(e.target.closest('.copy-btn')) return;
+      const svg = wrap.querySelector('.mermaid svg') || wrap.querySelector('svg');
+      if(!svg) return;
+      const cloned = svg.cloneNode(true);
+      cloned.style.maxWidth = '100%';
+      cloned.style.height = 'auto';
+      overlayContent.innerHTML = '';
+      overlayContent.appendChild(cloned);
+      overlay.classList.add('active');
+    });
+  });
+  closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('active'); });
+
+  /* Back to top */
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  });
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* Keyboard nav — Escape closes overlay */
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && overlay.classList.contains('active')){
+      overlay.classList.remove('active');
+    }
+  });
+
+  /* hljs — highlight if available */
+  if(window.hljs){
+    document.querySelectorAll('pre code[class^="language-"]').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  }
+})();
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/commands/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Commands/Slash Commands — Command Registry</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Commands</a> &rsaquo; <a href="../index.html">Slash Commands</a> &rsaquo; <span>Command Registry</span></nav>
+
+<main id="main">
+<h1>Command Registry</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Dual-layer registration: CLI core commands and runtime plugin commands</p>
+  <p>OpenClaw maintains two command registries that work in concert. The <strong>CLI core registry</strong> lazy-loads 18 built-in commands on demand, while the <strong>plugin registry</strong> accepts dynamically registered commands from plugins at runtime. Together they form the complete command surface available to users across every channel.</p>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>The command registry is the single source of truth for "what commands exist." When a user types <code>/doctor</code>, the registry determines whether that command exists, loads its handler module on demand, and dispatches execution. Understanding the registry is critical for adding new commands, diagnosing lazy-load failures, or resolving conflicts between plugin and built-in commands.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a phone switchboard at a large company. The core registry is the permanent directory of internal extensions — always available, loaded on first call. The plugin registry is a guest directory: external contractors register their lines at check-in, and those lines are removed when they leave. Both directories feed into the same switchboard, and the operator (parser) routes calls to whichever directory has the matching extension.</p>
+</details>
+</div>
+
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Map command names to handler functions, supporting both lazy-loaded CLI commands and dynamically registered plugin commands.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p><code>CoreCliEntry[]</code> for built-in commands; <code>OpenClawPluginCommandDefinition</code> objects for plugin commands.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Lazy vs eager loading, duplicate detection, registry locking during execution, reserved name enforcement.</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>Registered handlers reachable via <code>pluginCommands</code> Map or Commander.js program tree. No persistent state beyond memory.</p></div>
+</div>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  CLI["CLI Entry (openclaw ...)"]
+  CORE["Core CLI Registry"]
+  LAZY["Lazy Import Module"]
+  COMMANDER["Commander.js Program"]
+  PLUGIN_REG["Plugin Registration"]
+  VALIDATE["validatePluginCommandDefinition()"]
+  PLUGIN_MAP["pluginCommands Map"]
+  USER["User Message /command"]
+  MATCH["matchPluginCommand()"]
+  DISPATCH["Command Dispatch"]
+
+  CLI --> CORE
+  CORE -->|"registerCoreCliByName()"| LAZY
+  LAZY -->|"await import()"| COMMANDER
+  COMMANDER --> DISPATCH
+
+  PLUGIN_REG -->|"registerPluginCommand()"| VALIDATE
+  VALIDATE -->|"OK"| PLUGIN_MAP
+  USER --> MATCH
+  MATCH -->|"Lookup"| PLUGIN_MAP
+  MATCH -->|"Found"| DISPATCH
+</pre>
+</div>
+<p>Two distinct paths converge at dispatch. CLI commands flow through Commander.js after lazy loading; plugin commands are matched from the global <code>pluginCommands</code> Map. The registry enforces that no two commands can claim the same invocation key.</p>
+
+<h2 id="core-types">Core Types</h2>
+
+<pre><code class="language-typescript">// src/cli/program/command-registry.ts — Core CLI types
+export type CommandRegistration = {
+  id: string;
+  register: (params: CommandRegisterParams) =&gt; void;
+};
+
+type CoreCliEntry = {
+  commands: CoreCliCommandDescriptor[];
+  register: (params: CommandRegisterParams) =&gt; Promise&lt;void&gt; | void;
+};
+
+type CommandRegisterParams = {
+  program: Command;
+  ctx: ProgramContext;
+  argv: string[];
+};</code></pre>
+
+<pre><code class="language-typescript">// src/plugins/command-registry-state.ts — Plugin registry state
+export type RegisteredPluginCommand = OpenClawPluginCommandDefinition &amp; {
+  pluginId: string;
+  pluginName?: string;
+  pluginRoot?: string;
+};
+
+type PluginCommandState = {
+  pluginCommands: Map&lt;string, RegisteredPluginCommand&gt;;
+  registryLocked: boolean;
+};</code></pre>
+
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Lazy vs eager load</td><td>Core entries use <code>async register()</code> with dynamic <code>import()</code></td><td>Startup time: only the invoked command's module is loaded, keeping CLI snappy</td></tr>
+  <tr><td>Duplicate detection</td><td><code>registerPluginCommand()</code> checks all invocation keys</td><td>Prevents two plugins from silently shadowing each other's commands</td></tr>
+  <tr><td>Reserved name blocking</td><td><code>reservedCommands</code> Set in <code>validateCommandName()</code></td><td>Plugins cannot override core commands like <code>/help</code>, <code>/status</code>, <code>/model</code></td></tr>
+  <tr><td>Registry locking</td><td><code>isPluginCommandRegistryLocked()</code> flag</td><td>Prevents race conditions when commands are being processed</td></tr>
+  <tr><td>Name-based lookup</td><td><code>registerCoreCliByName()</code> searches <code>coreEntries</code></td><td>Allows on-demand loading of a specific command without registering all others</td></tr>
+</table>
+
+<h2 id="mechanism">How It Works</h2>
+
+<h3 id="mechanism-cli">Phase 1 — CLI Core Registration</h3>
+<p>The <code>coreEntries</code> array defines 18 built-in commands. Each entry contains a descriptor (name + description) and an async <code>register</code> function that dynamically imports the command module and attaches it to the Commander.js program tree.</p>
+
+<pre><code class="language-typescript">// src/cli/program/command-registry.ts — lazy registration pattern
+const coreEntries: CoreCliEntry[] = [
+  {
+    commands: [{ name: "doctor", description: "Health checks + quick fixes",
+                 hasSubcommands: false }],
+    register: async ({ program }) =&gt; {
+      const mod = await import("./register.doctor.js");
+      mod.registerDoctorCommand(program);
+    },
+  },
+  {
+    commands: [{ name: "models", description: "Model selection, configuration, auth",
+                 hasSubcommands: true }],
+    register: async ({ program }) =&gt; {
+      const mod = await import("./register.models.js");
+      mod.registerModelsCommand(program);
+    },
+  },
+  // ... 16 more entries: setup, onboard, configure, config, backup,
+  //     dashboard, reset, uninstall, message, mcp, agent, agents,
+  //     status, health, sessions, tasks
+];</code></pre>
+
+<h3 id="mechanism-lookup">Phase 2 — On-Demand Lookup</h3>
+
+<pre><code class="language-typescript">// src/cli/program/command-registry.ts — name-based lazy load
+export async function registerCoreCliByName(
+  program: Command,
+  ctx: ProgramContext,
+  name: string,
+  argv: string[] = process.argv,
+): Promise&lt;boolean&gt; {
+  const entry = coreEntries.find((candidate) =&gt;
+    candidate.commands.some((cmd) =&gt; cmd.name === name),
+  );
+  if (!entry) {
+    return false;
+  }
+  removeEntryCommands(program, entry);
+  await entry.register({ program, ctx, argv });
+  return true;
+}</code></pre>
+
+<h3 id="mechanism-plugin">Phase 3 — Plugin Command Registration</h3>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Plugin as Plugin Loader
+    participant Validate as validatePluginCommandDefinition()
+    participant NameCheck as validateCommandName()
+    participant Reserved as reservedCommands Set
+    participant Map as pluginCommands Map
+    participant Lock as Registry Lock
+
+    Plugin->>Lock: isPluginCommandRegistryLocked()?
+    Lock-->>Plugin: false
+    Plugin->>Validate: validatePluginCommandDefinition(def)
+    Validate->>NameCheck: validateCommandName("tts")
+    NameCheck->>Reserved: reservedCommands.has("tts")?
+    Reserved-->>NameCheck: false
+    NameCheck-->>Validate: null (valid)
+    Validate-->>Plugin: null (valid)
+    Plugin->>Map: Check for duplicate keys
+    Map-->>Plugin: No conflicts
+    Plugin->>Map: pluginCommands.set("/tts", registered)
+    Map-->>Plugin: { ok: true }
+</pre>
+</div>
+
+<pre><code class="language-typescript">// src/plugins/command-registration.ts — registration with validation
+export function registerPluginCommand(
+  pluginId: string,
+  command: OpenClawPluginCommandDefinition,
+  opts?: { pluginName?: string; pluginRoot?: string },
+): CommandRegistrationResult {
+  if (isPluginCommandRegistryLocked()) {
+    return { ok: false, error: "Cannot register commands while processing is in progress" };
+  }
+
+  const definitionError = validatePluginCommandDefinition(command);
+  if (definitionError) {
+    return { ok: false, error: definitionError };
+  }
+
+  const invocationKeys = listPluginInvocationKeys(command);
+  const key = `/${command.name.trim().toLowerCase()}`;
+
+  for (const invocationKey of invocationKeys) {
+    const existing = pluginCommands.get(invocationKey) ??
+      Array.from(pluginCommands.values()).find((candidate) =&gt;
+        listPluginInvocationKeys(candidate).includes(invocationKey),
+      );
+    if (existing) {
+      return { ok: false,
+        error: `Command "${invocationKey.slice(1)}" already registered by plugin "${existing.pluginId}"` };
+    }
+  }
+
+  pluginCommands.set(key, { ...command, pluginId, pluginName: opts?.pluginName, pluginRoot: opts?.pluginRoot });
+  return { ok: true };
+}</code></pre>
+
+<!-- CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">Code Walkthrough</h2>
+<div class="code-walk">
+<div class="step">
+<p><strong>State initialization</strong> — The plugin registry uses a global singleton to survive module re-imports. A <code>Symbol.for</code> key ensures exactly one instance across the process.</p>
+<pre><code class="language-typescript">// src/plugins/command-registry-state.ts — singleton state
+const PLUGIN_COMMAND_STATE_KEY = Symbol.for("openclaw.pluginCommandsState");
+
+const getState = () =&gt;
+  resolveGlobalSingleton&lt;PluginCommandState&gt;(PLUGIN_COMMAND_STATE_KEY, () =&gt; ({
+    pluginCommands: new Map&lt;string, RegisteredPluginCommand&gt;(),
+    registryLocked: false,
+  }));</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Proxy-based access</strong> — The exported <code>pluginCommands</code> is a Proxy that delegates all operations to the singleton state. This allows callers to import and use the Map normally, even if the underlying singleton is created lazily.</p>
+<pre><code class="language-typescript">// src/plugins/command-registry-state.ts — proxy delegation
+export const pluginCommands = new Proxy(
+  new Map&lt;string, RegisteredPluginCommand&gt;(),
+  {
+    get(_target, property) {
+      const value = Reflect.get(
+        getPluginCommandMap(), property, getPluginCommandMap()
+      );
+      return typeof value === "function"
+        ? value.bind(getPluginCommandMap())
+        : value;
+    },
+  },
+);</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Command name validation</strong> — Every name passes through <code>validateCommandName()</code>, which enforces a strict pattern: must start with a letter, contain only <code>[a-z0-9_-]</code>, and not collide with any of the 30 reserved built-in names.</p>
+<pre><code class="language-typescript">// src/plugins/command-registration.ts — name validation
+export function validateCommandName(name: string): string | null {
+  const trimmed = name.trim().toLowerCase();
+  if (!trimmed) return "Command name cannot be empty";
+  if (!/^[a-z][a-z0-9_-]*$/.test(trimmed)) {
+    return "Command name must start with a letter and contain " +
+           "only letters, numbers, hyphens, and underscores";
+  }
+  reservedCommands ??= new Set([
+    "help", "commands", "status", "whoami", "context", "btw",
+    "stop", "restart", "reset", "new", "compact", "config",
+    "debug", "allowlist", "activation", "skill", "subagents",
+    "kill", "steer", "tell", "model", "models", "queue",
+    "send", "bash", "exec", "think", "verbose", "reasoning",
+    "elevated", "usage",
+  ]);
+  if (reservedCommands.has(trimmed)) {
+    return `Command name "${trimmed}" is reserved by a built-in command`;
+  }
+  return null;
+}</code></pre>
+</div>
+</div>
+
+<!-- RESERVED COMMANDS -->
+<h2 id="reserved-names">Reserved Command Names</h2>
+<p>The following 30 names are permanently reserved by the built-in command system. Plugins that attempt to register any of these names receive a validation error.</p>
+<div class="summary-grid">
+  <div class="cell"><strong>Session control</strong><p><code>help</code>, <code>commands</code>, <code>status</code>, <code>whoami</code>, <code>context</code>, <code>btw</code></p></div>
+  <div class="cell"><strong>Lifecycle</strong><p><code>stop</code>, <code>restart</code>, <code>reset</code>, <code>new</code>, <code>compact</code>, <code>config</code></p></div>
+  <div class="cell"><strong>Security</strong><p><code>debug</code>, <code>allowlist</code>, <code>activation</code>, <code>skill</code>, <code>subagents</code>, <code>kill</code></p></div>
+  <div class="cell"><strong>Communication</strong><p><code>steer</code>, <code>tell</code>, <code>model</code>, <code>models</code>, <code>queue</code>, <code>send</code></p></div>
+  <div class="cell"><strong>Execution</strong><p><code>bash</code>, <code>exec</code>, <code>think</code>, <code>verbose</code>, <code>reasoning</code>, <code>elevated</code>, <code>usage</code></p></div>
+</div>
+
+<!-- PLUGIN TEARDOWN -->
+<h2 id="plugin-teardown">Plugin Lifecycle &amp; Teardown</h2>
+<p>When a plugin is unloaded — either during a hot-reload or because the user disabled it — all commands registered by that plugin must be removed. The registry provides two teardown functions:</p>
+
+<pre><code class="language-typescript">// src/plugins/command-registry-state.ts — teardown
+export function clearPluginCommands(): void {
+  pluginCommands.clear();
+}
+
+export function clearPluginCommandsForPlugin(pluginId: string): void {
+  for (const [key, cmd] of pluginCommands.entries()) {
+    if (cmd.pluginId === pluginId) {
+      pluginCommands.delete(key);
+    }
+  }
+}
+
+export function getPluginCommandSpecs(
+  provider?: string,
+): Array&lt;{ name: string; description: string; acceptsArgs: boolean }&gt; {
+  const providerName = provider?.trim().toLowerCase();
+  if (providerName &amp;&amp; providerName !== "telegram"
+      &amp;&amp; providerName !== "discord") {
+    return [];
+  }
+  return Array.from(pluginCommands.values()).map((cmd) =&gt; ({
+    name: resolvePluginNativeName(cmd, provider),
+    description: cmd.description,
+    acceptsArgs: cmd.acceptsArgs ?? false,
+  }));
+}</code></pre>
+
+<div class="callout warn">
+<strong>&#9888; Registry locking:</strong> The <code>registryLocked</code> flag is set to <code>true</code> while a command handler is executing. Any registration attempt during this window is rejected to prevent iterator invalidation on the <code>pluginCommands</code> Map. The lock is automatically released when the handler completes.
+</div>
+
+<h2 id="registered-commands">Registered Core Commands</h2>
+<table>
+  <tr><th>Command</th><th>Module</th><th>Subcommands</th></tr>
+  <tr><td><code>setup</code></td><td>register.setup.js</td><td>No</td></tr>
+  <tr><td><code>onboard</code></td><td>register.onboard.js</td><td>No</td></tr>
+  <tr><td><code>configure</code></td><td>register.configure.js</td><td>No</td></tr>
+  <tr><td><code>config</code></td><td>config-cli.js</td><td>Yes (get/set/unset/file/validate)</td></tr>
+  <tr><td><code>backup</code></td><td>register.backup.js</td><td>Yes (create/verify)</td></tr>
+  <tr><td><code>doctor</code></td><td>register.doctor.js</td><td>No</td></tr>
+  <tr><td><code>dashboard</code></td><td>register.dashboard.js</td><td>No</td></tr>
+  <tr><td><code>reset</code></td><td>register.reset.js</td><td>No</td></tr>
+  <tr><td><code>uninstall</code></td><td>register.uninstall.js</td><td>No</td></tr>
+  <tr><td><code>message</code></td><td>register.message.js</td><td>No</td></tr>
+  <tr><td><code>models</code></td><td>register.models.js</td><td>Yes (list/set/aliases/fallbacks/auth/scan)</td></tr>
+  <tr><td><code>channels</code></td><td>register.channels.js</td><td>Yes (add/list/remove/status)</td></tr>
+  <tr><td><code>agents</code></td><td>register.agents.js</td><td>Yes (add/list/delete/bind)</td></tr>
+  <tr><td><code>status</code></td><td>register.status.js</td><td>No</td></tr>
+  <tr><td><code>health</code></td><td>register.health.js</td><td>No</td></tr>
+  <tr><td><code>sessions</code></td><td>register.sessions.js</td><td>No</td></tr>
+  <tr><td><code>tasks</code></td><td>register.tasks.js</td><td>No</td></tr>
+  <tr><td><code>mcp</code></td><td>register.mcp.js</td><td>Yes</td></tr>
+</table>
+
+<h2 id="edge-cases">Edge Cases</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Rationale</th></tr>
+  <tr><td>Plugin registers <code>/help</code></td><td>Returns <code>{ ok: false, error: "reserved" }</code></td><td>30 reserved names protect core functionality</td></tr>
+  <tr><td>Two plugins register <code>/weather</code></td><td>Second registration fails with duplicate error</td><td>First-come-first-served prevents silent shadowing</td></tr>
+  <tr><td>Registration during command processing</td><td>Returns <code>{ ok: false, error: "locked" }</code></td><td>Registry lock prevents iterator invalidation</td></tr>
+  <tr><td>Plugin unloaded</td><td><code>clearPluginCommandsForPlugin(pluginId)</code> removes its entries</td><td>Clean teardown prevents stale handlers</td></tr>
+</table>
+
+<h2 id="related-topics">Related Topics</h2>
+<div class="summary-grid">
+  <div class="cell"><strong><a href="../command_parsing/index.html">Command Parsing</a></strong><p>How raw text is parsed before registry lookup.</p></div>
+  <div class="cell"><strong><a href="../command_aliases/index.html">Command Aliases</a></strong><p>How nativeNames create provider-specific command aliases.</p></div>
+  <div class="cell"><strong><a href="../../admin/permission_gating/index.html">Permission Gating</a></strong><p>Authorization checks that run after registry lookup.</p></div>
+</div>
+
+<h2 id="directory-map">Source Files</h2>
+<details open>
+<summary style="cursor:pointer;font-weight:600;color:var(--heading);">Key files involved in command registration</summary>
+<pre><code>src/
+├── cli/program/
+│   ├── command-registry.ts           ← Core CLI lazy-load registry (18 commands)
+│   ├── core-command-descriptors.ts   ← Command name/description metadata
+│   ├── command-tree.ts               ← Commander.js tree management
+│   └── register-lazy-command.ts      ← Lazy command loading helper
+├── plugins/
+│   ├── command-registration.ts       ← registerPluginCommand(), validation
+│   ├── command-registry-state.ts     ← pluginCommands Map, locking
+│   ├── commands.ts                   ← matchPluginCommand() runtime lookup
+│   └── bundle-commands.ts            ← Bundle command utilities
+└── commands/                         ← 260+ command implementation files
+</code></pre>
+</details>
+
+<div class="footer"><a href="../index.html">&larr; Back to Slash Commands</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

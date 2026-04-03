@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Task Lifecycle — OpenClaw Infrastructure</title>
+<style>
+  :root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2129;--border:#30363d;--text:#e6edf3;--text-secondary:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.12);--success:#3fb950;--warning:#d29922;--danger:#f85149;--code-bg:#1c2129;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--focus-ring:0 0 0 3px rgba(88,166,255,.4)}
+  [data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-secondary:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.08);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(31,35,40,.12);--focus-ring:0 0 0 3px rgba(9,105,218,.3)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:4rem}
+  body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+  .skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:var(--radius);z-index:1000;font-weight:600}.skip-link:focus{top:1rem}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+  nav[aria-label="Breadcrumb"]{font-size:.875rem;color:var(--text-secondary)}
+  nav[aria-label="Breadcrumb"] a{color:var(--accent)}
+  nav[aria-label="Breadcrumb"] .sep{margin:0 .35rem;color:var(--text-secondary)}
+  .theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:.4rem .75rem;cursor:pointer;font-size:.875rem;transition:background .2s}.theme-toggle:hover{background:var(--accent-bg)}.theme-toggle:focus-visible{box-shadow:var(--focus-ring)}
+  .hero{max-width:52rem;margin:2rem auto;padding:0 2rem}
+  .focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:.75rem;font-weight:600;padding:.2rem .65rem;border-radius:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+  .hero h1{font-size:2rem;font-weight:700;margin-bottom:.4rem}
+  .hero .subtitle{color:var(--text-secondary);font-size:1.05rem;margin-bottom:.75rem}
+  .hero .reading-time{font-size:.8rem;color:var(--text-secondary)}
+  main{max-width:52rem;margin:0 auto 4rem;padding:0 2rem}
+  h2{font-size:1.4rem;font-weight:600;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+  h3{font-size:1.15rem;font-weight:600;margin:1.75rem 0 .75rem}
+  p{margin-bottom:1rem}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.5rem 0}
+  .summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+  .summary-grid .card h4{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:.35rem}
+  .summary-grid .card p{font-size:.9rem;color:var(--text-secondary);margin:0}
+  .callout{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.5rem 0}
+  .callout.analogy{border-left-color:var(--warning);background:rgba(210,153,34,.1)}
+  .callout.danger{border-left-color:var(--danger);background:rgba(248,81,73,.08)}
+  .callout strong{display:block;margin-bottom:.3rem}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative;font-size:.875rem;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  code{font-family:var(--font-mono);background:var(--code-bg);padding:.15rem .35rem;border-radius:4px;font-size:.85em}
+  .code-walk{margin:1.5rem 0}
+  .code-walk .step{display:flex;gap:1rem;margin-bottom:1.25rem;align-items:flex-start}
+  .code-walk .step-num{flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin-top:.15rem}
+  .code-walk .step-body{flex:1}
+  .code-walk .step-body p{margin-bottom:.4rem}
+  .mermaid-wrap{margin:1.5rem 0;cursor:pointer;position:relative}
+  .mermaid-wrap pre[data-source]{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow:auto}
+  .mermaid-wrap .expand-hint{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.15rem .45rem;font-size:.7rem;color:var(--text-secondary);opacity:0;transition:opacity .2s}.mermaid-wrap:hover .expand-hint{opacity:1}
+  .diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .25s}.diagram-overlay.active{opacity:1}
+  .diagram-overlay .inner{background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+  .diagram-overlay .close-btn{position:absolute;top:.5rem;right:.75rem;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+  .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1.5rem 0}
+  .toc summary{font-weight:600;cursor:pointer;font-size:.95rem}.toc ul{margin:.5rem 0 0 1.25rem;list-style:disc}.toc li{margin:.25rem 0;font-size:.9rem}
+  .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);border-radius:4px;padding:.2rem .5rem;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}
+  .back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:2.5rem;height:2.5rem;font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:50}
+  footer{max-width:52rem;margin:0 auto;padding:2rem;border-top:1px solid var(--border);text-align:center;color:var(--text-secondary);font-size:.85rem}
+  footer a{color:var(--accent)}
+  @media(max-width:600px){.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}header{padding:.75rem 1rem}}
+  @media print{header,.theme-toggle,.skip-link,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.callout{border-left-color:#333;background:#f5f5f5}pre{border-color:#ccc}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav aria-label="Breadcrumb">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">scheduling</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Task Lifecycle</span>
+  </nav>
+  <button class="theme-toggle" aria-label="Toggle dark/light theme" id="themeToggle">🌓 Theme</button>
+</header>
+
+<section class="hero">
+  <span class="focus-label">Focus</span>
+  <h1>Task Lifecycle</h1>
+  <p class="subtitle">Process supervision, graceful restarts, and cross-platform daemon management</p>
+  <p class="reading-time" id="readingTime"></p>
+</section>
+
+<main id="main">
+
+  <details class="toc" open>
+    <summary>Table of Contents</summary>
+    <ul id="tocList"></ul>
+  </details>
+
+  <h2 id="overview">Overview &amp; Motivation</h2>
+  <p>Process supervision ensures the OpenClaw gateway stays running across crashes, config changes, and
+    planned restarts. The lifecycle handles graceful shutdown (waiting for in-flight work), cross-platform
+    daemon management (launchd, systemd, schtasks), and audit logging for every restart event.</p>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy — Hospital Shift Change</strong>
+    <p>Think of restarts like a hospital's shift change protocol. The outgoing doctor (current process)
+      can't leave until all critical patients are stable (deferral polling). The incoming doctor (new process)
+      gets authorized credentials (SIGUSR1 auth token) with a 5-second window. A supervisor (launchd/systemd)
+      ensures someone is always on duty. The shift change is logged for the record (audit trail).</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Restart Controller</h4>
+      <p>500+ line orchestrator handling SIGUSR1 signaling, cooldown, and deferral-until-idle</p>
+    </div>
+    <div class="card">
+      <h4>Process Respawn</h4>
+      <p>Four respawn modes — spawned, supervised, disabled, failed — with PID tracking</p>
+    </div>
+    <div class="card">
+      <h4>Supervisor Detection</h4>
+      <p>Auto-detects launchd, systemd, or schtasks via environment variable patterns</p>
+    </div>
+    <div class="card">
+      <h4>Gateway Lock</h4>
+      <p>PID + timestamp file lock with /proc liveness checks, 30s stale TTL, SHA256 config hash</p>
+    </div>
+  </div>
+
+  <h2 id="restart-controller">Restart Controller — <code>restart.ts</code></h2>
+  <p>The primary restart controller at 500+ lines is the most complex module in the scheduling subsystem.
+    It coordinates the entire restart lifecycle: authorization gates, deferral polling, signal emission,
+    cooldown management, and audit logging.</p>
+
+  <h3>Core Types</h3>
+  <p>Three key interfaces define the restart domain model:</p>
+  <ul>
+    <li><code>RestartAttempt</code> — outcome of an OS-level restart:
+      <code>{ ok, method: "launchctl"|"systemd"|"schtasks"|"supervisor", detail?, tried? }</code></li>
+    <li><code>ScheduledRestart</code> — outcome of a scheduled SIGUSR1 restart:
+      <code>{ ok, pid, signal: "SIGUSR1", delayMs, reason?, mode: "emit"|"signal", coalesced, cooldownMsApplied }</code></li>
+    <li><code>RestartAuditInfo</code> — provenance metadata attached to every restart event:
+      <code>{ actor?, deviceId?, clientIp?, changedPaths? }</code></li>
+  </ul>
+
+  <h3>Authorization Flow</h3>
+  <p>Not every component may trigger a restart. The authorization system uses a token-based approach with a
+    5-second grace period:</p>
+  <ul>
+    <li><code>setPreRestartDeferralCheck(fn)</code> — register a callback that must return <code>true</code>
+      before any restart proceeds</li>
+    <li><code>authorizeGatewaySigusr1Restart(delayMs?)</code> — issues a time-limited restart authorization
+      token (default 5 000 ms grace window)</li>
+    <li><code>consumeGatewaySigusr1RestartAuthorization()</code> — one-shot consume; returns
+      <code>false</code> if expired or already consumed</li>
+    <li><code>isGatewaySigusr1RestartExternallyAllowed()</code> — check without consuming</li>
+  </ul>
+
+  <div class="callout danger">
+    <strong>⚠️ Security Note</strong>
+    <p>The 5-second authorization window is intentionally short. In production, a race between
+      <code>authorize()</code> and <code>consume()</code> wider than 5 s indicates a hung process and triggers
+      an alert via the monitoring pipeline.</p>
+  </div>
+
+  <h2 id="deferral-and-cooldown">Deferral &amp; Cooldown</h2>
+  <p><code>deferGatewayRestartUntilIdle(opts)</code> implements a polling loop that waits for all pending
+    work to drain before allowing the restart to proceed. The loop polls every 500 ms with exponential
+    backoff up to a 5-minute ceiling. If work never drains, the restart is forced after the ceiling.</p>
+  <p><code>scheduleGatewaySigusr1Restart(opts?)</code> wraps the signal emission with a 30-second cooldown.
+    Multiple restart requests arriving within the cooldown are coalesced — only one actual signal is sent,
+    and the <code>ScheduledRestart.coalesced</code> count records how many were merged.</p>
+
+  <div class="code-walk">
+    <h3>Code Walk — Restart Scheduling with Cooldown</h3>
+    <div class="step">
+      <span class="step-num">1</span>
+      <div class="step-body">
+        <p>Check if a restart is already pending within the cooldown window.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <div class="step-body">
+        <p>If coalescing, increment the counter and return early.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <div class="step-body">
+        <p>Otherwise, authorize the restart, wait for idle, then emit SIGUSR1.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <div class="step-body">
+        <p>Record the cooldown timestamp and audit info for the event.</p>
+      </div>
+    </div>
+  </div>
+
+  <pre><code class="language-typescript">interface ScheduledRestart {
+  ok: boolean;
+  pid: number;
+  signal: 'SIGUSR1';
+  delayMs: number;
+  reason?: string;
+  mode: 'emit' | 'signal';
+  coalesced: number;
+  cooldownMsApplied: number;
+}
+
+const COOLDOWN_MS = 30_000;
+let lastRestartTs = 0;
+let coalescedCount = 0;
+
+async function scheduleGatewaySigusr1Restart(
+  opts?: { reason?: string; audit?: RestartAuditInfo }
+): Promise&lt;ScheduledRestart&gt; {
+  const now = Date.now();
+  if (now - lastRestartTs &lt; COOLDOWN_MS) {
+    coalescedCount++;
+    return {
+      ok: true, pid: process.pid, signal: 'SIGUSR1',
+      delayMs: 0, reason: opts?.reason,
+      mode: 'emit', coalesced: coalescedCount,
+      cooldownMsApplied: COOLDOWN_MS - (now - lastRestartTs),
+    };
+  }
+
+  authorizeGatewaySigusr1Restart(5_000);
+  await deferGatewayRestartUntilIdle({ maxWaitMs: 300_000 });
+
+  emitGatewayRestart();  // sends SIGUSR1
+  lastRestartTs = Date.now();
+  const result: ScheduledRestart = {
+    ok: true, pid: process.pid, signal: 'SIGUSR1',
+    delayMs: Date.now() - now, reason: opts?.reason,
+    mode: 'signal', coalesced: coalescedCount,
+    cooldownMsApplied: COOLDOWN_MS,
+  };
+  coalescedCount = 0;
+  return result;
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <h2 id="process-respawn">Process Respawn — <code>process-respawn.ts</code></h2>
+  <p><code>restartGatewayProcessWithFreshPid()</code> handles the actual OS-level process creation. It
+    returns a <code>GatewayRespawnResult</code> with one of four modes:</p>
+  <ul>
+    <li><strong>spawned</strong> — a new detached child process was created; parent exits</li>
+    <li><strong>supervised</strong> — a supervisor (launchd/systemd) is detected; exit and let it restart</li>
+    <li><strong>disabled</strong> — <code>OPENCLAW_NO_RESPAWN</code> env var is set; process exits without replacement</li>
+    <li><strong>failed</strong> — respawn attempted but the child process could not be started</li>
+  </ul>
+
+  <h2 id="supervisor-detection">Supervisor Detection</h2>
+  <p><code>detectRespawnSupervisor(env, platform)</code> inspects environment variables to determine which
+    process supervisor, if any, is managing the gateway:</p>
+  <ul>
+    <li><strong>launchd</strong> — detected via <code>LAUNCH_JOB_LABEL</code> env var (macOS)</li>
+    <li><strong>systemd</strong> — detected via <code>INVOCATION_ID</code> env var (Linux)</li>
+    <li><strong>schtasks</strong> — detected via <code>OPENCLAW_WINDOWS_TASK_NAME</code> env var (Windows)</li>
+  </ul>
+  <p>When a supervisor is detected, the respawn mode switches to "supervised" — the process simply exits
+    with code 0, trusting the supervisor to restart it.</p>
+
+  <h2 id="gateway-lock">Gateway Lock — <code>gateway-lock.ts</code></h2>
+  <p>The gateway lock (260 lines) prevents multiple gateway instances from running simultaneously. The lock
+    file contains the owning PID and a creation timestamp. On Linux, liveness is verified by reading
+    <code>/proc/$&#123;pid&#125;/stat</code>. On other platforms, a port-based check is used as fallback.</p>
+
+  <div class="callout">
+    <strong>ℹ️ Lock Details</strong>
+    <p>Lock parameters: 30s stale TTL, 100ms poll interval, 5s acquisition timeout. The lock path includes a
+      SHA256 hash of the config path, allowing multiple gateway instances with different configs on the same
+      machine.</p>
+  </div>
+
+  <pre><code class="language-typescript">interface GatewayLockHandle {
+  lockPath: string;
+  configPath: string;
+  release: () =&gt; Promise&lt;void&gt;;
+}
+
+class GatewayLockError extends Error {
+  constructor(
+    message: string,
+    public readonly lockPath: string,
+    public readonly ownerPid?: number
+  ) {
+    super(message);
+    this.name = 'GatewayLockError';
+  }
+}
+
+async function acquireGatewayLock(opts?: {
+  configPath: string;
+  staleTtlMs?: number;
+  pollIntervalMs?: number;
+  timeoutMs?: number;
+}): Promise&lt;GatewayLockHandle&gt; {
+  const staleTtl = opts?.staleTtlMs ?? 30_000;
+  const pollInterval = opts?.pollIntervalMs ?? 100;
+  const timeout = opts?.timeoutMs ?? 5_000;
+  const hash = createHash('sha256')
+    .update(opts!.configPath)
+    .digest('hex')
+    .slice(0, 12);
+  const lockPath = join(stateDir, `gateway-${hash}.lock`);
+  const deadline = Date.now() + timeout;
+
+  while (Date.now() &lt; deadline) {
+    const existing = await tryReadLock(lockPath);
+    if (!existing || !isProcessAlive(existing.pid, staleTtl)) {
+      await writeLock(lockPath, process.pid);
+      return {
+        lockPath,
+        configPath: opts!.configPath,
+        release: () =&gt; unlink(lockPath),
+      };
+    }
+    await sleep(pollInterval);
+  }
+  throw new GatewayLockError('Lock acquisition timed out', lockPath);
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <h2 id="restart-lifecycle">Restart Lifecycle Diagram</h2>
+  <p>The following state diagram captures the complete restart lifecycle, from the initial request through
+    authorization, deferral polling, signal emission, respawn, and back to normal operation.</p>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="restart-lifecycle-states"><code class="language-mermaid">stateDiagram-v2
+    [*] --> Running
+    Running --> RestartRequested: config change / API call
+    RestartRequested --> AuthorizationCheck: validate caller
+    AuthorizationCheck --> Rejected: token expired / unauthorized
+    Rejected --> Running: log &amp; resume
+    AuthorizationCheck --> DeferralPolling: authorized
+    DeferralPolling --> DeferralPolling: pending work exists (500ms backoff)
+    DeferralPolling --> SIGUSR1Emit: idle or max wait exceeded
+    SIGUSR1Emit --> ProcessExiting: signal sent
+    ProcessExiting --> SupervisorRespawn: supervisor detected
+    ProcessExiting --> SelfRespawn: no supervisor
+    SupervisorRespawn --> Running: new PID via launchd/systemd
+    SelfRespawn --> Running: detached child spawned
+    ProcessExiting --> Terminated: OPENCLAW_NO_RESPAWN set</code></pre>
+  </div>
+
+  <h2 id="platform-restart-paths">Platform-Specific Restart Paths</h2>
+  <p>Each platform has a distinct restart strategy dictated by the available process supervisor. The
+    flowchart below shows the decision tree used by <code>triggerOpenClawRestart()</code>.</p>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="platform-restart-flowchart"><code class="language-mermaid">flowchart TD
+    A["triggerOpenClawRestart()"] --> B{"detectRespawnSupervisor()"}
+    B -->|launchd| C["launchctl kickstart -k"]
+    B -->|systemd| D["systemctl restart openclaw"]
+    B -->|schtasks| E["schtasks /Run /TN task"]
+    B -->|none| F{"OPENCLAW_NO_RESPAWN?"}
+    F -->|set| G["Exit code 0 — no respawn"]
+    F -->|unset| H["spawn detached child"]
+    C --> I["RestartAttempt { ok, method: launchctl }"]
+    D --> J["RestartAttempt { ok, method: systemd }"]
+    E --> K["RestartAttempt { ok, method: schtasks }"]
+    H --> L["GatewayRespawnResult { mode: spawned, pid }"]
+    G --> M["GatewayRespawnResult { mode: disabled }"]</code></pre>
+  </div>
+
+  <h2 id="audit-trail">Audit Trail</h2>
+  <p>Every restart event records a <code>RestartAuditInfo</code> object persisted to the state directory. This
+    includes the actor (user or system), device ID, client IP (for remote-triggered restarts), and a list of
+    changed config paths that prompted the restart. The audit log is append-only and rotated at 10 MB.</p>
+
+  <div class="callout">
+    <strong>ℹ️ Debugging Tip</strong>
+    <p>To inspect recent restarts, run <code>openclaw gateway audit --last 10</code>. This reads the audit
+      log and pretty-prints the last 10 entries with timestamps, reasons, and whether the restart was
+      coalesced.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p><a href="../index.html">← Back to scheduling</a></p>
+  <p>Generated on 2026-04-02 · OpenClaw Infrastructure Wiki</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="inner">
+    <button class="close-btn" aria-label="Close overlay">&times;</button>
+    <div class="overlay-content"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* Theme toggle */
+  const THEME_KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const stored = localStorage.getItem(THEME_KEY);
+  if(stored) root.setAttribute('data-theme', stored);
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  /* TOC generation */
+  const tocList = document.getElementById('tocList');
+  document.querySelectorAll('main h2[id]').forEach(h => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* Reading time */
+  const text = document.querySelector('main').textContent;
+  const words = text.trim().split(/\s+/).length;
+  const mins = Math.max(1, Math.round(words / 200));
+  document.getElementById('readingTime').textContent = mins + ' min read · ' + words + ' words';
+
+  /* Copy buttons */
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const code = btn.parentElement.querySelector('code');
+      await navigator.clipboard.writeText(code.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+
+  /* Mermaid init (startOnLoad:false) */
+  if(window.mermaid){
+    mermaid.initialize({ startOnLoad:false, theme: 'default' });
+  }
+  document.querySelectorAll('pre[data-source]').forEach(pre => {
+    const code = pre.querySelector('code');
+    if(!code) return;
+    const src = code.textContent;
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = src;
+    pre.parentNode.insertBefore(div, pre);
+    pre.style.display = 'none';
+    if(window.mermaid){ try{mermaid.run({ nodes: [div] });}catch(e){console.warn('mermaid:',e)} }
+  });
+
+  /* Diagram overlay with cloneNode(true) */
+  const overlay = document.getElementById('diagramOverlay');
+  const overlayContent = overlay.querySelector('.overlay-content');
+  const closeBtn = overlay.querySelector('.close-btn');
+  document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
+    wrap.addEventListener('click', (e) => {
+      if(e.target.closest('.copy-btn')) return;
+      const svg = wrap.querySelector('.mermaid svg') || wrap.querySelector('svg');
+      if(!svg) return;
+      const cloned = svg.cloneNode(true);
+      cloned.style.maxWidth = '100%';
+      cloned.style.height = 'auto';
+      overlayContent.innerHTML = '';
+      overlayContent.appendChild(cloned);
+      overlay.classList.add('active');
+    });
+  });
+  closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('active'); });
+
+  /* Back to top */
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  });
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* Keyboard nav — Escape closes overlay */
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && overlay.classList.contains('active')){
+      overlay.classList.remove('active');
+    }
+  });
+
+  /* hljs — highlight if available */
+  if(window.hljs){
+    document.querySelectorAll('pre code[class^="language-"]').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  }
+})();
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="openclaw/extensions">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Extensions &mdash; Provider Adapters</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">OpenClaw</a> &rsaquo; <a href="../index.html">Extensions</a> &rsaquo; <span>Provider Adapters</span></nav>
+
+<main id="main">
+<h1>Provider Adapters</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">How AI provider extensions connect models to the agent engine</p>
+  <p>Provider adapters implement the <code>ProviderPlugin</code> interface &mdash; a rich contract covering authentication, model discovery, transport normalization, stream processing, and capability declaration. Each provider extension (OpenAI, Anthropic, Ollama, etc.) builds one or more <code>ProviderPlugin</code> objects and registers them via <code>api.registerProvider()</code>.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>The <code>ProviderPlugin</code> interface is the abstraction layer that lets OpenClaw talk to any LLM &mdash; cloud-hosted or self-hosted &mdash; through a uniform streaming interface. Without it, adding a new AI model backend would require rewriting the agent engine. With it, you implement a handful of methods (auth, model resolution, transport normalization) and the engine handles the rest.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Provider adapters are like power adapters for international travel. Every country (AI vendor) has a different plug shape (API format) and voltage (auth scheme). The adapter translates your device&rsquo;s power needs (agent engine&rsquo;s streaming interface) into the local standard. The agent engine doesn&rsquo;t care whether it&rsquo;s plugged into a 110V US outlet (OpenAI) or a 220V EU outlet (Anthropic) &mdash; the adapter handles conversion.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Translate vendor-specific LLM APIs into OpenClaw&rsquo;s uniform provider contract for the agent engine.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>User config (API keys, base URLs), model selection, chat messages, tool schemas.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Auth method selection, dynamic model resolution, transport normalization, thinking-level support.</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>Streaming token responses, model catalogs, usage snapshots, attribution headers.</p></div>
+</div>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Agent["Agent Engine"]
+    Req["Chat Request"]
+    Stream["Stream Consumer"]
+  end
+  subgraph Provider["ProviderPlugin"]
+    Auth["Auth Resolution"]
+    Model["Model Catalog"]
+    Transport["Transport Normalization"]
+    StreamFn["Stream Function"]
+  end
+  subgraph Vendor["Vendor API"]
+    API["HTTP Endpoint"]
+  end
+  Req --> Auth
+  Auth --> Model
+  Model --> Transport
+  Transport --> StreamFn
+  StreamFn --> API
+  API --> Stream
+</pre>
+</div>
+<p>When the agent engine needs to send a chat request, it resolves the provider from the model ID, runs through the provider&rsquo;s auth chain, normalizes the transport (base URL, API key headers), creates a streaming function, and pipes the response back to the conversation.</p>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Which auth method to use</td><td><code>auth: ProviderAuthMethod[]</code> array ordering</td><td>First matching auth method wins; determines API key source and config flow</td></tr>
+  <tr><td>Dynamic model resolution</td><td><code>resolveDynamicModel(ctx)</code></td><td>Allows forward-compatibility with unreleased models (e.g., <code>gpt-5.4</code> before catalog update)</td></tr>
+  <tr><td>Transport override</td><td><code>normalizeTransport(ctx)</code></td><td>Redirects API calls through proxies, custom endpoints, or gateway overlays</td></tr>
+  <tr><td>Stream wrapping</td><td><code>wrapStreamFn(ctx)</code></td><td>Injects vendor-specific headers (attribution, tracing) without modifying the base stream</td></tr>
+  <tr><td>Thinking level support</td><td><code>supportsXHighThinking(ctx)</code></td><td>Enables extended reasoning for capable models (o-series, Claude 3.5+)</td></tr>
+  <tr><td>Model suppression</td><td><code>suppressBuiltInModel(ctx)</code></td><td>Hides deprecated or overlapping built-in models when provider takes over</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+
+<h3 id="mechanism-interface">The ProviderPlugin Interface</h3>
+<p>The <code>ProviderPlugin</code> type defines 25+ optional methods. Only <code>id</code>, <code>label</code>, and <code>auth</code> are required &mdash; everything else has sensible defaults:</p>
+<pre><code class="language-typescript">type ProviderPlugin = {
+  // Identity
+  id: string;                    // Unique provider ID (e.g., "openai")
+  label: string;                 // Display name (e.g., "OpenAI")
+  docsPath?: string;             // Path to documentation
+  envVars?: string[];            // Expected env vars (e.g., ["OPENAI_API_KEY"])
+
+  // Authentication
+  auth: ProviderAuthMethod[];    // Ordered list of auth strategies
+
+  // Model Discovery
+  catalog?: ProviderPluginCatalog;
+  resolveDynamicModel?: (ctx) => ProviderRuntimeModel | null;
+  augmentModelCatalog?: (ctx) => ModelCatalogEntry[];
+
+  // Transport
+  normalizeTransport?: (ctx) => { api?: string; baseUrl?: string } | null;
+  normalizeResolvedModel?: (ctx) => ProviderRuntimeModel | null;
+  normalizeConfig?: (ctx) => ModelProviderConfig | null;
+
+  // Streaming
+  createStreamFn?: (ctx) => StreamFn | null;
+  wrapStreamFn?: (ctx) => StreamFn | null;
+
+  // Capabilities
+  capabilities?: Partial&lt;ProviderCapabilities&gt;;
+  supportsXHighThinking?: (ctx) => boolean;
+  resolveDefaultThinkingLevel?: (ctx) => ThinkingLevel | null;
+
+  // Usage & Billing
+  resolveUsageAuth?: (ctx) => Promise&lt;ProviderResolvedUsageAuth&gt;;
+  fetchUsageSnapshot?: (ctx) => Promise&lt;ProviderUsageSnapshot&gt;;
+
+  // Error Messages
+  buildMissingAuthMessage?: (ctx) => string | null;
+  buildUnknownModelHint?: (ctx) => string | null;
+};
+</code></pre>
+
+<h3 id="mechanism-auth">Authentication Chain</h3>
+<p>Each provider declares one or more <code>ProviderAuthMethod</code> objects. The auth resolver tries them in order, returning the first that succeeds (API key present, OAuth token valid, etc.):</p>
+<pre><code class="language-typescript">// From extensions/openai/openai-provider.ts
+auth: [
+  createProviderApiKeyAuthMethod({
+    providerId: "openai",
+    methodId: "api-key",
+    label: "OpenAI API key",
+    hint: "Direct OpenAI API key",
+    optionKey: "openaiApiKey",
+    flagName: "--openai-api-key",
+    envVar: "OPENAI_API_KEY",
+    promptMessage: "Enter OpenAI API key",
+    defaultModel: "gpt-5.4",
+    expectedProviders: ["openai"],
+    applyConfig: (cfg) => applyOpenAIConfig(cfg),
+    wizard: {
+      title: "OpenAI Setup",
+      steps: [/* interactive setup steps */],
+    },
+  }),
+],
+</code></pre>
+<div class="callout">
+<strong>Key detail:</strong> The <code>createProviderApiKeyAuthMethod</code> helper generates a full auth method from a declarative config. It handles env var lookup, CLI flag parsing, config file resolution, interactive prompts, and setup wizard rendering.
+</div>
+
+<h3 id="mechanism-model-resolution">Model Resolution Pipeline</h3>
+<p>When a user requests a model like <code>openai/gpt-5.4</code>, the resolution pipeline proceeds through these stages:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  Input["User requests model: openai/gpt-5.4"]
+  Catalog["Check static catalog"]
+  Dynamic["resolveDynamicModel()"]
+  Normalize["normalizeResolvedModel()"]
+  Compat["contributeResolvedModelCompat()"]
+  Transport["normalizeTransport()"]
+  Ready["ProviderRuntimeModel ready"]
+
+  Input --> Catalog
+  Catalog -->|Found| Normalize
+  Catalog -->|Not found| Dynamic
+  Dynamic -->|Resolved| Normalize
+  Dynamic -->|null| Error["Unknown model error"]
+  Normalize --> Compat
+  Compat --> Transport
+  Transport --> Ready
+</pre>
+</div>
+
+<h3 id="mechanism-streaming">Stream Processing</h3>
+<p>The streaming pipeline supports two extension points: <code>createStreamFn</code> (replace the entire stream) and <code>wrapStreamFn</code> (wrap the default stream with middleware):</p>
+<pre><code class="language-typescript">// From extensions/openai/openai-provider.ts
+wrapStreamFn: (ctx) => {
+  return createOpenAIAttributionHeadersWrapper({
+    innerStream: ctx.defaultStreamFn,
+    modelId: ctx.model.id,
+    providerFamily: "openai",
+  });
+},
+</code></pre>
+<div class="callout warn">
+<strong>Performance note:</strong> <code>wrapStreamFn</code> is preferred over <code>createStreamFn</code> when you only need to add headers or logging. It preserves the default streaming implementation and avoids re-implementing SSE parsing.
+</div>
+
+<!-- BEHAVIOR DIAGRAM -->
+<h2 id="behavior">Request Lifecycle</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant Agent as Agent Engine
+  participant Resolver as Provider Resolver
+  participant Auth as Auth Chain
+  participant Provider as ProviderPlugin
+  participant API as Vendor API
+
+  Agent->>Resolver: resolveProvider("openai/gpt-5.4")
+  Resolver->>Provider: resolveDynamicModel()
+  Provider-->>Resolver: ProviderRuntimeModel
+  Resolver->>Auth: prepareRuntimeAuth()
+  Auth-->>Resolver: API key + headers
+  Resolver->>Provider: normalizeTransport()
+  Provider-->>Resolver: { baseUrl, api }
+  Resolver->>Provider: wrapStreamFn()
+  Provider-->>Resolver: Wrapped StreamFn
+  Agent->>API: POST /v1/chat/completions (streaming)
+  API-->>Agent: SSE token stream
+</pre>
+</div>
+<p>The entire lifecycle from model selection to first token is typically under 100ms of local processing. Network latency to the vendor API dominates the total time-to-first-token.</p>
+
+<!-- ANNOTATED CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough</h2>
+<p>Walk through building a complete provider extension from scratch:</p>
+
+<div class="code-walk">
+<div class="step">
+<p>Define the provider metadata and auth chain. The <code>id</code> must be unique across all providers:</p>
+<pre><code class="language-typescript">// extensions/my-provider/my-provider.ts
+import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/core";
+import type { ProviderPlugin } from "openclaw/plugin-sdk/core";
+
+const PROVIDER_ID = "my-provider";
+
+export function buildMyProvider(): ProviderPlugin {
+  return {
+    id: PROVIDER_ID,
+    label: "My Provider",
+    docsPath: "/providers/my-provider",
+    envVars: ["MY_PROVIDER_API_KEY"],
+
+    auth: [
+      createProviderApiKeyAuthMethod({
+        providerId: PROVIDER_ID,
+        methodId: "api-key",
+        label: "My Provider API key",
+        envVar: "MY_PROVIDER_API_KEY",
+        flagName: "--my-provider-api-key",
+        defaultModel: "my-model-v1",
+        expectedProviders: [PROVIDER_ID],
+        applyConfig: (cfg) => ({
+          ...cfg,
+          baseUrl: "https://api.myprovider.com/v1",
+        }),
+      }),
+    ],
+  };
+}
+</code></pre>
+</div>
+
+<div class="step">
+<p>Add model catalog and dynamic resolution for forward compatibility with new models:</p>
+<pre><code class="language-typescript">// Continue in my-provider.ts
+export function buildMyProvider(): ProviderPlugin {
+  return {
+    // ... id, label, auth from Step 1 ...
+
+    catalog: {
+      models: [
+        { id: "my-model-v1", label: "My Model v1", contextWindow: 128000 },
+        { id: "my-model-v2", label: "My Model v2", contextWindow: 256000 },
+      ],
+    },
+
+    resolveDynamicModel: (ctx) => {
+      // Accept any model prefixed with "my-model-"
+      if (ctx.modelId.startsWith("my-model-")) {
+        return {
+          id: ctx.modelId,
+          label: ctx.modelId,
+          provider: PROVIDER_ID,
+        };
+      }
+      return null;
+    },
+
+    normalizeTransport: ({ provider, api, baseUrl }) => ({
+      api: api ?? "openai",  // Use OpenAI-compatible API format
+      baseUrl: baseUrl ?? "https://api.myprovider.com/v1",
+    }),
+
+    capabilities: { providerFamily: "openai" },
+  };
+}
+</code></pre>
+<div class="callout success">
+<strong>Compatibility tip:</strong> Setting <code>api: "openai"</code> in <code>normalizeTransport</code> tells the engine to use the OpenAI-compatible chat completions format. Most providers support this, making integration trivial.
+</div>
+</div>
+
+<div class="step">
+<p>Register the provider in the extension entry point:</p>
+<pre><code class="language-typescript">// extensions/my-provider/index.ts
+import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { buildMyProvider } from "./my-provider.js";
+
+export default definePluginEntry({
+  id: "my-provider",
+  name: "My Provider",
+  description: "Custom LLM provider integration",
+  register(api) {
+    api.registerProvider(buildMyProvider());
+  },
+});
+</code></pre>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Code Location</th></tr>
+  <tr><td>No auth method succeeds</td><td><code>buildMissingAuthMessage()</code> generates a user-friendly error with setup instructions</td><td><code>openai-provider.ts</code></td></tr>
+  <tr><td>Unknown model ID requested</td><td><code>resolveDynamicModel()</code> returns null; <code>buildUnknownModelHint()</code> suggests similar models</td><td>Provider resolver</td></tr>
+  <tr><td>Vendor API returns 429 (rate limit)</td><td><code>buildReplayPolicy()</code> defines retry intervals with exponential backoff</td><td>Stream wrapper</td></tr>
+  <tr><td>Model deprecated by vendor</td><td><code>suppressBuiltInModel()</code> hides it from catalog; <code>augmentModelCatalog()</code> adds replacement</td><td>Provider plugin</td></tr>
+  <tr><td>Transport normalization fails</td><td>Falls back to default base URL; warning logged</td><td><code>normalizeTransport()</code></td></tr>
+  <tr><td>Stream connection drops mid-response</td><td>Engine retries with partial context if <code>buildReplayPolicy()</code> permits</td><td>Agent engine</td></tr>
+</table>
+
+<!-- PROVIDER CAPABILITIES -->
+<h2 id="capabilities">Provider Capabilities Reference</h2>
+<table>
+  <tr><th>Capability</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>providerFamily</code></td><td><code>string</code></td><td>API compatibility family (e.g., <code>"openai"</code>, <code>"anthropic"</code>)</td></tr>
+  <tr><td><code>supportsXHighThinking</code></td><td><code>boolean</code></td><td>Whether the model supports extended reasoning/thinking tokens</td></tr>
+  <tr><td><code>isModernModelRef</code></td><td><code>boolean</code></td><td>Whether the model ID uses the modern naming convention</td></tr>
+  <tr><td><code>normalizeToolSchemas</code></td><td><code>function</code></td><td>Custom tool schema transformation for vendor-specific formats</td></tr>
+  <tr><td><code>createEmbeddingProvider</code></td><td><code>function</code></td><td>Factory for vector embedding generation</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Config Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>envVars</code></td><td><code>[]</code></td><td>Environment variables the provider reads for API keys</td></tr>
+  <tr><td><code>auth[].optionKey</code></td><td>&mdash;</td><td>Config file key for the API key (e.g., <code>openaiApiKey</code>)</td></tr>
+  <tr><td><code>auth[].flagName</code></td><td>&mdash;</td><td>CLI flag name (e.g., <code>--openai-api-key</code>)</td></tr>
+  <tr><td><code>auth[].defaultModel</code></td><td>&mdash;</td><td>Model to use when user doesn&rsquo;t specify one</td></tr>
+  <tr><td><code>normalizeTransport.baseUrl</code></td><td>Vendor default</td><td>Override API base URL (for proxies, self-hosted endpoints)</td></tr>
+</table>
+
+<!-- RELATED TOPICS -->
+<h2 id="related">Related Topics</h2>
+<p>See also:</p>
+<ul>
+  <li><a href="../index.html">Extensions overview</a> &mdash; all extension categories and the full ecosystem</li>
+  <li><a href="../extension_contract/index.html">Extension Contract</a> &mdash; the shared registration interface all extensions use</li>
+  <li><a href="../channel_extensions/index.html">Channel Extensions</a> &mdash; the parallel adapter pattern for messaging channels</li>
+</ul>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source files for provider adapters</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>extensions/
+├── openai/
+│   ├── index.ts                   ← Entry: registers provider, speech, image, media, CLI
+│   ├── openai-provider.ts         ← ProviderPlugin: auth, catalog, transport, streaming
+│   ├── speech-provider.ts         ← SpeechProviderPlugin: TTS via OpenAI
+│   ├── image-generation-provider.ts ← ImageGenerationProviderPlugin: DALL-E
+│   ├── media-understanding-provider.ts ← Media analysis (vision, audio)
+│   └── cli-backend.ts             ← CLI interactive backend (Codex)
+├── anthropic/
+│   ├── index.ts                   ← Entry: registers Anthropic provider
+│   └── anthropic-provider.ts      ← ProviderPlugin: Claude models, extended thinking
+├── google/
+│   ├── index.ts                   ← Entry: registers Google provider
+│   └── google-provider.ts         ← ProviderPlugin: Gemini models, multimodal
+├── ollama/
+│   ├── index.ts                   ← Entry: registers Ollama provider
+│   └── ollama-provider.ts         ← ProviderPlugin: local server, any GGUF model
+├── groq/
+│   ├── index.ts                   ← Entry: registers Groq provider
+│   └── groq-provider.ts           ← ProviderPlugin: ultra-fast inference
+└── (30+ more provider extensions...)
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Extensions</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

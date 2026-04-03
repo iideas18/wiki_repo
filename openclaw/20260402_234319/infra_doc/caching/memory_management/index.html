@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Memory Management — OpenClaw Infrastructure</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2333;--border:#30363d;--text:#e6edf3;--text-muted:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.1);--success:#3fb950;--warning:#d29922;--danger:#f85149;--info:#58a6ff;--code-bg:#1c2333;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--font-mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.1);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--info:#0969da;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;transition:background .2s,color .2s}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:1rem;padding:.5rem 1rem;background:var(--accent);color:#fff;border-radius:var(--radius);z-index:9999;font-weight:600}.skip-link:focus{top:1rem}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+nav.breadcrumb{font-size:.875rem;color:var(--text-muted)}nav.breadcrumb a{color:var(--accent)}nav.breadcrumb .sep{margin:0 .35rem;color:var(--text-muted)}
+.theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:.4rem .75rem;border-radius:var(--radius);cursor:pointer;font-size:.875rem;display:flex;align-items:center;gap:.35rem;transition:background .15s}.theme-toggle:hover{background:var(--accent-bg)}
+main{max-width:56rem;margin:0 auto;padding:2rem 1.5rem 4rem}
+.hero{text-align:center;padding:2.5rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent);padding:.2rem .7rem;border-radius:99px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+.hero h1{font-size:2rem;margin-bottom:.5rem}.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.meta-bar{display:flex;gap:1.5rem;justify-content:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted);flex-wrap:wrap}.meta-bar span{display:flex;align-items:center;gap:.3rem}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:2rem}.toc h2{font-size:1rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}.toc ol{padding-left:1.25rem}.toc li{margin:.35rem 0}.toc a{font-size:.925rem}
+h2{font-size:1.5rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.15rem;margin:1.75rem 0 .75rem;color:var(--accent)}
+p{margin:.75rem 0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}.summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}.summary-grid .card h4{font-size:.95rem;margin-bottom:.35rem;color:var(--accent)}.summary-grid .card p{font-size:.85rem;color:var(--text-muted);margin:0}
+.callout{border-left:4px solid var(--info);background:var(--surface);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.25rem 0;font-size:.925rem}.callout.analogy{border-left-color:var(--success)}.callout.warning{border-left-color:var(--warning)}.callout.danger{border-left-color:var(--danger)}.callout strong{display:block;margin-bottom:.25rem}
+.code-walk{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:1.5rem 0;overflow:hidden}.code-walk .step{display:flex;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);align-items:flex-start}.code-walk .step:last-child{border-bottom:none}.code-walk .step-num{background:var(--accent);color:#fff;width:1.75rem;height:1.75rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}.code-walk .step-body{flex:1;min-width:0}.code-walk .step-body p{margin:0 0 .5rem;font-size:.9rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative}pre code{background:none;color:inherit;padding:0;font-family:var(--font-mono);font-size:.85rem;line-height:1.6}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .15s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{background:var(--accent-bg);color:var(--accent)}
+.mermaid-wrapper{margin:1.5rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;position:relative}.mermaid-wrapper:hover{box-shadow:var(--shadow)}.mermaid-wrapper .expand-hint{position:absolute;top:.5rem;right:.5rem;font-size:.7rem;color:var(--text-muted);background:var(--surface-2);padding:.15rem .5rem;border-radius:4px}
+.diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .2s}.diagram-overlay.active{opacity:1}.diagram-overlay .close-overlay{position:absolute;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);color:var(--text);width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center}.diagram-overlay .diagram-content{max-width:90vw;max-height:90vh;overflow:auto;background:var(--surface);border-radius:var(--radius);padding:2rem}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;width:2.5rem;height:2.5rem;border-radius:50%;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:99;box-shadow:var(--shadow)}.back-to-top.visible{opacity:1}
+footer{text-align:center;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;margin-top:3rem}footer a{color:var(--accent)}
+@media print{header,.theme-toggle,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay,.skip-link{display:none!important}body{background:#fff;color:#000}main{max-width:100%;padding:0}.mermaid-wrapper{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word;border:1px solid #ccc}}
+@media(max-width:768px){main{padding:1.5rem 1rem}.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}.code-walk .step{flex-direction:column}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb navigation">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">caching</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Memory Management</span>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+    <span class="theme-icon">🌙</span> Theme
+  </button>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <span class="focus-label">Focus Page</span>
+    <h1>Memory Management</h1>
+    <p class="subtitle">Fixed-window rate limiting, bounded queues, and memory pressure controls</p>
+    <div class="meta-bar">
+      <span>📅 2026-04-02</span>
+      <span>📖 <span id="readingTime">–</span> min read</span>
+      <span>🔖 src/infra/</span>
+      <span>🔗 047b701859</span>
+    </div>
+  </div>
+
+  <div class="toc" id="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#rate-limiter">Fixed-Window Rate Limiter</a></li>
+      <li><a href="#bounded-collections">Bounded Collections</a></li>
+      <li><a href="#retry-runners">Rate Limit Retry Runners</a></li>
+      <li><a href="#backoff-policy">Backoff Policy</a></li>
+      <li><a href="#memory-safety">Memory Safety &amp; Fatal Errors</a></li>
+      <li><a href="#disk-budget">Session Disk Budget</a></li>
+      <li><a href="#diagrams">Architecture Diagrams</a></li>
+    </ol>
+  </div>
+
+  <!-- Overview -->
+  <h2 id="overview">Overview</h2>
+
+  <div class="callout analogy">
+    <strong>🎯 What &amp; Why</strong>
+    Without memory management, long-running processes like the OpenClaw gateway would leak memory until they crash. Bounded collections, rate limiters, and disk budgets keep resource usage predictable. Every in-memory collection has a cap, every retry has a ceiling, and every disk operation has a quota.
+  </div>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy</strong>
+    Like a swimming pool with a lifeguard. The pool has a max capacity (bounded queue). The lifeguard (rate limiter) only lets new swimmers in when there's room. If the pool is full, you wait in line (<code>retryAfterMs</code>). If someone stays too long (TTL), they're asked to leave. If the pool floods (OOM), everyone evacuates (fatal exit).
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Rate Limiter</h4>
+      <p>Fixed-window counter: consume tokens, get allowed/denied with retry-after hint.</p>
+    </div>
+    <div class="card">
+      <h4>Bounded Queues</h4>
+      <p>Presence: 200 entries. Sessions: 20 per queue. Delivery: disk-bounded.</p>
+    </div>
+    <div class="card">
+      <h4>Backoff Policy</h4>
+      <p>Exponential with jitter: <code>base × factor^(attempt-1) + jitter</code>.</p>
+    </div>
+    <div class="card">
+      <h4>OOM Handling</h4>
+      <p>ERR_OUT_OF_MEMORY triggers immediate process exit. No retry, no recovery.</p>
+    </div>
+  </div>
+
+  <!-- Fixed-Window Rate Limiter -->
+  <h2 id="rate-limiter">Fixed-Window Rate Limiter</h2>
+  <p>
+    The <code>FixedWindowRateLimiter</code> divides time into fixed windows (e.g., 60 seconds). Each window allows a set number of requests. The <code>consume()</code> method returns whether the request is allowed, how many tokens remain, and — if denied — how long the caller should wait before retrying.
+  </p>
+
+  <div class="code-walk">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Define the rate limiter with a window duration and maximum consumption count per window.</p>
+        <pre><code class="language-typescript">interface RateLimitResult {
+  allowed: boolean;
+  retryAfterMs: number;
+  remaining: number;
+}
+
+class FixedWindowRateLimiter {
+  private windowStartMs: number = 0;
+  private consumed: number = 0;
+
+  constructor(
+    private readonly windowMs: number,
+    private readonly maxPerWindow: number
+  ) {}
+
+  consume(): RateLimitResult {
+    const now = Date.now();
+
+    // Reset window if expired
+    if (now - this.windowStartMs >= this.windowMs) {
+      this.windowStartMs = now;
+      this.consumed = 0;
+    }
+
+    if (this.consumed < this.maxPerWindow) {
+      this.consumed++;
+      return {
+        allowed: true,
+        retryAfterMs: 0,
+        remaining: this.maxPerWindow - this.consumed,
+      };
+    }
+
+    const windowEnd = this.windowStartMs + this.windowMs;
+    return {
+      allowed: false,
+      retryAfterMs: Math.max(0, windowEnd - now),
+      remaining: 0,
+    };
+  }
+
+  reset(): void {
+    this.windowStartMs = 0;
+    this.consumed = 0;
+  }
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Usage example: create a limiter allowing 100 requests per 60 seconds, then check before each API call.</p>
+        <pre><code class="language-typescript">const apiLimiter = new FixedWindowRateLimiter(60_000, 100);
+
+async function makeApiCall(payload: unknown): Promise&lt;Response&gt; {
+  const result = apiLimiter.consume();
+  if (!result.allowed) {
+    await sleepWithAbort(result.retryAfterMs);
+    return makeApiCall(payload); // retry after wait
+  }
+  return fetch("/api/endpoint", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bounded Collections -->
+  <h2 id="bounded-collections">Bounded Collections</h2>
+  <p>
+    Every in-memory collection in the caching layer has an explicit size limit. These bounds prevent any single subsystem from consuming unbounded memory.
+  </p>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>SystemPresence</h4>
+      <p>Max 200 entries. Oldest-first eviction when cap exceeded. 5-min TTL per entry.</p>
+    </div>
+    <div class="card">
+      <h4>SessionQueue</h4>
+      <p>Max 20 events per session. FIFO overflow — oldest shifted out on push.</p>
+    </div>
+    <div class="card">
+      <h4>Delivery Queue</h4>
+      <p>Bounded by disk space, not memory. Each entry is a .json file. Disk budget enforced separately.</p>
+    </div>
+    <div class="card">
+      <h4>Config Backups</h4>
+      <p>Max 5 rotation slots. Oldest backup deleted when 6th would be created.</p>
+    </div>
+  </div>
+
+  <!-- Retry Runners -->
+  <h2 id="retry-runners">Rate Limit Retry Runners</h2>
+  <p>
+    When external APIs rate-limit requests, the retry runner handles backoff automatically. Two factory functions create pre-configured runners: <code>createRateLimitRetryRunner</code> for general APIs and <code>createTelegramRetryRunner</code> for Telegram-specific limits.
+  </p>
+
+  <div class="callout">
+    <strong>📋 Telegram Retry Configuration</strong>
+    Telegram-specific runner: 3 max attempts, 400ms initial delay, 30s maximum delay, 0.1 jitter factor. Transient errors are detected via pattern: <code>/429|timeout|connect|reset|closed|unavailable|temporarily/i</code>.
+  </div>
+
+  <pre><code class="language-typescript">interface RetryRunnerParams {
+  maxAttempts: number;
+  backoff: BackoffPolicy;
+  isTransient: (error: unknown) =&gt; boolean;
+  onRetry?: (attempt: number, error: unknown) =&gt; void;
+}
+
+const TRANSIENT_PATTERN = /429|timeout|connect|reset|closed|unavailable|temporarily/i;
+
+function createTelegramRetryRunner(): RetryRunner {
+  return createRateLimitRetryRunner({
+    maxAttempts: 3,
+    backoff: {
+      initialMs: 400,
+      maxMs: 30_000,
+      factor: 2,
+      jitter: 0.1,
+    },
+    isTransient: (err) =&gt; {
+      const msg = err instanceof Error ? err.message : String(err);
+      return TRANSIENT_PATTERN.test(msg);
+    },
+    onRetry: (attempt, err) =&gt; {
+      console.warn(`Telegram retry #${attempt}:`, err);
+    },
+  });
+}
+
+function createRateLimitRetryRunner(
+  params: RetryRunnerParams
+): RetryRunner {
+  return {
+    async run&lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;): Promise&lt;T&gt; {
+      let lastError: unknown;
+      for (let attempt = 1; attempt &lt;= params.maxAttempts; attempt++) {
+        try {
+          return await fn();
+        } catch (err) {
+          lastError = err;
+          if (!params.isTransient(err) || attempt === params.maxAttempts) {
+            throw err;
+          }
+          const delayMs = computeBackoff(params.backoff, attempt);
+          params.onRetry?.(attempt, err);
+          await sleepWithAbort(delayMs);
+        }
+      }
+      throw lastError;
+    },
+  };
+}</code></pre>
+
+  <!-- Backoff Policy -->
+  <h2 id="backoff-policy">Backoff Policy</h2>
+  <p>
+    The <code>BackoffPolicy</code> type defines exponential backoff parameters. The <code>computeBackoff</code> function calculates the delay for a given attempt using the formula: <code>base × factor^(attempt-1) + random jitter</code>. The result is clamped to <code>maxMs</code>.
+  </p>
+
+  <div class="code-walk">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Define the backoff policy interface and the compute function with jitter randomization.</p>
+        <pre><code class="language-typescript">interface BackoffPolicy {
+  initialMs: number;
+  maxMs: number;
+  factor: number;
+  jitter: number; // 0..1 — proportion of base delay added as random noise
+}
+
+function computeBackoff(policy: BackoffPolicy, attempt: number): number {
+  const base = policy.initialMs * Math.pow(policy.factor, attempt - 1);
+  const jitterAmount = base * policy.jitter * Math.random();
+  return Math.min(base + jitterAmount, policy.maxMs);
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Cancellable sleep using <code>AbortSignal</code>. If the signal fires before the delay expires, the sleep resolves immediately — enabling graceful shutdown during backoff waits.</p>
+        <pre><code class="language-typescript">function sleepWithAbort(
+  ms: number,
+  signal?: AbortSignal
+): Promise&lt;void&gt; {
+  return new Promise((resolve) =&gt; {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () =&gt; {
+      clearTimeout(timer);
+      resolve();
+    }, { once: true });
+  });
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory Safety & Fatal Errors -->
+  <h2 id="memory-safety">Memory Safety &amp; Fatal Errors</h2>
+  <p>
+    The <code>unhandled-rejections.ts</code> module classifies unhandled promise rejections into three categories: <strong>fatal</strong> (immediate exit), <strong>transient</strong> (log + retry), and <strong>unknown</strong> (log + continue). <code>ERR_OUT_OF_MEMORY</code> is always fatal.
+  </p>
+
+  <div class="callout danger">
+    <strong>🚨 Fatal: ERR_OUT_OF_MEMORY</strong>
+    When Node.js reports an out-of-memory error, the process exits immediately with code 137. No retry logic is attempted — the process must be restarted by the supervisor (systemd, Docker, etc.). Attempting to recover from OOM risks heap corruption and undefined behavior.
+  </div>
+
+  <pre><code class="language-typescript">type ErrorClass = "fatal" | "transient" | "unknown";
+
+function classifyError(err: unknown): ErrorClass {
+  const msg = err instanceof Error ? err.message : String(err);
+
+  // Fatal — no recovery possible
+  if (/ERR_OUT_OF_MEMORY/i.test(msg)) return "fatal";
+  if (/heap out of memory/i.test(msg)) return "fatal";
+
+  // Transient — safe to retry
+  if (/SQLITE_BUSY/i.test(msg)) return "transient";
+  if (/SQLITE_LOCKED/i.test(msg)) return "transient";
+  if (/ECONNRESET/i.test(msg)) return "transient";
+  if (/ETIMEDOUT/i.test(msg)) return "transient";
+
+  return "unknown";
+}
+
+process.on("unhandledRejection", (reason) =&gt; {
+  const cls = classifyError(reason);
+  console.error(`Unhandled rejection [${cls}]:`, reason);
+
+  if (cls === "fatal") {
+    process.exit(137);
+  }
+  // transient and unknown: logged, not crashed
+});</code></pre>
+
+  <div class="callout warning">
+    <strong>⚠️ SQLite Transient Errors</strong>
+    <code>SQLITE_BUSY</code> and <code>SQLITE_LOCKED</code> are classified as transient. These occur during write contention in WAL mode. The retry runner re-attempts the query after a short backoff rather than crashing the process.
+  </div>
+
+  <!-- Session Disk Budget -->
+  <h2 id="disk-budget">Session Disk Budget</h2>
+  <p>
+    Each session has a disk budget enforced by periodic sweeps. The sweep scans the session directory, sums file sizes, and prunes the oldest entries until total usage falls below the configured quota.
+  </p>
+
+  <pre><code class="language-typescript">interface SessionDiskBudgetSweepResult {
+  prunedEntries: number;
+  freedBytes: number;
+  scanDurationMs: number;
+  budgetExceeded: boolean;
+}
+
+async function sweepSessionDisk(
+  sessionDir: string,
+  budgetBytes: number
+): Promise&lt;SessionDiskBudgetSweepResult&gt; {
+  const start = Date.now();
+  const entries = await readdir(sessionDir, { withFileTypes: true });
+
+  // Sort by mtime ascending (oldest first)
+  const files = await Promise.all(
+    entries
+      .filter(e =&gt; e.isFile())
+      .map(async (e) =&gt; {
+        const p = join(sessionDir, e.name);
+        const stat = await fsStat(p);
+        return { path: p, size: stat.size, mtimeMs: stat.mtimeMs };
+      })
+  );
+  files.sort((a, b) =&gt; a.mtimeMs - b.mtimeMs);
+
+  let totalBytes = files.reduce((s, f) =&gt; s + f.size, 0);
+  let prunedEntries = 0;
+  let freedBytes = 0;
+
+  while (totalBytes &gt; budgetBytes &amp;&amp; files.length &gt; 0) {
+    const oldest = files.shift()!;
+    await unlink(oldest.path);
+    totalBytes -= oldest.size;
+    freedBytes += oldest.size;
+    prunedEntries++;
+  }
+
+  return {
+    prunedEntries,
+    freedBytes,
+    scanDurationMs: Date.now() - start,
+    budgetExceeded: totalBytes &gt; budgetBytes,
+  };
+}</code></pre>
+
+  <!-- Diagrams -->
+  <h2 id="diagrams">Architecture Diagrams</h2>
+
+  <h3>Rate Limiter Decision Flow</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand rate limiter decision flowchart">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="rate-limiter-flow">
+flowchart TD
+    A[Incoming Request] --> B{Window expired?}
+    B -- Yes --> C[Reset window + counter]
+    C --> D{Consumed < max?}
+    B -- No --> D
+    D -- Yes --> E[Increment counter]
+    E --> F[Return allowed=true, remaining=N]
+    D -- No --> G[Calculate retryAfterMs]
+    G --> H[Return allowed=false]
+    H --> I{Caller retries?}
+    I -- Yes --> J[sleepWithAbort retryAfterMs]
+    J --> A
+    I -- No --> K[Request dropped]
+    </pre>
+  </div>
+
+  <h3>Memory Pressure Response States</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand memory pressure state diagram">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="memory-pressure-states">
+stateDiagram-v2
+    [*] --> Normal : process start
+    Normal --> Warning : heap usage > 70%
+    Warning --> Normal : GC reclaims memory
+    Warning --> Critical : heap usage > 85%
+    Critical --> Warning : aggressive GC + eviction
+    Critical --> OOM : allocation fails
+    OOM --> Fatal : ERR_OUT_OF_MEMORY
+    Fatal --> [*] : process.exit(137)
+
+    Normal --> Normal : bounded collections enforce caps
+    Warning --> Warning : rate limiter slows intake
+    Critical --> Critical : disk budget sweep runs
+    </pre>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="../index.html">← Back to Caching Module</a>
+  </p>
+  <p>OpenClaw Infrastructure Wiki · Generated 2026-04-02</p>
+</footer>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <button class="close-overlay" aria-label="Close diagram overlay">&times;</button>
+  <div class="diagram-content" id="diagramContent"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script type="module">
+/* mermaid loaded via CDN in head */
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getPreferredTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored) return stored;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  const icon = document.querySelector('.theme-icon');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+
+  const hljsLink = document.getElementById('hljs-theme');
+  if (hljsLink) {
+    hljsLink.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+}
+
+applyTheme(getPreferredTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+  initMermaid();
+});
+
+// Reading time
+const text = document.querySelector('main')?.textContent || '';
+const words = text.trim().split(/\s+/).length;
+const readingEl = document.getElementById('readingTime');
+if (readingEl) readingEl.textContent = String(Math.max(1, Math.round(words / 200)));
+
+// Highlight.js
+hljs.highlightAll();
+
+// Copy buttons
+document.querySelectorAll('pre code').forEach(block => {
+  if (block.closest('.mermaid-wrapper')) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(block.textContent || '');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+  block.closest('pre')?.appendChild(btn);
+});
+
+// Mermaid
+function initMermaid() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  mermaid.initialize({
+    startOnLoad:false,
+    theme: theme === 'dark' ? 'dark' : 'default',
+    flowchart: { useMaxWidth: true },
+    securityLevel: 'loose',
+  });
+
+  document.querySelectorAll('pre.mermaid').forEach((el, i) => {
+    const source = el.getAttribute('data-source') || `diagram-${i}`;
+    const code = el.textContent || '';
+    el.removeAttribute('data-processed');
+    el.innerHTML = code;
+    mermaid.render(`mermaid-${source}-${i}`, code).then(({ svg }).catch(function(e){console.warn('mermaid:',e)}) => {
+      el.innerHTML = svg;
+    }).catch(err => {
+      console.warn(`Mermaid render failed for ${source}:`, err);
+      el.innerHTML = `<span style="color:var(--danger)">Diagram render failed</span>`;
+    });
+  });
+}
+initMermaid();
+
+// Diagram overlay
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('diagramContent');
+
+document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+  wrapper.addEventListener('click', () => {
+    const svg = wrapper.querySelector('svg');
+    if (!svg || !overlay || !overlayContent) return;
+    overlayContent.innerHTML = '';
+    overlayContent.appendChild(svg.cloneNode(true));
+    overlay.classList.add('active');
+  });
+});
+
+overlay?.querySelector('.close-overlay')?.addEventListener('click', () => {
+  overlay.classList.remove('active');
+});
+overlay?.addEventListener('click', (e) => {
+  if (e.target === overlay) overlay.classList.remove('active');
+});
+
+// Back to top
+const backBtn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  if (backBtn) backBtn.classList.toggle('visible', window.scrollY > 400);
+});
+backBtn?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+    overlay.classList.remove('active');
+  }
+});
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

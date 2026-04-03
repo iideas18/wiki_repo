@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/commands/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Commands/Admin — Diagnostics Commands</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Commands</a> &rsaquo; <a href="../index.html">Admin</a> &rsaquo; <span>Diagnostics Commands</span></nav>
+
+<main id="main">
+<h1>Diagnostics Commands</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Health checks, status scanning, and automated repair flows</p>
+  <p>The diagnostics subsystem provides three complementary views into system health: the <code>health</code> command for real-time gateway probes, the <code>status</code> command for deep runtime and session scanning, and the <code>doctor</code> flow for interactive config repair. Together they form the primary observability surface for operators and the first line of automated self-healing.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>Diagnostics commands are the nervous system of an OpenClaw deployment. When a channel stops responding, when sessions accumulate stale state, or when a gateway probe times out, these commands are the first tools an operator reaches for. They surface structured health data as both human-readable summaries and machine-parseable JSON, enabling both manual triage and automated monitoring pipelines.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a hospital triage system. The <code>health</code> command is the vital-signs monitor — quick pulse, temperature, blood pressure. The <code>status</code> command is the full diagnostic panel — blood work, imaging, detailed charts. The <code>doctor</code> command is the attending physician who reads the panels and prescribes treatment. Each level provides progressively deeper insight and intervention capability.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Probe gateway health, scan runtime status, and interactively repair misconfigured deployments via structured diagnostic pipelines.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>CLI flags (<code>--json</code>, <code>--verbose</code>, <code>--deep</code>, <code>--usage</code>, <code>--timeout-ms</code>), gateway RPC responses, and local config files.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Should we probe channels? Is the heartbeat stale? Are sessions orphaned? Does the config need migration? Should we offer an update first?</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p><code>HealthSummary</code> or <code>StatusReport</code> objects rendered as tables or JSON. The doctor flow may mutate config files and restart services.</p></div>
+</div>
+
+<div class="callout">
+  <strong>Three diagnostic tiers:</strong> <code>health</code> is fast and read-only (gateway round-trip). <code>status</code> adds local runtime and session scanning. <code>doctor</code> is the only tier that writes — it can repair config, update allowlists, and restart processes.
+</div>
+
+<!-- CORE TYPES -->
+<h2 id="core-types">Core Types</h2>
+<p>The health subsystem is built around a hierarchy of summary types. <code>HealthSummary</code> is the top-level envelope returned by the gateway, containing per-channel, per-agent, and session data. Each nested type carries its own probe and heartbeat metadata.</p>
+
+<pre><code class="language-typescript">// src/commands/health.ts — ChannelAccountHealthSummary
+export type ChannelAccountHealthSummary = {
+  accountId: string;
+  configured?: boolean;
+  linked?: boolean;
+  authAgeMs?: number | null;
+  probe?: unknown;
+  lastProbeAt?: number | null;
+  [key: string]: unknown;
+};
+
+// src/commands/health.ts — ChannelHealthSummary
+export type ChannelHealthSummary = ChannelAccountHealthSummary &amp; {
+  accounts?: Record&lt;string, ChannelAccountHealthSummary&gt;;
+};</code></pre>
+
+<pre><code class="language-typescript">// src/commands/health.ts — AgentHealthSummary &amp; top-level HealthSummary
+export type AgentHealthSummary = {
+  agentId: string;
+  name?: string;
+  isDefault: boolean;
+  heartbeat: AgentHeartbeatSummary;
+  sessions: HealthSummary["sessions"];
+};
+
+export type HealthSummary = {
+  ok: true;
+  ts: number;
+  durationMs: number;
+  channels: Record&lt;string, ChannelHealthSummary&gt;;
+  channelOrder: string[];
+  channelLabels: Record&lt;string, string&gt;;
+  heartbeatSeconds: number;
+  defaultAgentId: string;
+  agents: AgentHealthSummary[];
+  sessions: {
+    path: string;
+    count: number;
+    recent: Array&lt;{
+      key: string;
+      updatedAt: number | null;
+      age: number | null;
+    }&gt;;
+  };
+};</code></pre>
+
+<table>
+  <tr><th>Type</th><th>Scope</th><th>Key fields</th></tr>
+  <tr><td><code>ChannelAccountHealthSummary</code></td><td>Single account within a channel</td><td><code>accountId</code>, <code>configured</code>, <code>linked</code>, <code>authAgeMs</code>, <code>probe</code></td></tr>
+  <tr><td><code>ChannelHealthSummary</code></td><td>Entire channel (extends account)</td><td>Inherits account fields plus <code>accounts</code> map for multi-account channels</td></tr>
+  <tr><td><code>AgentHealthSummary</code></td><td>Single agent instance</td><td><code>agentId</code>, <code>isDefault</code>, <code>heartbeat</code>, <code>sessions</code></td></tr>
+  <tr><td><code>HealthSummary</code></td><td>Full system snapshot</td><td><code>ok</code>, <code>ts</code>, <code>durationMs</code>, <code>channels</code>, <code>agents</code>, <code>sessions</code></td></tr>
+</table>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Probe depth</td><td><code>--verbose</code> flag sets <code>{ probe: true }</code> in gateway params</td><td>Without verbose, channels report cached status only — probing triggers a live round-trip to each provider API</td></tr>
+  <tr><td>Timeout handling</td><td><code>opts.timeoutMs</code> passed to <code>callGateway</code></td><td>A slow channel probe must not block the entire health check; the timeout ensures bounded latency</td></tr>
+  <tr><td>JSON vs human output</td><td><code>opts.json</code> boolean flag</td><td>JSON mode emits raw <code>HealthSummary</code> for piping into monitoring tools; human mode renders colored tables</td></tr>
+  <tr><td>Deep status scan</td><td><code>opts.deep</code> flag on <code>statusCommand</code></td><td>Deep mode additionally scans local runtime files and session directories for orphaned state</td></tr>
+  <tr><td>Doctor auto-update offer</td><td><code>maybeOfferUpdateBeforeDoctor</code> guard</td><td>Running doctor on an outdated binary wastes time — the guard prompts for update first</td></tr>
+  <tr><td>Config migration</td><td><code>loadAndMaybeMigrateDoctorConfig</code></td><td>Old config schemas are silently migrated before diagnostic checks run, preventing false positives</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>The diagnostics subsystem has three independent but composable command paths: the <strong>health command</strong> for gateway-level probes, the <strong>status command</strong> for local runtime scanning, and the <strong>doctor flow</strong> for interactive repair. Each is designed to be invoked independently or chained in automated pipelines.</p>
+
+<h3 id="mechanism-health">Health Command — Gateway Probing</h3>
+<p>The <code>healthCommand</code> function issues a single RPC call to the gateway's <code>health</code> method. When the <code>--verbose</code> flag is set, it passes <code>{ probe: true }</code> to trigger live channel probes rather than returning cached status. The result is a complete <code>HealthSummary</code> snapshot.</p>
+
+<pre><code class="language-typescript">// src/commands/health.ts — healthCommand
+export async function healthCommand(
+  opts: { json?: boolean; timeoutMs?: number; verbose?: boolean; config?: OpenClawConfig },
+  runtime: RuntimeEnv,
+) {
+  const cfg = opts.config ?? runtime.config;
+  const summary = await callGateway&lt;HealthSummary&gt;({
+    method: "health",
+    params: opts.verbose ? { probe: true } : undefined,
+    timeoutMs: opts.timeoutMs,
+    config: cfg,
+  });
+
+  if (opts.json) {
+    runtime.stdout.write(JSON.stringify(summary, null, 2));
+    return;
+  }
+
+  // Render human-readable channel table
+  renderChannelTable(summary.channels, summary.channelOrder, summary.channelLabels, runtime);
+  renderAgentTable(summary.agents, summary.defaultAgentId, runtime);
+  renderSessionSummary(summary.sessions, runtime);
+}</code></pre>
+
+<p>The companion <code>getHealthSnapshot</code> function provides a programmatic API for other subsystems (e.g. the doctor flow) that need a <code>HealthSummary</code> without CLI rendering:</p>
+
+<pre><code class="language-typescript">// src/commands/health.ts — getHealthSnapshot
+export async function getHealthSnapshot(
+  params?: { timeoutMs?: number; probe?: boolean },
+): Promise&lt;HealthSummary&gt; {
+  return callGateway&lt;HealthSummary&gt;({
+    method: "health",
+    params: params?.probe ? { probe: true } : undefined,
+    timeoutMs: params?.timeoutMs,
+  });
+}</code></pre>
+
+<h3 id="mechanism-status">Status Command — Runtime Scanning</h3>
+<p>The <code>statusCommand</code> extends health data with local runtime introspection. It scans session directories, checks process states, and optionally gathers usage statistics. The <code>--deep</code> flag activates the full scan pipeline including <code>status.scan.runtime.ts</code> and <code>status.scan.fast-json.ts</code>.</p>
+
+<pre><code class="language-typescript">// src/commands/status.command.ts — statusCommand
+export async function statusCommand(
+  opts: {
+    json?: boolean;
+    deep?: boolean;
+    usage?: boolean;
+    timeoutMs?: number;
+    verbose?: boolean;
+    all?: boolean;
+  },
+  runtime: RuntimeEnv,
+) {
+  const health = await getHealthSnapshot({
+    timeoutMs: opts.timeoutMs,
+    probe: opts.verbose,
+  });
+
+  const scanResult = opts.deep
+    ? await deepScan(runtime)
+    : await fastScan(runtime);
+
+  const summary = buildStatusSummary(health, scanResult, {
+    includeUsage: opts.usage,
+    includeAll: opts.all,
+  });
+
+  if (opts.json) {
+    runtime.stdout.write(JSON.stringify(summary, null, 2));
+    return;
+  }
+
+  renderStatusReport(summary, runtime);
+}</code></pre>
+
+<div class="callout warn">
+  <strong>Performance note:</strong> Deep scan reads every session file from disk via <code>status.scan.fast-json.ts</code>, which uses streaming JSON parsing to avoid loading entire session blobs into memory. On deployments with 10,000+ sessions, prefer <code>--json</code> output piped to <code>jq</code> for filtering.
+</div>
+
+<h3 id="mechanism-doctor">Doctor Flow — Interactive Repair</h3>
+<p>The doctor flow is the most complex diagnostic path. It combines health probing, config validation, and interactive repair into a single guided workflow. The flow is orchestrated by <code>createDoctorPrompter</code> which presents issues and repair options through a terminal UI.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  START["doctor command invoked"]
+  UPDATE{"maybeOfferUpdateBeforeDoctor()"}
+  MIGRATE["loadAndMaybeMigrateDoctorConfig()"]
+  HEALTH["getHealthSnapshot(probe: true)"]
+  INSTALL["noteSourceInstallIssues()"]
+  STARTUP["noteStartupOptimizationHints()"]
+  ALLOWLIST["Check allowlist policies"]
+  ISSUES{"Issues found?"}
+  PROMPT["createDoctorPrompter — display issues"]
+  REPAIR["Apply selected repairs"]
+  VERIFY["Re-run health check"]
+  DONE["Report summary"]
+
+  START --> UPDATE
+  UPDATE -->|"Outdated"| DONE
+  UPDATE -->|"Current"| MIGRATE
+  MIGRATE --> HEALTH
+  HEALTH --> INSTALL
+  INSTALL --> STARTUP
+  STARTUP --> ALLOWLIST
+  ALLOWLIST --> ISSUES
+  ISSUES -->|"No"| DONE
+  ISSUES -->|"Yes"| PROMPT
+  PROMPT --> REPAIR
+  REPAIR --> VERIFY
+  VERIFY --> DONE
+</pre>
+</div>
+<p>The doctor flow runs six sequential diagnostic stages. First, it checks whether the binary itself is outdated. Then it migrates any legacy config schemas. The health snapshot is taken with full probing enabled. Installation issues (missing binaries, incorrect permissions) and startup optimization hints (unnecessary env vars, slow plugin loads) are noted. Finally, allowlist policies are validated against the current channel configuration.</p>
+
+<div class="callout success">
+  <strong>Idempotent repairs:</strong> Every repair action in the doctor flow is idempotent. Running <code>doctor</code> twice with the same config produces the same result. Repairs are applied through atomic file writes with rollback on failure.
+</div>
+
+<!-- CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">Code Walkthrough</h2>
+<div class="code-walk">
+
+<div class="step">
+<h4>Gateway health RPC</h4>
+<p>The health command calls <code>callGateway</code> with method <code>"health"</code>. The gateway aggregates channel probe results, agent heartbeats, and session counts into a single <code>HealthSummary</code> response. The <code>timeoutMs</code> parameter bounds the total round-trip including all channel probes.</p>
+</div>
+
+<div class="step">
+<h4>Channel iteration</h4>
+<p>The summary's <code>channelOrder</code> array determines rendering order. Each channel's <code>ChannelHealthSummary</code> may contain nested <code>accounts</code> for multi-account providers (e.g. multiple Telegram bot tokens). The <code>configured</code> and <code>linked</code> booleans distinguish between channels that are defined in config versus channels that have active authenticated connections.</p>
+</div>
+
+<div class="step">
+<h4>Agent heartbeat evaluation</h4>
+<p>Each <code>AgentHealthSummary</code> contains a <code>heartbeat</code> field with the last heartbeat timestamp. The health renderer compares this against <code>heartbeatSeconds</code> from the top-level summary to determine if an agent is stale. Agents whose last heartbeat exceeds <code>2 × heartbeatSeconds</code> are flagged as unhealthy.</p>
+</div>
+
+<div class="step">
+<h4>Session age analysis</h4>
+<p>The <code>sessions.recent</code> array contains the most recently updated sessions with their <code>age</code> in milliseconds. The status command uses this to identify orphaned sessions — those with <code>age</code> exceeding the configured session TTL. The <code>count</code> field gives the total number of active sessions without loading them all.</p>
+</div>
+
+<div class="step">
+<h4>Doctor repair dispatch</h4>
+<p>When the doctor flow identifies issues, <code>createDoctorPrompter</code> presents them as a numbered list. Each issue has an associated repair function. Repairs are executed in dependency order: config repairs before service restarts, allowlist repairs before channel re-probes. The <code>maybeRepairUiProtocolFreshness</code> function handles the special case of stale UI protocol versions.</p>
+</div>
+
+</div>
+
+<!-- SEQUENCE DIAGRAM — Doctor Repair Flow -->
+<h2 id="doctor-sequence">Doctor Command Repair Sequence</h2>
+<p>The following diagram shows the interaction between the doctor command, the health gateway, and the local repair subsystem during a typical repair session:</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Operator
+    participant Doctor as doctor flow
+    participant Config as config loader
+    participant Gateway as health gateway
+    participant Repair as repair subsystem
+    participant FS as file system
+
+    Operator->>Doctor: openclaw doctor
+    Doctor->>Config: loadAndMaybeMigrateDoctorConfig()
+    Config->>FS: read config files
+    FS-->>Config: raw config
+    Config-->>Doctor: migrated config
+
+    Doctor->>Gateway: getHealthSnapshot(probe: true)
+    Gateway-->>Doctor: HealthSummary
+
+    Doctor->>Doctor: noteSourceInstallIssues()
+    Doctor->>Doctor: noteStartupOptimizationHints()
+    Doctor->>Doctor: check allowlist policies
+
+    Doctor-->>Operator: display issues list
+
+    Operator->>Doctor: select repairs
+    Doctor->>Repair: apply selected repairs
+    Repair->>FS: atomic config writes
+    FS-->>Repair: write confirmation
+    Repair-->>Doctor: repair results
+
+    Doctor->>Gateway: getHealthSnapshot(probe: true)
+    Gateway-->>Doctor: updated HealthSummary
+    Doctor-->>Operator: final report
+</pre>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Rationale</th></tr>
+  <tr><td>Gateway unreachable</td><td><code>healthCommand</code> throws with a timeout error after <code>timeoutMs</code> elapses</td><td>Bounded failure prevents indefinite hangs in monitoring scripts</td></tr>
+  <tr><td>Partial channel failure</td><td>Summary returns with per-channel error fields; overall <code>ok</code> remains <code>true</code></td><td>One broken channel should not mask the health of other channels</td></tr>
+  <tr><td>Stale heartbeat</td><td>Agent flagged as unhealthy when <code>lastHeartbeat &gt; 2 × heartbeatSeconds</code></td><td>The 2× multiplier provides a grace period for transient delays</td></tr>
+  <tr><td>Empty session directory</td><td><code>sessions.count</code> is <code>0</code> and <code>recent</code> is an empty array</td><td>Fresh deployments have no sessions; this is a valid healthy state</td></tr>
+  <tr><td>Config migration failure</td><td>Doctor aborts with a migration error before any repairs are attempted</td><td>Running repairs against an un-migrated config could corrupt state</td></tr>
+  <tr><td>Concurrent doctor runs</td><td>File-level locks prevent two doctor instances from writing config simultaneously</td><td>Atomic writes with lock files ensure config consistency</td></tr>
+  <tr><td>Null <code>authAgeMs</code></td><td>Channel reported as configured but auth age unknown; rendered as <code>"—"</code></td><td>Some channels (e.g. webhook-based) have no auth token with a measurable age</td></tr>
+  <tr><td><code>probe</code> field is <code>unknown</code></td><td>Type-safe: callers must narrow before accessing probe-specific fields</td><td>Different channel providers return different probe shapes; the index signature allows extension</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Setting</th><th>Location</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>--json</code></td><td>CLI flag on <code>health</code> and <code>status</code></td><td><code>false</code></td><td>Emit raw JSON instead of human-readable tables</td></tr>
+  <tr><td><code>--verbose</code></td><td>CLI flag on <code>health</code> and <code>status</code></td><td><code>false</code></td><td>Enable live channel probing (slower but more accurate)</td></tr>
+  <tr><td><code>--deep</code></td><td>CLI flag on <code>status</code></td><td><code>false</code></td><td>Scan local runtime files and session directories</td></tr>
+  <tr><td><code>--usage</code></td><td>CLI flag on <code>status</code></td><td><code>false</code></td><td>Include token usage statistics in the report</td></tr>
+  <tr><td><code>--all</code></td><td>CLI flag on <code>status</code></td><td><code>false</code></td><td>Show all agents and channels, including unconfigured ones</td></tr>
+  <tr><td><code>--timeout-ms</code></td><td>CLI flag on <code>health</code> and <code>status</code></td><td><code>10000</code></td><td>Maximum milliseconds to wait for gateway response</td></tr>
+  <tr><td><code>heartbeatSeconds</code></td><td>Gateway config</td><td><code>30</code></td><td>Expected interval between agent heartbeats; staleness threshold is 2×</td></tr>
+</table>
+
+<!-- DOCTOR SHARED MODULES -->
+<h2 id="doctor-shared">Doctor Shared Modules</h2>
+<p>The <code>src/commands/doctor/shared/</code> directory contains 25+ utility modules that the doctor flow delegates to for specific repair tasks. These are intentionally decoupled so they can be unit-tested in isolation.</p>
+
+<table>
+  <tr><th>Module</th><th>Responsibility</th></tr>
+  <tr><td><code>allowlist-policy-repair.ts</code></td><td>Detects and repairs mismatched allowlist policies against current channel configuration</td></tr>
+  <tr><td><code>exec-safe-bins.ts</code></td><td>Validates that all referenced binaries in exec commands exist and have correct permissions</td></tr>
+  <tr><td><code>mutable-allowlist.ts</code></td><td>Provides a mutable in-memory allowlist that the repair flow can modify before persisting</td></tr>
+  <tr><td><code>empty-allowlist-policy.ts</code></td><td>Generates a clean empty allowlist policy as a baseline when no policy file exists</td></tr>
+</table>
+
+<div class="callout">
+  <strong>Gateway status subsystem:</strong> The <code>src/commands/gateway-status/</code> directory contains four modules — <code>discovery.ts</code> (gateway endpoint resolution), <code>helpers.ts</code> (response normalization), <code>output.ts</code> (rendering), and <code>probe-run.ts</code> (individual probe execution) — that handle the low-level gateway communication for both <code>health</code> and <code>status</code> commands.
+</div>
+
+<!-- RELATED TOPICS -->
+<h2 id="related-topics">Related Topics</h2>
+<div class="summary-grid">
+  <div class="cell"><strong><a href="../admin_operations/index.html">Admin Operations</a></strong><p>Administrative commands that modify system state — complementary to the read-heavy diagnostics commands.</p></div>
+  <div class="cell"><strong><a href="../permission_gating/index.html">Permission Gating</a></strong><p>Authorization layer that controls who can run diagnostic commands, especially the write-capable doctor flow.</p></div>
+  <div class="cell"><strong><a href="../../slash-commands/command_parsing/index.html">Command Parsing</a></strong><p>How <code>/health</code>, <code>/status</code>, and <code>/doctor</code> are parsed from raw input before reaching the diagnostic handlers.</p></div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Source Files</h2>
+<details open>
+<summary style="cursor:pointer;font-weight:600;color:var(--heading);">Key files involved in diagnostics commands</summary>
+<pre><code>src/
+├── commands/
+│   ├── health.ts                        ← healthCommand(), getHealthSnapshot(), HealthSummary types
+│   ├── status.command.ts                ← statusCommand() entry point
+│   ├── status.scan.ts                   ← Core scan orchestration
+│   ├── status.scan.fast-json.ts         ← Streaming JSON session parser
+│   ├── status.scan.runtime.ts           ← Local runtime file scanner
+│   ├── status.summary.ts               ← buildStatusSummary() aggregation
+│   ├── doctor/
+│   │   └── shared/
+│   │       ├── allowlist-policy-repair.ts
+│   │       ├── exec-safe-bins.ts
+│   │       ├── mutable-allowlist.ts
+│   │       └── empty-allowlist-policy.ts  (25 files total)
+│   └── gateway-status/
+│       ├── discovery.ts                 ← Gateway endpoint resolution
+│       ├── helpers.ts                   ← Response normalization
+│       ├── output.ts                    ← Status rendering
+│       └── probe-run.ts                ← Individual probe execution
+└── flows/
+    └── doctor-health.ts                 ← Doctor flow orchestration
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Admin</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

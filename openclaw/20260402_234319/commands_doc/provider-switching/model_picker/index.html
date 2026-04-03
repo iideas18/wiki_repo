@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/commands/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Commands/Provider Switching — Model Picker</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Commands</a> &rsaquo; <a href="../index.html">Provider Switching</a> &rsaquo; <span>Model Picker</span></nav>
+
+<main id="main">
+<h1>Model Picker</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Discovering, filtering, and selecting AI models across providers</p>
+  <p>When a user runs <code>/model set gpt-4</code> or <code>/model scan</code>, the model picker subsystem is responsible for loading the full model registry, resolving configured entries (defaults, fallbacks, image models), presenting filterable rows, and persisting the user's selection back into the configuration. It bridges the gap between raw provider catalogs and the single "active model" that the agent runtime consumes.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>The model picker is the user-facing layer that turns a sprawling multi-provider model catalog into a manageable selection experience. Every <code>/model</code> subcommand — <code>set</code>, <code>set-image</code>, <code>list</code>, <code>scan</code> — relies on the registry loader and configured-entries resolver to know which models exist, which are available, and which the user has already chosen. Understanding this module is essential for debugging "model not found" errors, adding new provider integrations, or tracing how a fallback chain is evaluated at runtime.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a streaming service's "Choose your plan" screen. Behind the scenes the service queries every available plan from multiple billing providers, marks which ones are available in your region, highlights your current selection, and lets you switch with a single click. The model picker does the same thing — except the "plans" are AI models from OpenAI, Anthropic, local Ollama instances, and more. It aggregates, filters, tags, and presents them so the user can pick one without knowing the underlying provider plumbing.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Load the model registry from all configured providers, resolve tagged entries (default, fallback, image), and expose set/scan commands for model selection.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>User-supplied model key strings (e.g. <code>gpt-4</code>, <code>claude-3-opus</code>), the <code>OpenClawConfig</code> object, and provider auth credentials from <code>AuthProfileStore</code>.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Is the requested model key valid? Is the provider reachable and the model available? Should suppressed built-in models be hidden from the listing?</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>Writes the selected model key into the persisted config via <code>updateConfig()</code>. Returns <code>ModelRow[]</code> arrays for display and <code>versions.json</code>-compatible availability maps.</p></div>
+</div>
+
+<div class="callout">
+<strong>Key insight:</strong> The model picker never calls provider APIs directly. It delegates to <code>discoverModels()</code> which abstracts every provider behind a uniform <code>Model&lt;Api&gt;</code> interface. This keeps the picker purely about selection, not about protocol differences between providers.
+</div>
+
+<!-- CORE TYPES -->
+<h2 id="core-types">Core Types</h2>
+<p>The model picker revolves around two data structures: <code>ConfiguredEntry</code> which represents a model reference extracted from the user's config, and <code>ModelRow</code> which is the display-ready row shown to the user in listings and scan results.</p>
+
+<h3 id="core-types-configured-entry">ConfiguredEntry</h3>
+<p>Each entry in the user's configuration — default model, fallback chain, image model — is normalized into a <code>ConfiguredEntry</code>. The <code>tags</code> set indicates why this entry exists (e.g. <code>"default"</code>, <code>"fallback#1"</code>, <code>"image"</code>).</p>
+
+<pre><code class="language-typescript">// src/commands/models/list.types.ts
+export type ConfiguredEntry = {
+  key: string;
+  ref: { provider: string; model: string };
+  tags: Set&lt;string&gt;;
+  aliases: string[];
+};</code></pre>
+
+<table>
+  <tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>key</code></td><td><code>string</code></td><td>Canonical model identifier used as the lookup key in the registry (e.g. <code>"openai/gpt-4"</code>)</td></tr>
+  <tr><td><code>ref.provider</code></td><td><code>string</code></td><td>Provider slug such as <code>"openai"</code>, <code>"anthropic"</code>, or <code>"ollama"</code></td></tr>
+  <tr><td><code>ref.model</code></td><td><code>string</code></td><td>Provider-specific model name (e.g. <code>"gpt-4-turbo-preview"</code>)</td></tr>
+  <tr><td><code>tags</code></td><td><code>Set&lt;string&gt;</code></td><td>Role tags: <code>"default"</code>, <code>"fallback#N"</code>, <code>"image"</code>, <code>"img-fallback#N"</code>, <code>"configured"</code></td></tr>
+  <tr><td><code>aliases</code></td><td><code>string[]</code></td><td>Alternative names that resolve to this entry (e.g. <code>["gpt4", "gpt-4-turbo"]</code>)</td></tr>
+</table>
+
+<h3 id="core-types-model-row">ModelRow</h3>
+<p>The presentation-layer type used by the <code>/model list</code> and <code>/model scan</code> commands to render tabular output. Produced by the <code>toModelRow()</code> transform function.</p>
+
+<pre><code class="language-typescript">// src/commands/models/list.types.ts
+export type ModelRow = {
+  key: string;
+  name: string;
+  input: string;
+  contextWindow: number | null;
+  local: boolean | null;
+  available: boolean | null;
+  tags: string[];
+  missing: boolean;
+};</code></pre>
+
+<table>
+  <tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>key</code></td><td><code>string</code></td><td>Canonical model key for selection</td></tr>
+  <tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable display name</td></tr>
+  <tr><td><code>input</code></td><td><code>string</code></td><td>Supported input modalities (e.g. <code>"text"</code>, <code>"text+image"</code>)</td></tr>
+  <tr><td><code>contextWindow</code></td><td><code>number | null</code></td><td>Maximum context window in tokens, or <code>null</code> if unknown</td></tr>
+  <tr><td><code>local</code></td><td><code>boolean | null</code></td><td>Whether the model runs locally (Ollama, LM Studio) vs. cloud API</td></tr>
+  <tr><td><code>available</code></td><td><code>boolean | null</code></td><td>Provider reachability check result; <code>null</code> if not yet probed</td></tr>
+  <tr><td><code>tags</code></td><td><code>string[]</code></td><td>Flattened tag array from <code>ConfiguredEntry.tags</code> for display</td></tr>
+  <tr><td><code>missing</code></td><td><code>boolean</code></td><td><code>true</code> if the model key exists in config but not in the registry</td></tr>
+</table>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Built-in model suppression</td><td><code>shouldSuppressBuiltInModel()</code> filter in <code>loadModelRegistry</code></td><td>Prevents deprecated or internal-only models from appearing in user-facing listings</td></tr>
+  <tr><td>Availability probing</td><td>Provider auth credentials in <code>AuthProfileStore</code></td><td>Models from providers without valid credentials are marked <code>available: null</code> instead of <code>false</code></td></tr>
+  <tr><td>Tag assignment</td><td><code>resolveConfiguredEntries()</code> walks the config hierarchy</td><td>Tags like <code>"default"</code> and <code>"fallback#N"</code> control how the fallback chain is displayed and evaluated</td></tr>
+  <tr><td>Missing model detection</td><td><code>toModelRow()</code> checks registry lookup result</td><td>Config can reference models that have been removed from the provider; the <code>missing</code> flag surfaces this</td></tr>
+  <tr><td>Provider availability fallback</td><td><code>allowProviderAvailabilityFallback</code> parameter on <code>toModelRow</code></td><td>When an individual model probe fails, falls back to provider-level availability if allowed</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>The model picker pipeline has three distinct phases: <strong>registry loading</strong>, <strong>configured entry resolution</strong>, and <strong>model selection/scanning</strong>. Each phase builds on the previous one's output.</p>
+
+<h3 id="mechanism-registry">Phase 1 — Registry Loading</h3>
+<p>The <code>loadModelRegistry()</code> function bootstraps the full model catalog from all configured providers. It discovers the agent directory, reads auth credentials, calls each provider's model enumeration API, and filters out suppressed built-in models.</p>
+
+<pre><code class="language-typescript">// src/commands/models/list.registry.ts
+export async function loadModelRegistry(
+  cfg: OpenClawConfig,
+  opts?: { sourceConfig?: OpenClawConfig },
+) {
+  const agentDir = resolveOpenClawAgentDir();
+  const authStorage = discoverAuthStorage(agentDir);
+  const registry = discoverModels(authStorage, agentDir);
+  const models = registry
+    .getAll()
+    .filter((model) =&gt;
+      !shouldSuppressBuiltInModel({
+        provider: model.provider,
+        id: model.id,
+      }),
+    );
+  // ... availability checking against auth credentials
+  return { registry, models, availableKeys, availabilityErrorMessage };
+}</code></pre>
+
+<div class="callout success">
+<strong>Performance note:</strong> <code>discoverModels()</code> caches provider responses for the lifetime of the process. Subsequent calls to <code>loadModelRegistry()</code> within the same session are nearly free because the discovery layer returns cached catalogs.
+</div>
+
+<h3 id="mechanism-configured">Phase 2 — Configured Entry Resolution</h3>
+<p>Once the registry is loaded, <code>resolveConfiguredEntries()</code> walks the user's <code>OpenClawConfig</code> to extract every model reference and assign semantic tags. The function processes entries in a fixed order: default model first, then fallback chain, then image model, then image fallback chain, and finally any explicitly configured model entries.</p>
+
+<pre><code class="language-typescript">// src/commands/models/list.configured.ts
+export function resolveConfiguredEntries(cfg: OpenClawConfig) {
+  // resolves default, fallbacks, image model, configured models
+  // Tags: "default", "fallback#N", "image", "img-fallback#N", "configured"
+  return { entries };
+}</code></pre>
+
+<div class="callout warn">
+<strong>Ordering matters:</strong> If the same model key appears as both <code>"default"</code> and <code>"configured"</code>, the tags are merged into a single <code>ConfiguredEntry</code> rather than creating a duplicate. This ensures each model key appears at most once in the resolved list, with all applicable tags combined.
+</div>
+
+<h3 id="mechanism-selection">Phase 3 — Model Selection Commands</h3>
+<p>The <code>modelsSetCommand</code> and <code>modelsSetImageCommand</code> functions handle the final step: persisting the user's choice into the config file. Both follow the same pattern — call <code>updateConfig()</code> with a mutation function, log the result, and confirm to the user.</p>
+
+<pre><code class="language-typescript">// src/commands/models/set.ts
+export async function modelsSetCommand(
+  modelRaw: string,
+  runtime: RuntimeEnv,
+) {
+  const updated = await updateConfig((cfg) =&gt; {
+    return applyDefaultModelPrimaryUpdate({
+      cfg,
+      modelRaw,
+      field: "model",
+    });
+  });
+  logConfigUpdated(runtime);
+  runtime.log(
+    `Default model: ${
+      resolveAgentModelPrimaryValue(updated.agents?.defaults?.model)
+        ?? modelRaw
+    }`,
+  );
+}</code></pre>
+
+<pre><code class="language-typescript">// src/commands/models/set-image.ts
+export async function modelsSetImageCommand(
+  modelRaw: string,
+  runtime: RuntimeEnv,
+) {
+  const updated = await updateConfig((cfg) =&gt; {
+    return applyDefaultModelPrimaryUpdate({
+      cfg,
+      modelRaw,
+      field: "imageModel",
+    });
+  });
+  logConfigUpdated(runtime);
+  runtime.log(
+    `Image model: ${
+      resolveAgentModelPrimaryValue(updated.agents?.defaults?.imageModel)
+        ?? modelRaw
+    }`,
+  );
+}</code></pre>
+
+<!-- MERMAID DIAGRAM 1 — Model Selection Pipeline -->
+<h2 id="selection-pipeline">Model Selection Pipeline</h2>
+<p>The following flowchart shows the complete decision path from a user's <code>/model set</code> command to the final config write. Each diamond is a decision point; each rectangle is a processing step.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  CMD["User runs /model set &lt;key&gt;"]
+  LOAD["loadModelRegistry(cfg)"]
+  DISCOVER["discoverModels(authStorage, agentDir)"]
+  FILTER{"shouldSuppressBuiltInModel?"}
+  AVAIL["Check availability against auth"]
+  RESOLVE["resolveConfiguredEntries(cfg)"]
+  LOOKUP{"Model key in registry?"}
+  APPLY["applyDefaultModelPrimaryUpdate()"]
+  WRITE["updateConfig() — persist to disk"]
+  LOG["logConfigUpdated(runtime)"]
+  CONFIRM["runtime.log — confirm to user"]
+  ERR["Error: model not found"]
+
+  CMD --> LOAD
+  LOAD --> DISCOVER
+  DISCOVER --> FILTER
+  FILTER -->|Suppressed| DISCOVER
+  FILTER -->|Kept| AVAIL
+  AVAIL --> RESOLVE
+  RESOLVE --> LOOKUP
+  LOOKUP -->|Yes| APPLY
+  LOOKUP -->|No| ERR
+  APPLY --> WRITE
+  WRITE --> LOG
+  LOG --> CONFIRM
+</pre>
+</div>
+<p>The pipeline is intentionally linear for the <code>set</code> commands — there is no branching or retry logic. If the model key is not found in the registry, the command fails immediately with an error message. The <code>scan</code> command, by contrast, adds a probing loop before the selection step.</p>
+
+<!-- MERMAID DIAGRAM 2 — Sequence Diagram -->
+<h2 id="set-flow">modelsSetCommand Flow</h2>
+<p>This sequence diagram traces the exact call chain when a user runs <code>/model set gpt-4</code>. Each participant corresponds to a source file, and every arrow is a real function call in the codebase.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant CLI as commands/models/set.ts
+    participant Config as updateConfig()
+    participant Apply as applyDefaultModelPrimaryUpdate()
+    participant Resolve as resolveAgentModelPrimaryValue()
+    participant Runtime as RuntimeEnv
+
+    User->>CLI: /model set gpt-4
+    CLI->>Config: updateConfig(mutationFn)
+    Config->>Apply: applyDefaultModelPrimaryUpdate({cfg, modelRaw, field})
+    Apply-->>Config: updated OpenClawConfig
+    Config-->>CLI: persisted config object
+    CLI->>Resolve: resolveAgentModelPrimaryValue(updated.agents.defaults.model)
+    Resolve-->>CLI: "gpt-4" or null
+    CLI->>Runtime: logConfigUpdated(runtime)
+    CLI->>Runtime: runtime.log("Default model: gpt-4")
+    Runtime-->>User: "Default model: gpt-4"
+</pre>
+</div>
+<p>Notice that <code>resolveAgentModelPrimaryValue</code> is called <em>after</em> the config write. This is intentional — it reads the updated config to resolve any alias or provider-qualified name back to a human-readable form. If resolution fails (returns <code>null</code>), the raw user input is echoed instead.</p>
+
+<!-- MERMAID DIAGRAM 3 — Model Scan Pipeline -->
+<h2 id="scan-pipeline">Model Scan Pipeline</h2>
+<p>The <code>modelsScanCommand</code> extends the basic selection flow with concurrent availability probing. It enumerates candidate models, probes each for reachability (respecting concurrency and timeout limits), and optionally auto-selects the best candidate.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  SCAN["User runs /model scan"]
+  OPTS["Parse scan options"]
+  LOAD2["loadModelRegistry(cfg)"]
+  CANDIDATES["Filter candidates by provider, minParams, maxAge"]
+  PROBE{"Probe each candidate"}
+  REACHABLE["Collect reachable models"]
+  RANK["Rank by context window and capabilities"]
+  AUTO{"--setDefault or --setImage?"}
+  SET["modelsSetCommand / modelsSetImageCommand"]
+  DISPLAY["Display scan results as ModelRow table"]
+  JSON{"--json flag?"}
+  JSONOUT["Output JSON array"]
+
+  SCAN --> OPTS
+  OPTS --> LOAD2
+  LOAD2 --> CANDIDATES
+  CANDIDATES --> PROBE
+  PROBE --> REACHABLE
+  REACHABLE --> RANK
+  RANK --> AUTO
+  AUTO -->|Yes| SET
+  AUTO -->|No| DISPLAY
+  RANK --> JSON
+  JSON -->|Yes| JSONOUT
+  JSON -->|No| DISPLAY
+</pre>
+</div>
+
+<!-- CODE WALKTHROUGH — toModelRow -->
+<h2 id="code-walkthrough">Code Walkthrough: toModelRow</h2>
+<p>The <code>toModelRow</code> function is the bridge between the internal <code>Model&lt;Api&gt;</code> objects and the user-facing <code>ModelRow</code> display type. Here is how each piece of data is resolved, step by step.</p>
+
+<div class="code-walk">
+<div class="step">
+<h4>Accept parameters and destructure</h4>
+<p>The function receives a parameter bag that includes the registry model (which may be <code>undefined</code> if the config references a model that no longer exists), the canonical key, tags, aliases, the set of available keys from probing, and optional config/auth references for provider-level fallback.</p>
+<pre><code class="language-typescript">// src/commands/models/list.registry.ts
+export function toModelRow(params: {
+  model?: Model&lt;Api&gt;;
+  key: string;
+  tags: string[];
+  aliases?: string[];
+  availableKeys?: Set&lt;string&gt;;
+  cfg?: OpenClawConfig;
+  authStore?: AuthProfileStore;
+  allowProviderAvailabilityFallback?: boolean;
+}): ModelRow</code></pre>
+</div>
+
+<div class="step">
+<h4>Handle missing models</h4>
+<p>If <code>params.model</code> is <code>undefined</code>, the model exists in config but not in any provider's catalog. The function returns a <code>ModelRow</code> with <code>missing: true</code> and all capability fields set to <code>null</code>. This allows the UI to render a warning row without crashing.</p>
+</div>
+
+<div class="step">
+<h4>Resolve availability</h4>
+<p>For existing models, availability is determined by checking <code>params.availableKeys</code>. If the key is present, <code>available: true</code>. If the set exists but the key is absent, <code>available: false</code>. If no availability set was provided (probing was skipped), <code>available: null</code>. When <code>allowProviderAvailabilityFallback</code> is set and the model-level check is <code>null</code>, the function falls back to checking whether <em>any</em> model from the same provider is available.</p>
+</div>
+
+<div class="step">
+<h4>Build the display row</h4>
+<p>The final <code>ModelRow</code> is assembled from the model's metadata (name, input modalities, context window, local flag) combined with the resolved availability and the flattened tags array. This is returned to the caller for rendering.</p>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases</h2>
+<table>
+  <tr><th>Scenario</th><th>Input</th><th>Result</th><th>Rationale</th></tr>
+  <tr><td>Unknown model key</td><td><code>/model set nonexistent-v99</code></td><td>Error: model not found in registry</td><td>Registry lookup fails; <code>applyDefaultModelPrimaryUpdate</code> is never called</td></tr>
+  <tr><td>Suppressed built-in</td><td>Model with <code>shouldSuppressBuiltInModel() = true</code></td><td>Excluded from <code>loadModelRegistry</code> results</td><td>Prevents deprecated internal models from polluting listings</td></tr>
+  <tr><td>Duplicate config entry</td><td>Same key as both <code>default</code> and <code>configured</code></td><td>Single <code>ConfiguredEntry</code> with merged tags <code>{"default", "configured"}</code></td><td>Avoids duplicate rows in listings while preserving all semantic roles</td></tr>
+  <tr><td>Provider auth missing</td><td>Anthropic model when no Anthropic API key set</td><td><code>available: null</code>, not <code>false</code></td><td>Distinguishes "can't probe" from "probed and unreachable"</td></tr>
+  <tr><td>Local model offline</td><td>Ollama model when Ollama server not running</td><td><code>available: false</code>, <code>local: true</code></td><td>Local models are always probed; no auth fallback applies</td></tr>
+  <tr><td>Scan with zero candidates</td><td><code>/model scan --provider nonexistent</code></td><td>Empty results, no error</td><td>Scan gracefully returns empty array rather than throwing</td></tr>
+  <tr><td>Image model set on text-only</td><td><code>/model set-image gpt-3.5-turbo</code></td><td>Config persists the choice (no validation)</td><td>The picker does not validate modality; runtime handles mismatch</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Setting</th><th>Location</th><th>Default</th><th>Description</th></tr>
+  <tr><td>Default model</td><td><code>agents.defaults.model</code> in <code>openclaw.config</code></td><td>Provider-dependent</td><td>The primary model used for all agent interactions</td></tr>
+  <tr><td>Image model</td><td><code>agents.defaults.imageModel</code> in <code>openclaw.config</code></td><td><code>null</code></td><td>Model used for image generation tasks; separate from text model</td></tr>
+  <tr><td>Fallback chain</td><td><code>agents.defaults.fallbacks[]</code> in <code>openclaw.config</code></td><td><code>[]</code></td><td>Ordered list of fallback models tried when the primary is unavailable</td></tr>
+  <tr><td>Scan concurrency</td><td><code>--concurrency</code> flag on <code>/model scan</code></td><td><code>5</code></td><td>Maximum parallel probe requests during model scanning</td></tr>
+  <tr><td>Scan timeout</td><td><code>--timeout</code> flag on <code>/model scan</code></td><td><code>10s</code></td><td>Per-model probe timeout in seconds</td></tr>
+  <tr><td>Scan max candidates</td><td><code>--maxCandidates</code> flag on <code>/model scan</code></td><td><code>50</code></td><td>Maximum number of models to probe during a scan</td></tr>
+  <tr><td>Scan min params</td><td><code>--minParams</code> flag on <code>/model scan</code></td><td>None</td><td>Minimum parameter count filter for scan candidates</td></tr>
+</table>
+
+<div class="callout">
+<strong>Tip:</strong> The <code>modelsScanCommand</code> accepts all of these as optional CLI flags. When omitted, the defaults shown above are used. The <code>--json</code> flag outputs raw <code>ModelRow[]</code> as JSON for scripting and automation.
+</div>
+
+<pre><code class="language-typescript">// src/commands/models/scan.ts — full signature
+export async function modelsScanCommand(
+  opts: {
+    minParams?: string;
+    maxAgeDays?: string;
+    provider?: string;
+    maxCandidates?: string;
+    timeout?: string;
+    concurrency?: string;
+    yes?: boolean;
+    input?: boolean;
+    setDefault?: boolean;
+    setImage?: boolean;
+    json?: boolean;
+    probe?: boolean;
+  },
+  runtime: RuntimeEnv,
+)</code></pre>
+
+<!-- RELATED TOPICS -->
+<h2 id="related-topics">Related Topics</h2>
+<div class="summary-grid">
+  <div class="cell"><strong><a href="../provider_auth/index.html">Provider Auth</a></strong><p>How authentication credentials are discovered and stored per-provider, feeding the registry loader's availability checks.</p></div>
+  <div class="cell"><strong><a href="../fallback_chain/index.html">Fallback Chain</a></strong><p>The runtime mechanism that tries fallback models when the primary is unavailable — configured via the entries resolved here.</p></div>
+  <div class="cell"><strong><a href="../../slash-commands/command_parsing/index.html">Command Parsing</a></strong><p>How raw <code>/model set gpt-4</code> input is parsed into structured action and args before reaching the model picker.</p></div>
+  <div class="cell"><strong><a href="../../admin/permission_gating/index.html">Permission Gating</a></strong><p>Authorization checks that may restrict which models a user is allowed to select or scan.</p></div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Source Files</h2>
+<details open>
+<summary style="cursor:pointer;font-weight:600;color:var(--heading);">Key files involved in model picking</summary>
+<pre><code>src/
+└── commands/
+    └── models/
+        ├── list.types.ts          ← ConfiguredEntry &amp; ModelRow type definitions
+        ├── list.registry.ts       ← loadModelRegistry(), toModelRow() transform
+        ├── list.configured.ts     ← resolveConfiguredEntries() tag resolution
+        ├── set.ts                 ← modelsSetCommand() — set default model
+        ├── set-image.ts           ← modelsSetImageCommand() — set image model
+        └── scan.ts                ← modelsScanCommand() — probe &amp; auto-select
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Provider Switching</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/agents/pi-embedded-runner/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Agents/Streaming — Backpressure &amp; Flow Control</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Agents</a> &rsaquo; <a href="../index.html">Streaming</a> &rsaquo; <span>Backpressure</span></nav>
+
+<main id="main">
+<h1>Backpressure &amp; Flow Control</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Managing context window limits and adaptive compaction triggers</p>
+  <p>As streaming conversations grow, accumulated tokens can approach the model's context window ceiling. This module detects impending overflow, triggers adaptive compaction to summarize older messages, truncates oversized tool results, and prunes stale images — all while maintaining conversation coherence.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>Every LLM has a finite context window. When a long-running agent session accumulates enough messages and tool results, it risks exceeding that limit and crashing mid-response. Backpressure and flow control mechanisms detect when token counts approach the ceiling and proactively compact the conversation — summarizing old messages, truncating tool results, and pruning images. Without this, multi-turn agent sessions would fail unpredictably after a few dozen interactions.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a court reporter who must keep a running transcript for the judge. The transcript binder has a maximum number of pages. When it starts getting full, the reporter summarizes earlier testimony into condensed notes, archives the detailed pages, and continues writing. If a witness submits a 500-page evidence document, the reporter makes an abstract instead of pasting the whole thing. Old exhibit photos are removed to save space. The judge can still follow the trial because the summaries preserve the essential narrative.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Prevent context window overflow by compacting conversation history when estimated token count exceeds the safe threshold.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>Current message history, token estimates, model context window size, tool result payloads, and image attachments.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>When to trigger compaction; how aggressively to split messages (BASE_CHUNK_RATIO vs MIN_CHUNK_RATIO); whether to truncate tool results or prune images first.</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>Compacted message array with summarized older turns; truncated tool results; pruned image references; updated token estimates.</p></div>
+</div>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  CHECK["estimateTokens()"]
+  DECIDE{"tokens > context_window - reserve?"}
+  NORMAL["Continue normally"]
+  SPLIT["splitMessagesByTokenShare()"]
+  SUMMARIZE["summarizeInStages()"]
+  MERGE["Merge summaries + recent messages"]
+  VALIDATE{"compacted tokens < limit?"}
+  TRUNC["tool-result-truncation.ts"]
+  PRUNE["history-image-prune.ts"]
+  GUARD["tool-result-context-guard.ts"]
+  DONE["Compacted history ready"]
+  RETRY["Retry with reduced budget"]
+
+  CHECK --> DECIDE
+  DECIDE -->|No| NORMAL
+  DECIDE -->|Yes| TRUNC
+  TRUNC --> PRUNE
+  PRUNE --> GUARD
+  GUARD --> SPLIT
+  SPLIT --> SUMMARIZE
+  SUMMARIZE --> MERGE
+  MERGE --> VALIDATE
+  VALIDATE -->|Yes| DONE
+  VALIDATE -->|No| RETRY
+  RETRY --> SPLIT
+</pre>
+</div>
+<p>The overview flowchart shows the full compaction pipeline. Token estimation runs before every LLM call. When the estimate exceeds the safe threshold (context window minus a reserve buffer), the system first tries lightweight mitigations (truncating tool results, pruning old images). If those are insufficient, full compaction kicks in: split the history, summarize each chunk via LLM, merge, and validate. If the merged result still exceeds the limit, the system retries with a more aggressive split ratio.</p>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Compaction trigger</td><td><code>estimateTokens() &gt; context_window - reserve</code></td><td>The reserve must account for the next LLM response plus system prompt; too small a reserve triggers compaction too late</td></tr>
+  <tr><td>Split ratio selection</td><td><code>BASE_CHUNK_RATIO = 0.4</code>, falling to <code>MIN_CHUNK_RATIO = 0.15</code> on retry</td><td>The ratio determines what fraction of history is kept verbatim vs summarized; aggressive ratios lose more detail</td></tr>
+  <tr><td>Safety margin multiplier</td><td><code>SAFETY_MARGIN = 1.2</code></td><td>Multiplied against the token estimate to add headroom; prevents borderline cases from still overflowing</td></tr>
+  <tr><td>Tool result truncation</td><td>Per-result byte limit in <code>tool-result-truncation.ts</code></td><td>Large tool outputs (file reads, search results) are the most common cause of unexpected context blow-up</td></tr>
+  <tr><td>Image pruning</td><td>Age threshold and count limit in <code>history-image-prune.ts</code></td><td>Images consume disproportionate tokens; pruning old ones is the cheapest way to free context space</td></tr>
+  <tr><td>Compaction timeout</td><td><code>compaction-safety-timeout.ts</code> timer</td><td>Prevents compaction from running indefinitely if the summarize LLM call hangs</td></tr>
+  <tr><td>Idle connection handling</td><td><code>llm-idle-timeout.ts</code></td><td>Terminates stale LLM connections that are consuming resources but producing no chunks</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>Backpressure management operates at three layers: <strong>pre-compaction mitigations</strong>, <strong>adaptive compaction</strong>, and <strong>session truncation</strong> as a last resort. Each layer activates only when the previous layer fails to bring token counts below the safe threshold.</p>
+
+<h3 id="mechanism-pre-compaction">Layer 1 — Pre-Compaction Mitigations</h3>
+<p>Before triggering full compaction, the system tries two lightweight measures that preserve full conversation detail:</p>
+<p><strong>Tool result truncation</strong> (<code>tool-result-truncation.ts</code>) scans all tool results in the history and truncates any that exceed a configurable byte limit. It preserves the first and last N characters with an <code>[...truncated...]</code> marker in between, ensuring the LLM still sees the beginning and end of large outputs.</p>
+<p><strong>Image pruning</strong> (<code>history-image-prune.ts</code>) removes image attachments from messages older than a configurable number of turns. Images are expensive in tokens (a single screenshot can cost 1000+ tokens) and become less relevant as the conversation progresses.</p>
+
+<div class="callout">
+<strong>Key detail:</strong> The <code>tool-result-context-guard.ts</code> module wraps new incoming tool results before they enter the history, preventing a single oversized tool output from immediately triggering compaction. It enforces the truncation policy proactively, not just reactively.
+</div>
+
+<h3 id="mechanism-compaction">Layer 2 — Adaptive Compaction</h3>
+<p>When pre-compaction mitigations are insufficient, the full compaction algorithm runs. It is implemented primarily in <code>compact.ts</code> and orchestrated by <code>compaction-runtime-context.ts</code>.</p>
+
+<pre><code class="language-typescript">// compact.ts — core compaction algorithm
+const BASE_CHUNK_RATIO = 0.4;
+const MIN_CHUNK_RATIO = 0.15;
+const SAFETY_MARGIN = 1.2;
+
+async function compactHistory(
+  messages: Message[],
+  contextWindow: number,
+  reserve: number,
+  attempt: number = 0,
+): Promise&lt;Message[]&gt; {
+  const targetTokens = contextWindow - reserve;
+  const ratio = Math.max(
+    MIN_CHUNK_RATIO,
+    BASE_CHUNK_RATIO - attempt * 0.1,
+  );
+
+  // Split: keep recent messages verbatim, compact older ones
+  const { toCompact, toKeep } = splitMessagesByTokenShare(
+    messages,
+    ratio,
+    targetTokens,
+  );
+
+  // Summarize older messages in stages
+  const summaries = await summarizeInStages(toCompact, targetTokens * ratio);
+
+  // Merge: summary + recent verbatim messages
+  const compacted = [...summaries, ...toKeep];
+
+  // Validate: did we actually reduce enough?
+  const estimate = estimateTokens(compacted) * SAFETY_MARGIN;
+  if (estimate > targetTokens && attempt < 3) {
+    return compactHistory(messages, contextWindow, reserve, attempt + 1);
+  }
+
+  return compacted;
+}
+</code></pre>
+
+<div class="callout warn">
+<strong>Watch out:</strong> The <code>SAFETY_MARGIN</code> of 1.2 means the system targets 83% of the actual limit. This is intentional — token estimation is approximate, and the margin protects against underestimates. However, it also means compaction triggers ~20% earlier than strictly necessary, trading context for reliability.
+</div>
+
+<h3 id="mechanism-summarize">Summarization Strategy</h3>
+<p>The <code>summarizeInStages()</code> function breaks the to-compact portion into smaller chunks (each fitting within the LLM's context window) and summarizes them sequentially. Each stage's output becomes input for the next, progressively distilling the conversation. The function respects message boundaries — it never splits a single message across summary stages.</p>
+
+<h3 id="mechanism-session-truncation">Layer 3 — Session Truncation</h3>
+<p>If compaction fails (e.g., the summary itself is too long, or the timeout fires), <code>session-truncation.ts</code> performs hard truncation: it drops the oldest messages entirely until the history fits. This is the last resort — it loses information but guarantees the session can continue.</p>
+
+<div class="callout danger">
+<strong>Failure mode:</strong> Hard truncation can remove critical context (e.g., the initial user goal). To mitigate this, the system always preserves the first system message and the most recent N user messages, even during hard truncation.
+</div>
+
+<!-- BEHAVIOR DIAGRAM — Compaction State Machine -->
+<h2 id="behavior">Behavior Diagram</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Normal
+  Normal --> CheckingTokens : before LLM call
+  CheckingTokens --> Normal : under limit
+  CheckingTokens --> PreCompaction : over limit
+  PreCompaction --> TruncatingToolResults : truncate large results
+  TruncatingToolResults --> PruningImages : prune old images
+  PruningImages --> Recheck : re-estimate tokens
+  Recheck --> Normal : under limit
+  Recheck --> Compacting : still over limit
+  Compacting --> Splitting : splitMessagesByTokenShare()
+  Splitting --> Summarizing : summarizeInStages()
+  Summarizing --> Merging : combine summaries + recent
+  Merging --> Validating : estimateTokens() * SAFETY_MARGIN
+  Validating --> Normal : under limit
+  Validating --> RetryCompaction : still over, attempt < 3
+  RetryCompaction --> Splitting : reduced ratio
+  Validating --> HardTruncation : attempt >= 3
+  HardTruncation --> Normal : oldest messages dropped
+  Summarizing --> TimedOut : compaction-safety-timeout
+  TimedOut --> HardTruncation : fall back to truncation
+</pre>
+</div>
+<p>The state diagram shows the complete lifecycle of a single compaction cycle. Most sessions never leave the <code>Normal → CheckingTokens → Normal</code> loop. Long-running sessions may cycle through <code>PreCompaction</code> several times before needing full compaction. The <code>TimedOut</code> transition guards against summarization hangs, ensuring the session never blocks indefinitely.</p>
+
+<div class="callout success">
+<strong>Design insight:</strong> The three-layer approach (pre-compaction → adaptive compaction → hard truncation) means the system degrades gracefully. Each layer is more aggressive but also more likely to succeed, so the session always makes forward progress.
+</div>
+
+<!-- ANNOTATED CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough</h2>
+<p>Walk through the key functions in execution order during a compaction cycle.</p>
+
+<div class="code-walk">
+<div class="step">
+<p>The compaction check runs before every LLM call. <code>compaction-runtime-context.ts</code> assembles the runtime context needed for the decision:</p>
+<pre><code class="language-typescript">// compaction-runtime-context.ts
+interface CompactionRuntimeContext {
+  messages: Message[];
+  contextWindow: number;
+  reserveTokens: number;
+  estimatedTokens: number;
+  toolResultSizes: Map&lt;string, number&gt;;
+  imageCount: number;
+}
+
+function buildCompactionContext(
+  session: Session,
+  model: ModelConfig,
+): CompactionRuntimeContext {
+  const messages = session.getHistory();
+  const estimated = estimateTokens(messages);
+  return {
+    messages,
+    contextWindow: model.contextWindow,
+    reserveTokens: model.maxOutputTokens + 512, // +512 for system prompt
+    estimatedTokens: estimated,
+    toolResultSizes: scanToolResultSizes(messages),
+    imageCount: countImages(messages),
+  };
+}
+</code></pre>
+</div>
+
+<div class="step">
+<p>The <code>splitMessagesByTokenShare()</code> function divides the history at a token boundary. It scans from the oldest message forward, accumulating token estimates until the target threshold is reached:</p>
+<pre><code class="language-typescript">// compact.ts — splitting logic
+function splitMessagesByTokenShare(
+  messages: Message[],
+  ratio: number,
+  targetTokens: number,
+): { toCompact: Message[]; toKeep: Message[] } {
+  const compactBudget = Math.floor(targetTokens * ratio);
+  let accumulated = 0;
+  let splitIndex = 0;
+
+  for (let i = 0; i &lt; messages.length; i++) {
+    const msgTokens = estimateTokens([messages[i]]);
+    if (accumulated + msgTokens > compactBudget) {
+      splitIndex = i;
+      break;
+    }
+    accumulated += msgTokens;
+    splitIndex = i + 1;
+  }
+
+  // Always keep system message in both halves
+  const systemMsg = messages.find(m =&gt; m.role === "system");
+  return {
+    toCompact: messages.slice(0, splitIndex),
+    toKeep: systemMsg
+      ? [systemMsg, ...messages.slice(splitIndex).filter(m =&gt; m.role !== "system")]
+      : messages.slice(splitIndex),
+  };
+}
+</code></pre>
+<div class="callout warn">
+<strong>Performance note:</strong> Token estimation uses a fast heuristic (words × 1.3) rather than running the actual tokenizer. This makes compaction checks near-instant but introduces ~10% estimation error, which is why <code>SAFETY_MARGIN</code> exists.
+</div>
+</div>
+
+<div class="step">
+<p>The safety timeout wraps the entire compaction pipeline. If summarization takes too long, it aborts and falls through to hard truncation:</p>
+<pre><code class="language-typescript">// compaction-safety-timeout.ts
+const COMPACTION_TIMEOUT_MS = 30_000;
+
+async function withCompactionTimeout&lt;T&gt;(
+  fn: () =&gt; Promise&lt;T&gt;,
+  fallback: () =&gt; T,
+): Promise&lt;T&gt; {
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () =&gt; controller.abort(),
+    COMPACTION_TIMEOUT_MS,
+  );
+
+  try {
+    const result = await fn();
+    clearTimeout(timer);
+    return result;
+  } catch (err) {
+    clearTimeout(timer);
+    if (controller.signal.aborted) {
+      console.warn("Compaction timed out, falling back to truncation");
+      return fallback();
+    }
+    throw err;
+  }
+}
+</code></pre>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Code Location</th></tr>
+  <tr><td>Context window smaller than system prompt</td><td>Immediately raises a configuration error — compaction cannot help if the system prompt alone exceeds the limit</td><td><code>compaction-runtime-context.ts</code></td></tr>
+  <tr><td>All messages are system messages</td><td>System messages are never compacted; if they alone exceed the limit, the error propagates to the caller</td><td><code>compact.ts:splitMessagesByTokenShare()</code></td></tr>
+  <tr><td>Summarization produces longer output than input</td><td>Detected by the validation step; triggers a retry with a more aggressive ratio (<code>ratio - 0.1</code>)</td><td><code>compact.ts:compactHistory()</code></td></tr>
+  <tr><td>Tool result is a binary blob</td><td><code>tool-result-truncation.ts</code> detects non-UTF-8 content and replaces it with a placeholder noting the content type and size</td><td><code>tool-result-truncation.ts</code></td></tr>
+  <tr><td>Image pruning removes a referenced image</td><td>The message text is updated to note <code>[image removed to save context space]</code> so the LLM knows an image was present</td><td><code>history-image-prune.ts</code></td></tr>
+  <tr><td>Concurrent compaction requests</td><td>A mutex in <code>compaction-runtime-context.ts</code> serializes compaction; concurrent requests queue behind the first</td><td><code>compaction-runtime-context.ts</code></td></tr>
+  <tr><td>LLM idle during compaction summarization</td><td><code>llm-idle-timeout.ts</code> kills the connection after 60s of no chunks, triggering the compaction timeout fallback</td><td><code>llm-idle-timeout.ts</code></td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>BASE_CHUNK_RATIO</code></td><td>0.4</td><td>Fraction of history (by token count) to compact on the first attempt</td></tr>
+  <tr><td><code>MIN_CHUNK_RATIO</code></td><td>0.15</td><td>Minimum ratio on retries — below this, hard truncation is triggered instead</td></tr>
+  <tr><td><code>SAFETY_MARGIN</code></td><td>1.2</td><td>Multiplier on token estimates to add headroom against estimation inaccuracy</td></tr>
+  <tr><td><code>COMPACTION_TIMEOUT_MS</code></td><td>30000</td><td>Maximum time allowed for the entire compaction pipeline before falling back to truncation</td></tr>
+  <tr><td><code>TOOL_RESULT_MAX_BYTES</code></td><td>8192</td><td>Maximum byte size for a single tool result before truncation applies</td></tr>
+  <tr><td><code>IMAGE_PRUNE_AGE_TURNS</code></td><td>10</td><td>Images older than this many turns are candidates for pruning</td></tr>
+  <tr><td><code>IMAGE_PRUNE_MAX_COUNT</code></td><td>3</td><td>Maximum number of images to retain in history at any time</td></tr>
+  <tr><td><code>LLM_IDLE_TIMEOUT_MS</code></td><td>60000</td><td>Maximum idle time on an LLM connection before it is terminated</td></tr>
+  <tr><td><code>MAX_COMPACTION_RETRIES</code></td><td>3</td><td>Maximum number of compaction attempts with progressively reduced ratios</td></tr>
+  <tr><td><code>SESSION_TRUNCATION_KEEP_RECENT</code></td><td>5</td><td>Number of most recent user messages to always preserve during hard truncation</td></tr>
+</table>
+
+<!-- RELATED TOPICS -->
+<h2 id="related">Related Topics</h2>
+<p>See also:</p>
+<ul>
+  <li><a href="../index.html">Streaming overview</a> — the parent L2 page covering the full streaming pipeline</li>
+  <li><a href="../chunk_assembly/index.html">Chunk Assembly</a> — how raw SSE events are normalized into unified payloads</li>
+  <li><a href="../error_recovery/index.html">Error Recovery</a> — how errors during streaming are categorized and recovered from</li>
+</ul>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source files for this topic</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/agents/pi-embedded-runner/
+├── compaction/
+│   ├── compact.ts                        ← Core compaction algorithm with splitMessagesByTokenShare()
+│   ├── compaction-runtime-context.ts     ← Runtime context builder and concurrency mutex
+│   ├── compaction-safety-timeout.ts      ← Timeout guard for compaction pipeline
+│   └── session-truncation.ts             ← Last-resort hard truncation
+├── context-guard/
+│   ├── tool-result-truncation.ts         ← Truncates oversized tool results
+│   └── tool-result-context-guard.ts      ← Proactive guard on incoming tool results
+├── history/
+│   └── history-image-prune.ts            ← Prunes old images from conversation history
+└── streaming/
+    └── llm-idle-timeout.ts               ← Idle LLM connection timeout handler
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Streaming</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

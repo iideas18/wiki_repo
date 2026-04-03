@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Cache Invalidation — OpenClaw Infrastructure</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2333;--border:#30363d;--text:#e6edf3;--text-muted:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.1);--success:#3fb950;--warning:#d29922;--danger:#f85149;--info:#58a6ff;--code-bg:#1c2333;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--font-mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.1);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--info:#0969da;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;transition:background .2s,color .2s}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:1rem;padding:.5rem 1rem;background:var(--accent);color:#fff;border-radius:var(--radius);z-index:9999;font-weight:600}.skip-link:focus{top:1rem}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+nav.breadcrumb{font-size:.875rem;color:var(--text-muted)}nav.breadcrumb a{color:var(--accent)}nav.breadcrumb .sep{margin:0 .35rem;color:var(--text-muted)}
+.theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:.4rem .75rem;border-radius:var(--radius);cursor:pointer;font-size:.875rem;display:flex;align-items:center;gap:.35rem;transition:background .15s}.theme-toggle:hover{background:var(--accent-bg)}
+main{max-width:56rem;margin:0 auto;padding:2rem 1.5rem 4rem}
+.hero{text-align:center;padding:2.5rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent);padding:.2rem .7rem;border-radius:99px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+.hero h1{font-size:2rem;margin-bottom:.5rem}.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.meta-bar{display:flex;gap:1.5rem;justify-content:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted);flex-wrap:wrap}.meta-bar span{display:flex;align-items:center;gap:.3rem}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:2rem}.toc h2{font-size:1rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}.toc ol{padding-left:1.25rem}.toc li{margin:.35rem 0}.toc a{font-size:.925rem}
+h2{font-size:1.5rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.15rem;margin:1.75rem 0 .75rem;color:var(--accent)}
+p{margin:.75rem 0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}.summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}.summary-grid .card h4{font-size:.95rem;margin-bottom:.35rem;color:var(--accent)}.summary-grid .card p{font-size:.85rem;color:var(--text-muted);margin:0}
+.callout{border-left:4px solid var(--info);background:var(--surface);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.25rem 0;font-size:.925rem}.callout.analogy{border-left-color:var(--success)}.callout.warning{border-left-color:var(--warning)}.callout strong{display:block;margin-bottom:.25rem}
+.code-walk{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:1.5rem 0;overflow:hidden}.code-walk .step{display:flex;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);align-items:flex-start}.code-walk .step:last-child{border-bottom:none}.code-walk .step-num{background:var(--accent);color:#fff;width:1.75rem;height:1.75rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}.code-walk .step-body{flex:1;min-width:0}.code-walk .step-body p{margin:0 0 .5rem;font-size:.9rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative}pre code{background:none;color:inherit;padding:0;font-family:var(--font-mono);font-size:.85rem;line-height:1.6}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .15s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{background:var(--accent-bg);color:var(--accent)}
+.mermaid-wrapper{margin:1.5rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;position:relative}.mermaid-wrapper:hover{box-shadow:var(--shadow)}.mermaid-wrapper .expand-hint{position:absolute;top:.5rem;right:.5rem;font-size:.7rem;color:var(--text-muted);background:var(--surface-2);padding:.15rem .5rem;border-radius:4px}
+.diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .2s}.diagram-overlay.active{opacity:1}.diagram-overlay .close-overlay{position:absolute;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);color:var(--text);width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center}.diagram-overlay .diagram-content{max-width:90vw;max-height:90vh;overflow:auto;background:var(--surface);border-radius:var(--radius);padding:2rem}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;width:2.5rem;height:2.5rem;border-radius:50%;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:99;box-shadow:var(--shadow)}.back-to-top.visible{opacity:1}
+footer{text-align:center;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;margin-top:3rem}footer a{color:var(--accent)}
+@media print{header,.theme-toggle,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay,.skip-link{display:none!important}body{background:#fff;color:#000}main{max-width:100%;padding:0}.mermaid-wrapper{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word;border:1px solid #ccc}}
+@media(max-width:768px){main{padding:1.5rem 1rem}.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}.code-walk .step{flex-direction:column}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb navigation">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">caching</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Invalidation</span>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+    <span class="theme-icon">🌙</span> Theme
+  </button>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <span class="focus-label">Focus Page</span>
+    <h1>Cache Invalidation</h1>
+    <p class="subtitle">TTL expiry, event-driven purge, and delivery acknowledgment patterns</p>
+    <div class="meta-bar">
+      <span>📅 2026-04-02</span>
+      <span>📖 <span id="readingTime">–</span> min read</span>
+      <span>🔖 src/infra/</span>
+      <span>🔗 047b701859</span>
+    </div>
+  </div>
+
+  <div class="toc" id="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#ttl-invalidation">TTL-Based Invalidation</a></li>
+      <li><a href="#event-driven">Event-Driven Invalidation</a></li>
+      <li><a href="#delivery-invalidation">Delivery Queue Invalidation</a></li>
+      <li><a href="#approval-invalidation">Approval Invalidation</a></li>
+      <li><a href="#config-invalidation">Config &amp; Session Invalidation</a></li>
+      <li><a href="#diagrams">Decision Diagrams</a></li>
+    </ol>
+  </div>
+
+  <!-- Overview -->
+  <h2 id="overview">Overview</h2>
+
+  <div class="callout analogy">
+    <strong>🎯 What &amp; Why</strong>
+    Cache invalidation is famously one of the two hard problems in computer science (alongside naming things and off-by-one errors). Getting it wrong means serving stale data, missing critical updates, or wasting resources on entries that should have been purged long ago. OpenClaw uses a layered approach: TTL for time-sensitive caches, event-driven purge for test resets, and file-system operations for delivery queues.
+  </div>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy</strong>
+    Like a grocery store managing expiration dates. Some items (TTL caches) have a "best before" date and get pulled from shelves automatically. Others (delivery queue) are removed only when a customer picks them up (ack) or they're recalled (permanent error). The store never throws away everything at once — it's always surgical.
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>TTL Expiry</h4>
+      <p>5-minute window for presence entries; lazy eviction on next read access.</p>
+    </div>
+    <div class="card">
+      <h4>Event-Driven Purge</h4>
+      <p>Full cache reset for test isolation; FIFO overflow for bounded queues.</p>
+    </div>
+    <div class="card">
+      <h4>Delivery Ack/Fail</h4>
+      <p>File-system hard delete on ack; move-to-failed on permanent error (14 regex patterns).</p>
+    </div>
+    <div class="card">
+      <h4>Approval Expiry</h4>
+      <p>30-min default expiration; resolved approvals consumed once then discarded.</p>
+    </div>
+  </div>
+
+  <!-- TTL-Based Invalidation -->
+  <h2 id="ttl-invalidation">TTL-Based Invalidation</h2>
+  <p>
+    SystemPresence entries expire after 5 minutes (<code>PRESENCE_TTL_MS = 300_000</code>). Unlike active eviction with timers, OpenClaw uses <strong>lazy eviction</strong> — stale entries are removed only when the cache map is accessed. This avoids the overhead of background cleanup tasks and ensures that a quiet system does not spin up unnecessary work.
+  </p>
+
+  <div class="code-walk">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>On every cache read, iterate entries and evict any whose <code>lastSeen</code> timestamp exceeds the TTL window.</p>
+        <pre><code class="language-typescript">const PRESENCE_TTL_MS = 5 * 60 * 1000;
+
+function evictStaleEntries(
+  cache: Map&lt;string, SystemPresence&gt;
+): number {
+  const now = Date.now();
+  let evicted = 0;
+  for (const [key, entry] of cache) {
+    if (now - entry.lastSeen &gt; PRESENCE_TTL_MS) {
+      cache.delete(key);
+      evicted++;
+    }
+  }
+  return evicted;
+}
+
+function getPresence(
+  cache: Map&lt;string, SystemPresence&gt;,
+  key: string
+): SystemPresence | null {
+  evictStaleEntries(cache);
+  return cache.get(key) ?? null;
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>After eviction, check if the requested entry still exists. If it was stale, the caller receives <code>null</code> and must decide whether to re-fetch or proceed without it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <strong>⚠️ Lazy Eviction Trade-off</strong>
+    Lazy eviction means stale entries persist in memory until the next read. For the 200-entry presence cache this is acceptable — worst case is a few kilobytes of stale data. For larger caches, consider periodic sweeps.
+  </div>
+
+  <!-- Event-Driven Invalidation -->
+  <h2 id="event-driven">Event-Driven Invalidation</h2>
+  <p>
+    For test isolation, the heartbeat event cache provides a <code>resetHeartbeatEventsForTest()</code> function that clears the entire cache. This ensures no state leaks between test cases. Session queues use FIFO overflow as their invalidation mechanism — when a queue reaches its 20-entry cap, the oldest event is shifted out to make room.
+  </p>
+
+  <pre><code class="language-typescript">/**
+ * Reset the entire heartbeat cache — for test isolation only.
+ * In production this is a no-op guarded by NODE_ENV check.
+ */
+export function resetHeartbeatEventsForTest(): void {
+  if (process.env.NODE_ENV !== "test") {
+    console.warn("resetHeartbeatEventsForTest called outside test env");
+    return;
+  }
+  const state = getHeartbeatState();
+  state.lastEvent = null;
+  state.listeners.clear();
+}
+
+/**
+ * FIFO overflow for session event queues.
+ * Called internally by pushSessionEvent when queue is full.
+ */
+function enforceQueueBound(queue: SessionQueue): SystemEvent | null {
+  if (queue.events.length &gt; queue.maxSize) {
+    return queue.events.shift() ?? null; // evict oldest
+  }
+  return null;
+}</code></pre>
+
+  <!-- Delivery Queue Invalidation -->
+  <h2 id="delivery-invalidation">Delivery Queue Invalidation</h2>
+  <p>
+    The delivery queue uses file-system operations for invalidation. Each delivery is a <code>.json</code> file on disk. Three invalidation paths exist:
+  </p>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>ackDelivery(id)</h4>
+      <p>Hard-deletes the <code>.json</code> file. The delivery was successfully consumed.</p>
+    </div>
+    <div class="card">
+      <h4>failDelivery(id, error?)</h4>
+      <p>Marks the <code>.delivered</code> flag. Retains the file for debugging, but stops retry attempts.</p>
+    </div>
+    <div class="card">
+      <h4>moveToFailed(id)</h4>
+      <p>Moves the file to <code>failed/</code> subdirectory. Used when a permanent error is detected.</p>
+    </div>
+  </div>
+
+  <div class="code-walk">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Acknowledge a successful delivery by removing its file from the queue directory.</p>
+        <pre><code class="language-typescript">import { unlink, rename, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+const PERMANENT_ERROR_PATTERNS = [
+  /400 Bad Request/i,
+  /401 Unauthorized/i,
+  /403 Forbidden/i,
+  /404 Not Found/i,
+  /405 Method Not Allowed/i,
+  /409 Conflict/i,
+  /410 Gone/i,
+  /413 Payload Too Large/i,
+  /415 Unsupported Media/i,
+  /422 Unprocessable/i,
+  /INVALID_TOKEN/i,
+  /MALFORMED_PAYLOAD/i,
+  /SCHEMA_VIOLATION/i,
+  /DUPLICATE_DELIVERY/i,
+];
+
+async function ackDelivery(queueDir: string, id: string): Promise&lt;void&gt; {
+  const filePath = join(queueDir, `${id}.json`);
+  await unlink(filePath);
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>On failure, check whether the error matches any permanent pattern. If so, move to <code>failed/</code>. Otherwise, mark as delivered to prevent immediate retry.</p>
+        <pre><code class="language-typescript">function isPermanentError(error: string): boolean {
+  return PERMANENT_ERROR_PATTERNS.some(re =&gt; re.test(error));
+}
+
+async function failDelivery(
+  queueDir: string,
+  id: string,
+  error?: string
+): Promise&lt;void&gt; {
+  const filePath = join(queueDir, `${id}.json`);
+  if (error &amp;&amp; isPermanentError(error)) {
+    await moveToFailed(queueDir, id);
+    return;
+  }
+  // Mark .delivered flag — file stays for manual review
+  await writeFile(`${filePath}.delivered`, error ?? "unknown");
+}
+
+async function moveToFailed(
+  queueDir: string,
+  id: string
+): Promise&lt;void&gt; {
+  const src = join(queueDir, `${id}.json`);
+  const dest = join(queueDir, "failed", `${id}.json`);
+  await rename(src, dest);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Invalidation -->
+  <h2 id="approval-invalidation">Approval Invalidation</h2>
+  <p>
+    Approval requests carry an <code>expiresAtMs</code> field (defaulting to 30 minutes from creation). When the approval is checked, the system compares the current time against the expiration. Expired approvals are treated as rejected. Resolved approvals (approved or denied) are consumed exactly once — after reading, the entry is deleted.
+  </p>
+
+  <pre><code class="language-typescript">interface ApprovalRequest {
+  id: string;
+  createdAtMs: number;
+  expiresAtMs: number;  // default: createdAtMs + 30 * 60 * 1000
+  status: "pending" | "approved" | "denied";
+  resolvedAtMs?: number;
+}
+
+const DEFAULT_APPROVAL_TTL_MS = 30 * 60 * 1000;
+
+function checkApproval(
+  approvals: Map&lt;string, ApprovalRequest&gt;,
+  id: string
+): ApprovalRequest["status"] {
+  const req = approvals.get(id);
+  if (!req) return "denied";
+
+  if (Date.now() &gt; req.expiresAtMs) {
+    approvals.delete(id);
+    return "denied"; // expired → treat as denied
+  }
+
+  if (req.status !== "pending") {
+    approvals.delete(id); // consume once
+    return req.status;
+  }
+
+  return "pending";
+}</code></pre>
+
+  <!-- Config & Session Invalidation -->
+  <h2 id="config-invalidation">Config &amp; Session Invalidation</h2>
+  <p>
+    Configuration backups are rotated keeping the most recent 5 versions. Older backups are deleted during the rotation step. Session data is pruned based on age — entries older than the configured threshold (in days) are removed during periodic sweeps.
+  </p>
+
+  <div class="callout">
+    <strong>📋 Backup Rotation Details</strong>
+    The system maintains files named <code>config.backup.1</code> through <code>config.backup.5</code>. On each save, the current config is shifted into slot 1 and older backups move up. Slot 6+ are deleted. This provides a simple undo mechanism without unbounded disk growth.
+  </div>
+
+  <!-- Diagrams -->
+  <h2 id="diagrams">Decision Diagrams</h2>
+
+  <h3>TTL Check → Evict → Repopulate Flow</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand TTL invalidation sequence diagram">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="ttl-invalidation-sequence">
+sequenceDiagram
+    participant Caller
+    participant Cache
+    participant Evictor
+    participant Source
+
+    Caller->>Cache: getPresence(key)
+    Cache->>Evictor: evictStaleEntries()
+    Evictor-->>Cache: evicted N entries
+    alt Entry exists and fresh
+        Cache-->>Caller: return entry
+    else Entry missing or was stale
+        Cache-->>Caller: return null
+        Caller->>Source: fetchPresence(key)
+        Source-->>Caller: fresh presence data
+        Caller->>Cache: updatePresence(key, data)
+        Cache-->>Caller: SystemPresenceUpdate
+    end
+    </pre>
+  </div>
+
+  <h3>Delivery Invalidation Decision Tree</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand delivery invalidation flowchart">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="delivery-invalidation-tree">
+flowchart TD
+    A[Delivery Callback Received] --> B{Success?}
+    B -- Yes --> C[ackDelivery: delete .json file]
+    C --> D[Done — entry removed]
+    B -- No --> E{Error message available?}
+    E -- No --> F[failDelivery: mark .delivered flag]
+    E -- Yes --> G{Matches permanent pattern?}
+    G -- Yes --> H[moveToFailed: move to failed/ dir]
+    G -- No --> I{Retry count exceeded?}
+    I -- Yes --> H
+    I -- No --> J[Schedule retry with backoff]
+    J --> K[Re-attempt delivery]
+    K --> A
+    F --> L[Manual review needed]
+    H --> M[Permanently archived]
+    </pre>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="../index.html">← Back to Caching Module</a>
+  </p>
+  <p>OpenClaw Infrastructure Wiki · Generated 2026-04-02</p>
+</footer>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <button class="close-overlay" aria-label="Close diagram overlay">&times;</button>
+  <div class="diagram-content" id="diagramContent"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script type="module">
+/* mermaid loaded via CDN in head */
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getPreferredTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored) return stored;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  const icon = document.querySelector('.theme-icon');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+
+  const hljsLink = document.getElementById('hljs-theme');
+  if (hljsLink) {
+    hljsLink.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+}
+
+applyTheme(getPreferredTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+  initMermaid();
+});
+
+// Reading time
+const text = document.querySelector('main')?.textContent || '';
+const words = text.trim().split(/\s+/).length;
+const readingEl = document.getElementById('readingTime');
+if (readingEl) readingEl.textContent = String(Math.max(1, Math.round(words / 200)));
+
+// Highlight.js
+hljs.highlightAll();
+
+// Copy buttons
+document.querySelectorAll('pre code').forEach(block => {
+  if (block.closest('.mermaid-wrapper')) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(block.textContent || '');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+  block.closest('pre')?.appendChild(btn);
+});
+
+// Mermaid
+function initMermaid() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  mermaid.initialize({
+    startOnLoad:false,
+    theme: theme === 'dark' ? 'dark' : 'default',
+    flowchart: { useMaxWidth: true },
+    securityLevel: 'loose',
+  });
+
+  document.querySelectorAll('pre.mermaid').forEach((el, i) => {
+    const source = el.getAttribute('data-source') || `diagram-${i}`;
+    const code = el.textContent || '';
+    el.removeAttribute('data-processed');
+    el.innerHTML = code;
+    mermaid.render(`mermaid-${source}-${i}`, code).then(({ svg }).catch(function(e){console.warn('mermaid:',e)}) => {
+      el.innerHTML = svg;
+    }).catch(err => {
+      console.warn(`Mermaid render failed for ${source}:`, err);
+      el.innerHTML = `<span style="color:var(--danger)">Diagram render failed</span>`;
+    });
+  });
+}
+initMermaid();
+
+// Diagram overlay
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('diagramContent');
+
+document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+  wrapper.addEventListener('click', () => {
+    const svg = wrapper.querySelector('svg');
+    if (!svg || !overlay || !overlayContent) return;
+    overlayContent.innerHTML = '';
+    overlayContent.appendChild(svg.cloneNode(true));
+    overlay.classList.add('active');
+  });
+});
+
+overlay?.querySelector('.close-overlay')?.addEventListener('click', () => {
+  overlay.classList.remove('active');
+});
+overlay?.addEventListener('click', (e) => {
+  if (e.target === overlay) overlay.classList.remove('active');
+});
+
+// Back to top
+const backBtn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  if (backBtn) backBtn.classList.toggle('visible', window.scrollY > 400);
+});
+backBtn?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+    overlay.classList.remove('active');
+  }
+});
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

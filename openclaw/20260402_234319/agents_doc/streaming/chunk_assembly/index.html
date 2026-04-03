@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/agents/pi-embedded-runner/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Agents/Streaming — Chunk Assembly</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Agents</a> &rsaquo; <a href="../index.html">Streaming</a> &rsaquo; <span>Chunk Assembly</span></nav>
+
+<main id="main">
+<h1>Chunk Assembly</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Normalizing vendor SSE streams into unified response payloads</p>
+  <p>Every LLM provider ships a different Server-Sent Events format. This module intercepts raw SSE, normalizes deltas into a common internal structure, routes content by type (text, tool call, thinking), and assembles the final payloads consumed by downstream agent logic.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>Chunk assembly is the first stage of the streaming pipeline where raw vendor events become structured data the agent can reason about. Without this normalization layer, every downstream component would need provider-specific parsing logic, creating an explosion of branching paths. Understanding chunk assembly is essential for debugging malformed tool calls, missing tokens, or truncated reasoning output.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine a multilingual postal sorting centre. Letters arrive in Japanese, German, Arabic, and Portuguese — each with different address formats, stamp positions, and envelope sizes. The sorting centre opens every envelope, translates the destination into a standard internal routing slip, and forwards the unified package onward. If a letter is split across two envelopes (like a tool call whose JSON arguments span multiple SSE chunks), the centre holds the first half until the second arrives, reassembles them, and only then routes the complete message.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Normalize vendor-specific SSE streams into a unified internal chunk format, then assemble coherent payloads from those chunks.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>Raw SSE events from OpenAI, Anthropic, Google, and Bedrock provider connections — each with a different delta schema.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Content routing: is this chunk text, a tool call fragment, or thinking/reasoning content? Is the tool call argument JSON complete or still accumulating?</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>Unified <code>EmbeddedRunPayload</code> objects containing assistant text, tool metadata, and token usage — ready for the attempt loop.</p></div>
+</div>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  SSE["Raw SSE Event Stream"]
+  OAI["openai-stream-wrappers.ts"]
+  GGL["google-stream-wrappers.ts"]
+  ANT["anthropic-stream-wrappers.ts"]
+  BDR["bedrock-stream-wrappers.ts"]
+  NORM["Normalized Chunk"]
+  ROUTER["Content Router"]
+  TEXT["Text Accumulator"]
+  TOOL["Tool-Call Accumulator"]
+  THINK["Thinking Stream"]
+  USAGE["usage-accumulator.ts"]
+  BUILD["payloads.ts — buildEmbeddedRunPayloads()"]
+  OUT["EmbeddedRunPayload"]
+
+  SSE --> OAI
+  SSE --> GGL
+  SSE --> ANT
+  SSE --> BDR
+  OAI --> NORM
+  GGL --> NORM
+  ANT --> NORM
+  BDR --> NORM
+  NORM --> ROUTER
+  ROUTER -->|"delta.content"| TEXT
+  ROUTER -->|"delta.tool_calls"| TOOL
+  ROUTER -->|"delta.thinking"| THINK
+  NORM --> USAGE
+  TEXT --> BUILD
+  TOOL --> BUILD
+  THINK --> BUILD
+  USAGE --> BUILD
+  BUILD --> OUT
+</pre>
+</div>
+<p>The diagram above shows the full chunk-assembly data flow. Each provider wrapper sits behind a common interface: it consumes raw bytes from the HTTP response body and emits normalized chunk objects. The content router inspects each chunk's type discriminator and fans out to the appropriate accumulator. Finally, <code>buildEmbeddedRunPayloads()</code> merges all accumulated state into a single payload object.</p>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Provider selection</td><td>Model identifier prefix (<code>gpt-</code>, <code>claude-</code>, <code>gemini-</code>)</td><td>Determines which stream wrapper parses the SSE bytes</td></tr>
+  <tr><td>Text vs tool-call routing</td><td>Presence of <code>delta.tool_calls</code> array in the normalized chunk</td><td>Tool-call chunks enter a separate accumulation path with argument repair</td></tr>
+  <tr><td>Thinking content separation</td><td><code>delta.thinking</code> field or <code>content_block_type === "thinking"</code></td><td>Reasoning tokens are tracked separately so they can be shown in the UI or omitted</td></tr>
+  <tr><td>Tool-call completeness</td><td>JSON parse success on accumulated argument string</td><td>Incomplete JSON triggers the argument-repair path; premature emission would crash downstream</td></tr>
+  <tr><td>Stream termination</td><td><code>data: [DONE]</code> sentinel or provider-specific finish event</td><td>Triggers final payload flush and usage summary</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>Chunk assembly operates in three logical phases: <strong>normalization</strong>, <strong>routing</strong>, and <strong>payload construction</strong>. Each phase is designed to be stateless with respect to the others, communicating only through the normalized chunk interface.</p>
+
+<h3 id="mechanism-normalization">Phase 1 — Provider Normalization</h3>
+<p>Each LLM provider streams responses in a vendor-specific SSE format. The provider wrappers translate these into a common <code>NormalizedChunk</code> shape. OpenAI sends <code>data: {choices: [{delta: {content, tool_calls}}]}</code>, while Anthropic uses <code>content_block_delta</code> events with a <code>type</code> discriminator. Google's Vertex AI uses yet another event structure, and Bedrock wraps everything in an AWS EventStream binary framing.</p>
+
+<pre><code class="language-typescript">// openai-stream-wrappers.ts — normalize OpenAI delta
+interface OpenAIDelta {
+  choices: Array&lt;{
+    delta: {
+      content?: string;
+      tool_calls?: Array&lt;{
+        index: number;
+        id?: string;
+        function?: { name?: string; arguments?: string };
+      }&gt;;
+    };
+    finish_reason: string | null;
+  }&gt;;
+  usage?: { prompt_tokens: number; completion_tokens: number };
+}
+
+function normalizeOpenAIChunk(raw: OpenAIDelta): NormalizedChunk {
+  const choice = raw.choices[0];
+  return {
+    content: choice.delta.content ?? null,
+    toolCalls: choice.delta.tool_calls?.map(tc =&gt; ({
+      index: tc.index,
+      id: tc.id ?? null,
+      name: tc.function?.name ?? null,
+      argumentFragment: tc.function?.arguments ?? "",
+    })) ?? null,
+    thinking: null,
+    finishReason: choice.finish_reason,
+    usage: raw.usage ?? null,
+  };
+}
+</code></pre>
+
+<div class="callout">
+<strong>Key detail:</strong> OpenAI may send tool-call chunks where only <code>arguments</code> is present (no <code>id</code> or <code>name</code>). The wrapper must handle partial tool-call deltas by using the <code>index</code> field to match fragments to the correct accumulator slot.
+</div>
+
+<h3 id="mechanism-routing">Phase 2 — Content Routing</h3>
+<p>Once normalized, each chunk is routed by type. Text content is appended to a running string buffer. Tool-call fragments are dispatched to per-index accumulators that build up the argument JSON incrementally. Thinking content is piped to a separate stream handled by <code>thinking.ts</code>.</p>
+
+<pre><code class="language-typescript">// Simplified content routing logic
+function routeChunk(chunk: NormalizedChunk, state: AssemblyState): void {
+  if (chunk.thinking) {
+    state.thinkingStream.push(chunk.thinking);
+    return;
+  }
+
+  if (chunk.content) {
+    state.textBuffer += chunk.content;
+  }
+
+  if (chunk.toolCalls) {
+    for (const tc of chunk.toolCalls) {
+      if (!state.toolAccumulators[tc.index]) {
+        state.toolAccumulators[tc.index] = {
+          id: tc.id ?? "",
+          name: tc.name ?? "",
+          argumentChunks: [],
+        };
+      }
+      const acc = state.toolAccumulators[tc.index];
+      if (tc.id) acc.id = tc.id;
+      if (tc.name) acc.name = tc.name;
+      acc.argumentChunks.push(tc.argumentFragment);
+    }
+  }
+
+  if (chunk.usage) {
+    state.usageAccumulator.add(chunk.usage);
+  }
+}
+</code></pre>
+
+<div class="callout warn">
+<strong>Watch out:</strong> Anthropic sends tool-call arguments as a single blob in the <code>content_block_stop</code> event rather than streaming them incrementally like OpenAI. The routing logic must not assume incremental delivery — it checks whether the accumulated JSON is already parseable before engaging the repair path.
+</div>
+
+<h3 id="mechanism-tool-repair">Phase 3 — Tool-Call Argument Repair</h3>
+<p>Tool-call arguments arrive as JSON fragments split across multiple SSE chunks. Because the split point is arbitrary (it may land in the middle of a string value or between object keys), naive concatenation can produce invalid JSON. The <code>attempt.tool-call-normalization.ts</code> module first joins all fragments and attempts <code>JSON.parse()</code>. If that fails, <code>attempt.tool-call-argument-repair.ts</code> applies heuristic fixes: closing unclosed strings, adding missing brackets, and stripping trailing commas.</p>
+
+<div class="callout danger">
+<strong>Failure mode:</strong> If argument repair cannot produce valid JSON after three attempts, the tool call is marked as <code>malformed</code> and the attempt loop re-prompts the LLM with an error message asking it to re-emit the tool call.
+</div>
+
+<h3 id="mechanism-payload">Phase 4 — Payload Construction</h3>
+<p>After the stream terminates (or a tool-call is deemed complete), <code>payloads.ts</code> calls <code>buildEmbeddedRunPayloads()</code> to merge the text buffer, finalized tool calls, thinking content, and accumulated usage into an <code>EmbeddedRunPayload</code>. This payload is the unit of work consumed by the attempt loop and ultimately returned to the caller.</p>
+
+<!-- BEHAVIOR DIAGRAM -->
+<h2 id="behavior">Behavior Diagram</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant Provider as LLM Provider
+  participant Wrapper as Stream Wrapper
+  participant Router as Content Router
+  participant TextAcc as Text Accumulator
+  participant ToolAcc as Tool-Call Accumulator
+  participant Repair as Argument Repair
+  participant Builder as Payload Builder
+
+  Provider->>Wrapper: SSE chunk (vendor format)
+  Wrapper->>Router: NormalizedChunk
+  alt text content
+    Router->>TextAcc: append(delta.content)
+  else tool-call fragment
+    Router->>ToolAcc: accumulate(index, fragment)
+  end
+  Provider->>Wrapper: SSE chunk #2
+  Wrapper->>Router: NormalizedChunk
+  Router->>ToolAcc: accumulate(index, fragment)
+  Note over ToolAcc: JSON still incomplete
+  Provider->>Wrapper: data: [DONE]
+  Wrapper->>Router: finishReason = "stop"
+  ToolAcc->>Repair: tryParse(joinedArgs)
+  alt parse succeeds
+    Repair->>Builder: validToolCall
+  else parse fails
+    Repair->>Repair: heuristic fix + retry
+    Repair->>Builder: repairedToolCall
+  end
+  TextAcc->>Builder: fullText
+  Builder->>Builder: buildEmbeddedRunPayloads()
+  Builder-->>Provider: EmbeddedRunPayload
+</pre>
+</div>
+<p>The sequence diagram above traces a typical two-chunk interaction where the first SSE event carries text content and the start of a tool call, the second continues the tool-call arguments, and the <code>[DONE]</code> sentinel triggers final assembly. Notice how the argument-repair step only activates when <code>JSON.parse()</code> fails on the concatenated fragments.</p>
+
+<div class="callout success">
+<strong>Design insight:</strong> By deferring tool-call argument validation until stream termination, the system avoids expensive parse attempts on every chunk. This is a deliberate trade-off: it adds latency to tool-call resolution but eliminates redundant JSON parsing overhead during high-throughput streaming.</p>
+</div>
+
+<!-- ANNOTATED CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough</h2>
+<p>Walk through the key functions in the order they execute during a single streaming response.</p>
+
+<div class="code-walk">
+<div class="step">
+<p>The entry point receives raw SSE bytes from the provider HTTP response and splits them into individual events. Each event is passed to the appropriate provider wrapper:</p>
+<pre><code class="language-typescript">// stream-controller.ts — entry point
+async function* processStream(
+  providerType: ProviderType,
+  response: ReadableStream&lt;Uint8Array&gt;,
+): AsyncGenerator&lt;NormalizedChunk&gt; {
+  const wrapper = getStreamWrapper(providerType);
+  const reader = response.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const events = extractSSEEvents(buffer);
+    buffer = events.remainder;
+    for (const event of events.parsed) {
+      yield wrapper.normalize(event);
+    }
+  }
+}
+</code></pre>
+</div>
+
+<div class="step">
+<p>Tool-call argument repair attempts to fix malformed JSON. The repair function tries progressively more aggressive fixes:</p>
+<pre><code class="language-typescript">// attempt.tool-call-argument-repair.ts
+function repairToolCallArguments(raw: string): object | null {
+  // Attempt 1: direct parse
+  try { return JSON.parse(raw); } catch {}
+
+  // Attempt 2: close unclosed strings and brackets
+  let fixed = raw;
+  const openBraces = (fixed.match(/\{/g) || []).length;
+  const closeBraces = (fixed.match(/\}/g) || []).length;
+  if (openBraces > closeBraces) {
+    fixed += "}".repeat(openBraces - closeBraces);
+  }
+  // Strip trailing commas before closing brace
+  fixed = fixed.replace(/,\s*\}/g, "}");
+  try { return JSON.parse(fixed); } catch {}
+
+  // Attempt 3: close unclosed string literals
+  const quoteCount = (fixed.match(/(?<!\\)"/g) || []).length;
+  if (quoteCount % 2 !== 0) {
+    fixed = fixed + '"';
+    fixed += "}".repeat(Math.max(0, openBraces - closeBraces));
+    try { return JSON.parse(fixed); } catch {}
+  }
+
+  return null; // malformed — will trigger re-prompt
+}
+</code></pre>
+<div class="callout warn">
+<strong>Performance note:</strong> The repair function is called at most once per tool call (at stream end), not on every chunk. In production, fewer than 2% of tool calls require repair — the vast majority parse cleanly on the first attempt.
+</div>
+</div>
+
+<div class="step">
+<p>Finally, <code>buildEmbeddedRunPayloads()</code> merges all accumulated state into the output payload. Token usage from <code>usage-accumulator.ts</code> is included so downstream can track costs:</p>
+<pre><code class="language-typescript">// payloads.ts — final assembly
+function buildEmbeddedRunPayloads(state: AssemblyState): EmbeddedRunPayload {
+  const toolCalls = Object.values(state.toolAccumulators).map(acc =&gt; ({
+    id: acc.id,
+    name: acc.name,
+    arguments: repairToolCallArguments(acc.argumentChunks.join("")),
+  }));
+
+  return {
+    assistantText: state.textBuffer,
+    toolCalls: toolCalls.filter(tc =&gt; tc.arguments !== null),
+    malformedToolCalls: toolCalls.filter(tc =&gt; tc.arguments === null),
+    thinking: state.thinkingStream.join(""),
+    usage: state.usageAccumulator.summary(),
+  };
+}
+</code></pre>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Code Location</th></tr>
+  <tr><td>Empty SSE event (heartbeat)</td><td>Silently discarded by the event parser — never reaches the wrapper</td><td><code>stream-controller.ts:extractSSEEvents()</code></td></tr>
+  <tr><td>Tool-call argument split mid-Unicode</td><td>TextDecoder with <code>stream: true</code> holds incomplete byte sequences until the next chunk completes them</td><td><code>stream-controller.ts:processStream()</code></td></tr>
+  <tr><td>Duplicate <code>[DONE]</code> sentinel</td><td>Second sentinel is a no-op; the generator has already returned</td><td><code>stream-controller.ts</code> while-loop guard</td></tr>
+  <tr><td>Provider sends <code>error</code> event mid-stream</td><td>Wrapper emits a <code>NormalizedChunk</code> with <code>finishReason: "error"</code>; payload builder creates a partial payload with an error flag</td><td><code>*-stream-wrappers.ts</code></td></tr>
+  <tr><td>Thinking content interleaved with text</td><td>Router separates by type discriminator on every chunk; ordering is preserved per-type but not across types</td><td><code>thinking.ts</code>, <code>routeChunk()</code></td></tr>
+  <tr><td>Zero tool-call arguments (empty object)</td><td><code>JSON.parse("{}")</code> succeeds immediately; no repair needed</td><td><code>attempt.tool-call-argument-repair.ts</code></td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>MAX_ARGUMENT_REPAIR_ATTEMPTS</code></td><td>3</td><td>Number of heuristic repair attempts before marking a tool call as malformed</td></tr>
+  <tr><td><code>SSE_HEARTBEAT_INTERVAL_MS</code></td><td>15000</td><td>Expected heartbeat interval; exceeding 2× this triggers a connection health warning</td></tr>
+  <tr><td><code>STREAM_BUFFER_HIGH_WATER</code></td><td>64 KB</td><td>Maximum size of the SSE text buffer before forcing a flush to the event parser</td></tr>
+  <tr><td><code>THINKING_STREAM_ENABLED</code></td><td>true</td><td>Whether to separate thinking/reasoning tokens into their own stream; disable to merge with text</td></tr>
+  <tr><td><code>USAGE_ACCUMULATOR_MODE</code></td><td>"incremental"</td><td>Whether to track token usage per-chunk (<code>incremental</code>) or only from the final summary event (<code>final</code>)</td></tr>
+</table>
+
+<!-- RELATED TOPICS -->
+<h2 id="related">Related Topics</h2>
+<p>See also:</p>
+<ul>
+  <li><a href="../index.html">Streaming overview</a> — the parent L2 page covering the full streaming pipeline</li>
+  <li><a href="../backpressure/index.html">Backpressure &amp; Flow Control</a> — how the pipeline manages context window limits</li>
+  <li><a href="../error_recovery/index.html">Error Recovery</a> — how errors during streaming are categorized and recovered from</li>
+</ul>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source files for this topic</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/agents/pi-embedded-runner/
+├── streaming/
+│   ├── openai-stream-wrappers.ts      ← OpenAI SSE normalization
+│   ├── google-stream-wrappers.ts      ← Google Vertex AI normalization
+│   ├── anthropic-stream-wrappers.ts   ← Anthropic SSE normalization
+│   ├── bedrock-stream-wrappers.ts     ← AWS Bedrock EventStream normalization
+│   ├── payloads.ts                    ← buildEmbeddedRunPayloads() assembly
+│   ├── thinking.ts                    ← Thinking/reasoning content stream
+│   └── usage-accumulator.ts           ← Token usage tracking across chunks
+├── attempt/
+│   ├── attempt.tool-call-normalization.ts  ← Tool-call JSON join + parse
+│   └── attempt.tool-call-argument-repair.ts ← Heuristic JSON repair
+└── stream-controller.ts              ← SSE event loop and provider dispatch
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Streaming</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

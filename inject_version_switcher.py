@@ -33,13 +33,15 @@ font-size:.85rem;cursor:pointer;font-family:inherit}
 .version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
 @media print{.version-switcher{display:none!important}}"""
 
-SWITCHER_JS = """\
+SWITCHER_JS = r"""\
 (function(){
-  var versionsUrl='../versions.json';
+  var dirPath=location.pathname.replace(/[^/]*$/,'');
+  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
+  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
+  var versionsUrl=projectBase+'versions.json';
   fetch(versionsUrl).then(function(r){return r.json()}).then(function(versions){
     if(!versions||versions.length<2)return;
-    var parts=location.pathname.replace(/\\/$/,'').split('/');
-    var curTs=parts[parts.length-1]||parts[parts.length-2];
+    var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
     /* Build UI */
     var wrap=document.createElement('div');
     wrap.className='version-switcher';
@@ -65,13 +67,13 @@ SWITCHER_JS = """\
     sel.addEventListener('change',function(){
       var newTs=this.value;
       if(newTs===curTs)return;
-      var newUrl='../'+newTs+'/index.html';
+      var newUrl=projectBase+newTs+'/index.html';
       fetch(newUrl).then(function(r){return r.text()}).then(function(html){
         var parser=new DOMParser();
         var doc=parser.parseFromString(html,'text/html');
         var newMain=doc.querySelector('#main')||doc.querySelector('main');
         if(!newMain){location.href=newUrl;return}
-        var base='../'+newTs+'/';
+        var base=projectBase+newTs+'/';
         newMain.querySelectorAll('[href]').forEach(function(el){
           var h=el.getAttribute('href');
           if(h&&!/^(https?:|mailto:|#|\\/\\/)/.test(h)&&!h.startsWith('/'))

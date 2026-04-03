@@ -1,0 +1,507 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/plugins/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Plugins — Extensible Plugin Ecosystem | OpenClaw Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.4)}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76;--shadow:0 1px 3px rgba(0,0,0,.12)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{color:var(--heading);font-weight:600}
+.skip-link{position:absolute;top:-100%;left:16px;background:var(--accent);color:#fff;padding:8px 16px;border-radius:var(--radius);z-index:1000;font-weight:600}
+.skip-link:focus{top:16px}
+.theme-toggle{position:fixed;top:16px;right:16px;z-index:999;background:var(--surface);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:background .2s}
+.theme-toggle:hover{background:var(--border)}
+.container{max-width:960px;margin:0 auto;padding:24px 20px 80px}
+.breadcrumb{font-size:.875rem;color:var(--text-muted);margin-bottom:24px;display:flex;align-items:center;gap:6px}
+.breadcrumb a{color:var(--accent)}
+.hero{text-align:center;padding:48px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:32px}
+.hero h1{font-size:2rem;margin-bottom:8px}
+.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.reading-time{display:inline-block;margin-top:10px;font-size:.8rem;color:var(--text-muted);background:var(--bg);padding:2px 10px;border-radius:12px}
+.stat-row{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 24px;text-align:center;min-width:120px}
+.stat .num{font-size:1.5rem;font-weight:700;color:var(--accent);display:block}
+.stat .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.badges{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;background:var(--surface);border:1px solid var(--border)}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:var(--radius);padding:20px 24px;margin-bottom:32px}
+.intro-box h3{margin-bottom:8px;font-size:1rem}
+.intro-box p{margin-bottom:10px}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem}
+details summary:hover{text-decoration:underline}
+details .analogy{margin-top:10px;padding:12px 16px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);font-style:italic;color:var(--text-muted);line-height:1.6}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 24px;margin-bottom:40px}
+.toc h3{font-size:.9rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px}
+.toc ol{padding-left:20px}
+.toc li{margin-bottom:4px;font-size:.9rem}
+.toc a{color:var(--text)}
+.toc a:hover{color:var(--accent)}
+section{margin-bottom:48px}
+section>h2{font-size:1.4rem;border-bottom:2px solid var(--border);padding-bottom:8px;margin-bottom:20px}
+section>h3{font-size:1.1rem;margin:20px 0 10px}
+.table-wrap{overflow-x:auto;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:.875rem}
+th,td{padding:10px 14px;border:1px solid var(--border);text-align:left}
+th{background:var(--surface);color:var(--heading);font-weight:600;white-space:nowrap}
+td{vertical-align:top}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--surface) 50%,transparent)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.6;position:relative;margin-bottom:20px}
+code{font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+:not(pre)>code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.85em;border:1px solid var(--border)}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.75rem}
+.copy-btn:hover{color:var(--accent)}
+.mermaid-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;text-align:center;cursor:pointer;position:relative}
+.mermaid-wrap::after{content:'🔍 Click to enlarge';position:absolute;bottom:8px;right:12px;font-size:.7rem;color:var(--text-muted);opacity:.7}
+.mermaid-wrap svg{max-width:100%;height:auto}
+.diagram-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:24px}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .inner{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+.diagram-overlay .close-btn{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s}
+.card:hover{border-color:var(--accent)}
+.card h4{margin-bottom:6px}
+.card p{font-size:.85rem;color:var(--text-muted);margin:0}
+.dir-tree{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:monospace;font-size:.82rem;line-height:1.8;overflow-x:auto}
+.dir-tree .file{color:var(--text)}
+.dir-tree .annot{color:var(--text-muted);font-style:italic}
+footer{text-align:center;padding:32px 20px;margin-top:48px;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem}
+footer a{color:var(--accent)}
+.back-to-top{position:fixed;bottom:24px;right:24px;z-index:900;background:var(--accent);color:#fff;border:none;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.back-to-top.visible{display:flex}
+@media print{
+.theme-toggle,.back-to-top,.copy-btn,.diagram-overlay,.mermaid-wrap::after{display:none!important}
+body{background:#fff;color:#000}
+.hero,.stat,.intro-box,.card,.toc,pre,.mermaid-wrap,.dir-tree{border-color:#ccc;background:#fafafa}
+a{color:#0969da}
+}
+@media(max-width:600px){
+.hero h1{font-size:1.4rem}
+.stat-row{gap:8px}
+.stat{min-width:80px;padding:10px 14px}
+.card-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+<main id="main">
+<div class="container">
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb">
+  <a title="OpenClaw — Source Code Wiki" href="../index.html">OpenClaw</a> <span>›</span> <span>Plugins</span>
+</nav>
+
+<header class="hero">
+  <h1>Plugins — Extensible Plugin Ecosystem</h1>
+  <p class="subtitle">Manifest-driven plugin discovery, capability registration, and MCP tool bridging</p>
+  <span class="reading-time" id="readingTime"></span>
+</header>
+
+<div class="stat-row">
+  <div class="stat"><span class="num">286</span><span class="label">Files</span></div>
+  <div class="stat"><span class="num">337</span><span class="label">SDK Files</span></div>
+  <div class="stat"><span class="num">25+</span><span class="label">Hook Types</span></div>
+  <div class="stat"><span class="num">TypeScript</span><span class="label">Language</span></div>
+</div>
+
+<div class="badges">
+  <span class="badge">🔵 Manifest-Driven</span>
+  <span class="badge">🟢 Lazy Loading</span>
+  <span class="badge">🟡 Hook Pipeline</span>
+  <span class="badge">🔴 MCP Bridge</span>
+</div>
+
+<div class="intro-box">
+  <h3>💡 What is this?</h3>
+  <p>The plugins module is the extensibility backbone of OpenClaw. It manages how plugins are discovered, loaded, configured, and wired into the assistant lifecycle. Every channel adapter, LLM provider, memory engine, and tool extension is a plugin. The system uses a manifest-first approach: plugin metadata (<code>openclaw.plugin.json</code>) is parsed and validated before any plugin code runs, enabling fast config validation and auto-enable logic without importing heavy runtime dependencies.</p>
+  <details>
+    <summary>🔎 Analogy — how does this work?</summary>
+    <div class="analogy">Think of the plugin system as a modular electrical panel in a building. Each plugin is a circuit breaker with a standardized interface. The manifest is the label on each breaker — it tells the panel what the breaker controls without flipping it on. The registry is the panel itself, routing power (API calls) to the right circuits. The hook pipeline is the wiring bus — events flow through it and each active breaker can intercept, transform, or block the current.</div>
+  </details>
+</div>
+
+<nav class="toc">
+  <h3>Table of Contents</h3>
+  <ol id="tocList"></ol>
+</nav>
+
+<!-- ── Architecture ── -->
+<section>
+<h2 id="architecture">Architecture</h2>
+<p>The plugin system is organized into four major subsystems: <strong>Discovery</strong> scans plugin roots and parses manifests into a cache; <strong>Loading</strong> evaluates enable/disable config state and uses <code>jiti</code> to lazily import plugin code; <strong>Registration</strong> builds the plugin API surface and populates the central registry with hooks, tools, and channels; and the <strong>MCP Bridge</strong> extracts MCP server configuration from bundles for external tool serving.</p>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TD
+  subgraph Discovery["Plugin Discovery"]
+    Roots["Plugin Roots"]
+    Scan["Directory Scanner"]
+    Manifest["Manifest Parser"]
+    Cache["Discovery Cache"]
+  end
+  subgraph Loading["Plugin Loading"]
+    ConfigState["Config State"]
+    Enable["Enable/Disable Logic"]
+    Jiti["Jiti Loader"]
+    Runtime["Plugin Runtime"]
+  end
+  subgraph Registration["Capability Registration"]
+    API["Plugin API Builder"]
+    Registry["Plugin Registry"]
+    Hooks["Hook Runner"]
+    Tools["Tool Factory"]
+  end
+  subgraph Bridge["MCP Bridge"]
+    BundleMCP["Bundle MCP Config"]
+    MCPServers["MCP Server Map"]
+    ToolServe["Tool Serving"]
+  end
+  Roots --> Scan
+  Scan --> Manifest
+  Manifest --> Cache
+  Cache --> ConfigState
+  ConfigState --> Enable
+  Enable --> Jiti
+  Jiti --> Runtime
+  Runtime --> API
+  API --> Registry
+  Registry --> Hooks
+  Registry --> Tools
+  Runtime --> BundleMCP
+  BundleMCP --> MCPServers
+  MCPServers --> ToolServe
+</pre>
+</div>
+</section>
+
+<!-- ── Plugin Lifecycle ── -->
+<section>
+<h2 id="lifecycle">Plugin Lifecycle</h2>
+<p>The lifecycle of a plugin spans from discovery through registration to runtime hook execution. The application kicks off discovery by scanning configured plugin roots. Each discovered manifest is loaded into a registry of static metadata. The runtime then resolves enable states, lazily imports plugin modules via <code>jiti</code>, and calls each plugin's <code>register()</code> function with a typed API surface. Hooks registered during this phase are later invoked by the hook runner with priority-based ordering.</p>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+sequenceDiagram
+  participant App as Application
+  participant Disc as Discovery
+  participant Man as Manifest Registry
+  participant Loader as Plugin Loader
+  participant Reg as Plugin Registry
+  participant Hook as Hook Runner
+  App->>Disc: discoverOpenClawPlugins(roots)
+  Disc->>Man: loadPluginManifestRegistry()
+  Man-->>Disc: manifest[] (static metadata)
+  Disc-->>App: PluginCandidate[]
+  App->>Loader: resolveRuntimePluginRegistry()
+  Loader->>Loader: resolveEffectiveEnableState()
+  Loader->>Loader: createJiti() + import plugin
+  Loader->>Reg: buildPluginApi() → register()
+  Reg->>Reg: registerHook / registerTool / registerChannel
+  Reg-->>Loader: PluginRegistry
+  App->>Hook: runHook('before_agent_start', event)
+  Hook->>Hook: sort by priority
+  Hook->>Hook: execute handlers sequentially
+  Hook-->>App: accumulated result
+</pre>
+</div>
+</section>
+
+<!-- ── Key Types ── -->
+<section>
+<h2 id="key-types">Key Types</h2>
+<p>The plugin system defines a rich set of TypeScript types and interfaces that form the contract between the host application and plugin code.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>PluginManifest</code></td><td>manifest.ts</td><td>Interface</td><td>Static plugin metadata: id, schema, capabilities, providers, channels</td></tr>
+<tr><td><code>PluginRegistry</code></td><td>registry.ts</td><td>Class</td><td>Central registry holding all registered hooks, tools, channels, providers</td></tr>
+<tr><td><code>PluginRuntime</code></td><td>runtime/types.ts</td><td>Interface</td><td>Active plugin state during execution with config and logger</td></tr>
+<tr><td><code>OpenClawPluginApi</code></td><td>types.ts</td><td>Interface</td><td>The API surface given to plugins for registration (registerTool, registerHook, etc.)</td></tr>
+<tr><td><code>PluginHookRegistration</code></td><td>types.ts</td><td>Type</td><td>Hook handler with priority, pluginId, and execution context</td></tr>
+<tr><td><code>BundlePluginManifest</code></td><td>bundle-manifest.ts</td><td>Type</td><td>Bundle-format manifest for Codex/Claude/Cursor plugin formats</td></tr>
+<tr><td><code>PluginCandidate</code></td><td>discovery.ts</td><td>Type</td><td>Discovered plugin with source, format, package metadata</td></tr>
+<tr><td><code>BuildPluginApiParams</code></td><td>api-builder.ts</td><td>Type</td><td>Parameters for constructing the plugin API facade</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ── Hook Execution Pipeline ── -->
+<section>
+<h2 id="hook-pipeline">Hook Execution Pipeline</h2>
+<p>Hooks are the primary extension mechanism in the plugin system. When the application invokes <code>runHook(name, event)</code>, the hook runner collects all registered handlers for that hook name, sorts them by <strong>priority</strong> (highest first, with <code>pluginId</code> as a tiebreaker for equal priorities), and executes them <strong>sequentially</strong>. Each handler receives the current accumulated result and can transform or extend it. Results are merged via <code>mergeResults()</code>. A handler can signal early exit through <code>shouldStop()</code>, which terminates the pipeline and logs the terminal decision. This allows plugins to override default behavior or short-circuit processing when needed.</p>
+<div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart LR
+  Sort["Sort by Priority"] --> Exec["Execute Handler"]
+  Exec --> Merge["mergeResults(acc, next)"]
+  Merge --> Stop{"shouldStop?"}
+  Stop -->|No| Exec
+  Stop -->|Yes| Return["Return Result"]
+  Merge -->|All done| Return
+</pre>
+</div>
+</section>
+
+<!-- ── Sub-modules ── -->
+<section>
+<h2 id="sub-modules">Sub-modules</h2>
+<p>The plugin system is composed of several focused sub-modules, each handling a distinct concern in the plugin lifecycle.</p>
+<div class="card-grid">
+  <a class="card" href="bundling/index.html">
+    <h4>🔧 Bundling</h4>
+    <p>Bundle discovery, manifest parsing, and packaging for Codex/Claude/Cursor plugin formats</p>
+  </a>
+  <a class="card" href="sdk/index.html">
+    <h4>🧰 SDK</h4>
+    <p>Plugin SDK providing the public API surface for plugin developers</p>
+  </a>
+  <a class="card" href="mcp-bridge/index.html">
+    <h4>🌉 MCP Bridge</h4>
+    <p>MCP server configuration extraction and tool serving</p>
+  </a>
+</div>
+</section>
+
+<!-- ── Directory Map ── -->
+<section>
+<h2 id="directory-map">Directory Map</h2>
+<div class="dir-tree">
+<span class="file">📁 src/plugins/ — 286 files</span><br>
+├── <span class="file">manifest.ts</span>                  <span class="annot"># Plugin manifest parsing (openclaw.plugin.json)</span><br>
+├── <span class="file">registry.ts</span>                  <span class="annot"># Central plugin registry</span><br>
+├── <span class="file">loader.ts</span>                    <span class="annot"># Plugin discovery &amp; lazy loading</span><br>
+├── <span class="file">discovery.ts</span>                 <span class="annot"># Plugin candidate scanning</span><br>
+├── <span class="file">hooks.ts</span>                     <span class="annot"># Hook runner with priority ordering</span><br>
+├── <span class="file">api-builder.ts</span>               <span class="annot"># Plugin API facade constructor</span><br>
+├── <span class="file">tools.ts</span>                     <span class="annot"># Plugin tool resolution</span><br>
+├── <span class="file">config-state.ts</span>              <span class="annot"># Enable/disable state management</span><br>
+├── <span class="file">types.ts</span>                     <span class="annot"># Core plugin type definitions</span><br>
+├── <span class="file">bundle-manifest.ts</span>           <span class="annot"># Bundle format manifest loading</span><br>
+├── <span class="file">bundle-commands.ts</span>           <span class="annot"># Bundle command spec parsing</span><br>
+├── <span class="file">bundle-mcp.ts</span>                <span class="annot"># MCP server config extraction</span><br>
+├── <span class="file">bundle-lsp.ts</span>                <span class="annot"># LSP integration support</span><br>
+├── <span class="file">bundled-capability-runtime.ts</span> <span class="annot"># Bundled plugin runtime</span><br>
+├── <span class="file">provider-auth-*.ts</span>           <span class="annot"># Provider authentication (13 files)</span><br>
+├── <span class="file">provider-*.ts</span>                <span class="annot"># Provider management (20+ files)</span><br>
+├── <span class="file">memory-*.ts</span>                  <span class="annot"># Memory plugin support</span><br>
+├── <span class="file">runtime-*.ts</span>                 <span class="annot"># Channel runtime adapters</span><br>
+├── <span class="file">runtime/</span>                     <span class="annot"># Runtime type definitions (9 files)</span><br>
+├── <span class="file">contracts/</span>                   <span class="annot"># Contract test suites</span><br>
+└── <span class="file">*.test.ts</span>                    <span class="annot"># Unit tests (100+ files)</span><br>
+<br>
+<span class="file">📁 src/plugin-sdk/ — 337 files</span><br>
+├── <span class="file">index.ts</span>                     <span class="annot"># Main SDK entry (re-exports)</span><br>
+├── <span class="file">core.ts</span>                      <span class="annot"># Core plugin/channel/provider types</span><br>
+├── <span class="file">plugin-runtime.ts</span>            <span class="annot"># Runtime command/hook helpers</span><br>
+├── <span class="file">plugin-entry.ts</span>              <span class="annot"># Plugin entry point utilities</span><br>
+├── <span class="file">channel-*.ts</span>                 <span class="annot"># Channel abstractions (25+ files)</span><br>
+├── <span class="file">provider-*.ts</span>                <span class="annot"># Provider abstractions (25+ files)</span><br>
+├── <span class="file">agent-runtime.ts</span>             <span class="annot"># Agent runtime abstractions</span><br>
+├── <span class="file">memory-core*.ts</span>              <span class="annot"># Memory engine SDK (20+ files)</span><br>
+├── <span class="file">discord*.ts, slack*.ts, ...</span>  <span class="annot"># Channel implementations (80+ files)</span><br>
+├── <span class="file">openai.ts, anthropic*.ts, ...</span> <span class="annot"># LLM provider SDKs (60+ files)</span><br>
+└── <span class="file">testing.ts</span>                   <span class="annot"># Test utilities</span><br>
+</div>
+</section>
+
+<!-- ── Code Examples ── -->
+<section>
+<h2 id="code-examples">Code Examples</h2>
+
+<h3>Plugin Registration</h3>
+<p>A plugin exports a default object with a <code>register()</code> method. The API surface passed to <code>register()</code> provides typed methods for hooking into the lifecycle, registering tools, and declaring capabilities.</p>
+<pre><code class="language-typescript">// Example: Registering a plugin with hooks and tools
+import type { OpenClawPluginDefinition } from "./types.js";
+
+export default {
+  register(api) {
+    // Register a lifecycle hook
+    api.registerHook("before_agent_start", {
+      priority: 100,
+      handler: async (event) => {
+        api.logger.info("Agent starting for", event.channelId);
+        return { extraSystemPrompt: "You are helpful." };
+      },
+    });
+
+    // Register a custom tool
+    api.registerTool({
+      name: "my-plugin-lookup",
+      description: "Looks up data from my service",
+      parameters: { query: { type: "string" } },
+      execute: async ({ query }) => {
+        return { result: await fetchFromService(query) };
+      },
+    });
+  },
+} satisfies OpenClawPluginDefinition;</code></pre>
+
+<h3>Plugin Manifest</h3>
+<p>Every plugin must include an <code>openclaw.plugin.json</code> manifest that declares its identity, config schema, and capabilities. The manifest is validated statically before any plugin code is imported.</p>
+<pre><code class="language-typescript">// openclaw.plugin.json — Plugin manifest
+{
+  "id": "my-custom-plugin",
+  "name": "My Custom Plugin",
+  "version": "1.0.0",
+  "enabledByDefault": false,
+  "configSchema": {
+    "apiEndpoint": { "type": "string", "default": "https://api.example.com" }
+  },
+  "providers": ["my-provider"],
+  "providerAuthEnvVars": {
+    "my-provider": ["MY_PROVIDER_API_KEY"]
+  }
+}</code></pre>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <a title="OpenClaw — Source Code Wiki" href="../index.html">← Back to OpenClaw Wiki</a>
+  &nbsp;·&nbsp;
+  <a title="OpenClaw — Search Wiki" href="../search.html">🔍 Search</a>
+  <p style="margin-top:10px;">Generated 2026-04-02 · Source rev <code>047b701859</code></p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="inner">
+    <button class="close-btn" aria-label="Close diagram">&times;</button>
+    <div class="overlay-content"></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/typescript.min.js"></script>
+<script>
+document.querySelectorAll('pre.mermaid,.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+
+(function () {
+  var THEME_KEY = 'neutra-ip-theme';
+  var toggle = document.getElementById('themeToggle');
+  var root = document.documentElement;
+  var hljsLink = document.getElementById('hljs-theme');
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    toggle.textContent = t === 'dark' ? '🌙' : '☀️';
+    hljsLink.href = t === 'dark'
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  }
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+  toggle.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+  async function renderMermaid() {
+    var els = document.querySelectorAll('.mermaid');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var src = el.textContent.trim();
+      try {
+        var id = 'mermaid-' + i;
+        var result = await mermaid.render(id, src);
+        el.innerHTML = result.svg;
+      } catch (e) {
+        console.warn('Mermaid render error:', e);
+        el.innerHTML = '<p style="color:var(--accent4)">⚠ Diagram render error</p><pre>' + src + '</pre>';
+      }
+    }
+  }
+  renderMermaid();
+  hljs.highlightAll();
+  document.querySelectorAll('pre > code').forEach(function (block) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(block.textContent).then(function () {
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    block.parentElement.appendChild(btn);
+  });
+  var tocList = document.getElementById('tocList');
+  document.querySelectorAll('section > h2[id]').forEach(function (h) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+  var text = document.getElementById('main').textContent || '';
+  var words = text.trim().split(/\s+/).length;
+  var mins = Math.max(1, Math.round(words / 220));
+  document.getElementById('readingTime').textContent = '~' + mins + ' min read';
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function () {
+    btt.classList.toggle('visible', window.scrollY > 400);
+  });
+  btt.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  var overlay = document.getElementById('diagramOverlay');
+  if (!overlay) return;
+  var overlayContent = overlay.querySelector('.overlay-content');
+  var closeBtn = overlay.querySelector('.close-btn');
+  document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+    wrap.addEventListener('click', function () {
+      var svg = wrap.querySelector('svg');
+      if (!svg) return;
+      var clone = svg.cloneNode(true);
+      clone.style.maxWidth = '90vw';
+      clone.style.maxHeight = '85vh';
+      overlayContent.innerHTML = '';
+      overlayContent.appendChild(clone);
+      overlay.classList.add('active');
+    });
+  });
+  closeBtn.addEventListener('click', function () { overlay.classList.remove('active'); });
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+  overlay.querySelector('.inner').addEventListener('wheel', function (e) {
+    var svg = overlayContent.querySelector('svg');
+    if (!svg) return;
+    e.preventDefault();
+    var scale = parseFloat(svg.getAttribute('data-scale') || '1');
+    scale += e.deltaY < 0 ? 0.1 : -0.1;
+    scale = Math.max(0.3, Math.min(5, scale));
+    svg.setAttribute('data-scale', scale);
+    svg.style.transform = 'scale(' + scale + ')';
+    svg.style.transformOrigin = 'center center';
+  }, { passive: false });
+  var sections = Array.from(document.querySelectorAll('section > h2[id]'));
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var idx = -1;
+    var scrollY = window.scrollY + 80;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].offsetTop <= scrollY) { idx = i; break; }
+    }
+    if (e.key === 'j' && idx < sections.length - 1) {
+      sections[idx + 1].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'k' && idx > 0) {
+      sections[idx - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+})();
+</script>
+</body></html>

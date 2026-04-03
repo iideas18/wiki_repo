@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/commands/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Commands/Slash Commands — Command Aliases</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Commands</a> &rsaquo; <a href="../index.html">Slash Commands</a> &rsaquo; <span>Command Aliases</span></nav>
+
+<main id="main">
+<h1>Command Aliases</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Provider-specific native names and alias resolution for plugin commands</p>
+  <p>When a plugin registers a command like <code>/summarize</code>, it can simultaneously declare platform-specific aliases via the <code>nativeNames</code> property — for example <code>/tldr</code> on Telegram and <code>/recap</code> on Discord. The alias resolution layer ensures that every invocation key — primary name, default alias, and provider-specific aliases — maps back to the same handler without duplication or ambiguity.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>Command aliases allow plugin authors to register a single command handler that responds to multiple slash-command names across different chat platforms. This is critical in a multi-provider architecture where Telegram users expect short commands like <code>/tl</code> while Discord communities prefer descriptive names like <code>/translate</code>. Without aliases, plugin authors would need to register separate commands for each provider — leading to duplicated handlers, inconsistent validation, and a maintenance nightmare.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of an international airport arrivals board. A single flight — say BA117 — might be listed as "British Airways 117" on the departures screen, "BAW117" on the ATC radar, and "Speedbird 117" on the radio. All three names refer to the same aircraft and crew. The alias system works the same way: one handler, multiple invocation keys, each tuned for a different surface.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Map multiple invocation keys (primary name + provider-specific aliases) to a single <code>PluginCommandHandler</code> without duplicating registrations.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>The <code>nativeNames</code> property on <code>OpenClawPluginCommandDefinition</code>, keyed by provider name (<code>default</code>, <code>telegram</code>, <code>discord</code>).</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Which invocation key wins when a user types a command? Is the alias valid? Does it collide with another registered command?</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>A deduplicated <code>string[]</code> of slash-prefixed invocation keys returned by <code>listPluginInvocationKeys</code>. Used by the matcher and help system.</p></div>
+</div>
+
+<div class="callout">
+<strong>Note:</strong> Command aliases (native names on plugin commands) are distinct from <strong>model aliases</strong> managed by <code>src/commands/models/aliases.ts</code>. Model aliases are user-defined shortcuts for LLM model identifiers (e.g. <code>fast → gpt-4o-mini</code>), while command aliases are developer-defined alternative invocation names for slash commands.
+</div>
+
+<!-- CORE TYPES -->
+<h2 id="core-types">Core Types</h2>
+<p>The alias system is built on the <code>nativeNames</code> property of <code>OpenClawPluginCommandDefinition</code>. This is an optional partial record keyed by provider name, with a special <code>default</code> key for a cross-platform alias.</p>
+
+<pre><code class="language-typescript">// src/plugins/types.ts — OpenClawPluginCommandDefinition
+export type OpenClawPluginCommandDefinition = {
+  name: string;
+  nativeNames?: Partial&lt;Record&lt;string, string&gt;&gt; &amp; { default?: string };
+  description: string;
+  acceptsArgs?: boolean;
+  requireAuth?: boolean;
+  handler: PluginCommandHandler;
+};</code></pre>
+
+<table>
+  <tr><th>Property</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>name</code></td><td><code>string</code></td><td>Primary invocation key — always registered as <code>/name</code></td></tr>
+  <tr><td><code>nativeNames.default</code></td><td><code>string | undefined</code></td><td>Cross-platform alias available on all providers</td></tr>
+  <tr><td><code>nativeNames.telegram</code></td><td><code>string | undefined</code></td><td>Telegram-specific alias, used when the bot runs on Telegram</td></tr>
+  <tr><td><code>nativeNames.discord</code></td><td><code>string | undefined</code></td><td>Discord-specific alias, used when the bot runs in Discord guilds</td></tr>
+  <tr><td><code>handler</code></td><td><code>PluginCommandHandler</code></td><td>The single handler function invoked regardless of which alias was used</td></tr>
+</table>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Include primary name?</td><td><code>push(command.name)</code> always called first</td><td>Guarantees the canonical name is always a valid invocation key</td></tr>
+  <tr><td>Include default alias?</td><td><code>push(command.nativeNames?.default)</code></td><td>Provides a cross-platform shortcut without per-provider config</td></tr>
+  <tr><td>Include provider aliases?</td><td><code>push(command.nativeNames?.telegram)</code> and <code>push(command.nativeNames?.discord)</code></td><td>Allows platform-idiomatic naming conventions</td></tr>
+  <tr><td>Deduplication</td><td><code>Set&lt;string&gt;</code> collects all keys</td><td>Prevents duplicate entries when <code>default</code> equals <code>name</code></td></tr>
+  <tr><td>Normalization</td><td><code>value?.trim().toLowerCase()</code></td><td>Ensures case-insensitive matching regardless of definition casing</td></tr>
+  <tr><td>Validation of aliases</td><td><code>validateCommandName</code> applied to each alias entry</td><td>Rejects invalid characters, empty strings, and reserved names at registration time</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>Alias resolution operates in three distinct phases spread across registration time and runtime lookup. At registration, aliases are validated and stored. At lookup time, the matcher iterates all registered commands and checks both primary keys and alias keys.</p>
+
+<h3 id="mechanism-registration">Phase 1 — Registration &amp; Validation</h3>
+<p>When a plugin is loaded, <code>validatePluginCommandDefinition</code> iterates over <code>nativeNames</code> entries and applies the same <code>validateCommandName</code> rules used for the primary name. This prevents invalid aliases from entering the registry.</p>
+
+<pre><code class="language-typescript">// src/plugins/command-registration.ts — alias validation loop
+for (const [label, alias] of Object.entries(command.nativeNames ?? {})) {
+  if (typeof alias !== "string") continue;
+  const aliasError = validateCommandName(alias.trim());
+  if (aliasError) {
+    return `Native command alias "${label}" invalid: ${aliasError}`;
+  }
+}</code></pre>
+
+<div class="callout warn">
+<strong>Validation first:</strong> Alias validation runs <em>before</em> the command is added to the global <code>pluginCommands</code> Map. If any single alias fails validation, the entire command registration is rejected — not just the offending alias.
+</div>
+
+<h3 id="mechanism-key-collection">Phase 2 — Invocation Key Collection</h3>
+<p>The <code>listPluginInvocationKeys</code> function collects all valid invocation keys for a command. It uses a <code>Set</code> to automatically deduplicate keys that resolve to the same normalized string.</p>
+
+<pre><code class="language-typescript">// src/plugins/command-registration.ts — listPluginInvocationKeys
+export function listPluginInvocationKeys(
+  command: OpenClawPluginCommandDefinition,
+): string[] {
+  const keys = new Set&lt;string&gt;();
+  const push = (value: string | undefined) =&gt; {
+    const normalized = value?.trim().toLowerCase();
+    if (!normalized) return;
+    keys.add(`/${normalized}`);
+  };
+  push(command.name);
+  push(command.nativeNames?.default);
+  push(command.nativeNames?.telegram);
+  push(command.nativeNames?.discord);
+  return [...keys];
+}</code></pre>
+
+<div class="code-walk">
+  <div class="step">
+    <p>A <code>Set&lt;string&gt;</code> is created to hold unique invocation keys. The <code>push</code> helper normalizes each value by trimming whitespace and lowercasing, then adds it with a <code>/</code> prefix.</p>
+  </div>
+  <div class="step">
+    <p>The primary <code>command.name</code> is pushed first, ensuring it is always present in the result set.</p>
+  </div>
+  <div class="step">
+    <p>The <code>default</code> alias is pushed next. If it matches the primary name after normalization, the Set silently deduplicates it.</p>
+  </div>
+  <div class="step">
+    <p>Provider-specific aliases (<code>telegram</code>, <code>discord</code>) are pushed last. Again, the Set handles any overlaps.</p>
+  </div>
+  <div class="step">
+    <p>The Set is spread into an array and returned. Callers receive a flat list of slash-prefixed strings like <code>["/summarize", "/tldr", "/recap"]</code>.</p>
+  </div>
+</div>
+
+<h3 id="mechanism-resolution">Phase 3 — Runtime Alias Resolution</h3>
+<p>At runtime, when <code>getPluginCommandSpecs</code> is called (e.g. for generating help text or autocomplete lists), it uses <code>resolvePluginNativeName</code> to pick the best name for the current provider context.</p>
+
+<pre><code class="language-typescript">// src/plugins/command-registry-state.ts — getPluginCommandSpecs
+export function getPluginCommandSpecs(
+  provider?: string,
+): Array&lt;{ name: string; description: string; acceptsArgs: boolean }&gt; {
+  const providerName = provider?.trim().toLowerCase();
+  if (providerName &amp;&amp; providerName !== "telegram" &amp;&amp; providerName !== "discord")
+    return [];
+  return Array.from(pluginCommands.values()).map((cmd) =&gt; ({
+    name: resolvePluginNativeName(cmd, provider),
+    description: cmd.description,
+    acceptsArgs: cmd.acceptsArgs ?? false,
+  }));
+}</code></pre>
+
+<div class="callout success">
+<strong>Provider-aware naming:</strong> When Telegram requests the command list, <code>resolvePluginNativeName</code> returns the <code>telegram</code> alias if defined, falling back to <code>default</code>, then to the primary <code>name</code>. This means <code>/setbotcommands</code> on Telegram automatically shows platform-idiomatic names.
+</div>
+
+<!-- ALIAS RESOLUTION FLOWCHART -->
+<h2 id="alias-resolution-flow">Alias Resolution Flow</h2>
+<p>The following flowchart shows how the system resolves an incoming slash command against the registered aliases. The matcher first checks the primary key in the <code>pluginCommands</code> Map, then falls back to scanning all registered commands via <code>listPluginInvocationKeys</code>.</p>
+
+<div class="diagram-container">
+<pre class="mermaid" data-source="">
+flowchart TD
+  INPUT["Incoming command: /tldr some text"]
+  EXTRACT["Extract command key: /tldr"]
+  DIRECT{"pluginCommands.get(/tldr)?"}
+  SCAN["Scan all commands via listPluginInvocationKeys"]
+  FOUND{"Alias match found?"}
+  ACCEPT_ARGS{"command.acceptsArgs?"}
+  DISPATCH["Dispatch to command.handler"]
+  FALLTHROUGH["Fall through to built-in / agent"]
+  REJECT["Reject: args not accepted"]
+
+  INPUT --> EXTRACT
+  EXTRACT --> DIRECT
+  DIRECT -->|"Hit"| ACCEPT_ARGS
+  DIRECT -->|"Miss"| SCAN
+  SCAN --> FOUND
+  FOUND -->|"Yes"| ACCEPT_ARGS
+  FOUND -->|"No"| FALLTHROUGH
+  ACCEPT_ARGS -->|"Yes or no args"| DISPATCH
+  ACCEPT_ARGS -->|"No but args present"| REJECT
+  REJECT --> FALLTHROUGH
+</pre>
+</div>
+<p>The direct Map lookup is O(1) for commands registered under their primary name. The fallback scan iterates all registered commands and checks each one's invocation keys — this is O(n) where n is the number of registered plugin commands. In practice, n is small (typically &lt; 50), so the linear scan has negligible cost.</p>
+
+<!-- REGISTRATION SEQUENCE DIAGRAM -->
+<h2 id="registration-sequence">Plugin Registration with Native Names</h2>
+<p>The following sequence diagram shows the lifecycle of a plugin command with <code>nativeNames</code>, from definition through registration to runtime invocation via an alias.</p>
+
+<div class="diagram-container">
+<pre class="mermaid" data-source="">
+sequenceDiagram
+    participant Plugin as Plugin Module
+    participant Validator as validatePluginCommandDefinition
+    participant Registry as pluginCommands Map
+    participant KeyBuilder as listPluginInvocationKeys
+    participant Matcher as matchPluginCommand
+    participant User as End User
+
+    Plugin->>Validator: Register command with nativeNames
+    Validator->>Validator: Validate primary name
+    Validator->>Validator: Validate each alias in nativeNames
+    alt Validation passes
+        Validator->>Registry: Store command under /primaryName
+        Registry-->>Plugin: Registration success
+    else Validation fails
+        Validator-->>Plugin: Error: alias invalid
+    end
+
+    Note over User,Matcher: Later at runtime...
+
+    User->>Matcher: /tldr summarize this
+    Matcher->>Registry: pluginCommands.get("/tldr")
+    Registry-->>Matcher: null (not primary key)
+    Matcher->>KeyBuilder: Scan all commands
+    KeyBuilder-->>Matcher: ["/summarize", "/tldr", "/recap"]
+    Matcher->>Matcher: "/tldr" found in keys
+    Matcher-->>User: Dispatch to summarize handler
+</pre>
+</div>
+<p>Note that the command is stored in the Map under its primary name (<code>/summarize</code>), not under each alias. Aliases are resolved at match time by calling <code>listPluginInvocationKeys</code> on each candidate command. This design keeps the Map simple and avoids stale entries when aliases are updated.</p>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases</h2>
+<table>
+  <tr><th>Scenario</th><th>Input / Config</th><th>Result</th><th>Rationale</th></tr>
+  <tr><td>Alias matches primary name</td><td><code>name: "help"</code>, <code>nativeNames: { default: "help" }</code></td><td>Single key: <code>["/help"]</code></td><td>The <code>Set</code> deduplicates identical normalized keys automatically</td></tr>
+  <tr><td>Case mismatch in alias</td><td><code>nativeNames: { telegram: "TL" }</code></td><td>Key: <code>/tl</code></td><td>All values are lowercased via <code>trim().toLowerCase()</code> before insertion</td></tr>
+  <tr><td>Empty alias string</td><td><code>nativeNames: { discord: "" }</code></td><td>Alias is silently skipped</td><td>The <code>push</code> helper returns early if <code>!normalized</code></td></tr>
+  <tr><td>Undefined alias</td><td><code>nativeNames: { telegram: undefined }</code></td><td>Alias is silently skipped</td><td>Optional chaining <code>value?.trim()</code> produces <code>undefined</code>, caught by the guard</td></tr>
+  <tr><td>Non-string alias value</td><td><code>nativeNames: { telegram: 42 }</code></td><td>Skipped during validation</td><td><code>typeof alias !== "string"</code> guard in the validation loop</td></tr>
+  <tr><td>Alias collides with another command</td><td>Two plugins both alias <code>/quick</code></td><td>First registered wins</td><td><code>Array.from(...).find()</code> returns the first match in iteration order</td></tr>
+  <tr><td>Alias with whitespace</td><td><code>nativeNames: { default: " my cmd " }</code></td><td>Fails <code>validateCommandName</code></td><td>Command names cannot contain spaces; trimming removes leading/trailing but not inner spaces</td></tr>
+  <tr><td>Unknown provider key</td><td><code>nativeNames: { slack: "shortcut" }</code></td><td>Stored but never resolved</td><td><code>listPluginInvocationKeys</code> only reads <code>default</code>, <code>telegram</code>, <code>discord</code></td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Setting</th><th>Location</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>nativeNames</code></td><td><code>OpenClawPluginCommandDefinition</code></td><td><code>undefined</code></td><td>Optional record of provider-specific aliases for the command</td></tr>
+  <tr><td><code>nativeNames.default</code></td><td>Same as above</td><td><code>undefined</code></td><td>Cross-platform alias — used on all providers as a secondary invocation key</td></tr>
+  <tr><td><code>nativeNames.telegram</code></td><td>Same as above</td><td><code>undefined</code></td><td>Telegram-specific alias — shown in <code>/setbotcommands</code> and used for matching</td></tr>
+  <tr><td><code>nativeNames.discord</code></td><td>Same as above</td><td><code>undefined</code></td><td>Discord-specific alias — shown in guild command registration</td></tr>
+  <tr><td><code>provider</code> param</td><td><code>getPluginCommandSpecs(provider?)</code></td><td><code>undefined</code></td><td>When provided, <code>resolvePluginNativeName</code> picks the best alias for that provider</td></tr>
+</table>
+
+<!-- MODEL ALIASES (DISTINCT SYSTEM) -->
+<h2 id="model-aliases">Model Aliases (Distinct System)</h2>
+<p>OpenClaw also has a separate alias system for LLM model identifiers, managed in <code>src/commands/models/aliases.ts</code>. These are <strong>user-defined</strong> shortcuts, not developer-defined command names. The two systems are entirely independent.</p>
+
+<table>
+  <tr><th>Aspect</th><th>Command Aliases (<code>nativeNames</code>)</th><th>Model Aliases (<code>models/aliases.ts</code>)</th></tr>
+  <tr><td>Defined by</td><td>Plugin developers at registration time</td><td>End users via <code>/models aliases add</code></td></tr>
+  <tr><td>Scope</td><td>Slash command invocation keys</td><td>LLM model identifier shortcuts</td></tr>
+  <tr><td>Storage</td><td>In-memory <code>pluginCommands</code> Map</td><td>Persistent runtime environment</td></tr>
+  <tr><td>Management</td><td>Automatic via plugin lifecycle</td><td>Manual via <code>modelsAliasesAddCommand</code>, <code>modelsAliasesRemoveCommand</code>, <code>modelsAliasesListCommand</code></td></tr>
+</table>
+
+<pre><code class="language-typescript">// src/commands/models/aliases.ts — model alias management functions
+export async function modelsAliasesListCommand(...)
+export async function modelsAliasesAddCommand(...)
+export async function modelsAliasesRemoveCommand(
+  aliasRaw: string,
+  runtime: RuntimeEnv,
+)</code></pre>
+
+<!-- RELATED TOPICS -->
+<h2 id="related-topics">Related Topics</h2>
+<div class="summary-grid">
+  <div class="cell"><strong><a href="../command_parsing/index.html">Command Parsing</a></strong><p>The low-level extraction layer that converts raw text into structured parse results before alias resolution runs.</p></div>
+  <div class="cell"><strong><a href="../command_registry/index.html">Command Registry</a></strong><p>The global <code>pluginCommands</code> Map where commands (and their aliases) are stored and looked up.</p></div>
+  <div class="cell"><strong><a href="../../admin/permission_gating/index.html">Permission Gating</a></strong><p>Authorization checks that run after alias resolution but before the handler is invoked.</p></div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Source Files</h2>
+<details open>
+<summary style="cursor:pointer;font-weight:600;color:var(--heading);">Key files involved in command aliases</summary>
+<pre><code>src/
+├── plugins/
+│   ├── types.ts                      ← OpenClawPluginCommandDefinition &amp; nativeNames type
+│   ├── command-registration.ts       ← listPluginInvocationKeys(), validatePluginCommandDefinition()
+│   ├── command-registry-state.ts     ← getPluginCommandSpecs(), resolvePluginNativeName()
+│   └── commands.ts                   ← matchPluginCommand() alias lookup fallback
+├── commands/
+│   └── models/
+│       └── aliases.ts                ← Model alias CRUD (separate system)
+└── auto-reply/
+    └── reply/
+        └── commands-slash-parse.ts   ← Upstream parser (feeds into alias resolution)
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Slash Commands</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

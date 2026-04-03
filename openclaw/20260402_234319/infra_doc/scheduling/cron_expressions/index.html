@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Cron Expressions — OpenClaw Infrastructure</title>
+<style>
+  :root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2129;--border:#30363d;--text:#e6edf3;--text-secondary:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.12);--success:#3fb950;--warning:#d29922;--danger:#f85149;--code-bg:#1c2129;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--focus-ring:0 0 0 3px rgba(88,166,255,.4)}
+  [data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-secondary:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.08);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(31,35,40,.12);--focus-ring:0 0 0 3px rgba(9,105,218,.3)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:4rem}
+  body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+  .skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:var(--radius);z-index:1000;font-weight:600}.skip-link:focus{top:1rem}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+  nav[aria-label="Breadcrumb"]{font-size:.875rem;color:var(--text-secondary)}
+  nav[aria-label="Breadcrumb"] a{color:var(--accent)}
+  nav[aria-label="Breadcrumb"] .sep{margin:0 .35rem;color:var(--text-secondary)}
+  .theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:.4rem .75rem;cursor:pointer;font-size:.875rem;transition:background .2s}.theme-toggle:hover{background:var(--accent-bg)}.theme-toggle:focus-visible{box-shadow:var(--focus-ring)}
+  .hero{max-width:52rem;margin:2rem auto;padding:0 2rem}
+  .focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:.75rem;font-weight:600;padding:.2rem .65rem;border-radius:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+  .hero h1{font-size:2rem;font-weight:700;margin-bottom:.4rem}
+  .hero .subtitle{color:var(--text-secondary);font-size:1.05rem;margin-bottom:.75rem}
+  .hero .reading-time{font-size:.8rem;color:var(--text-secondary)}
+  main{max-width:52rem;margin:0 auto 4rem;padding:0 2rem}
+  h2{font-size:1.4rem;font-weight:600;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+  h3{font-size:1.15rem;font-weight:600;margin:1.75rem 0 .75rem}
+  p{margin-bottom:1rem}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.5rem 0}
+  .summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+  .summary-grid .card h4{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:.35rem}
+  .summary-grid .card p{font-size:.9rem;color:var(--text-secondary);margin:0}
+  .callout{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.5rem 0}
+  .callout.analogy{border-left-color:var(--warning);background:rgba(210,153,34,.1)}
+  .callout strong{display:block;margin-bottom:.3rem}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative;font-size:.875rem;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  code{font-family:var(--font-mono);background:var(--code-bg);padding:.15rem .35rem;border-radius:4px;font-size:.85em}
+  .code-walk{margin:1.5rem 0}
+  .code-walk .step{display:flex;gap:1rem;margin-bottom:1.25rem;align-items:flex-start}
+  .code-walk .step-num{flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin-top:.15rem}
+  .code-walk .step-body{flex:1}
+  .code-walk .step-body p{margin-bottom:.4rem}
+  .mermaid-wrap{margin:1.5rem 0;cursor:pointer;position:relative}
+  .mermaid-wrap pre[data-source]{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow:auto}
+  .mermaid-wrap .expand-hint{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.15rem .45rem;font-size:.7rem;color:var(--text-secondary);opacity:0;transition:opacity .2s}.mermaid-wrap:hover .expand-hint{opacity:1}
+  .diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .25s}.diagram-overlay.active{opacity:1}
+  .diagram-overlay .inner{background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:95vw;max-height:95vh;overflow:auto;position:relative}
+  .diagram-overlay .close-btn{position:absolute;top:.5rem;right:.75rem;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+  .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1.5rem 0}
+  .toc summary{font-weight:600;cursor:pointer;font-size:.95rem}.toc ul{margin:.5rem 0 0 1.25rem;list-style:disc}.toc li{margin:.25rem 0;font-size:.9rem}
+  .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);border-radius:4px;padding:.2rem .5rem;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}
+  .back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:2.5rem;height:2.5rem;font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:50}
+  footer{max-width:52rem;margin:0 auto;padding:2rem;border-top:1px solid var(--border);text-align:center;color:var(--text-secondary);font-size:.85rem}
+  footer a{color:var(--accent)}
+  @media(max-width:600px){.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}header{padding:.75rem 1rem}}
+  @media print{header,.theme-toggle,.skip-link,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.callout{border-left-color:#333;background:#f5f5f5}pre{border-color:#ccc}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav aria-label="Breadcrumb">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">scheduling</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Cron Expressions</span>
+  </nav>
+  <button class="theme-toggle" aria-label="Toggle dark/light theme" id="themeToggle">🌓 Theme</button>
+</header>
+
+<section class="hero">
+  <span class="focus-label">Focus</span>
+  <h1>Cron Expressions</h1>
+  <p class="subtitle">Heartbeat interval resolution and active-hours time gating</p>
+  <p class="reading-time" id="readingTime"></p>
+</section>
+
+<main id="main">
+
+  <details class="toc" open>
+    <summary>Table of Contents</summary>
+    <ul id="tocList"></ul>
+  </details>
+
+  <h2 id="overview">Overview &amp; Motivation</h2>
+  <p>Cron expressions define when and how often heartbeats fire. The resolution pipeline considers multiple
+    factors: global enable state, per-agent config, active hours, reason kind, and channel visibility. This
+    multi-layered approach prevents unnecessary messages while ensuring important channels stay alive.</p>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy — Radio Broadcast Schedule</strong>
+    <p>Think of heartbeats like a radio station's broadcast schedule. The station manager (config) sets the
+      base schedule. Time slots (active hours) determine when to broadcast. Different show types (reason kinds)
+      have different frequencies. Some listeners (channels) opted for silent mode. The DJ (heartbeat runner)
+      checks all these before going on air.</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Interval Resolution</h4>
+      <p>Per-agent interval computation from layered config, base + overrides merged at runtime</p>
+    </div>
+    <div class="card">
+      <h4>Active Hours</h4>
+      <p>Time-window gating suppresses heartbeats outside configured operating hours</p>
+    </div>
+    <div class="card">
+      <h4>Reason Classification</h4>
+      <p>HeartbeatReasonKind categorises triggers — cron, exec, system — each with distinct intervals</p>
+    </div>
+    <div class="card">
+      <h4>Visibility Control</h4>
+      <p>Per-channel settings: normal, silent, or disabled — governs which channels receive beats</p>
+    </div>
+  </div>
+
+  <h2 id="heartbeat-interval">Heartbeat Interval Resolution</h2>
+  <p><code>resolveHeartbeatIntervalMs(agentId, config)</code> is the entry point. It reads the agent's
+    dedicated config section, falls back to the global defaults, and produces a millisecond interval. The
+    function accounts for minimum-floor clamping (never below 10 000 ms) and ceiling caps defined at the
+    organisation level.</p>
+  <p>If a per-agent override is present in <code>config.agents[agentId].heartbeatIntervalMs</code>, it takes
+    precedence over the global <code>config.heartbeatIntervalMs</code>. The resolved value is cached for the
+    lifetime of the config object so subsequent calls are effectively free.</p>
+
+  <div class="code-walk">
+    <h3>Code Walk — Interval Resolution</h3>
+    <div class="step">
+      <span class="step-num">1</span>
+      <div class="step-body">
+        <p>Read agent-specific override, falling back to global default.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <div class="step-body">
+        <p>Clamp the value between the floor (10s) and the org ceiling.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <div class="step-body">
+        <p>Cache the result on the config object for future lookups.</p>
+      </div>
+    </div>
+  </div>
+
+  <pre><code class="language-typescript">interface HeartbeatConfig {
+  heartbeatIntervalMs?: number;
+  agents?: Record&lt;string, { heartbeatIntervalMs?: number }&gt;;
+  orgCeilingMs?: number;
+}
+
+const FLOOR_MS = 10_000;
+
+function resolveHeartbeatIntervalMs(
+  agentId: string,
+  config: HeartbeatConfig
+): number {
+  const agentOverride = config.agents?.[agentId]?.heartbeatIntervalMs;
+  const base = agentOverride ?? config.heartbeatIntervalMs ?? 60_000;
+  const ceiling = config.orgCeilingMs ?? 300_000;
+  return Math.max(FLOOR_MS, Math.min(base, ceiling));
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <h2 id="active-hours">Active Hours Gating</h2>
+  <p>The <code>heartbeat-active-hours.ts</code> module provides time-based gating. Each agent can define an
+    <code>activeHoursRange</code> (UTC) expressed as a pair of 24-hour integers, e.g. <code>[8, 20]</code>.
+    Before every heartbeat cycle, the runner calls <code>isWithinActiveHours(agentId, now)</code>. If the
+    current time falls outside the window, the heartbeat is silently skipped and an internal counter of
+    "suppressed beats" increments.</p>
+
+  <div class="callout">
+    <strong>ℹ️ Edge Case — Midnight Crossings</strong>
+    <p>When the start hour exceeds the end hour (e.g. <code>[22, 6]</code>), the window wraps around
+      midnight. The check correctly handles this by splitting the range into two half-open intervals and
+      checking whether <code>now</code> falls in either one.</p>
+  </div>
+
+  <h2 id="reason-classification">Reason Classification</h2>
+  <p><code>heartbeat-reason.ts</code> exports the <code>HeartbeatReasonKind</code> enum. Each kind maps to a
+    multiplier applied on top of the base interval:</p>
+  <ul>
+    <li><strong>Cron</strong> — standard scheduled beat; multiplier 1×</li>
+    <li><strong>ExecCompletion</strong> — fires after a command finishes; multiplier 0.5× (faster)</li>
+    <li><strong>SystemEvent</strong> — kernel / OS-level trigger; multiplier 2× (slower, less urgent)</li>
+    <li><strong>Manual</strong> — explicit API call; bypasses interval entirely</li>
+  </ul>
+
+  <h2 id="visibility-rules">Visibility Rules</h2>
+  <p>Channel visibility is configured per-channel via <code>heartbeat-visibility.ts</code>. Three modes
+    exist:</p>
+  <ul>
+    <li><code>HeartbeatVisibility.Normal</code> — full message content</li>
+    <li><code>HeartbeatVisibility.Silent</code> — delivered without notification sound</li>
+    <li><code>HeartbeatVisibility.Disabled</code> — channel receives no heartbeats at all</li>
+  </ul>
+  <p>The <code>resolveVisibilityForChannel(channelId)</code> function reads channel-level overrides first,
+    then falls back to the workspace default. Disabled channels are filtered before the delivery phase,
+    meaning no network request is made for them.</p>
+
+  <h2 id="resolution-pipeline">Resolution Pipeline</h2>
+  <p>The full resolution pipeline is orchestrated by <code>resolveHeartbeatSummaryForAgent(agentId)</code>,
+    which returns a single <code>HeartbeatSummary</code> object containing every resolved field. This is the
+    canonical "should we fire?" decision object consumed by the heartbeat runner.</p>
+
+  <pre><code class="language-typescript">interface HeartbeatSummary {
+  intervalMs: number;
+  reason: HeartbeatReasonKind;
+  visibility: HeartbeatVisibility;
+  enabled: boolean;
+  activeHoursOk: boolean;
+  suppressedCount: number;
+}
+
+function resolveHeartbeatSummaryForAgent(
+  agentId: string
+): HeartbeatSummary {
+  const config = loadAgentConfig(agentId);
+  const enabled = areHeartbeatsEnabled()
+    &amp;&amp; isHeartbeatEnabledForAgent(agentId);
+  const activeHoursOk = isWithinActiveHours(agentId, Date.now());
+  const reason = classifyCurrentReason(agentId);
+  const baseInterval = resolveHeartbeatIntervalMs(agentId, config);
+  const intervalMs = applyReasonMultiplier(baseInterval, reason);
+  const visibility = resolveVisibilityForChannel(
+    config.primaryChannelId
+  );
+  return {
+    intervalMs, reason, visibility,
+    enabled, activeHoursOk,
+    suppressedCount: getSuppressedCount(agentId),
+  };
+}</code><button class="copy-btn" aria-label="Copy code">Copy</button></pre>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="heartbeat-resolution-pipeline"><code class="language-mermaid">flowchart TD
+    A["areHeartbeatsEnabled()"] -->|yes| B["isHeartbeatEnabledForAgent(agentId)"]
+    A -->|no| Z["Skip — globally disabled"]
+    B -->|yes| C["isWithinActiveHours(agentId, now)"]
+    B -->|no| Z2["Skip — agent disabled"]
+    C -->|yes| D["classifyCurrentReason(agentId)"]
+    C -->|no| Z3["Skip — outside active hours"]
+    D --> E["resolveHeartbeatIntervalMs(agentId, config)"]
+    E --> F["applyReasonMultiplier(interval, reason)"]
+    F --> G["resolveVisibilityForChannel(channelId)"]
+    G -->|Normal/Silent| H["Fire heartbeat"]
+    G -->|Disabled| Z4["Skip — channel disabled"]</code></pre>
+  </div>
+
+  <h2 id="state-lifecycle">Heartbeat State Lifecycle</h2>
+  <p>Each heartbeat instance transitions through a well-defined set of states. The state diagram below
+    captures the complete lifecycle, including the cooldown period that prevents rapid re-firing after a
+    successful beat.</p>
+
+  <div class="mermaid-wrap">
+    <span class="expand-hint">Click to expand</span>
+    <pre data-source="heartbeat-state-lifecycle"><code class="language-mermaid">stateDiagram-v2
+    [*] --> Disabled: heartbeats off
+    Disabled --> Idle: setHeartbeatsEnabled(true)
+    Idle --> ActiveHoursCheck: timer tick
+    ActiveHoursCheck --> Idle: outside window
+    ActiveHoursCheck --> Scheduled: within window
+    Scheduled --> ReasonEval: interval elapsed
+    ReasonEval --> VisibilityCheck: reason resolved
+    VisibilityCheck --> Firing: Normal / Silent
+    VisibilityCheck --> Idle: Disabled channel
+    Firing --> Cooldown: beat sent
+    Cooldown --> Idle: cooldown elapsed
+    Idle --> Disabled: setHeartbeatsEnabled(false)</code></pre>
+  </div>
+
+  <h2 id="wake-handlers">Wake Handlers</h2>
+  <p><code>heartbeat-wake.ts</code> provides manual trigger support. Calling
+    <code>wakeHeartbeat(agentId, reason?)</code> forces an immediate heartbeat cycle regardless of the
+    scheduled interval. This is used by the CLI's <code>--heartbeat-now</code> flag and by the REST API's
+    <code>POST /heartbeat/:agentId/wake</code> endpoint.</p>
+  <p>Wake calls still respect the active-hours gate and visibility rules — only the timing constraint is
+    bypassed. If a wake arrives during cooldown, it is queued and fires as soon as cooldown expires.</p>
+
+  <h2 id="enable-disable">Enable / Disable Toggles</h2>
+  <p>Two levels of toggle exist:</p>
+  <ul>
+    <li><code>areHeartbeatsEnabled()</code> / <code>setHeartbeatsEnabled(flag)</code> — global kill switch
+      stored in the state directory as a boolean flag file.</li>
+    <li><code>isHeartbeatEnabledForAgent(agentId)</code> — per-agent override. Agents can be individually
+      disabled without affecting the global state.</li>
+  </ul>
+  <p>The global toggle is checked first. If globally disabled, no per-agent check occurs. This short-circuit
+    makes emergency shutdowns instantaneous.</p>
+
+  <div class="callout">
+    <strong>⚠️ Operational Note</strong>
+    <p>Disabling heartbeats globally via <code>setHeartbeatsEnabled(false)</code> does <em>not</em> cancel
+      in-flight heartbeats. Any beat already in the "Firing" state will complete. The disable takes effect on
+      the next timer tick.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p><a href="../index.html">← Back to scheduling</a></p>
+  <p>Generated on 2026-04-02 · OpenClaw Infrastructure Wiki</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="inner">
+    <button class="close-btn" aria-label="Close overlay">&times;</button>
+    <div class="overlay-content"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* Theme toggle */
+  const THEME_KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const stored = localStorage.getItem(THEME_KEY);
+  if(stored) root.setAttribute('data-theme', stored);
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  /* TOC generation */
+  const tocList = document.getElementById('tocList');
+  document.querySelectorAll('main h2[id]').forEach(h => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* Reading time */
+  const text = document.querySelector('main').textContent;
+  const words = text.trim().split(/\s+/).length;
+  const mins = Math.max(1, Math.round(words / 200));
+  document.getElementById('readingTime').textContent = mins + ' min read · ' + words + ' words';
+
+  /* Copy buttons */
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const code = btn.parentElement.querySelector('code');
+      await navigator.clipboard.writeText(code.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+
+  /* Mermaid init (startOnLoad:false) */
+  if(window.mermaid){
+    mermaid.initialize({ startOnLoad:false, theme: 'default' });
+  }
+  document.querySelectorAll('pre[data-source]').forEach(pre => {
+    const code = pre.querySelector('code');
+    if(!code) return;
+    const src = code.textContent;
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = src;
+    pre.parentNode.insertBefore(div, pre);
+    pre.style.display = 'none';
+    if(window.mermaid){ try{mermaid.run({ nodes: [div] });}catch(e){console.warn('mermaid:',e)} }
+  });
+
+  /* Diagram overlay with cloneNode(true) */
+  const overlay = document.getElementById('diagramOverlay');
+  const overlayContent = overlay.querySelector('.overlay-content');
+  const closeBtn = overlay.querySelector('.close-btn');
+  document.querySelectorAll('.mermaid-wrap').forEach(wrap => {
+    wrap.addEventListener('click', (e) => {
+      if(e.target.closest('.copy-btn')) return;
+      const svg = wrap.querySelector('.mermaid svg') || wrap.querySelector('svg');
+      if(!svg) return;
+      const cloned = svg.cloneNode(true);
+      cloned.style.maxWidth = '100%';
+      cloned.style.height = 'auto';
+      overlayContent.innerHTML = '';
+      overlayContent.appendChild(cloned);
+      overlay.classList.add('active');
+    });
+  });
+  closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('active'); });
+
+  /* Back to top */
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  });
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* Keyboard nav — Escape closes overlay */
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && overlay.classList.contains('active')){
+      overlay.classList.remove('active');
+    }
+  });
+
+  /* hljs — highlight if available */
+  if(window.hljs){
+    document.querySelectorAll('pre code[class^="language-"]').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  }
+})();
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/agents/tools/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Agents/Tool Use/ &mdash; Function Calling &amp; Tool Infrastructure</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">OpenClaw</a> &rsaquo; <a href="../index.html">Agents</a> &rsaquo; <span>Tool Use</span></nav>
+
+<main id="main">
+<h1>Agents/Tool Use/ &mdash; Function Calling &amp; Tool Infrastructure</h1>
+<div class="hero">
+  <p class="subtitle">60+ agent tools and the infrastructure for LLM function calling</p>
+  <p>The tool-use sub-module implements OpenClaw&rsquo;s complete library of agent tools and the infrastructure that enables LLMs to call them. It handles tool call normalization, argument validation and repair, parameter type checking, action gating, error propagation, result truncation, and context-window guards &mdash; turning raw LLM function-call requests into safe, validated tool executions.</p>
+  <p>Each of the 60+ tools follows a consistent contract: validate inputs via <code>readStringParam()</code> and TypeBox schemas, check authorization via action gates, execute the operation, and return a structured result within configured size limits.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">60+</div><div class="label">Tools</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="label">Categories</div></div>
+  <div class="stat-box"><div class="num">~40k</div><div class="label">Total Lines</div></div>
+  <div class="stat-box"><div class="num">TypeScript</div><div class="label">Language</div></div>
+</div>
+
+<p>
+  <span class="badge blue">Function Calling</span>
+  <span class="badge green">Schema Validation</span>
+  <span class="badge yellow">Action Gating</span>
+  <span class="badge red">Error Recovery</span>
+</p>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The tool-use sub-module is the bridge between what an LLM <em>wants</em> to do and what actually happens. When an LLM decides it needs to fetch a web page, spawn a sub-agent, generate an image, or run a cron job, this module validates the request, checks permissions, repairs any malformed arguments, executes the tool, and returns the result in a format the LLM can understand. Without it, function calling would be unreliable and insecure.</p>
+<p>It covers every stage from the moment the LLM emits a <code>tool_call</code> JSON object to the moment the result is injected back into the conversation context &mdash; including the surprisingly common case where the LLM produces syntactically broken JSON that needs automatic repair.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a Swiss Army knife with 60+ blades. Each blade is a different tool (web fetch, image generation, cron scheduling, etc.), but you can&rsquo;t just yank any blade out &mdash; there&rsquo;s a safety mechanism. The tool-use module is the spring-loaded locking system: it checks which blade you asked for, validates that your grip is correct (parameter validation), ensures you&rsquo;re authorized to use that blade (action gating), and if you try to open the blade at a weird angle (malformed JSON), it auto-corrects your grip before the blade deploys. If something goes wrong, it safely folds the blade back and reports what happened.</p>
+</details>
+</div>
+
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<p>The tool execution pipeline is a linear chain with early-exit error branches. Every tool call from the LLM passes through normalization, argument repair, parameter validation, and action gating before reaching the actual tool handler. Results flow back through truncation and context guards before being returned to the LLM.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  LLM["LLM Response"] --> NORM["Tool Call Normalization\nattempt.tool-call-normalization.ts"]
+  NORM --> REPAIR["Argument Repair\nattempt.tool-call-argument-repair.ts"]
+  REPAIR --> VALIDATE["Parameter Validation\nreadStringParam / TypeBox schemas"]
+  VALIDATE --> GATE["Action Gate\ncreateActionGate()"]
+  GATE --> DISPATCH["Tool Dispatch\nAnyAgentTool union routing"]
+  DISPATCH --> EXEC["Tool Execution\nIndividual tool handlers"]
+  EXEC --> TRUNC["Result Truncation\nDEFAULT_FETCH_MAX_CHARS"]
+  TRUNC --> GUARD["Context Guard\nWindow boundary check"]
+  GUARD --> LLM
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>The sequence diagram below shows the full lifecycle of a single tool call, from raw LLM output through normalization, gating, execution, and result delivery. Error branches (400 validation errors, 403 authorization errors) return structured error messages directly to the LLM.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant LLM as LLM Provider
+    participant Norm as Tool Call Normalizer
+    participant Repair as Argument Repair
+    participant Gate as Action Gate
+    participant Tool as Tool Handler
+    participant Trunc as Result Truncation
+    participant Ctx as Context Guard
+
+    LLM->>Norm: Raw tool_call JSON
+    Norm->>Norm: Normalize argument keys
+    Norm->>Repair: Normalized call
+    alt Malformed JSON
+        Repair->>Repair: Attempt JSON repair
+    end
+    Repair->>Gate: Valid tool call
+    alt Permission denied
+        Gate-->>LLM: ToolAuthorizationError (403)
+    end
+    Gate->>Tool: Authorized call
+    Tool->>Tool: Execute (web-fetch, spawn, cron, etc.)
+    alt Tool error
+        Tool-->>LLM: ToolInputError (400)
+    end
+    Tool->>Trunc: Raw result
+    Trunc->>Trunc: Enforce MAX_CHARS / MAX_BYTES
+    Trunc->>Ctx: Truncated result
+    Ctx->>Ctx: Check context window budget
+    Ctx-->>LLM: Final tool result
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes</h2>
+<p>The core types and functions below form the backbone of the tool infrastructure. <code>AnyAgentTool</code> is the discriminated union through which every tool call is routed; <code>ToolInputError</code> and <code>ToolAuthorizationError</code> are the standard error types; and <code>createActionGate()</code> is the factory that builds permission boundaries around individual tool actions.</p>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>AnyAgentTool</code></td><td>tools/common.ts</td><td>Union type encompassing all 60+ agent tools for type-safe dispatch</td></tr>
+  <tr><td><code>ToolInputError</code></td><td>tools/common.ts</td><td>400-level error for parameter validation failures; extends <code>Error</code></td></tr>
+  <tr><td><code>ToolAuthorizationError</code></td><td>tools/common.ts</td><td>403-level error for access control violations; extends <code>ToolInputError</code></td></tr>
+  <tr><td><code>createActionGate()</code></td><td>tools/common.ts</td><td>Factory that creates tool-level allow/deny action gates</td></tr>
+  <tr><td><code>readStringParam()</code></td><td>tools/common.ts</td><td>Validates and reads string params with trim, required, and label options</td></tr>
+  <tr><td><code>SessionsSpawnToolSchema</code></td><td>sessions-spawn-tool.ts</td><td>TypeBox schema defining the spawn tool&rsquo;s parameter shape</td></tr>
+  <tr><td><code>web-fetch.ts</code></td><td>tools/</td><td>Fetches web pages with configurable char/byte limits and redirect caps</td></tr>
+  <tr><td><code>web-search.ts</code></td><td>tools/</td><td>Performs web searches and returns structured results</td></tr>
+  <tr><td><code>sessions-spawn-tool.ts</code></td><td>tools/</td><td>Spawns sub-agent sessions with runtime and sandbox mode selection</td></tr>
+  <tr><td><code>cron-tool.ts</code></td><td>tools/</td><td>Manages scheduled tasks: add, update, remove, run, list, status</td></tr>
+  <tr><td><code>attempt.tool-call-normalization.ts</code></td><td>run/</td><td>Normalizes tool call argument keys and formats before dispatch</td></tr>
+  <tr><td><code>attempt.tool-call-argument-repair.ts</code></td><td>run/</td><td>Repairs malformed JSON in tool call arguments from LLM output</td></tr>
+  <tr><td><code>message-tool.ts</code></td><td>tools/</td><td>Sends structured messages between agents and users</td></tr>
+  <tr><td><code>gateway-tool.ts</code></td><td>tools/</td><td>Routes requests through the API gateway with auth propagation</td></tr>
+  <tr><td><code>subagents-tool.ts</code></td><td>tools/</td><td>Manages sub-agent lifecycle: creation, delegation, result collection</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<p>Constants and type definitions that control tool behaviour at compile time and runtime. The discriminated union <code>AnyAgentTool</code> enables exhaustive switch statements; spawn runtime and sandbox mode literals constrain session creation; and fetch/error limit constants set safe defaults.</p>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>type</td><td><code>AnyAgentTool</code></td><td>Discriminated union of all tool types for exhaustive pattern matching</td></tr>
+  <tr><td>interface</td><td><code>StringParamOptions</code></td><td>Options for <code>readStringParam()</code>: required, trim, label, allowEmpty</td></tr>
+  <tr><td>const</td><td><code>OWNER_ONLY_TOOL_ERROR</code></td><td>Error constant returned when non-owners attempt owner-restricted tools</td></tr>
+  <tr><td>const</td><td><code>SESSIONS_SPAWN_RUNTIMES</code></td><td><code>["subagent", "acp"]</code> &mdash; available spawn runtime backends</td></tr>
+  <tr><td>const</td><td><code>SESSIONS_SPAWN_SANDBOX_MODES</code></td><td><code>["inherit", "require"]</code> &mdash; sandbox inheritance modes for spawned sessions</td></tr>
+  <tr><td>const</td><td><code>CRON_ACTIONS</code></td><td><code>["status", "list", "add", "update", "remove", "run", "runs", "wake"]</code></td></tr>
+  <tr><td>const</td><td><code>DEFAULT_FETCH_MAX_CHARS</code></td><td><code>50000</code> &mdash; character limit for web fetch tool results</td></tr>
+  <tr><td>const</td><td><code>DEFAULT_FETCH_MAX_RESPONSE_BYTES</code></td><td><code>2000000</code> &mdash; byte limit for web fetch responses</td></tr>
+  <tr><td>const</td><td><code>DEFAULT_FETCH_MAX_REDIRECTS</code></td><td><code>3</code> &mdash; maximum HTTP redirect hops</td></tr>
+  <tr><td>const</td><td><code>DEFAULT_TOOL_ALLOW</code></td><td>Default allowlist of 16 tool actions permitted for agents</td></tr>
+  <tr><td>const</td><td><code>ACP_SPAWN_MODES</code></td><td><code>["run", "session"]</code> &mdash; ACP spawn execution modes</td></tr>
+  <tr><td>const</td><td><code>ACP_SPAWN_SANDBOX_MODES</code></td><td><code>["inherit", "require"]</code> &mdash; ACP sandbox enforcement modes</td></tr>
+</table>
+
+<h2 id="tool-categories">Tool Categories</h2>
+<p>Tools are organized into six functional categories. Each category groups tools that share a common domain, and tools within a category often share utility functions, error types, and configuration constants.</p>
+<table>
+  <tr><th>Category</th><th>Tools</th><th>Description</th></tr>
+  <tr><td>Web</td><td><code>web-fetch</code>, <code>web-search</code>, <code>web-tools</code></td><td>HTTP fetching, search engine queries, and web utilities</td></tr>
+  <tr><td>Session</td><td><code>sessions-spawn</code>, <code>sessions-send</code>, <code>sessions-list</code>, <code>sessions-history</code>, <code>sessions-yield</code>, <code>session-status</code></td><td>Sub-agent session lifecycle management</td></tr>
+  <tr><td>Media</td><td><code>image</code>, <code>image-generate</code>, <code>canvas</code>, <code>pdf</code>, <code>tts</code></td><td>Image processing, generation, document handling, text-to-speech</td></tr>
+  <tr><td>Data</td><td><code>nodes</code>, <code>nodes-commands</code>, <code>nodes-media</code></td><td>Structured data node operations and media attachments</td></tr>
+  <tr><td>System</td><td><code>cron</code>, <code>gateway</code>, <code>agent-step</code>, <code>agents-list</code>, <code>subagents</code></td><td>Scheduling, API gateway, agent orchestration</td></tr>
+  <tr><td>Message</td><td><code>message-tool</code></td><td>Structured message delivery between agents and channels</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<p>The tool-use sub-module sits at the centre of the agent execution loop, interacting with nearly every other subsystem. Inbound interactions arrive as tool call requests from the LLM streaming pipeline; outbound interactions fan out to web APIs, session managers, sandboxes, and MCP servers.</p>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td>LLM Providers</td><td>Function call protocol</td><td>Receives tool call requests from streaming LLM responses</td></tr>
+  <tr><td>&rarr;</td><td>Streaming Pipeline</td><td><code>attempt.ts</code></td><td>Tool calls are extracted and dispatched from the streaming attempt loop</td></tr>
+  <tr><td>&rarr;</td><td>Web APIs</td><td>HTTP / fetch</td><td>Web-fetch and web-search tools make outbound HTTP requests</td></tr>
+  <tr><td>&rarr;</td><td>Session Manager</td><td><code>SessionManager</code></td><td>Session tools (spawn, send, list) interact with session state</td></tr>
+  <tr><td>&rarr;</td><td>Sandbox Runtime</td><td>Docker / SSH</td><td>Sandboxed execution tools delegate to container or SSH backends</td></tr>
+  <tr><td>&rarr;</td><td>MCP Servers</td><td>MCP protocol</td><td>MCP bridge tools connect to external Model Context Protocol servers</td></tr>
+  <tr><td>&larr;</td><td>Auth System</td><td><code>createActionGate()</code></td><td>Action gates consult auth profiles for tool-level authorization</td></tr>
+  <tr><td>&rarr;</td><td>Context Engine</td><td>Result truncation</td><td>Tool results are truncated to fit within context window budgets</td></tr>
+</table>
+
+<h2 id="configuration">Configuration</h2>
+<p>Tool behaviour is controlled through a layered configuration system. Global defaults are defined as module-level constants, while per-tool overrides can be supplied at runtime. Fetch limits, error truncation thresholds, execution host strategies, and security policies are all configurable.</p>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>DEFAULT_FETCH_MAX_CHARS</code></td><td><code>50000</code></td><td>Maximum characters returned by the web-fetch tool</td></tr>
+  <tr><td><code>DEFAULT_FETCH_MAX_RESPONSE_BYTES</code></td><td><code>2000000</code></td><td>Maximum response body size in bytes for web-fetch</td></tr>
+  <tr><td><code>FETCH_MAX_RESPONSE_BYTES_MIN</code></td><td><code>32000</code></td><td>Floor value for configurable fetch byte limit</td></tr>
+  <tr><td><code>FETCH_MAX_RESPONSE_BYTES_MAX</code></td><td><code>10000000</code></td><td>Ceiling value for configurable fetch byte limit</td></tr>
+  <tr><td><code>DEFAULT_FETCH_MAX_REDIRECTS</code></td><td><code>3</code></td><td>Maximum HTTP redirect hops before aborting</td></tr>
+  <tr><td><code>DEFAULT_ERROR_MAX_CHARS</code></td><td><code>4000</code></td><td>Maximum characters in error messages returned to LLM</td></tr>
+  <tr><td><code>DEFAULT_ERROR_MAX_BYTES</code></td><td><code>64000</code></td><td>Maximum bytes in serialized error payloads</td></tr>
+  <tr><td><code>ExecToolDefaults.host</code></td><td><code>auto</code></td><td>Execution host strategy: <code>auto</code>, <code>local</code>, or <code>sandbox</code></td></tr>
+  <tr><td><code>ExecToolDefaults.ask</code></td><td><code>off</code></td><td>User confirmation mode: <code>off</code>, <code>on</code>, or <code>escalate</code></td></tr>
+  <tr><td><code>ExecToolDefaults.security</code></td><td><code>full</code></td><td>Security level: <code>full</code>, <code>limited</code>, or <code>strict</code></td></tr>
+  <tr><td><code>DEFAULT_TOOL_ALLOW</code></td><td>16 actions</td><td>Default allowlist: exec, process, read, write, edit, apply_patch, image, sessions_list, sessions_history, sessions_send, sessions_spawn, sessions_yield, subagents, session_status</td></tr>
+  <tr><td><code>ACP_SPAWN_MODES</code></td><td><code>["run","session"]</code></td><td>Available ACP spawn execution modes</td></tr>
+  <tr><td><code>ACP_SPAWN_SANDBOX_MODES</code></td><td><code>["inherit","require"]</code></td><td>ACP sandbox enforcement modes for spawned processes</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<p>The tool source files are split across two directories: <code>tools/</code> contains the individual tool implementations and shared utilities, while <code>run/</code> contains the normalization and repair logic that preprocesses tool calls before dispatch.</p>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for tool-use</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>tools/
+├── common.ts                              ← AnyAgentTool, ToolInputError, createActionGate()
+├── web-fetch.ts                           ← Web page fetching with limits
+├── web-search.ts                          ← Search engine integration
+├── web-tools.ts                           ← Shared web utilities
+├── message-tool.ts                        ← Structured message delivery
+├── sessions-spawn-tool.ts                 ← Sub-agent session spawning
+├── sessions-send-tool.ts                  ← Send messages to sessions
+├── sessions-list-tool.ts                  ← List active sessions
+├── sessions-history-tool.ts               ← Session history retrieval
+├── sessions-yield-tool.ts                 ← Yield control to parent
+├── session-status-tool.ts                 ← Session status queries
+├── cron-tool.ts                           ← Cron job management (8 actions)
+├── pdf-tool.ts                            ← PDF document handling
+├── image-tool.ts                          ← Image processing
+├── image-generate-tool.ts                 ← Image generation
+├── canvas-tool.ts                         ← Canvas rendering
+├── tts-tool.ts                            ← Text-to-speech synthesis
+├── nodes-tool.ts                          ← Data node operations
+├── nodes-commands-tool.ts                 ← Node command execution
+├── nodes-media-tool.ts                    ← Node media attachments
+├── gateway-tool.ts                        ← API gateway routing
+├── subagents-tool.ts                      ← Sub-agent lifecycle management
+├── agents-list-tool.ts                    ← Agent enumeration
+├── agent-step-tool.ts                     ← Single agent step execution
+run/
+├── attempt.tool-call-normalization.ts     ← Normalizes tool call arguments
+└── attempt.tool-call-argument-repair.ts   ← Repairs malformed JSON in args
+</code></pre>
+</details>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core tool-use mechanisms have been extracted into dedicated focus pages for in-depth exploration. Each page covers one subsystem with diagrams, code walks, and configuration details.</p>
+<h4>Deep-Dive Pages</h4>
+<p>These focus pages drill into the three most complex subsystems within the tool-use module. Start with Function Calling if you want to understand the end-to-end tool invocation protocol; MCP Bridge if you are integrating external tool servers; Sandbox Execution if you are working on security boundaries.</p>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="function_calling/index.html" title="Function Calling &mdash; Deep Dive">
+    <h4>Function Calling <span class="focus-badge">Focus</span></h4>
+    <p>Tool call protocol, schema validation with TypeBox, and the argument repair pipeline that recovers from malformed LLM JSON output.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="mcp_bridge/index.html" title="MCP Bridge &mdash; Deep Dive">
+    <h4>MCP Bridge <span class="focus-badge">Focus</span></h4>
+    <p>Model Context Protocol server integration, tool runtime helpers, and the bridge that exposes external MCP tools to agents.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+  <a class="card" href="sandbox_execution/index.html" title="Sandbox Execution &mdash; Deep Dive">
+    <h4>Sandbox Execution <span class="focus-badge">Focus</span></h4>
+    <p>Sandboxed code execution infrastructure with Docker and SSH backends, security policies, and resource isolation.</p>
+    <div class="focus-meta" style="margin-top:.6rem;font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Extracted topic page</div>
+  </a>
+</div>
+
+<h2 id="error-handling">Error Handling</h2>
+<p>The tool-use module defines a two-tier error hierarchy. <code>ToolInputError</code> (HTTP 400 equivalent) signals parameter validation failures &mdash; missing required fields, invalid types, or out-of-range values. <code>ToolAuthorizationError</code> (HTTP 403 equivalent) extends <code>ToolInputError</code> and signals permission violations when an agent tries to invoke an owner-restricted tool or an action blocked by the gate.</p>
+<p>Both error types are caught by the attempt loop and returned to the LLM as structured error messages, capped at <code>DEFAULT_ERROR_MAX_CHARS</code> (4000) characters. This approach ensures the LLM can understand what went wrong and retry with corrected parameters, rather than receiving an opaque failure. The error hierarchy is intentionally modeled after HTTP status codes for familiarity.</p>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="example-tool-input-error">Example: ToolInputError Usage Pattern</h3>
+<pre><code class="language-typescript">import { ToolInputError, ToolAuthorizationError } from "./tools/common";
+
+function validateFetchUrl(url: string): void {
+  if (!url || typeof url !== "string") {
+    throw new ToolInputError("url parameter is required and must be a string");
+  }
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:" &amp;&amp; parsed.protocol !== "http:") {
+    throw new ToolInputError(`Unsupported protocol: ${parsed.protocol}`);
+  }
+}
+
+function checkToolAccess(tool: string, userId: string, ownerId: string): void {
+  if (tool === "gateway" &amp;&amp; userId !== ownerId) {
+    throw new ToolAuthorizationError(OWNER_ONLY_TOOL_ERROR);
+  }
+}
+</code></pre>
+
+<h3 id="example-action-gate">Example: createActionGate() Factory Pattern</h3>
+<p>Action gates provide composable permission boundaries. An admin gate may allow all default tools, while a restricted user gate only permits read-only actions. Gates are checked synchronously before every tool dispatch.</p>
+<pre><code class="language-typescript">import { createActionGate } from "./tools/common";
+
+// Create a gate that allows only specific tool actions
+const gate = createActionGate({
+  allow: ["exec", "read", "write", "sessions_spawn"],
+  deny: ["gateway", "subagents"],
+});
+
+// Gate returns true/false for each tool action
+if (!gate.isAllowed("gateway")) {
+  throw new ToolAuthorizationError("gateway tool is not permitted");
+}
+
+// Gates can be composed for layered permission checks
+const adminGate = createActionGate({ allow: DEFAULT_TOOL_ALLOW });
+const userGate = createActionGate({
+  allow: ["read", "web_fetch", "web_search"],
+  deny: ["exec", "write", "apply_patch"],
+});
+</code></pre>
+
+<h3 id="example-fetch-config">Example: Web Fetch Config Resolution</h3>
+<p>The fetch configuration resolver clamps user-supplied overrides within the allowed bounds, ensuring safety limits are always respected even when callers request extreme values.</p>
+<pre><code class="language-typescript">const DEFAULT_FETCH_MAX_CHARS = 50_000;
+const DEFAULT_FETCH_MAX_RESPONSE_BYTES = 2_000_000;
+const DEFAULT_FETCH_MAX_REDIRECTS = 3;
+const FETCH_MAX_RESPONSE_BYTES_MIN = 32_000;
+const FETCH_MAX_RESPONSE_BYTES_MAX = 10_000_000;
+
+function resolveFetchConfig(overrides?: Partial&lt;FetchConfig&gt;): FetchConfig {
+  const maxBytes = Math.min(
+    FETCH_MAX_RESPONSE_BYTES_MAX,
+    Math.max(
+      FETCH_MAX_RESPONSE_BYTES_MIN,
+      overrides?.maxResponseBytes ?? DEFAULT_FETCH_MAX_RESPONSE_BYTES,
+    ),
+  );
+  return {
+    maxChars: overrides?.maxChars ?? DEFAULT_FETCH_MAX_CHARS,
+    maxResponseBytes: maxBytes,
+    maxRedirects: overrides?.maxRedirects ?? DEFAULT_FETCH_MAX_REDIRECTS,
+  };
+}
+</code></pre>
+
+<div class="footer"><a href="../index.html">&larr; Back to Agents Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');var hljsLink=document.getElementById('hljs-theme');var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);hljsLink.href=(t==='light')?lightHL:darkHL;btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+document.querySelectorAll('pre code').forEach(function(block){var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

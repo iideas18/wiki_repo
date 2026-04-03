@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-focus-parent" content="../index.html">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/infra/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Cache Strategies — OpenClaw Infrastructure</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<style>
+:root{--bg:#0e1117;--surface:#161b22;--surface-2:#1c2333;--border:#30363d;--text:#e6edf3;--text-muted:#8b949e;--accent:#58a6ff;--accent-hover:#79c0ff;--accent-bg:rgba(88,166,255,.1);--success:#3fb950;--warning:#d29922;--danger:#f85149;--info:#58a6ff;--code-bg:#1c2333;--shadow:0 1px 3px rgba(0,0,0,.4);--radius:8px;--font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--font-mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--surface-2:#eaeef2;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent-hover:#0550ae;--accent-bg:rgba(9,105,218,.1);--success:#1a7f37;--warning:#9a6700;--danger:#cf222e;--info:#0969da;--code-bg:#f6f8fa;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;transition:background .2s,color .2s}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+.skip-link{position:absolute;top:-100%;left:1rem;padding:.5rem 1rem;background:var(--accent);color:#fff;border-radius:var(--radius);z-index:9999;font-weight:600}.skip-link:focus{top:1rem}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+nav.breadcrumb{font-size:.875rem;color:var(--text-muted)}nav.breadcrumb a{color:var(--accent)}nav.breadcrumb .sep{margin:0 .35rem;color:var(--text-muted)}
+.theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:.4rem .75rem;border-radius:var(--radius);cursor:pointer;font-size:.875rem;display:flex;align-items:center;gap:.35rem;transition:background .15s}.theme-toggle:hover{background:var(--accent-bg)}
+main{max-width:56rem;margin:0 auto;padding:2rem 1.5rem 4rem}
+.hero{text-align:center;padding:2.5rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.focus-label{display:inline-block;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent);padding:.2rem .7rem;border-radius:99px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+.hero h1{font-size:2rem;margin-bottom:.5rem}.hero .subtitle{color:var(--text-muted);font-size:1.1rem}
+.meta-bar{display:flex;gap:1.5rem;justify-content:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted);flex-wrap:wrap}.meta-bar span{display:flex;align-items:center;gap:.3rem}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:2rem}.toc h2{font-size:1rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}.toc ol{padding-left:1.25rem}.toc li{margin:.35rem 0}.toc a{font-size:.925rem}
+h2{font-size:1.5rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+h3{font-size:1.15rem;margin:1.75rem 0 .75rem;color:var(--accent)}
+p{margin:.75rem 0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}.summary-grid .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}.summary-grid .card h4{font-size:.95rem;margin-bottom:.35rem;color:var(--accent)}.summary-grid .card p{font-size:.85rem;color:var(--text-muted);margin:0}
+.callout{border-left:4px solid var(--info);background:var(--surface);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;margin:1.25rem 0;font-size:.925rem}.callout.analogy{border-left-color:var(--success)}.callout.warning{border-left-color:var(--warning)}.callout strong{display:block;margin-bottom:.25rem}
+.code-walk{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:1.5rem 0;overflow:hidden}.code-walk .step{display:flex;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);align-items:flex-start}.code-walk .step:last-child{border-bottom:none}.code-walk .step-num{background:var(--accent);color:#fff;width:1.75rem;height:1.75rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}.code-walk .step-body{flex:1;min-width:0}.code-walk .step-body p{margin:0 0 .5rem;font-size:.9rem}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:1rem 0;position:relative}pre code{background:none;color:inherit;padding:0;font-family:var(--font-mono);font-size:.85rem;line-height:1.6}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem;opacity:0;transition:opacity .15s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{background:var(--accent-bg);color:var(--accent)}
+.mermaid-wrapper{margin:1.5rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;position:relative}.mermaid-wrapper:hover{box-shadow:var(--shadow)}.mermaid-wrapper .expand-hint{position:absolute;top:.5rem;right:.5rem;font-size:.7rem;color:var(--text-muted);background:var(--surface-2);padding:.15rem .5rem;border-radius:4px}
+.diagram-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .2s}.diagram-overlay.active{opacity:1}.diagram-overlay .close-overlay{position:absolute;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);color:var(--text);width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center}.diagram-overlay .diagram-content{max-width:90vw;max-height:90vh;overflow:auto;background:var(--surface);border-radius:var(--radius);padding:2rem}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;background:var(--accent);color:#fff;width:2.5rem;height:2.5rem;border-radius:50%;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:99;box-shadow:var(--shadow)}.back-to-top.visible{opacity:1}
+footer{text-align:center;padding:2rem 1rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;margin-top:3rem}footer a{color:var(--accent)}
+@media print{header,.theme-toggle,.back-to-top,.copy-btn,.expand-hint,.diagram-overlay,.skip-link{display:none!important}body{background:#fff;color:#000}main{max-width:100%;padding:0}.mermaid-wrapper{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word;border:1px solid #ccc}}
+@media(max-width:768px){main{padding:1.5rem 1rem}.hero h1{font-size:1.5rem}.summary-grid{grid-template-columns:1fr}.code-walk .step{flex-direction:column}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header>
+  <nav class="breadcrumb" aria-label="Breadcrumb navigation">
+    <a href="../../../index.html">OpenClaw</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../../index.html">Infrastructure</a>
+    <span class="sep">&rsaquo;</span>
+    <a href="../index.html">caching</a>
+    <span class="sep">&rsaquo;</span>
+    <span>Cache Strategies</span>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+    <span class="theme-icon">🌙</span> Theme
+  </button>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <span class="focus-label">Focus Page</span>
+    <h1>Cache Strategies</h1>
+    <p class="subtitle">In-memory caching patterns and Symbol-based singleton management</p>
+    <div class="meta-bar">
+      <span>📅 2026-04-02</span>
+      <span>📖 <span id="readingTime">–</span> min read</span>
+      <span>🔖 src/infra/</span>
+      <span>🔗 047b701859</span>
+    </div>
+  </div>
+
+  <div class="toc" id="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#symbol-singletons">Symbol-Based Singletons</a></li>
+      <li><a href="#presence-cache">System Presence Cache</a></li>
+      <li><a href="#heartbeat-cache">Heartbeat Event Cache</a></li>
+      <li><a href="#session-events">Session-Scoped Ephemeral Events</a></li>
+      <li><a href="#cache-patterns">Cache Read/Write Patterns</a></li>
+      <li><a href="#diagrams">Architecture Diagrams</a></li>
+    </ol>
+  </div>
+
+  <!-- Overview -->
+  <h2 id="overview">Overview</h2>
+
+  <div class="callout analogy">
+    <strong>🎯 What &amp; Why</strong>
+    Cache strategies determine how in-memory state is organized, accessed, and shared across the application. Using Symbol-based singletons ensures exactly one cache instance exists per process, eliminating the risk of duplicated state when modules are loaded multiple times by different bundlers or import paths.
+  </div>
+
+  <div class="callout analogy">
+    <strong>💡 Analogy</strong>
+    Like a shared notice board in an office. Everyone reads the same board (Symbol singleton). Notices older than the morning shift are removed (TTL). Only 200 post-it notes fit (max entries). New critical notices push off the oldest ones.
+  </div>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Symbol Singletons</h4>
+      <p>Global registry ensures one cache instance per key across all module copies.</p>
+    </div>
+    <div class="card">
+      <h4>Presence Cache</h4>
+      <p>200-entry map with 5-min TTL for system-wide presence state tracking.</p>
+    </div>
+    <div class="card">
+      <h4>Heartbeat Events</h4>
+      <p>Single-slot cache holding the last heartbeat event with pub/sub broadcast.</p>
+    </div>
+    <div class="card">
+      <h4>Session Queues</h4>
+      <p>Per-session bounded queues (max 20) with dedup for ephemeral events.</p>
+    </div>
+  </div>
+
+  <!-- Symbol-Based Singletons -->
+  <h2 id="symbol-singletons">Symbol-Based Singletons</h2>
+  <p>
+    The cache layer uses <code>Symbol.for()</code> to guarantee a single instance across the entire Node.js process. Because <code>Symbol.for()</code> operates on the global Symbol registry rather than module scope, even if the module is loaded multiple times through different paths, the same cache instance is returned.
+  </p>
+
+  <h3>Heartbeat Event State</h3>
+  <p>
+    The heartbeat event cache stores the most recent heartbeat event and a list of subscribers. The Symbol key <code>"openclaw.heartbeatEvents.state"</code> anchors the cache to the global registry.
+  </p>
+
+  <div class="code-walk">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Register the Symbol key in the global registry and retrieve or initialize the cache state.</p>
+        <pre><code class="language-typescript">const HEARTBEAT_KEY = Symbol.for("openclaw.heartbeatEvents.state");
+
+interface HeartbeatState {
+  lastEvent: HeartbeatEvent | null;
+  listeners: Set&lt;(evt: HeartbeatEvent) =&gt; void&gt;;
+}
+
+function getHeartbeatState(): HeartbeatState {
+  const g = globalThis as Record&lt;symbol, unknown&gt;;
+  if (!g[HEARTBEAT_KEY]) {
+    g[HEARTBEAT_KEY] = {
+      lastEvent: null,
+      listeners: new Set(),
+    };
+  }
+  return g[HEARTBEAT_KEY] as HeartbeatState;
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Emit an event: update the cached value and broadcast to all subscribers with a timestamp.</p>
+        <pre><code class="language-typescript">export function emitHeartbeatEvent(evt: HeartbeatEvent): void {
+  const state = getHeartbeatState();
+  state.lastEvent = { ...evt, timestamp: Date.now() };
+  for (const listener of state.listeners) {
+    try {
+      listener(state.lastEvent);
+    } catch {
+      // listener errors must not crash the emitter
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p>Subscribe: returns an unsubscribe function for clean teardown. Read the last event without subscribing.</p>
+        <pre><code class="language-typescript">export function onHeartbeatEvent(
+  listener: (evt: HeartbeatEvent) =&gt; void
+): () =&gt; void {
+  const state = getHeartbeatState();
+  state.listeners.add(listener);
+  return () =&gt; { state.listeners.delete(listener); };
+}
+
+export function getLastHeartbeatEvent(): HeartbeatEvent | null {
+  return getHeartbeatState().lastEvent;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <h3>Session Queue Singletons</h3>
+  <p>
+    System event queues are resolved per session using <code>resolveGlobalMap</code>. Each session context receives a bounded queue (max 20 entries) that deduplicates events before insertion.
+  </p>
+
+  <pre><code class="language-typescript">function resolveGlobalMap&lt;K, V&gt;(): Map&lt;K, V&gt; {
+  const MAP_KEY = Symbol.for("openclaw.systemEvents.map");
+  const g = globalThis as Record&lt;symbol, unknown&gt;;
+  if (!g[MAP_KEY]) {
+    g[MAP_KEY] = new Map&lt;K, V&gt;();
+  }
+  return g[MAP_KEY] as Map&lt;K, V&gt;;
+}
+
+interface SessionQueue {
+  events: SystemEvent[];
+  maxSize: number;
+}
+
+function getSessionQueue(sessionId: string): SessionQueue {
+  const map = resolveGlobalMap&lt;string, SessionQueue&gt;();
+  if (!map.has(sessionId)) {
+    map.set(sessionId, { events: [], maxSize: 20 });
+  }
+  return map.get(sessionId)!;
+}</code></pre>
+
+  <!-- System Presence Cache -->
+  <h2 id="presence-cache">System Presence Cache</h2>
+  <p>
+    The system presence cache tracks up to 200 active system entries in a global in-memory map. Each entry has a 5-minute TTL and is lazily evicted on read. The cache is initialized with self-presence data: hostname, IP address, macOS model identifier, and application version.
+  </p>
+
+  <div class="callout">
+    <strong>📋 SystemPresenceUpdate Tracking</strong>
+    Every presence update produces a <code>SystemPresenceUpdate</code> delta object with <code>previous</code>, <code>next</code>, and a <code>changes</code> array describing which fields changed. This enables downstream consumers to react only to meaningful transitions.
+  </div>
+
+  <pre><code class="language-typescript">interface SystemPresence {
+  hostname: string;
+  ip: string;
+  model: string;      // macOS model identifier
+  version: string;
+  lastSeen: number;   // Unix timestamp in ms
+}
+
+interface SystemPresenceUpdate {
+  previous: SystemPresence | null;
+  next: SystemPresence;
+  changes: (keyof SystemPresence)[];
+}
+
+const MAX_PRESENCE_ENTRIES = 200;
+const PRESENCE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function updatePresence(
+  cache: Map&lt;string, SystemPresence&gt;,
+  key: string,
+  presence: SystemPresence
+): SystemPresenceUpdate {
+  const previous = cache.get(key) ?? null;
+  const next = { ...presence, lastSeen: Date.now() };
+  cache.set(key, next);
+
+  // Enforce max entries — evict oldest
+  if (cache.size &gt; MAX_PRESENCE_ENTRIES) {
+    let oldestKey = "";
+    let oldestTime = Infinity;
+    for (const [k, v] of cache) {
+      if (v.lastSeen &lt; oldestTime) {
+        oldestTime = v.lastSeen;
+        oldestKey = k;
+      }
+    }
+    if (oldestKey) cache.delete(oldestKey);
+  }
+
+  const changes: (keyof SystemPresence)[] = [];
+  if (previous) {
+    for (const field of ["hostname", "ip", "model", "version"] as const) {
+      if (previous[field] !== next[field]) changes.push(field);
+    }
+  }
+
+  return { previous, next, changes };
+}</code></pre>
+
+  <!-- Heartbeat Event Cache -->
+  <h2 id="heartbeat-cache">Heartbeat Event Cache</h2>
+  <p>
+    The heartbeat event cache is a single-slot write-through cache. <code>emitHeartbeatEvent(evt)</code> records the event locally and broadcasts it to all registered listeners. <code>getLastHeartbeatEvent()</code> returns the cached event or <code>null</code> if none has been emitted.
+  </p>
+
+  <div class="callout warning">
+    <strong>⚠️ Important</strong>
+    Listener exceptions are silently swallowed to prevent a single faulty subscriber from disrupting the heartbeat pipeline. Monitor error logs separately if listener reliability is critical.
+  </div>
+
+  <!-- Session-Scoped Ephemeral Events -->
+  <h2 id="session-events">Session-Scoped Ephemeral Events</h2>
+  <p>
+    Each session context maintains its own bounded event queue via <code>resolveGlobalMap&lt;string, SessionQueue&gt;()</code>. Queues are capped at 20 entries. Before pushing a new event, the queue checks for duplicates (matching event ID) and drops the incoming event if already present. When the queue overflows, the oldest event is shifted out.
+  </p>
+
+  <pre><code class="language-typescript">function pushSessionEvent(sessionId: string, event: SystemEvent): boolean {
+  const queue = getSessionQueue(sessionId);
+
+  // Dedup check
+  if (queue.events.some(e =&gt; e.id === event.id)) {
+    return false;
+  }
+
+  queue.events.push(event);
+
+  // Enforce bounded size — FIFO eviction
+  while (queue.events.length &gt; queue.maxSize) {
+    queue.events.shift();
+  }
+
+  return true;
+}</code></pre>
+
+  <!-- Cache Read/Write Patterns -->
+  <h2 id="cache-patterns">Cache Read/Write Patterns</h2>
+
+  <div class="summary-grid">
+    <div class="card">
+      <h4>Write-Through</h4>
+      <p>Used for presence: update local cache immediately then broadcast the change event to peers.</p>
+    </div>
+    <div class="card">
+      <h4>Read-Through</h4>
+      <p>Used for heartbeat events: check cache first, return cached value or null. No remote fetch.</p>
+    </div>
+    <div class="card">
+      <h4>FIFO Eviction</h4>
+      <p>Session queues evict the oldest entry when full. No priority, no LRU — simple and fast.</p>
+    </div>
+    <div class="card">
+      <h4>Lazy TTL</h4>
+      <p>Presence entries evicted on read, not on timer. Reduces background bookkeeping.</p>
+    </div>
+  </div>
+
+  <!-- Diagrams -->
+  <h2 id="diagrams">Architecture Diagrams</h2>
+
+  <h3>Cache Lookup / Update Pattern with TTL Check</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand cache lookup diagram">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="cache-lookup-pattern">
+flowchart TD
+    A[Incoming Request] --> B{Key in cache?}
+    B -- Yes --> C{TTL expired?}
+    C -- No --> D[Return cached value]
+    C -- Yes --> E[Evict stale entry]
+    E --> F[Fetch fresh value]
+    B -- No --> F
+    F --> G{Cache full?}
+    G -- Yes --> H[Evict oldest entry]
+    H --> I[Store new entry]
+    G -- No --> I
+    I --> J[Return fresh value]
+    D --> K[Update lastAccessed]
+    K --> L[Done]
+    J --> L
+    </pre>
+  </div>
+
+  <h3>Cache Entry Lifecycle</h3>
+  <div class="mermaid-wrapper" tabindex="0" role="button" aria-label="Expand cache entry lifecycle diagram">
+    <span class="expand-hint">Click to expand</span>
+    <pre class="mermaid" data-source="cache-entry-lifecycle">
+stateDiagram-v2
+    [*] --> Empty : initialize
+    Empty --> Populated : set(key, value)
+    Populated --> Populated : update(key, newValue)
+    Populated --> Stale : TTL expires (lazy check)
+    Stale --> Evicted : next read triggers eviction
+    Populated --> Evicted : capacity overflow (oldest)
+    Evicted --> Populated : re-populated on next write
+    Evicted --> [*]
+    </pre>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="../index.html">← Back to Caching Module</a>
+  </p>
+  <p>OpenClaw Infrastructure Wiki · Generated 2026-04-02</p>
+</footer>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <button class="close-overlay" aria-label="Close diagram overlay">&times;</button>
+  <div class="diagram-content" id="diagramContent"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script type="module">
+/* mermaid loaded via CDN in head */
+
+const THEME_KEY = 'neutra-ip-theme';
+
+function getPreferredTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored) return stored;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  const icon = document.querySelector('.theme-icon');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+
+  const hljsLink = document.getElementById('hljs-theme');
+  if (hljsLink) {
+    hljsLink.href = theme === 'dark'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+}
+
+applyTheme(getPreferredTheme());
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+  initMermaid();
+});
+
+// Reading time
+const text = document.querySelector('main')?.textContent || '';
+const words = text.trim().split(/\s+/).length;
+const readingEl = document.getElementById('readingTime');
+if (readingEl) readingEl.textContent = String(Math.max(1, Math.round(words / 200)));
+
+// Highlight.js
+hljs.highlightAll();
+
+// Copy buttons
+document.querySelectorAll('pre code').forEach(block => {
+  if (block.closest('.mermaid-wrapper')) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(block.textContent || '');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+  block.closest('pre')?.appendChild(btn);
+});
+
+// Mermaid
+function initMermaid() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  mermaid.initialize({
+    startOnLoad:false,
+    theme: theme === 'dark' ? 'dark' : 'default',
+    flowchart: { useMaxWidth: true },
+    securityLevel: 'loose',
+  });
+
+  document.querySelectorAll('pre.mermaid').forEach((el, i) => {
+    const source = el.getAttribute('data-source') || `diagram-${i}`;
+    const code = el.textContent || '';
+    el.removeAttribute('data-processed');
+    el.innerHTML = code;
+    mermaid.render(`mermaid-${source}-${i}`, code).then(({ svg }).catch(function(e){console.warn('mermaid:',e)}) => {
+      el.innerHTML = svg;
+    }).catch(err => {
+      console.warn(`Mermaid render failed for ${source}:`, err);
+      el.innerHTML = `<span style="color:var(--danger)">Diagram render failed</span>`;
+    });
+  });
+}
+initMermaid();
+
+// Diagram overlay
+const overlay = document.getElementById('diagramOverlay');
+const overlayContent = document.getElementById('diagramContent');
+
+document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+  wrapper.addEventListener('click', () => {
+    const svg = wrapper.querySelector('svg');
+    if (!svg || !overlay || !overlayContent) return;
+    overlayContent.innerHTML = '';
+    overlayContent.appendChild(svg.cloneNode(true));
+    overlay.classList.add('active');
+  });
+});
+
+overlay?.querySelector('.close-overlay')?.addEventListener('click', () => {
+  overlay.classList.remove('active');
+});
+overlay?.addEventListener('click', (e) => {
+  if (e.target === overlay) overlay.classList.remove('active');
+});
+
+// Back to top
+const backBtn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  if (backBtn) backBtn.classList.toggle('visible', window.scrollY > 400);
+});
+backBtn?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+    overlay.classList.remove('active');
+  }
+});
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/gateway/">
+<meta name="wiki-source-rev" content="047b701859">
+<title>Gateway &mdash; Control Plane &amp; Authentication</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">OpenClaw</a> &rsaquo; <span>Gateway</span></nav>
+
+<main id="main">
+<h1>Gateway <span style="font-size:1rem;color:var(--text-muted);font-weight:400">&mdash; Control Plane &amp; Authentication</span></h1>
+
+<div class="hero">
+  <p class="subtitle">The Front Door of OpenClaw</p>
+  <p>Gateway is the control plane that manages every connection entering the system &mdash; from device authentication and rate limiting to boot orchestration, message routing, session lifecycle, and assistant identity resolution. It is the single entry point through which all client traffic flows before reaching agents.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">441</div><div class="label">Source Files</div></div>
+  <div class="stat-box"><div class="num">4</div><div class="label">Auth Modes</div></div>
+  <div class="stat-box"><div class="num">80+</div><div class="label">Protocol Validators</div></div>
+  <div class="stat-box"><div class="num">32+</div><div class="label">Session Fields</div></div>
+</div>
+
+<p>
+  <span class="badge blue">TypeScript</span>
+  <span class="badge green">Control Plane</span>
+  <span class="badge yellow">Auth</span>
+  <span class="badge red">Security-Critical</span>
+</p>
+
+<h2 id="what-and-why">What Is This &amp; Why Does It Exist?</h2>
+<p>Every production system needs a front door &mdash; something that decides <em>who</em> gets in, <em>how</em> services start up, and <em>where</em> messages go. The Gateway module is that front door for OpenClaw.</p>
+<details open>
+  <summary style="cursor:pointer;color:var(--accent);font-weight:600">&#128161; Real-world analogy</summary>
+  <p style="margin-top:.5rem">Think of Gateway as an <strong>airport terminal</strong>. The <strong>Auth</strong> subsystem is passport control &mdash; it checks your credentials (token, password, Tailscale identity, or device pairing) and decides whether to let you through. <strong>Rate limiting</strong> is the queue-management system that prevents the terminal from being overwhelmed. <strong>Boot</strong> is the pre-flight checklist that ensures all ground systems are operational before any planes depart. <strong>Routing</strong> is the air-traffic controller that dispatches each passenger to the correct gate (session) and ensures the right pilot (assistant identity) is assigned to each flight.</p>
+</details>
+
+<div class="toc" id="toc">
+  <h3 style="margin:0 0 .5rem;column-span:all">Table of Contents</h3>
+</div>
+
+<h2 id="architecture">Architecture Overview</h2>
+<p>The Gateway sits between external clients (CLI, Web UI, mobile apps) and internal OpenClaw subsystems (agents, sessions, plugins). It enforces authentication, manages connection lifecycle, and routes RPC requests.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TB
+    subgraph Clients
+        CLI["CLI Client"]
+        WEB["Web UI"]
+        MOB["Mobile App"]
+    end
+
+    subgraph Gateway["Gateway Control Plane"]
+        AUTH["Auth Layer<br/>resolveGatewayAuth()<br/>authorizeGatewayConnect()"]
+        RL["Rate Limiter<br/>AuthRateLimiter"]
+        BOOT["Boot Orchestrator<br/>runBootOnce()"]
+        PROTO["Protocol Validation<br/>80+ validators"]
+        ROUTER["Request Router<br/>GatewayRequestHandlers"]
+        SESS["Session Manager<br/>GatewaySessionRow"]
+        IDENT["Assistant Identity<br/>resolveAssistantIdentity()"]
+        CRED["Credential Resolver<br/>resolveGatewayCredentialsFromConfig()"]
+    end
+
+    subgraph Internal["Internal Services"]
+        AGENTS["Agent Runtime"]
+        PLUGINS["Plugin System"]
+        STORAGE["Session Storage"]
+        HEALTH["Health Monitor"]
+    end
+
+    CLI --> AUTH
+    WEB --> AUTH
+    MOB --> AUTH
+    AUTH --> RL
+    RL --> PROTO
+    PROTO --> ROUTER
+    ROUTER --> SESS
+    ROUTER --> IDENT
+    ROUTER --> AGENTS
+    ROUTER --> PLUGINS
+    SESS --> STORAGE
+    BOOT --> HEALTH
+    AUTH --> CRED
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>A typical client connection follows this sequence from initial handshake through authenticated request dispatch.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant GW as Gateway
+    participant Auth as Auth Layer
+    participant RL as Rate Limiter
+    participant Proto as Protocol
+    participant Router as Router
+    participant Sess as Session Mgr
+    participant Agent as Agent Runtime
+
+    C->>GW: WebSocket connect (ConnectParams)
+    GW->>Auth: authorizeGatewayConnect(params)
+    Auth->>RL: rateLimiter.check(clientIp)
+    RL-->>Auth: RateLimitCheckResult {allowed, remaining}
+    Auth->>Auth: resolveGatewayAuth(cfg)
+    Auth-->>GW: GatewayAuthResult {ok, method, user}
+    GW->>Proto: validateConnectParams(frame)
+    Proto-->>GW: validated
+    GW->>GW: runBootOnce(cfg, deps)
+    GW->>Router: dispatch(RequestFrame)
+    Router->>Sess: create/resume session
+    Sess-->>Router: GatewaySessionRow
+    Router->>Agent: forward to agent runtime
+    Agent-->>Router: response stream
+    Router-->>C: ResponseFrame / EventFrame
+</pre>
+</div>
+
+<h2 id="walkthrough">Narrated Walkthrough</h2>
+<p>Follow the journey of a single client request through the Gateway, step by step.</p>
+
+<h3 id="step1">Step 1 &mdash; Client Initiates Connection</h3>
+<p>A CLI, Web UI, or mobile client opens a WebSocket connection, sending <code>ConnectParams</code> that include the client version, requested auth method, and optional device token.</p>
+
+<h3 id="step2">Step 2 &mdash; Credential Resolution</h3>
+<p>The Gateway calls <code>resolveGatewayCredentialsFromConfig()</code> to determine which credentials apply. It checks environment variables, config files, and secret references in precedence order defined by <code>GatewayCredentialPrecedence</code>.</p>
+
+<h3 id="step3">Step 3 &mdash; Auth Mode Resolution</h3>
+<p><code>resolveGatewayAuth()</code> examines the config to determine the active auth mode: <code>"none"</code>, <code>"token"</code>, <code>"password"</code>, or <code>"trusted-proxy"</code>. If both token and password are configured, <code>assertExplicitGatewayAuthModeWhenBothConfigured()</code> enforces that an explicit mode is declared.</p>
+
+<h3 id="step4">Step 4 &mdash; Rate Limit Check</h3>
+<p>Before evaluating credentials, the <code>AuthRateLimiter</code> checks the client IP against a sliding-window counter. The <code>RateLimitConfig</code> defines <code>maxAttempts</code> (default&nbsp;10), <code>windowMs</code> (60&thinsp;s), and <code>lockoutMs</code> (5&thinsp;min). If the client is locked out, the request is rejected with <code>retryAfterMs</code>.</p>
+
+<h3 id="step5">Step 5 &mdash; Authentication</h3>
+<p><code>authorizeGatewayConnect()</code> evaluates the request against the resolved auth mode. It supports six methods: <code>none</code>, <code>token</code>, <code>password</code>, <code>tailscale</code>, <code>device-token</code>, and <code>trusted-proxy</code>. On failure, <code>rateLimiter.recordFailure()</code> is called.</p>
+
+<h3 id="step6">Step 6 &mdash; Protocol Validation</h3>
+<p>All incoming frames are validated by the protocol layer (80+ JSON-schema validators). <code>validateRequestFrame()</code> and <code>validateConnectParams()</code> ensure type safety before any processing.</p>
+
+<h3 id="step7">Step 7 &mdash; Boot Sequence</h3>
+<p>On first connection, <code>runBootOnce()</code> reads <code>BOOT.md</code> from the workspace directory and executes the bootstrap instructions. The result is a <code>BootRunResult</code> with status <code>"ran"</code>, <code>"skipped"</code>, or <code>"failed"</code>.</p>
+
+<h3 id="step8">Step 8 &mdash; Request Routing</h3>
+<p>Authenticated requests are dispatched through <code>GatewayRequestHandlers</code> &mdash; a <code>Record&lt;string, GatewayRequestHandler&gt;</code> that maps RPC method names to handler functions. Each handler receives a <code>GatewayRequestHandlerOptions</code> containing the request frame, client info, and full <code>GatewayRequestContext</code>.</p>
+
+<h3 id="step9">Step 9 &mdash; Session Management</h3>
+<p>The session manager creates or resumes a <code>GatewaySessionRow</code> (32+ fields). It tracks <code>SessionRunStatus</code> (<code>"running"</code>, <code>"done"</code>, <code>"failed"</code>, <code>"killed"</code>, <code>"timeout"</code>), token usage, cost estimates, and derived titles. Lifecycle events are persisted via <code>persistGatewaySessionLifecycleEvent()</code>.</p>
+
+<h3 id="step10">Step 10 &mdash; Assistant Identity</h3>
+<p><code>resolveAssistantIdentity()</code> determines the active assistant&rsquo;s name, avatar, and emoji from config and workspace files. The default is <code>DEFAULT_ASSISTANT_IDENTITY</code> (<code>agentId: "main"</code>, <code>name: "Assistant"</code>). Identity fields are bounded by <code>MAX_ASSISTANT_NAME</code> (50), <code>MAX_ASSISTANT_AVATAR</code> (200), and <code>MAX_ASSISTANT_EMOJI</code> (16).</p>
+
+<h2 id="key-types">Key Types &amp; Functions</h2>
+<table>
+  <tr><th>Name</th><th>File</th><th>Description</th></tr>
+  <tr><td><code>ResolvedGatewayAuth</code></td><td>auth.ts</td><td>Resolved auth config: mode, token, password, allowTailscale, trustedProxy</td></tr>
+  <tr><td><code>GatewayAuthResult</code></td><td>auth.ts</td><td>Auth outcome: ok, method, user, reason, rateLimited, retryAfterMs</td></tr>
+  <tr><td><code>AuthRateLimiter</code></td><td>auth-rate-limit.ts</td><td>Rate limiter interface: check(), recordFailure(), reset(), prune()</td></tr>
+  <tr><td><code>RateLimitConfig</code></td><td>auth-rate-limit.ts</td><td>Config: maxAttempts, windowMs, lockoutMs, exemptLoopback</td></tr>
+  <tr><td><code>BootRunResult</code></td><td>boot.ts</td><td>Boot outcome: status &ldquo;ran&rdquo; | &ldquo;skipped&rdquo; | &ldquo;failed&rdquo;</td></tr>
+  <tr><td><code>GatewayRequestContext</code></td><td>server-methods/types.ts</td><td>Full server context with 25+ fields: deps, cron, broadcast, nodeRegistry</td></tr>
+  <tr><td><code>GatewayRequestHandler</code></td><td>server-methods/types.ts</td><td>Handler function type: (opts) =&gt; Promise&lt;void&gt;</td></tr>
+  <tr><td><code>GatewaySessionRow</code></td><td>session-utils.types.ts</td><td>Session row with 32+ fields: key, kind, status, tokens, cost</td></tr>
+  <tr><td><code>AssistantIdentity</code></td><td>assistant-identity.ts</td><td>Identity: agentId, name, avatar, emoji</td></tr>
+  <tr><td><code>GatewayConnectionDetails</code></td><td>connection-details.ts</td><td>Connection info: url, urlSource, bindDetail, message</td></tr>
+  <tr><td><code>ResolvedGatewayCredentials</code></td><td>credentials.ts</td><td>Resolved credentials: token, password</td></tr>
+  <tr><td><code>ConnectParams</code></td><td>protocol/index.ts</td><td>Client connection parameters (validated by JSON schema)</td></tr>
+</table>
+
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <a href="auth/index.html" class="card">
+    <h4>&#128274; Auth</h4>
+    <p>Authentication, device pairing, rate limiting, install policies, and auth-mode configuration.</p>
+    <ul>
+      <li><code>resolveGatewayAuth()</code> &mdash; mode resolution</li>
+      <li><code>authorizeGatewayConnect()</code> &mdash; connection auth</li>
+      <li><code>AuthRateLimiter</code> &mdash; sliding-window rate limiter</li>
+    </ul>
+  </a>
+  <a href="boot/index.html" class="card">
+    <h4>&#128640; Boot</h4>
+    <p>Startup orchestration, capability negotiation, and health checks for gateway initialization.</p>
+    <ul>
+      <li><code>runBootOnce()</code> &mdash; one-shot bootstrap</li>
+      <li><code>BOOT.md</code> execution &mdash; workspace init</li>
+      <li>Health monitoring integration</li>
+    </ul>
+  </a>
+  <a href="routing/index.html" class="card">
+    <h4>&#128268; Routing</h4>
+    <p>Message dispatch, session lifecycle management, assistant identity, and RPC request handling.</p>
+    <ul>
+      <li><code>GatewayRequestHandlers</code> &mdash; RPC dispatch</li>
+      <li><code>GatewaySessionRow</code> &mdash; session lifecycle</li>
+      <li><code>resolveAssistantIdentity()</code> &mdash; identity config</li>
+    </ul>
+  </a>
+</div>
+
+<h2 id="interactions">Module Interactions</h2>
+<table>
+  <tr><th>Interaction</th><th>From</th><th>To</th><th>Mechanism</th></tr>
+  <tr><td>Client auth check</td><td>Client</td><td>Auth Layer</td><td><code>authorizeGatewayConnect(AuthorizeGatewayConnectParams)</code></td></tr>
+  <tr><td>Rate limit enforcement</td><td>Auth Layer</td><td>Rate Limiter</td><td><code>rateLimiter.check(ip, scope)</code></td></tr>
+  <tr><td>Credential resolution</td><td>Auth Layer</td><td>Credential Resolver</td><td><code>resolveGatewayCredentialsFromConfig()</code></td></tr>
+  <tr><td>Protocol validation</td><td>Gateway</td><td>Protocol</td><td><code>validateRequestFrame()</code> + 80 validators</td></tr>
+  <tr><td>Boot execution</td><td>Gateway</td><td>Boot</td><td><code>runBootOnce(cfg, deps, workspaceDir)</code></td></tr>
+  <tr><td>Request dispatch</td><td>Gateway</td><td>Router</td><td><code>GatewayRequestHandler(opts)</code></td></tr>
+  <tr><td>Session create/resume</td><td>Router</td><td>Session Manager</td><td><code>GatewaySessionRow</code> + lifecycle events</td></tr>
+  <tr><td>Identity resolution</td><td>Router</td><td>Identity</td><td><code>resolveAssistantIdentity(cfg, agentId)</code></td></tr>
+</table>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>auth.mode</code></td><td><code>ResolvedGatewayAuthMode</code></td><td><code>"none"</code></td><td>Auth mode: none, token, password, trusted-proxy</td></tr>
+  <tr><td><code>auth.token</code></td><td><code>string</code></td><td>&mdash;</td><td>Static bearer token for token auth</td></tr>
+  <tr><td><code>auth.password</code></td><td><code>string</code></td><td>&mdash;</td><td>Password for password auth</td></tr>
+  <tr><td><code>auth.allowTailscale</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Allow Tailscale identity as auth</td></tr>
+  <tr><td><code>rateLimit.maxAttempts</code></td><td><code>number</code></td><td><code>10</code></td><td>Max failed attempts in window</td></tr>
+  <tr><td><code>rateLimit.windowMs</code></td><td><code>number</code></td><td><code>60000</code></td><td>Sliding window duration (ms)</td></tr>
+  <tr><td><code>rateLimit.lockoutMs</code></td><td><code>number</code></td><td><code>300000</code></td><td>Lockout duration after max attempts</td></tr>
+  <tr><td><code>assistant.name</code></td><td><code>string</code></td><td><code>"Assistant"</code></td><td>Assistant display name (max 50 chars)</td></tr>
+  <tr><td><code>assistant.avatar</code></td><td><code>string</code></td><td><code>"A"</code></td><td>Avatar character or URL (max 200)</td></tr>
+  <tr><td><code>boot.filename</code></td><td><code>string</code></td><td><code>"BOOT.md"</code></td><td>Bootstrap instruction file</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree &mdash; src/gateway/</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/gateway/
+├── auth.ts                        ← Core auth: resolveGatewayAuth, authorizeGatewayConnect
+├── auth-rate-limit.ts             ← AuthRateLimiter, RateLimitConfig, createAuthRateLimiter
+├── auth-mode-policy.ts            ← Auth mode validation, ambiguity detection
+├── auth-install-policy.ts         ← Install-time auth requirements
+├── auth-config-utils.ts           ← withGatewayAuthPassword, resolveGatewayPasswordSecretRef
+├── boot.ts                        ← runBootOnce, BootRunResult, BOOT_FILENAME
+├── assistant-identity.ts          ← AssistantIdentity, resolveAssistantIdentity
+├── credentials.ts                 ← GatewayCredentials, GatewaySecretRefUnavailableError
+├── connection-auth.ts             ← resolveGatewayConnectionAuth
+├── connection-details.ts          ← GatewayConnectionDetails
+├── call.ts                        ← buildGatewayConnectionDetails
+├── session-utils.types.ts         ← GatewaySessionRow (32+ fields), SessionRunStatus
+├── session-lifecycle-state.ts     ← Lifecycle snapshots, persistGatewaySessionLifecycleEvent
+├── protocol/
+│   └── index.ts                   ← 80+ JSON schema validators, ConnectParams, RequestFrame
+├── server/
+│   └── ws-types.ts                ← GatewayWsClient, WebSocket client type
+└── server-methods/
+    └── types.ts                   ← GatewayRequestContext, GatewayRequestHandler
+</code></pre>
+</details>
+
+<div class="footer">
+  <p>Gateway Wiki &mdash; Generated from source analysis &bull; <a href="../index.html">OpenClaw Overview</a></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

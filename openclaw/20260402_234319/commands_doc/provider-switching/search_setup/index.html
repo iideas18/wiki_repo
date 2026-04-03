@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/commands/">
+<meta name="wiki-source-rev" content="047b701859">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>Commands/Provider Switching — Search Setup</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+.hero .focus-label{display:inline-block;background:var(--accent4);color:#fff;font-size:.7rem;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.callout.warn{border-left-color:var(--accent3)}
+.callout.danger{border-left-color:var(--accent4)}
+.callout.success{border-left-color:var(--accent2)}
+.callout strong{color:var(--heading)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.code-walk{counter-reset:walk-step}
+.code-walk .step{margin:1.2rem 0;counter-increment:walk-step}
+.code-walk .step::before{content:"Step " counter(walk-step);display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:.4rem}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .hero .focus-label{color:#fff}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../../index.html">OpenClaw</a> &rsaquo; <a href="../../index.html">Commands</a> &rsaquo; <a href="../index.html">Provider Switching</a> &rsaquo; <span>Search Setup</span></nav>
+
+<main id="main">
+<h1>Search Setup</h1>
+<div class="hero">
+  <div class="focus-label">Focus Deep-Dive</div>
+  <p class="subtitle">Configuring and selecting web search providers through the setup wizard</p>
+  <p>When a user runs the search setup flow or types <code>/docs search</code>, the search setup module discovers all available search providers — both bundled and runtime-contributed — presents a selection prompt, handles API key credential input, and writes the chosen provider into <code>OpenClawConfig</code>. This module bridges the gap between plugin-contributed search providers and the user-facing configuration wizard.</p>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it matter?</h3>
+<p>Search setup is the configuration gateway for OpenClaw's web search capability. Every search provider — whether it's a bundled provider like Tavily or Brave, or a runtime plugin — must be discovered, selected, and credentialed through this flow before the agent can perform web searches. Understanding this module is essential for adding new search providers, debugging "no search provider configured" errors, or tracing how API keys are stored in the config.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of setting up a new streaming service on your smart TV. First, the TV scans for all available apps (provider discovery). Then you pick one from the list (selection prompt). Next, you enter your login credentials (API key input). Finally, the TV saves your choice as the default (config persistence). The search setup flow is exactly this process — but for web search providers in an AI assistant.</p>
+</details>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2 id="contents">Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<div class="summary-grid">
+  <div class="cell"><strong>Primary role</strong><p>Discover available search providers, present a selection UI, collect credentials, and persist the chosen provider into <code>OpenClawConfig</code>.</p></div>
+  <div class="cell"><strong>Main inputs</strong><p>Current <code>OpenClawConfig</code>, <code>RuntimeEnv</code> for environment variable checks, <code>WizardPrompter</code> for interactive prompts, and optional <code>SetupSearchOptions</code>.</p></div>
+  <div class="cell"><strong>Key decisions</strong><p>Which providers are available? Does the user already have a key? Should the key come from env or manual input? Which provider is selected?</p></div>
+  <div class="cell"><strong>Outputs / side effects</strong><p>An updated <code>OpenClawConfig</code> with the selected provider, enabled flag set to <code>true</code>, and the credential applied. No direct I/O side effects.</p></div>
+</div>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  START["runSearchSetupFlow()"]
+  DISCOVER["resolveSearchProviderOptions()"]
+  CONTRIBS["resolveSearchProviderSetupContributions()"]
+  BUNDLED["Bundled providers"]
+  RUNTIME["Runtime plugin providers"]
+  MERGE["Merge &amp; sort by label"]
+  PROMPT["Show provider selection prompt"]
+  HASKEY{"hasExistingKey()?"}
+  ENVKEY{"hasKeyInEnv()?"}
+  ASKKEY["Prompt for API key"]
+  USEENV["Use environment key"]
+  USEEXIST["Use existing key"]
+  APPLY["applySearchKey()"]
+  SELECT["applySearchProviderSelection()"]
+  CONFIG["Updated OpenClawConfig"]
+
+  START --> DISCOVER
+  DISCOVER --> CONTRIBS
+  CONTRIBS --> BUNDLED
+  CONTRIBS --> RUNTIME
+  BUNDLED --> MERGE
+  RUNTIME --> MERGE
+  MERGE --> PROMPT
+  PROMPT --> HASKEY
+  HASKEY -->|Yes| USEEXIST
+  HASKEY -->|No| ENVKEY
+  ENVKEY -->|Yes| USEENV
+  ENVKEY -->|No| ASKKEY
+  USEEXIST --> APPLY
+  USEENV --> APPLY
+  ASKKEY --> APPLY
+  APPLY --> SELECT
+  SELECT --> CONFIG
+</pre>
+</div>
+<p>The diagram shows the complete search setup pipeline. Provider discovery merges bundled and runtime contributions, the wizard prompts for selection, credential resolution checks existing keys and environment variables before falling back to manual input, and the final step applies both the provider selection and key to produce an updated config.</p>
+
+<!-- CORE TYPES -->
+<h2 id="core-types">Core Types</h2>
+<p>The search setup module defines several types that bridge the generic flow system with search-specific configuration. <code>SearchProvider</code> is a deeply-nested type extraction from the config schema, while <code>SearchProviderSetupContribution</code> extends the generic <code>FlowContribution</code> with search-specific metadata.</p>
+
+<pre><code class="language-typescript">// src/flows/search-setup.ts — Core type definitions
+export type SearchProvider = NonNullable&lt;
+  NonNullable&lt;
+    NonNullable&lt;
+      NonNullable&lt;OpenClawConfig["tools"]&gt;["web"]
+    &gt;["search"]
+  &gt;["provider"]
+&gt;;
+
+type SearchConfig = NonNullable&lt;
+  NonNullable&lt;
+    NonNullable&lt;OpenClawConfig["tools"]&gt;["web"]
+  &gt;["search"]
+&gt;;
+
+type MutableSearchConfig = SearchConfig &amp; Record&lt;string, unknown&gt;;</code></pre>
+
+<p>The <code>SearchProvider</code> type uses a chain of <code>NonNullable</code> unwrapping to drill through the optional config nesting and extract the literal union of valid provider names. <code>MutableSearchConfig</code> extends the readonly config with an index signature so that provider-specific credential setters can write arbitrary keys.</p>
+
+<pre><code class="language-typescript">// src/flows/search-setup.ts — Contribution types
+export type SearchProviderSetupOption = FlowOption &amp; {
+  value: SearchProvider;
+};
+
+export type SearchProviderSetupContribution = FlowContribution &amp; {
+  kind: "search";
+  surface: "setup";
+  provider: PluginWebSearchProviderEntry;
+  option: SearchProviderSetupOption;
+  source: "bundled" | "runtime";
+};</code></pre>
+
+<table>
+  <tr><th>Type</th><th>Purpose</th><th>Key fields</th></tr>
+  <tr><td><code>SearchProvider</code></td><td>Literal union of valid search provider identifiers</td><td>String literal type extracted from config schema</td></tr>
+  <tr><td><code>SearchConfig</code></td><td>The <code>tools.web.search</code> config section with nulls removed</td><td><code>provider</code>, <code>enabled</code>, credential fields</td></tr>
+  <tr><td><code>MutableSearchConfig</code></td><td>Writable variant allowing dynamic credential key assignment</td><td>All of <code>SearchConfig</code> plus <code>Record&lt;string, unknown&gt;</code></td></tr>
+  <tr><td><code>SearchProviderSetupOption</code></td><td>A selectable option in the wizard prompt</td><td><code>value: SearchProvider</code>, inherited label/description</td></tr>
+  <tr><td><code>SearchProviderSetupContribution</code></td><td>A fully-resolved provider contribution with metadata</td><td><code>kind</code>, <code>surface</code>, <code>provider</code>, <code>option</code>, <code>source</code></td></tr>
+</table>
+
+<!-- DECISION POINTS -->
+<h2 id="decision-points">Decision Points</h2>
+<table>
+  <tr><th>Decision</th><th>What controls it</th><th>Why it matters</th></tr>
+  <tr><td>Bundled vs. runtime provider</td><td>The <code>source</code> field on <code>SearchProviderSetupContribution</code></td><td>Determines whether the provider is built into OpenClaw or was registered by a plugin at runtime</td></tr>
+  <tr><td>Provider ordering</td><td><code>resolveSearchProviderSetupContributions</code> sorts by label</td><td>Ensures consistent, alphabetical display in the selection prompt across runs</td></tr>
+  <tr><td>Existing key detection</td><td><code>hasExistingKey()</code> checks the current config for a stored credential</td><td>Avoids prompting for a key the user has already provided in a previous setup</td></tr>
+  <tr><td>Environment key fallback</td><td><code>hasKeyInEnv()</code> checks <code>RuntimeEnv</code> for provider-specific env vars</td><td>Allows zero-prompt setup in CI/CD or containerized environments where keys are injected</td></tr>
+  <tr><td>Credential application strategy</td><td><code>providerEntry.setConfiguredCredentialValue</code> presence</td><td>Some providers use a two-phase credential write (pre-config then post-config); this flag controls the path</td></tr>
+  <tr><td>Provider entry resolution</td><td><code>resolveSearchProviderEntry()</code> lookup by provider name</td><td>If the provider entry is not found (e.g., plugin unloaded), <code>applySearchKey</code> returns config unchanged</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="mechanism">How It Works</h2>
+<p>Search setup operates in four distinct phases: <strong>provider discovery</strong>, <strong>selection flow</strong>, <strong>credential application</strong>, and <strong>docs search integration</strong>. Each phase is intentionally decoupled so that provider discovery can be reused by other setup flows.</p>
+
+<h3 id="mechanism-discovery">Phase 1 — Provider Discovery</h3>
+<p>The <code>resolveSearchProviderOptions</code> function is the public entry point for discovering available providers. It delegates to <code>resolveSearchProviderSetupContributions</code>, which merges bundled providers shipped with OpenClaw and runtime providers registered by plugins, then sorts the merged list alphabetically by label.</p>
+
+<pre><code class="language-typescript">// src/flows/search-setup.ts — Provider discovery
+export function resolveSearchProviderOptions(
+  config?: OpenClawConfig,
+): readonly PluginWebSearchProviderEntry[] {
+  return resolveSearchProviderSetupContributions(config)
+    .map((contribution) =&gt; contribution.provider);
+}
+
+export function resolveSearchProviderSetupContributions(
+  config?: OpenClawConfig,
+): SearchProviderSetupContribution[] {
+  // 1. Collect bundled providers (source: "bundled")
+  // 2. Collect runtime plugin providers (source: "runtime")
+  // 3. Merge into a single array
+  // 4. Sort by contribution.option.label for stable UI ordering
+  // Returns: SearchProviderSetupContribution[]
+}</code></pre>
+
+<div class="callout">
+<strong>&#128270; Design note:</strong> The contribution model uses the same <code>FlowContribution</code> pattern as other setup flows (model setup, API key setup). This means the search setup wizard can be composed with other wizards in a unified onboarding experience.
+</div>
+
+<h3 id="mechanism-selection">Phase 2 — Selection Flow</h3>
+<p>The <code>runSearchSetupFlow</code> orchestrates the full interactive wizard. It resolves available providers, renders a selection prompt via <code>WizardPrompter</code>, checks for existing credentials, and applies the result.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant Wizard as runSearchSetupFlow
+    participant Resolver as resolveSearchProviderOptions
+    participant Prompter as WizardPrompter
+    participant KeyCheck as hasExistingKey / hasKeyInEnv
+    participant Apply as applySearchKey
+    participant Config as OpenClawConfig
+
+    User->>Wizard: Initiate search setup
+    Wizard->>Resolver: resolveSearchProviderOptions(config)
+    Resolver-->>Wizard: PluginWebSearchProviderEntry[]
+    Wizard->>Prompter: Show provider selection list
+    Prompter-->>Wizard: Selected SearchProvider
+    Wizard->>KeyCheck: hasExistingKey(config, provider)?
+    KeyCheck-->>Wizard: false
+    Wizard->>KeyCheck: hasKeyInEnv(runtime, provider)?
+    KeyCheck-->>Wizard: false
+    Wizard->>Prompter: Prompt for API key
+    Prompter-->>Wizard: SecretInput (API key)
+    Wizard->>Apply: applySearchKey(config, provider, key)
+    Apply->>Config: Spread new search config
+    Apply->>Config: Set provider + enabled: true
+    Apply->>Config: Write credential value
+    Config-->>Wizard: Updated OpenClawConfig
+    Wizard-->>User: Setup complete
+</pre>
+</div>
+
+<pre><code class="language-typescript">// src/flows/search-setup.ts — Main setup flow
+export async function runSearchSetupFlow(
+  config: OpenClawConfig,
+  runtime: RuntimeEnv,
+  prompter: WizardPrompter,
+  opts?: SetupSearchOptions,
+): Promise&lt;OpenClawConfig&gt; {
+  // 1. Resolve available providers
+  const providers = resolveSearchProviderOptions(config);
+
+  // 2. Show provider selection prompt
+  const selected = await prompter.select({
+    message: "Choose a search provider",
+    options: providers.map(p =&gt; ({ label: p.label, value: p.id })),
+  });
+
+  // 3. Handle credential input
+  //    - Check hasExistingKey() first
+  //    - Then hasKeyInEnv() for env-injected keys
+  //    - Fall back to interactive prompt
+
+  // 4. Apply selection + key to config
+  return applySearchKey(config, selected, key);
+}</code></pre>
+
+<h3 id="mechanism-credential">Phase 3 — Credential Application</h3>
+<p>The <code>applySearchKey</code> function is the core of credential persistence. It performs an immutable config update using object spreads, handles the two-phase credential write pattern, and applies provider-specific selection config.</p>
+
+<div class="code-walk">
+<div class="step">
+<p><strong>Resolve the provider entry</strong> — Look up the <code>PluginWebSearchProviderEntry</code> by provider name. If the entry is not found (e.g., a plugin was unloaded between selection and application), return the config unchanged as a safety guard.</p>
+<pre><code class="language-typescript">// src/flows/search-setup.ts — applySearchKey
+export function applySearchKey(
+  config: OpenClawConfig,
+  provider: SearchProvider,
+  key: SecretInput,
+): OpenClawConfig {
+  const providerEntry = resolveSearchProviderEntry(config, provider);
+  if (!providerEntry) return config;</code></pre>
+</div>
+<div class="step">
+<p><strong>Build the new search config</strong> — Spread the existing <code>search</code> config (if any), set the <code>provider</code> field to the selected provider, and enable search by setting <code>enabled: true</code>.</p>
+<pre><code class="language-typescript">  const search: MutableSearchConfig = {
+    ...config.tools?.web?.search,
+    provider,
+    enabled: true,
+  };</code></pre>
+</div>
+<div class="step">
+<p><strong>Phase-1 credential write</strong> — If the provider does <em>not</em> have a <code>setConfiguredCredentialValue</code> method, call the standard <code>setCredentialValue</code> to write the key into the mutable search config object before it is frozen into the next config.</p>
+<pre><code class="language-typescript">  if (!providerEntry.setConfiguredCredentialValue) {
+    providerEntry.setCredentialValue(search, key);
+  }</code></pre>
+</div>
+<div class="step">
+<p><strong>Assemble the next config</strong> — Perform an immutable deep spread to produce the new <code>OpenClawConfig</code> with the updated <code>tools.web.search</code> section. Then apply any provider-specific selection config (e.g., default model, region settings).</p>
+<pre><code class="language-typescript">  const nextBase: OpenClawConfig = {
+    ...config,
+    tools: {
+      ...config.tools,
+      web: { ...config.tools?.web, search },
+    },
+  };
+  const next = applySearchProviderSelectionConfig(
+    nextBase, providerEntry,
+  );</code></pre>
+</div>
+<div class="step">
+<p><strong>Phase-2 credential write</strong> — If the provider supports the two-phase pattern (<code>setConfiguredCredentialValue</code> exists), call it now with the fully-assembled config. This allows providers that need the complete config context (e.g., to derive a storage path) to write their credential correctly.</p>
+<pre><code class="language-typescript">  providerEntry.setConfiguredCredentialValue?.(next, key);
+  return next;
+}</code></pre>
+</div>
+</div>
+
+<div class="callout warn">
+<strong>&#9888; Two-phase credential pattern:</strong> The dual <code>setCredentialValue</code> / <code>setConfiguredCredentialValue</code> split exists because some providers need the final config object (with provider-specific selection applied) to determine where to store the credential. If your provider only needs the search config section, implement <code>setCredentialValue</code> alone. Only implement <code>setConfiguredCredentialValue</code> if you need the full <code>OpenClawConfig</code> context.
+</div>
+
+<h3 id="mechanism-selection-only">Provider Selection Without Credentials</h3>
+<p>The <code>applySearchProviderSelection</code> function handles the case where only the provider choice changes but no new credential is provided. This is used when switching between providers that share a credential or when re-selecting the current provider.</p>
+
+<pre><code class="language-typescript">// src/flows/search-setup.ts
+export function applySearchProviderSelection(
+  config: OpenClawConfig,
+  provider: SearchProvider,
+): OpenClawConfig
+// Applies provider selection + provider-specific config
+// without touching credentials. Used by the /model command
+// when changing search providers via a shortcut.</code></pre>
+
+<h3 id="mechanism-docs">Phase 4 — Docs Search Integration</h3>
+<p>The <code>docsSearchCommand</code> in <code>src/commands/docs.ts</code> uses the configured search provider to perform documentation searches via the MCP tool interface. It joins query parts, invokes the <code>mcporter</code> tool with the configured search tool, and applies a timeout.</p>
+
+<pre><code class="language-typescript">// src/commands/docs.ts — docsSearchCommand
+export async function docsSearchCommand(
+  queryParts: string[],
+  runtime: RuntimeEnv,
+) {
+  const query = queryParts.join(" ").trim();
+  const res = await runTool(
+    "mcporter",
+    ["call", SEARCH_TOOL, "--args", payload, "--output", "text"],
+    { timeoutMs: SEARCH_TIMEOUT_MS },
+  );
+}</code></pre>
+
+<div class="callout success">
+<strong>&#9989; Re-export pattern:</strong> The <code>onboard-search.ts</code> module re-exports key functions from <code>search-setup.ts</code> under cleaner names for use by the onboarding wizard:
+</div>
+
+<pre><code class="language-typescript">// src/commands/onboard-search.ts — re-exports
+export {
+  SEARCH_PROVIDER_OPTIONS,
+  applySearchKey,
+  applySearchProviderSelection,
+  hasExistingKey,
+  hasKeyInEnv,
+  resolveExistingKey,
+  resolveSearchProviderOptions,
+  runSearchSetupFlow as setupSearch,
+} from "../flows/search-setup.js";</code></pre>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">Edge Cases</h2>
+<table>
+  <tr><th>Scenario</th><th>Behavior</th><th>Rationale</th></tr>
+  <tr><td>Provider entry not found</td><td><code>applySearchKey</code> returns config unchanged</td><td>Defensive guard against plugins being unloaded between provider selection and config write</td></tr>
+  <tr><td>No providers available</td><td><code>resolveSearchProviderOptions</code> returns empty array</td><td>The wizard prompt receives an empty options list and can show a "no providers" message</td></tr>
+  <tr><td>Key already exists</td><td><code>hasExistingKey()</code> returns true; wizard skips key prompt</td><td>Avoids asking for a key the user already entered, improving re-setup UX</td></tr>
+  <tr><td>Key in environment</td><td><code>hasKeyInEnv()</code> returns true; uses env value</td><td>Enables zero-touch setup in CI/Docker environments with pre-injected secrets</td></tr>
+  <tr><td>Provider without <code>setConfiguredCredentialValue</code></td><td>Only phase-1 <code>setCredentialValue</code> is called</td><td>Simple providers that only need the search config section for credential storage</td></tr>
+  <tr><td>Provider with both credential setters</td><td>Phase-1 is skipped; only phase-2 <code>setConfiguredCredentialValue</code> runs</td><td>Providers needing full config context get the complete assembled config</td></tr>
+  <tr><td>Docs search timeout</td><td><code>runTool</code> throws after <code>SEARCH_TIMEOUT_MS</code></td><td>Prevents hanging on unresponsive search provider APIs</td></tr>
+  <tr><td>Empty search query</td><td><code>queryParts.join(" ").trim()</code> produces empty string</td><td>Caller should validate before invoking; the MCP tool will return an error</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Setting</th><th>Location</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>tools.web.search.provider</code></td><td><code>OpenClawConfig</code></td><td><em>none</em></td><td>The selected search provider identifier (e.g., <code>"tavily"</code>, <code>"brave"</code>)</td></tr>
+  <tr><td><code>tools.web.search.enabled</code></td><td><code>OpenClawConfig</code></td><td><code>false</code></td><td>Whether web search is active; set to <code>true</code> by <code>applySearchKey</code></td></tr>
+  <tr><td><code>SEARCH_TOOL</code></td><td><code>src/commands/docs.ts</code></td><td>Constant</td><td>The MCP tool name used by <code>docsSearchCommand</code> for search invocations</td></tr>
+  <tr><td><code>SEARCH_TIMEOUT_MS</code></td><td><code>src/commands/docs.ts</code></td><td>Constant</td><td>Timeout in milliseconds for MCP search tool calls</td></tr>
+  <tr><td>Provider-specific env vars</td><td><code>RuntimeEnv</code></td><td>Varies</td><td>Environment variables like <code>TAVILY_API_KEY</code> or <code>BRAVE_API_KEY</code> checked by <code>hasKeyInEnv</code></td></tr>
+</table>
+
+<!-- RELATED TOPICS -->
+<h2 id="related-topics">Related Topics</h2>
+<div class="summary-grid">
+  <div class="cell"><strong><a href="../provider_detection/index.html">Provider Detection</a></strong><p>How OpenClaw discovers which providers are available based on config and runtime environment.</p></div>
+  <div class="cell"><strong><a href="../model_switching/index.html">Model Switching</a></strong><p>The parallel setup flow for switching AI model providers, using the same <code>FlowContribution</code> pattern.</p></div>
+  <div class="cell"><strong><a href="../../slash-commands/command_parsing/index.html">Command Parsing</a></strong><p>How slash commands like <code>/docs search</code> are parsed before reaching <code>docsSearchCommand</code>.</p></div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Source Files</h2>
+<details open>
+<summary style="cursor:pointer;font-weight:600;color:var(--heading);">Key files involved in search setup</summary>
+<pre><code>src/
+├── flows/
+│   └── search-setup.ts          ← Core types, discovery, applySearchKey, runSearchSetupFlow
+├── commands/
+│   ├── docs.ts                  ← docsSearchCommand() MCP tool invocation
+│   └── onboard-search.ts        ← Re-exports for onboarding wizard
+└── plugins/
+    └── web-search-providers/    ← Bundled provider entries (Tavily, Brave, etc.)
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer"><a href="../index.html">&larr; Back to Provider Switching</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>
