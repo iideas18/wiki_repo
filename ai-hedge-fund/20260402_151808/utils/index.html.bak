@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="wiki-generated" content="2026-04-02">
+  <meta name="wiki-source" content="src/utils/">
+  <meta name="wiki-source-rev" content="b6dca8c">
+  <title>Utils — Shared Utilities | AI Hedge Fund Wiki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e}
+    [data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+    .skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+    .breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+    .theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+    main{max-width:960px;margin:0 auto;padding:32px 24px}
+    .hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:8px}.hero p{color:var(--text-muted);font-size:1.1rem}
+    .reading-time{font-size:13px;color:var(--text-muted);margin-top:8px}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}.stat-box .value{font-size:1.6rem;font-weight:700;color:var(--heading)}.stat-box .label{font-size:13px;color:var(--text-muted)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}.badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}.badge.blue{background:rgba(88,166,255,.15);color:var(--accent)}.badge.green{background:rgba(63,185,80,.15);color:var(--accent2)}.badge.yellow{background:rgba(210,153,34,.15);color:var(--accent3)}.badge.red{background:rgba(248,81,73,.15);color:var(--accent4)}
+    .intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box h3{color:var(--accent);margin-bottom:8px}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+    .toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:24px 0}.toc h2{font-size:1rem;color:var(--heading);margin-bottom:8px}.toc ul{list-style:none;padding-left:0}.toc li{padding:4px 0}.toc li.h3{padding-left:16px}.toc a{color:var(--accent);font-size:14px}
+    h2{font-size:1.5rem;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:1.2rem;color:var(--heading);margin:24px 0 12px}
+    .mermaid-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:20px 0;overflow-x:auto;cursor:pointer;position:relative}.mermaid-wrapper:hover::after{content:"Click to expand";position:absolute;top:8px;right:12px;font-size:12px;color:var(--text-muted)}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th,td{padding:10px 12px;border:1px solid var(--border);text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:16px 0}.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}.card h4{color:var(--heading);margin-bottom:8px}.card p{font-size:14px;color:var(--text-muted)}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:16px 0}code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}.copy-btn:hover{color:var(--accent)}
+    .dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:13px;line-height:1.8;margin:16px 0}
+    footer{text-align:center;padding:32px;border-top:1px solid var(--border);margin-top:48px;color:var(--text-muted);font-size:14px}footer a{color:var(--accent)}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:24px}.overlay.active{display:flex}.overlay-content{background:var(--surface);border-radius:12px;padding:32px;max-width:90vw;max-height:90vh;overflow:auto;position:relative}.overlay-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+    .back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    @media print{.skip-link,header .theme-toggle,.overlay,.back-to-top{display:none!important}}
+    @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.6rem}}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <header>
+    <nav class="breadcrumb"><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">AI Hedge Fund</a> › Utils</nav>
+    <button class="theme-toggle" aria-label="Toggle dark/light theme" onclick="toggleTheme()">🌙 Theme</button>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <h1>🛠️ Utils — Shared Utilities</h1>
+      <p>Helper functions, analyst configuration, display formatting, progress tracking, and Docker/Ollama management</p>
+      <div class="reading-time" id="reading-time"></div>
+    </section>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="value">8</div><div class="label">Files</div></div>
+      <div class="stat-box"><div class="value">1,207</div><div class="label">Lines</div></div>
+      <div class="stat-box"><div class="value">19</div><div class="label">Analyst Configs</div></div>
+      <div class="stat-box"><div class="value">Python</div><div class="label">Language</div></div>
+    </div>
+
+    <div class="badges">
+      <span class="badge blue">🔵 Configuration Hub</span>
+      <span class="badge green">🟢 Rich Progress</span>
+      <span class="badge yellow">🟡 LLM Helpers</span>
+      <span class="badge red">🔴 Docker/Ollama</span>
+    </div>
+
+    <div class="intro-box">
+      <h3>💡 What is this module?</h3>
+      <p>The <strong>utils</strong> module is the largest support package — it handles everything from analyst registry and LLM calling with retry logic, to terminal display, real-time progress tracking, and Ollama/Docker container management.</p>
+      <p class="analogy">"Think of it as the <strong>backstage crew of a theater production</strong> — they set up the stage (configuration), manage the lights and sound (display &amp; progress), run the prompter (LLM helpers), and even build the theater itself (Docker/Ollama). The audience (agents) never sees them, but nothing works without them."</p>
+    </div>
+
+    <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+    <h2 id="architecture">Architecture Overview</h2>
+    <p>The utils module is a collection of independent utilities, each focused on one concern. The <code>analysts.py</code> file is the single source of truth for all 19 analyst agent configurations. The <code>llm.py</code> file provides the unified <code>call_llm()</code> function used by every agent.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="graph TD
+    A[Analyst Agents] --> B[utils.llm — call_llm]
+    A --> C[utils.analysts — ANALYST_CONFIG]
+    B --> D[llm.models — get_model]
+    A --> E[utils.progress — AgentProgress]
+    E --> F[Rich Live Display]
+    A --> G[utils.display — print_trading_output]
+    G --> H[Terminal / colorama + tabulate]
+    I[CLI / API] --> C
+    I --> J[utils.ollama — Docker management]
+    J --> K[Docker Engine]
+    style B fill:#58a6ff,stroke:#333,color:#000
+    style C fill:#d29922,stroke:#333,color:#000
+    style E fill:#3fb950,stroke:#333,color:#000
+    style J fill:#f85149,stroke:#333,color:#000">graph TD
+    A[Analyst Agents] --> B[utils.llm — call_llm]
+    A --> C[utils.analysts — ANALYST_CONFIG]
+    B --> D[llm.models — get_model]
+    A --> E[utils.progress — AgentProgress]
+    E --> F[Rich Live Display]
+    A --> G[utils.display — print_trading_output]
+    G --> H[Terminal / colorama + tabulate]
+    I[CLI / API] --> C
+    I --> J[utils.ollama — Docker management]
+    J --> K[Docker Engine]
+    style B fill:#58a6ff,stroke:#333,color:#000
+    style C fill:#d29922,stroke:#333,color:#000
+    style E fill:#3fb950,stroke:#333,color:#000
+    style J fill:#f85149,stroke:#333,color:#000</pre>
+    </div>
+
+    <h2 id="data-flow">Data Flow — call_llm Pipeline</h2>
+    <p>The <code>call_llm()</code> function is the most critical utility — every agent uses it to invoke the LLM. It handles model instantiation, structured output, retry logic, JSON extraction, and error recovery with default factories.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="sequenceDiagram
+    participant Agent
+    participant CallLLM as utils.llm.call_llm
+    participant GetModel as llm.models.get_model
+    participant LLM as LangChain Model
+    Agent->>CallLLM: call_llm(prompt, model_name, provider, pydantic_model)
+    CallLLM->>GetModel: get_model(model_name, provider)
+    GetModel-->>CallLLM: chat_model
+    loop max_retries=3
+        CallLLM->>LLM: invoke(prompt, json_mode=True)
+        alt Success
+            LLM-->>CallLLM: JSON response
+            CallLLM->>CallLLM: Parse with pydantic_model
+            CallLLM-->>Agent: Typed result
+        else Parse Error
+            CallLLM->>CallLLM: extract_json_from_response()
+            CallLLM->>CallLLM: Retry
+        else LLM Error
+            CallLLM->>CallLLM: default_factory fallback
+            CallLLM-->>Agent: Default result
+        end
+    end">sequenceDiagram
+    participant Agent
+    participant CallLLM as utils.llm.call_llm
+    participant GetModel as llm.models.get_model
+    participant LLM as LangChain Model
+    Agent->>CallLLM: call_llm(prompt, model_name, provider, pydantic_model)
+    CallLLM->>GetModel: get_model(model_name, provider)
+    GetModel-->>CallLLM: chat_model
+    loop max_retries=3
+        CallLLM->>LLM: invoke(prompt, json_mode=True)
+        alt Success
+            LLM-->>CallLLM: JSON response
+            CallLLM->>CallLLM: Parse with pydantic_model
+            CallLLM-->>Agent: Typed result
+        else Parse Error
+            CallLLM->>CallLLM: extract_json_from_response()
+            CallLLM->>CallLLM: Retry
+        else LLM Error
+            CallLLM->>CallLLM: default_factory fallback
+            CallLLM-->>Agent: Default result
+        end
+    end</pre>
+    </div>
+
+    <h2 id="key-classes">Key Classes &amp; Functions</h2>
+    <table>
+      <thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>ANALYST_CONFIG</code></td><td>analysts.py</td><td>Dict</td><td>Single source of truth for 19 analyst agents — display_name, description, investing_style, agent_func, type, order</td></tr>
+        <tr><td><code>ANALYST_ORDER</code></td><td>analysts.py</td><td>List</td><td>Derived ordered list of analyst names for UI display</td></tr>
+        <tr><td><code>get_analyst_nodes()</code></td><td>analysts.py</td><td>Function</td><td>Returns <code>(node_name, agent_func)</code> tuples for LangGraph wiring</td></tr>
+        <tr><td><code>get_agents_list()</code></td><td>analysts.py</td><td>Function</td><td>Returns analyst metadata list for API responses</td></tr>
+        <tr><td><code>call_llm()</code></td><td>llm.py</td><td>Function</td><td>Unified LLM caller with retry (max 3), JSON parsing, error recovery</td></tr>
+        <tr><td><code>extract_json_from_response()</code></td><td>llm.py</td><td>Function</td><td>Extracts JSON from freeform LLM text (fallback for non-JSON models)</td></tr>
+        <tr><td><code>get_agent_model_config()</code></td><td>llm.py</td><td>Function</td><td>Extracts per-agent model/provider config from AgentState metadata</td></tr>
+        <tr><td><code>print_trading_output()</code></td><td>display.py</td><td>Function</td><td>Formatted terminal output with colored tables (colorama + tabulate)</td></tr>
+        <tr><td><code>AgentProgress</code></td><td>progress.py</td><td>Class</td><td>Real-time progress tracking with Rich Live display and status updates</td></tr>
+        <tr><td><code>start_ollama_container()</code></td><td>ollama.py</td><td>Function</td><td>Starts Ollama Docker container with GPU support and health checks</td></tr>
+        <tr><td><code>pull_model()</code></td><td>ollama.py</td><td>Function</td><td>Pulls a model into the running Ollama container</td></tr>
+        <tr><td><code>get_api_key_from_state()</code></td><td>api_key.py</td><td>Function</td><td>Helper to extract API key from agent state metadata</td></tr>
+        <tr><td><code>save_graph_as_png()</code></td><td>visualize.py</td><td>Function</td><td>Exports LangGraph workflow as PNG image</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="interactions">Module Interactions</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Target</th><th>Interaction</th></tr></thead>
+      <tbody>
+        <tr><td>All analyst agents</td><td>utils.llm</td><td>Call <code>call_llm()</code> for every LLM invocation</td></tr>
+        <tr><td>utils.llm</td><td>llm.models</td><td>Delegates to <code>get_model()</code> factory for chat instances</td></tr>
+        <tr><td>main.py / API</td><td>utils.analysts</td><td>Reads <code>ANALYST_CONFIG</code> to wire LangGraph nodes</td></tr>
+        <tr><td>main.py</td><td>utils.display</td><td>Calls <code>print_trading_output()</code> for final results</td></tr>
+        <tr><td>main.py</td><td>utils.progress</td><td>Creates <code>AgentProgress</code> instance for live tracking</td></tr>
+        <tr><td>CLI</td><td>utils.ollama</td><td>Manages Docker containers for local Ollama models</td></tr>
+        <tr><td>utils.progress</td><td>Rich</td><td>Uses Rich Live, Table, and Console for terminal UI</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="deep-dive">Deep Dive</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>📋 analysts.py (200 LOC)</h4>
+        <p>The <code>ANALYST_CONFIG</code> dict is the single source of truth for all 19 analysts. Each entry has display_name, description, investing_style, agent_func reference, type (fundamental/technical/sentiment), and order.</p>
+      </div>
+      <div class="card">
+        <h4>🤖 llm.py (147 LOC)</h4>
+        <p><code>call_llm()</code> is the workhorse — 3 retries, structured JSON output, <code>extract_json_from_response()</code> fallback, and <code>default_factory</code> error recovery. Used by every single agent.</p>
+      </div>
+      <div class="card">
+        <h4>🖥️ display.py (395 LOC)</h4>
+        <p>Terminal formatting using colorama and tabulate. Produces colored tables showing analyst signals, portfolio allocation, trade decisions, and performance metrics.</p>
+      </div>
+      <div class="card">
+        <h4>📊 progress.py (116 LOC)</h4>
+        <p><code>AgentProgress</code> class with Rich Live display. Tracks agent_status dict, supports update_handlers for WebSocket push, and displays sorted progress bars.</p>
+      </div>
+      <div class="card">
+        <h4>🐳 ollama.py (407 LOC)</h4>
+        <p>Full Ollama container lifecycle: start with GPU passthrough, pull models, health checks, stop/restart. The largest file in the module.</p>
+      </div>
+      <div class="card">
+        <h4>🔧 docker.py (123 LOC)</h4>
+        <p>Lower-level Docker SDK utilities used by ollama.py for container management, port mapping, and volume mounts.</p>
+      </div>
+    </div>
+
+    <h3 id="directory-map">Directory Map</h3>
+    <div class="dir-map">
+src/utils/<br>
+├── __init__.py &nbsp;&nbsp;&nbsp;&nbsp;# Package init<br>
+├── analysts.py &nbsp;&nbsp;&nbsp;&nbsp;# 200 LOC — ANALYST_CONFIG, get_analyst_nodes(), get_agents_list()<br>
+├── llm.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 147 LOC — call_llm(), extract_json, get_agent_model_config<br>
+├── display.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 395 LOC — print_trading_output(), colored terminal tables<br>
+├── progress.py &nbsp;&nbsp;&nbsp;&nbsp;# 116 LOC — AgentProgress class with Rich Live<br>
+├── ollama.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 407 LOC — Ollama Docker container management<br>
+├── docker.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 123 LOC — Docker SDK utilities<br>
+├── api_key.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 8 LOC — get_api_key_from_state() helper<br>
+└── visualize.py &nbsp;&nbsp;&nbsp;# 8 LOC — save_graph_as_png()
+    </div>
+
+    <h3 id="configuration">Analyst Configuration Sample</h3>
+    <table>
+      <thead><tr><th>Analyst Key</th><th>Display Name</th><th>Type</th><th>Style</th></tr></thead>
+      <tbody>
+        <tr><td><code>warren_buffett</code></td><td>Warren Buffett</td><td>Fundamental</td><td>Value investing, margin of safety</td></tr>
+        <tr><td><code>peter_lynch</code></td><td>Peter Lynch</td><td>Fundamental</td><td>Growth at reasonable price (GARP)</td></tr>
+        <tr><td><code>cathie_wood</code></td><td>Cathie Wood</td><td>Fundamental</td><td>Disruptive innovation</td></tr>
+        <tr><td><code>ben_graham</code></td><td>Ben Graham</td><td>Fundamental</td><td>Deep value, net-net</td></tr>
+        <tr><td><code>technical_analyst</code></td><td>Technical Analyst</td><td>Technical</td><td>Chart patterns, momentum</td></tr>
+        <tr><td><code>sentiment_analyst</code></td><td>Sentiment Analyst</td><td>Sentiment</td><td>News &amp; insider activity</td></tr>
+        <tr><td><code>valuation_analyst</code></td><td>Valuation Analyst</td><td>Fundamental</td><td>DCF, comparables</td></tr>
+        <tr><td><code>risk_manager</code></td><td>Risk Manager</td><td>Risk</td><td>Position sizing, portfolio limits</td></tr>
+        <tr><td><code>portfolio_manager</code></td><td>Portfolio Manager</td><td>Decision</td><td>Final trade execution</td></tr>
+        <tr><td><code>fundamentals_analyst</code></td><td>Fundamentals Analyst</td><td>Fundamental</td><td>Financial statement analysis</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="code-examples">Code Examples</h3>
+    <pre><code class="language-python"># call_llm — unified LLM invocation with retry and fallback
+def call_llm(prompt, model_name, model_provider, pydantic_model=None,
+             max_retries=3, default_factory=None):
+    model = get_model(model_name, model_provider)
+    for attempt in range(max_retries):
+        try:
+            if pydantic_model:
+                response = model.invoke(prompt)
+                parsed = extract_json_from_response(response.content)
+                return pydantic_model.model_validate(parsed)
+            return model.invoke(prompt).content
+        except Exception as e:
+            if attempt == max_retries - 1:
+                if default_factory:
+                    return default_factory()
+                raise
+            continue</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># ANALYST_CONFIG — single source of truth for all 19 agents
+ANALYST_CONFIG = {
+    "warren_buffett": {
+        "display_name": "Warren Buffett",
+        "description": "Value investing with margin of safety",
+        "investing_style": "Seeks undervalued companies with durable moats",
+        "agent_func": warren_buffett_agent,
+        "type": "fundamental",
+        "order": 1,
+    },
+    "peter_lynch": {
+        "display_name": "Peter Lynch",
+        "description": "Growth at a reasonable price (GARP)",
+        "agent_func": peter_lynch_agent,
+        "type": "fundamental",
+        "order": 2,
+    },
+    # ... 17 more analysts
+}
+ANALYST_ORDER = sorted(ANALYST_CONFIG.keys(), key=lambda k: ANALYST_CONFIG[k]["order"])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># AgentProgress — Rich Live display for real-time tracking
+class AgentProgress:
+    def __init__(self):
+        self.agent_status = {}
+        self.update_handlers = []
+        self.live = Live(console=Console())
+
+    def update(self, agent_name, status, detail=""):
+        self.agent_status[agent_name] = {"status": status, "detail": detail}
+        for handler in self.update_handlers:
+            handler(agent_name, status, detail)
+        self._refresh_display()
+
+    def _refresh_display(self):
+        table = Table(title="Agent Progress")
+        table.add_column("Agent"); table.add_column("Status"); table.add_column("Detail")
+        for name in sorted(self.agent_status):
+            info = self.agent_status[name]
+            table.add_row(name, info["status"], info["detail"])
+        self.live.update(table)</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  </main>
+
+  <footer>
+    <p><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">← Back to AI Hedge Fund Overview</a> · <a title="AI Hedge Fund — Search Wiki" href="../search.html">🔍 Search</a></p>
+    <p>Generated 2026-04-02 · Source rev <code>b6dca8c</code></p>
+  </footer>
+
+  <div class="overlay" id="diagram-overlay">
+    <div class="overlay-content">
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      <div id="overlay-diagram"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark' });
+    await mermaid.run({ querySelector: '.mermaid' });
+  </script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('neutra-ip-theme', next);
+      document.querySelector('.theme-toggle').textContent = next === 'dark' ? '🌙 Theme' : '☀️ Theme';
+    }
+    (function(){
+      const saved = localStorage.getItem('neutra-ip-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '🌙 Theme' : '☀️ Theme';
+      }
+    })();
+
+    (function(){
+      const toc = document.getElementById('toc');
+      const ul = document.createElement('ul');
+      document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+        const li = document.createElement('li');
+        if (h.tagName === 'H3') li.classList.add('h3');
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      toc.appendChild(ul);
+    })();
+
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); });
+    }
+
+    function openOverlay(wrapper) {
+      const overlay = document.getElementById('diagram-overlay');
+      const container = document.getElementById('overlay-diagram');
+      const svg = wrapper.querySelector('svg');
+      if (!svg) return;
+      container.innerHTML = '';
+      const clone = svg.cloneNode(true);
+      clone.style.maxWidth = '100%';
+      container.appendChild(clone);
+      overlay.classList.add('active');
+      let scale = 1;
+      container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        scale += e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.max(0.3, Math.min(3, scale));
+        clone.style.transform = 'scale(' + scale + ')';
+      });
+    }
+    function closeOverlay() { document.getElementById('diagram-overlay').classList.remove('active'); }
+    document.getElementById('diagram-overlay').addEventListener('click', function(e) { if (e.target === this) closeOverlay(); });
+
+    window.addEventListener('scroll', function() {
+      document.getElementById('back-to-top').style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+
+    (function(){
+      const text = document.getElementById('main-content').textContent;
+      const words = text.trim().split(/\s+/).length;
+      const mins = Math.ceil(words / 200);
+      document.getElementById('reading-time').textContent = '📖 ' + mins + ' min read';
+    })();
+
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const sections = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+      if (e.key === 'j' || e.key === 'k') {
+        const scrollY = window.scrollY + 100;
+        let idx = sections.findIndex(s => s.offsetTop > scrollY);
+        if (e.key === 'k') idx = Math.max(0, idx - 2); else if (idx < 0) idx = sections.length - 1;
+        if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    hljs.highlightAll();
+  </script>
+</body>
+</html>

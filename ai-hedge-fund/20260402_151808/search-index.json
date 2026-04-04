@@ -1,0 +1,161 @@
+[
+  {
+    "title": "Agents — AI Investment Analysts | AI Hedge Fund Wiki",
+    "path": "agents/index.html",
+    "excerpt": "Agents — AI Investment Analysts | AI Hedge Fund Wiki Skip to content 🌙 AI Hedge Fund › Agents Agents — AI Investment Analysts 19 LLM-powered analyst agents modeling famous investors 22 Files 9,384 Lines 19 Analysts Python Language 🔵 Multi-Agent 🟢 LLM-Powered 🟡 Famous Investors 🔴 Signal Aggregation 💡 What is this? The agents module is the analytical brain of the AI Hedge Fund. It contains 19 specialized analyst agents — each modeled after a legendary investor — plus support agents for technical…",
+    "headings": [
+      "💡 What is this?",
+      "📑 Table of Contents",
+      "Architecture Overview",
+      "Key Classes & Functions",
+      "Data-Flow: Agent Analysis Cycle",
+      "Module Interactions",
+      "Deep-Dive Topics",
+      "Directory Map",
+      "Configuration Reference",
+      "Code Examples",
+      "Agent Function Pattern",
+      "PortfolioDecision Model",
+      "Weighted Signal Combination (technicals.py)"
+    ]
+  },
+  {
+    "title": "Backtesting — AI Hedge Fund Wiki",
+    "path": "backtesting/index.html",
+    "excerpt": "Backtesting — AI Hedge Fund Wiki Skip to content ☾ ↑ AI Hedge Fund › Backtesting Backtesting — Historical Strategy Simulation A modular backtesting engine for historical strategy evaluation This sub-module provides a complete event-driven loop that replays trading strategies against historical market data. It manages portfolio state, executes trades, computes risk-adjusted performance metrics, and benchmarks results against SPY. 10 Files 1,115 Lines 5 Performance Metrics Python Language 🔵…",
+    "headings": [
+      "🔋 What & Why",
+      "Architecture",
+      "Key Classes & Functions",
+      "Data Flow",
+      "🚶 Step-by-Step Walkthrough",
+      "Interactions",
+      "Deep-Dive Topics",
+      "Directory Map",
+      "Configuration",
+      "Code Examples",
+      "BacktestEngine initialization",
+      "Portfolio.apply_long_buy",
+      "PerformanceMetrics TypedDict"
+    ]
+  },
+  {
+    "title": "CLI — Command-Line Interface | AI Hedge Fund Wiki",
+    "path": "cli/index.html",
+    "excerpt": "CLI — Command-Line Interface | AI Hedge Fund Wiki Skip to content AI Hedge Fund › CLI 🌙 Theme ⌨️ CLI — Command-Line Interface Interactive CLI for analyst/model selection, ticker input, and argument parsing 2 Files 288 Lines 1 Dataclass Python Language 🔵 Questionary UI 🟢 Interactive Selection 🟡 Argparse 🔴 Ollama Support 💡 What is this module? The cli module is the front door to the AI Hedge Fund when running from the terminal. It collects all user inputs — which tickers to analyse, which…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "User Interaction Flow",
+      "Key Classes & Functions",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "CLIInputs Fields Reference",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Data — Data Models & Cache | AI Hedge Fund Wiki",
+    "path": "data/index.html",
+    "excerpt": "Data — Data Models & Cache | AI Hedge Fund Wiki Skip to content AI Hedge Fund › Data 🌙 Theme 📋 Data — Data Models & Cache Pydantic models for API schemas and an in-memory caching layer for financial data 3 Files 245 Lines 18 Models Python Language 🔵 Pydantic v2 🟢 Type-Safe 🟡 In-Memory Cache 🔴 API Schema 💡 What is this module? The data module defines the canonical shapes for every piece of financial data in the system — prices, metrics, trades, news, portfolio positions — plus a fast in-memory…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "Data Flow & Cache Lifecycle",
+      "Key Classes & Models",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "Model Configuration",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Graph — LangGraph Workflow State | AI Hedge Fund Wiki",
+    "path": "graph/index.html",
+    "excerpt": "Graph — LangGraph Workflow State | AI Hedge Fund Wiki Skip to content AI Hedge Fund › Graph 🌙 Theme 🔀 Graph — LangGraph Workflow State Defines the shared state TypedDict and helper utilities for the multi-agent workflow 2 Files 51 Lines 1 TypedDict Python Language 🔵 LangGraph 🟢 TypedDict State 🟡 Operator Reducers 🔴 Message Passing 💡 What is this module? The graph module defines AgentState — the single shared data structure that every agent in the LangGraph workflow reads from and writes to. It…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "State Data Flow",
+      "Key Classes & Functions",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "State Fields Reference",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "AI Hedge Fund — Source Code Wiki",
+    "path": "index.html",
+    "excerpt": "AI Hedge Fund — Source Code Wiki Skip to content ☾ ⇧ AI Hedge Fund — Source Code Wiki Multi-Agent LLM Trading System A comprehensive wiki documenting the AI Hedge Fund source code — a multi-agent trading system that uses large language models to simulate the investment strategies of famous investors. Built on LangGraph, it orchestrates 19 analyst agents, a risk manager, and a portfolio manager to generate actionable long/short trading decisions from real financial data. 19 Analyst Agents 12+…",
+    "headings": [
+      "📚 What is this?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Deep-Dive Highlights",
+      "Sub-Modules",
+      "Directory Map",
+      "Configuration",
+      "Quick Start"
+    ]
+  },
+  {
+    "title": "LLM — LLM Provider Abstraction | AI Hedge Fund Wiki",
+    "path": "llm/index.html",
+    "excerpt": "LLM — LLM Provider Abstraction | AI Hedge Fund Wiki Skip to content AI Hedge Fund › LLM 🌙 Theme 🤖 LLM — LLM Provider Abstraction Multi-provider model registry with a unified factory for 13 LLM providers 3 Files 242 Lines 13 Providers Python Language 🔵 Provider Abstraction 🟢 13 LLM Providers 🟡 JSON Config 🔴 Factory Pattern 💡 What is this module? The llm module is the single gateway between the AI Hedge Fund and any language model. It abstracts away provider differences so that agents simply…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "Data Flow",
+      "Key Classes & Functions",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "Provider Configuration",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Tools — Financial Data API Layer | AI Hedge Fund Wiki",
+    "path": "tools/index.html",
+    "excerpt": "Tools — Financial Data API Layer | AI Hedge Fund Wiki Skip to content AI Hedge Fund › Tools 🌙 Theme 🔌 Tools — Financial Data API Layer Wraps the Financial Datasets API with caching, rate limiting, and Pydantic validation 2 Files 371 Lines 7 API Functions Python Language 🔵 REST API 🟢 Rate Limiting 🟡 Caching 🔴 Pydantic Validation 💡 What is this module? The tools module is the sole data-fetching layer for the AI Hedge Fund. Every piece of financial data — prices, metrics, insider trades, news —…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "Data Flow",
+      "Key Classes & Functions",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "Configuration & API Endpoints",
+      "Code Examples"
+    ]
+  },
+  {
+    "title": "Utils — Shared Utilities | AI Hedge Fund Wiki",
+    "path": "utils/index.html",
+    "excerpt": "Utils — Shared Utilities | AI Hedge Fund Wiki Skip to content AI Hedge Fund › Utils 🌙 Theme 🛠️ Utils — Shared Utilities Helper functions, analyst configuration, display formatting, progress tracking, and Docker/Ollama management 8 Files 1,207 Lines 19 Analyst Configs Python Language 🔵 Configuration Hub 🟢 Rich Progress 🟡 LLM Helpers 🔴 Docker/Ollama 💡 What is this module? The utils module is the largest support package — it handles everything from analyst registry and LLM calling with retry…",
+    "headings": [
+      "💡 What is this module?",
+      "Table of Contents",
+      "Architecture Overview",
+      "Data Flow — call_llm Pipeline",
+      "Key Classes & Functions",
+      "Module Interactions",
+      "Deep Dive",
+      "Directory Map",
+      "Analyst Configuration Sample",
+      "Code Examples"
+    ]
+  }
+]

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-02">
+<meta name="wiki-source" content="src/agents/">
+<meta name="wiki-source-rev" content="b6dca8c">
+<title>Agents — AI Investment Analysts | AI Hedge Fund Wiki</title>
+<style>
+/* ── Design Tokens ── */
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --text: #c9d1d9;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #d29922;
+  --accent4: #f85149;
+  --border: #30363d;
+  --heading: #f0f6fc;
+  --code-bg: #1c2128;
+  --text-muted: #8b949e;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+[data-theme="light"] {
+  --bg: #fff;
+  --surface: #f6f8fa;
+  --text: #1f2328;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --accent2: #1a7f37;
+  --accent3: #9a6700;
+  --accent4: #cf222e;
+  --heading: #1f2328;
+  --code-bg: #f6f8fa;
+  --text-muted: #656d76;
+  --shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { color: var(--heading); font-weight: 600; }
+
+/* ── Skip Link ── */
+.skip-link {
+  position: absolute; top: -100%; left: 16px;
+  background: var(--accent); color: #fff; padding: 8px 16px;
+  border-radius: var(--radius); z-index: 1000; font-weight: 600;
+}
+.skip-link:focus { top: 16px; }
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  position: fixed; top: 16px; right: 16px; z-index: 999;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); width: 40px; height: 40px;
+  border-radius: 50%; cursor: pointer; font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow); transition: background .2s;
+}
+.theme-toggle:hover { background: var(--border); }
+
+/* ── Layout ── */
+.container { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  font-size: .875rem; color: var(--text-muted);
+  margin-bottom: 24px; display: flex; align-items: center; gap: 6px;
+}
+.breadcrumb a { color: var(--accent); }
+
+/* ── Hero ── */
+.hero {
+  text-align: center; padding: 48px 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 32px;
+}
+.hero h1 { font-size: 2rem; margin-bottom: 8px; }
+.hero .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+.reading-time {
+  display: inline-block; margin-top: 10px;
+  font-size: .8rem; color: var(--text-muted);
+  background: var(--bg); padding: 2px 10px; border-radius: 12px;
+}
+
+/* ── Stat Row ── */
+.stat-row {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 16px; margin-bottom: 24px;
+}
+.stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 24px; text-align: center;
+  min-width: 120px;
+}
+.stat .num { font-size: 1.5rem; font-weight: 700; color: var(--accent); display: block; }
+.stat .label { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── Badges ── */
+.badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 12px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+  background: var(--surface); border: 1px solid var(--border);
+}
+
+/* ── Intro Box ── */
+.intro-box {
+  background: var(--surface); border-left: 4px solid var(--accent);
+  border-radius: var(--radius); padding: 20px 24px; margin-bottom: 32px;
+}
+.intro-box h3 { margin-bottom: 8px; font-size: 1rem; }
+.intro-box p { margin-bottom: 10px; }
+details summary {
+  cursor: pointer; color: var(--accent); font-weight: 600; font-size: .9rem;
+}
+details summary:hover { text-decoration: underline; }
+details .analogy {
+  margin-top: 10px; padding: 12px 16px;
+  background: var(--bg); border-radius: var(--radius);
+  border: 1px solid var(--border); font-style: italic;
+  color: var(--text-muted); line-height: 1.6;
+}
+
+/* ── TOC ── */
+.toc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 24px; margin-bottom: 40px;
+}
+.toc h3 { font-size: .9rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 10px; }
+.toc ol { padding-left: 20px; }
+.toc li { margin-bottom: 4px; font-size: .9rem; }
+.toc a { color: var(--text); }
+.toc a:hover { color: var(--accent); }
+
+/* ── Sections ── */
+section { margin-bottom: 48px; }
+section > h2 { font-size: 1.4rem; border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 20px; }
+section > h3 { font-size: 1.1rem; margin: 20px 0 10px; }
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+th, td { padding: 10px 14px; border: 1px solid var(--border); text-align: left; }
+th { background: var(--surface); color: var(--heading); font-weight: 600; white-space: nowrap; }
+td { vertical-align: top; }
+tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 50%, transparent); }
+
+/* ── Code ── */
+pre {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; overflow-x: auto;
+  font-size: .85rem; line-height: 1.6; position: relative; margin-bottom: 20px;
+}
+code { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+:not(pre) > code {
+  background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+  font-size: .85em; border: 1px solid var(--border);
+}
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); padding: 4px 10px; border-radius: 4px;
+  cursor: pointer; font-size: .75rem;
+}
+.copy-btn:hover { color: var(--accent); }
+
+/* ── Mermaid ── */
+.mermaid-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 24px;
+  text-align: center; cursor: pointer; position: relative;
+}
+.mermaid-wrap::after {
+  content: '🔍 Click to enlarge';
+  position: absolute; bottom: 8px; right: 12px;
+  font-size: .7rem; color: var(--text-muted); opacity: .7;
+}
+.mermaid-wrap svg { max-width: 100%; height: auto; }
+
+/* ── Diagram Overlay ── */
+.diagram-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,.85); align-items: center; justify-content: center;
+  padding: 24px;
+}
+.diagram-overlay.active { display: flex; }
+.diagram-overlay .inner {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 24px; max-width: 95vw; max-height: 95vh; overflow: auto;
+  position: relative;
+}
+.diagram-overlay .close-btn {
+  position: absolute; top: 8px; right: 12px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 1.5rem; cursor: pointer;
+}
+
+/* ── Card Grid ── */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; transition: border-color .2s;
+}
+.card:hover { border-color: var(--accent); }
+.card h4 { margin-bottom: 6px; }
+.card p { font-size: .85rem; color: var(--text-muted); margin: 0; }
+
+/* ── Directory Map ── */
+.dir-tree {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; font-family: monospace;
+  font-size: .82rem; line-height: 1.8; overflow-x: auto;
+}
+.dir-tree .file { color: var(--text); }
+.dir-tree .annot { color: var(--text-muted); font-style: italic; }
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 32px 20px; margin-top: 48px;
+  border-top: 1px solid var(--border); color: var(--text-muted); font-size: .85rem;
+}
+footer a { color: var(--accent); }
+
+/* ── Back-to-Top ── */
+.back-to-top {
+  position: fixed; bottom: 24px; right: 24px; z-index: 900;
+  background: var(--accent); color: #fff; border: none;
+  width: 42px; height: 42px; border-radius: 50%;
+  cursor: pointer; font-size: 1.2rem; display: none;
+  align-items: center; justify-content: center; box-shadow: var(--shadow);
+}
+.back-to-top.visible { display: flex; }
+
+/* ── Print ── */
+@media print {
+  .theme-toggle, .back-to-top, .copy-btn, .diagram-overlay, .mermaid-wrap::after { display: none !important; }
+  body { background: #fff; color: #000; }
+  .hero, .stat, .intro-box, .card, .toc, pre, .mermaid-wrap, .dir-tree { border-color: #ccc; background: #fafafa; }
+  a { color: #0969da; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.4rem; }
+  .stat-row { gap: 8px; }
+  .stat { min-width: 80px; padding: 10px 14px; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Skip Link -->
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">🌙</button>
+
+<main id="main">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" role="navigation" aria-label="Breadcrumb">
+    <a title="AI Hedge Fund — Source Code Wiki" href="../index.html">AI Hedge Fund</a> <span>›</span> <span>Agents</span>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Agents — AI Investment Analysts</h1>
+    <p class="subtitle">19 LLM-powered analyst agents modeling famous investors</p>
+    <span class="reading-time" id="readingTime"></span>
+  </header>
+
+  <!-- Stat Row -->
+  <div class="stat-row">
+    <div class="stat"><span class="num">22</span><span class="label">Files</span></div>
+    <div class="stat"><span class="num">9,384</span><span class="label">Lines</span></div>
+    <div class="stat"><span class="num">19</span><span class="label">Analysts</span></div>
+    <div class="stat"><span class="num">Python</span><span class="label">Language</span></div>
+  </div>
+
+  <!-- Badges -->
+  <div class="badges">
+    <span class="badge">🔵 Multi-Agent</span>
+    <span class="badge">🟢 LLM-Powered</span>
+    <span class="badge">🟡 Famous Investors</span>
+    <span class="badge">🔴 Signal Aggregation</span>
+  </div>
+
+  <!-- Intro Box -->
+  <div class="intro-box">
+    <h3>💡 What is this?</h3>
+    <p>The <strong>agents</strong> module is the analytical brain of the AI Hedge Fund. It contains 19 specialized analyst agents — each modeled after a legendary investor — plus support agents for technical analysis, valuation, risk management, and portfolio orchestration. Every agent receives market data, applies its unique investment philosophy, and emits a <code>bullish</code>/<code>bearish</code>/<code>neutral</code> signal with a confidence score. The Portfolio Manager aggregates these signals into final trading decisions.</p>
+    <details>
+      <summary>🎭 Analogy: The Investment Advisory Board</summary>
+      <div class="analogy">
+        Imagine a boardroom where Warren Buffett, Charlie Munger, Nassim Taleb, and 16 other legendary investors sit around a table. A stock ticker flashes on the screen, and each advisor examines it through their own lens — Buffett looks for moats and intrinsic value, Taleb probes for tail risk and convexity, and the technician studies chart patterns. Each writes their verdict on a card (signal + confidence). A portfolio manager collects all cards, weighs them, considers position limits from the risk manager, and makes the final call. That's exactly what this module does — in code.
+      </div>
+    </details>
+  </div>
+
+  <!-- TOC -->
+  <nav class="toc" id="toc">
+    <h3>📑 Table of Contents</h3>
+    <ol id="tocList"></ol>
+  </nav>
+
+  <!-- Architecture Diagram -->
+  <section>
+    <h2 id="architecture">Architecture Overview</h2>
+    <p>Class relationships across the agents module. Each agent function consumes <code>AgentState</code> and returns a typed signal. The Portfolio Manager aggregates all signals into <code>PortfolioManagerOutput</code>.</p>
+    <div class="mermaid-wrap" data-source="classDiagram
+    class AgentState {
+        +dict data
+        +dict metadata
+        +list tickers
+        +str start_date
+        +str end_date
+    }
+    class WarrenBuffettSignal {
+        +str signal
+        +float confidence
+        +dict reasoning
+    }
+    class PortfolioDecision {
+        +str action
+        +int quantity
+        +float confidence
+        +str reasoning
+    }
+    class PortfolioManagerOutput {
+        +dict~str,PortfolioDecision~ decisions
+    }
+    class ToolsAPI {
+        +get_prices()
+        +get_financial_metrics()
+        +get_insider_trades()
+        +get_company_news()
+    }
+    class UtilsLLM {
+        +call_llm()
+        +get_model_info()
+    }
+
+    AgentState --> WarrenBuffettSignal : agent produces
+    AgentState --> PortfolioDecision : manager produces
+    PortfolioManagerOutput *-- PortfolioDecision : contains many
+    WarrenBuffettSignal <|-- AgentState : stored in state
+    ToolsAPI <.. AgentState : fetches data
+    UtilsLLM <.. WarrenBuffettSignal : generates analysis">
+      <pre class="mermaid">classDiagram
+    class AgentState {
+        +dict data
+        +dict metadata
+        +list tickers
+        +str start_date
+        +str end_date
+    }
+    class WarrenBuffettSignal {
+        +str signal
+        +float confidence
+        +dict reasoning
+    }
+    class PortfolioDecision {
+        +str action
+        +int quantity
+        +float confidence
+        +str reasoning
+    }
+    class PortfolioManagerOutput {
+        +dict~str,PortfolioDecision~ decisions
+    }
+    class ToolsAPI {
+        +get_prices()
+        +get_financial_metrics()
+        +get_insider_trades()
+        +get_company_news()
+    }
+    class UtilsLLM {
+        +call_llm()
+        +get_model_info()
+    }
+
+    AgentState --> WarrenBuffettSignal : agent produces
+    AgentState --> PortfolioDecision : manager produces
+    PortfolioManagerOutput *-- PortfolioDecision : contains many
+    WarrenBuffettSignal <|-- AgentState : stored in state
+    ToolsAPI <.. AgentState : fetches data
+    UtilsLLM <.. WarrenBuffettSignal : generates analysis</pre>
+    </div>
+  </section>
+
+  <!-- Key Classes Table -->
+  <section>
+    <h2 id="key-classes">Key Classes &amp; Functions</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>warren_buffett</code></td><td>warren_buffett.py</td><td>Agent fn</td><td>Value investing — moat analysis, intrinsic value via DCF, margin of safety</td></tr>
+          <tr><td><code>charlie_munger</code></td><td>charlie_munger.py</td><td>Agent fn</td><td>Quality businesses, rational thinking, competitive advantages, management quality</td></tr>
+          <tr><td><code>nassim_taleb</code></td><td>nassim_taleb.py</td><td>Agent fn</td><td>Tail risk hedging, antifragility scoring, barbell strategy, convex payoff detection</td></tr>
+          <tr><td><code>rakesh_jhunjhunwala</code></td><td>rakesh_jhunjhunwala.py</td><td>Agent fn</td><td>Macro insights, emerging market growth themes, high-conviction positions</td></tr>
+          <tr><td><code>stanley_druckenmiller</code></td><td>stanley_druckenmiller.py</td><td>Agent fn</td><td>Macro trend analysis, large position sizing on asymmetric opportunities</td></tr>
+          <tr><td><code>technicals_agent</code></td><td>technicals.py</td><td>Agent fn</td><td>Multi-strategy TA: trend, momentum, mean reversion, volatility, stat arb</td></tr>
+          <tr><td><code>valuation_agent</code></td><td>valuation.py</td><td>Agent fn</td><td>Four valuation models: DCF, residual earnings, EV/EBITDA, P/E comps</td></tr>
+          <tr><td><code>risk_manager</code></td><td>risk_manager.py</td><td>Agent fn</td><td>Volatility-adjusted position sizing, correlation analysis, risk limits</td></tr>
+          <tr><td><code>portfolio_manager</code></td><td>portfolio_manager.py</td><td>Agent fn</td><td>Aggregates signals, computes allowed actions, delegates to LLM for final trades</td></tr>
+          <tr><td><code>WarrenBuffettSignal</code></td><td>warren_buffett.py</td><td>Pydantic</td><td>BaseModel: signal (bullish/bearish/neutral), confidence (0–100), reasoning dict</td></tr>
+          <tr><td><code>PortfolioDecision</code></td><td>portfolio_manager.py</td><td>Pydantic</td><td>Action (buy/sell/short/cover/hold), quantity, confidence, reasoning string</td></tr>
+          <tr><td><code>PortfolioManagerOutput</code></td><td>portfolio_manager.py</td><td>Pydantic</td><td>Container: dict mapping ticker → PortfolioDecision for each security</td></tr>
+          <tr><td><code>growth_agent</code></td><td>growth_agent.py</td><td>Agent fn</td><td>Growth trend analysis via revenue/earnings acceleration metrics</td></tr>
+          <tr><td><code>fundamentals_agent</code></td><td>fundamentals.py</td><td>Agent fn</td><td>Financial ratio analysis — profitability, growth, health, valuation scores</td></tr>
+          <tr><td><code>news_sentiment_agent</code></td><td>news_sentiment.py</td><td>Agent fn</td><td>LLM-based news sentiment extraction and scoring</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Data-Flow Diagram -->
+  <section>
+    <h2 id="data-flow">Data-Flow: Agent Analysis Cycle</h2>
+    <p>How a single agent processes a ticker — from state extraction to signal storage.</p>
+    <div class="mermaid-wrap" data-source="sequenceDiagram
+    participant S as AgentState
+    participant A as WarrenBuffett Agent
+    participant API as tools/api.py
+    participant LLM as utils/llm.py
+    participant Out as analyst_signals
+
+    S->>A: Extract tickers, dates, portfolio
+    A->>API: get_prices(ticker, start, end)
+    API-->>A: OHLCV price data
+    A->>API: get_financial_metrics(ticker)
+    API-->>A: P/E, ROE, margins, debt ratios
+    A->>API: get_insider_trades(ticker)
+    API-->>A: Recent insider transactions
+    A->>A: Compute intrinsic value (DCF)
+    A->>A: Evaluate moat strength
+    A->>A: Calculate margin of safety
+    A->>LLM: call_llm(analysis_prompt)
+    LLM-->>A: WarrenBuffettSignal JSON
+    A->>Out: Store signal in state[data][analyst_signals]
+    Note over Out: {signal: bullish, confidence: 78, reasoning: {...}}">
+      <pre class="mermaid">sequenceDiagram
+    participant S as AgentState
+    participant A as WarrenBuffett Agent
+    participant API as tools/api.py
+    participant LLM as utils/llm.py
+    participant Out as analyst_signals
+
+    S->>A: Extract tickers, dates, portfolio
+    A->>API: get_prices(ticker, start, end)
+    API-->>A: OHLCV price data
+    A->>API: get_financial_metrics(ticker)
+    API-->>A: P/E, ROE, margins, debt ratios
+    A->>API: get_insider_trades(ticker)
+    API-->>A: Recent insider transactions
+    A->>A: Compute intrinsic value (DCF)
+    A->>A: Evaluate moat strength
+    A->>A: Calculate margin of safety
+    A->>LLM: call_llm(analysis_prompt)
+    LLM-->>A: WarrenBuffettSignal JSON
+    A->>Out: Store signal in state[data][analyst_signals]
+    Note over Out: {signal: bullish, confidence: 78, reasoning: {...}}</pre>
+    </div>
+  </section>
+
+  <!-- Interactions Table -->
+  <section>
+    <h2 id="interactions">Module Interactions</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>From</th><th>To</th><th>Mechanism</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>All agents</td><td><code>tools/api.py</code></td><td>Function call</td><td>Fetch prices, financial metrics, insider trades, company news</td></tr>
+          <tr><td>All agents</td><td><code>utils/llm.py</code></td><td><code>call_llm()</code></td><td>Send analysis prompt, receive structured JSON signal</td></tr>
+          <tr><td>All agents</td><td><code>AgentState</code></td><td>Dict read/write</td><td>Read tickers/dates/portfolio; write analyst_signals</td></tr>
+          <tr><td><code>portfolio_manager</code></td><td>All agents</td><td>State aggregation</td><td>Reads all analyst_signals to form consensus</td></tr>
+          <tr><td><code>risk_manager</code></td><td><code>portfolio_manager</code></td><td>State injection</td><td>Provides max position sizes and risk limits</td></tr>
+          <tr><td><code>graph/</code> module</td><td>All agents</td><td>LangGraph nodes</td><td>Orchestrates agent execution order and parallelism</td></tr>
+          <tr><td><code>technicals</code></td><td><code>numpy/pandas</code></td><td>Import</td><td>Numerical computation for EMA, RSI, Bollinger Bands, Hurst exponent</td></tr>
+          <tr><td><code>valuation</code></td><td><code>tools/api.py</code></td><td>Function call</td><td>Fetches detailed financials for DCF, residual earnings, comps models</td></tr>
+          <tr><td><code>news_sentiment</code></td><td><code>tools/api.py</code></td><td>Function call</td><td>Fetches recent company news for LLM sentiment scoring</td></tr>
+          <tr><td><code>sentiment</code></td><td><code>tools/api.py</code></td><td>Function call</td><td>Combines insider trade signals + news sentiment into composite score</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Deep-Dive Hub -->
+  <section>
+    <h2 id="deep-dives">Deep-Dive Topics</h2>
+    <p>Explore focused analyses of key subsystems within the agents module.</p>
+    <div class="card-grid">
+      <a class="card" href="#famous_investor_agents">
+        <h4>🎩 Famous Investor Agents</h4>
+        <p>Deep dive into how 15 legendary investors are modeled — prompt design, data flows, and signal structures.</p>
+      </a>
+      <a class="card" href="#technical_analysis_engine">
+        <h4>📊 Technical Analysis Engine</h4>
+        <p>Trend, momentum, mean reversion, volatility, and stat arb strategies inside technicals.py.</p>
+      </a>
+      <a class="card" href="#risk_portfolio_pipeline">
+        <h4>⚖️ Risk &amp; Portfolio Pipeline</h4>
+        <p>How risk_manager sets limits and portfolio_manager aggregates signals into actionable trades.</p>
+      </a>
+      <a class="card" href="#valuation_models">
+        <h4>💰 Valuation Models</h4>
+        <p>Four complementary valuation approaches: DCF, residual earnings, EV/EBITDA, and P/E comparables.</p>
+      </a>
+      <a class="card" href="#signal_aggregation">
+        <h4>🔗 Signal Aggregation</h4>
+        <p>How individual agent signals are weighted, combined, and fed into the portfolio manager's LLM prompt.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Directory Map -->
+  <section>
+    <h2 id="directory-map">Directory Map</h2>
+    <details open>
+      <summary>📁 src/agents/ — 22 files, 9,384 lines</summary>
+      <div class="dir-tree">
+<span class="file">├── warren_buffett.py</span>    <span class="annot"># 826 LOC — Value investing, moat analysis, DCF</span>
+<span class="file">├── charlie_munger.py</span>    <span class="annot"># 856 LOC — Quality businesses, rational thinking</span>
+<span class="file">├── nassim_taleb.py</span>      <span class="annot"># 761 LOC — Tail risk, antifragility, barbell strategy</span>
+<span class="file">├── rakesh_jhunjhunwala.py</span><span class="annot"># 707 LOC — Macro insights, emerging market growth</span>
+<span class="file">├── phil_fisher.py</span>       <span class="annot"># 603 LOC — Scuttlebutt research, management quality</span>
+<span class="file">├── stanley_druckenmiller.py</span><span class="annot"># 602 LOC — Macro trends, large positions</span>
+<span class="file">├── technicals.py</span>        <span class="annot"># 531 LOC — Multi-strategy technical analysis</span>
+<span class="file">├── peter_lynch.py</span>       <span class="annot"># 507 LOC — GARP, PEG ratio analysis</span>
+<span class="file">├── valuation.py</span>         <span class="annot"># 494 LOC — DCF, residual earnings, EV/EBITDA, P/E</span>
+<span class="file">├── bill_ackman.py</span>       <span class="annot"># 468 LOC — Activist investing, catalysts</span>
+<span class="file">├── cathie_wood.py</span>       <span class="annot"># 436 LOC — Disruptive innovation, growth</span>
+<span class="file">├── aswath_damodaran.py</span>  <span class="annot"># 419 LOC — Quantitative valuation, DCF rigor</span>
+<span class="file">├── michael_burry.py</span>     <span class="annot"># 376 LOC — Contrarian, deep value, shorts</span>
+<span class="file">├── mohnish_pabrai.py</span>    <span class="annot"># 359 LOC — Dhandho investing, low-risk bets</span>
+<span class="file">├── ben_graham.py</span>        <span class="annot"># 358 LOC — Margin of safety, net-net value</span>
+<span class="file">├── growth_agent.py</span>      <span class="annot"># 338 LOC — Growth trend analysis</span>
+<span class="file">├── risk_manager.py</span>      <span class="annot"># 317 LOC — Vol-adjusted sizing, correlation</span>
+<span class="file">├── portfolio_manager.py</span> <span class="annot"># 262 LOC — Signal aggregation, trading decisions</span>
+<span class="file">├── news_sentiment.py</span>    <span class="annot"># 220 LOC — LLM news sentiment analysis</span>
+<span class="file">├── fundamentals.py</span>      <span class="annot"># 163 LOC — Financial ratio analysis</span>
+<span class="file">├── sentiment.py</span>         <span class="annot"># 138 LOC — Insider trades + news sentiment</span>
+<span class="file">└── __init__.py</span>          <span class="annot"># Module exports</span>
+      </div>
+    </details>
+  </section>
+
+  <!-- Configuration Table -->
+  <section>
+    <h2 id="configuration">Configuration Reference</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Parameter</th><th>Source</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>model_name</code></td><td>State / env</td><td><code>gpt-4o</code></td><td>LLM model used for agent analysis</td></tr>
+          <tr><td><code>model_provider</code></td><td>State / env</td><td><code>openai</code></td><td>LLM provider (openai, anthropic, groq)</td></tr>
+          <tr><td><code>show_reasoning</code></td><td>State</td><td><code>true</code></td><td>Whether to display agent reasoning in output</td></tr>
+          <tr><td><code>tickers</code></td><td>CLI / State</td><td>—</td><td>List of stock ticker symbols to analyze</td></tr>
+          <tr><td><code>start_date</code></td><td>CLI / State</td><td>3 months ago</td><td>Analysis window start date</td></tr>
+          <tr><td><code>end_date</code></td><td>CLI / State</td><td>Today</td><td>Analysis window end date</td></tr>
+          <tr><td><code>initial_cash</code></td><td>CLI</td><td><code>100000</code></td><td>Starting portfolio cash balance</td></tr>
+          <tr><td><code>margin_requirement</code></td><td>CLI</td><td><code>0.0</code></td><td>Margin requirement for short positions</td></tr>
+          <tr><td><code>trend_weight</code></td><td>technicals.py</td><td><code>0.25</code></td><td>Weight for trend-following strategy in technicals</td></tr>
+          <tr><td><code>momentum_weight</code></td><td>technicals.py</td><td><code>0.25</code></td><td>Weight for momentum strategy in technicals</td></tr>
+          <tr><td><code>mean_rev_weight</code></td><td>technicals.py</td><td><code>0.20</code></td><td>Weight for mean reversion strategy in technicals</td></tr>
+          <tr><td><code>volatility_weight</code></td><td>technicals.py</td><td><code>0.15</code></td><td>Weight for volatility strategy in technicals</td></tr>
+          <tr><td><code>stat_arb_weight</code></td><td>technicals.py</td><td><code>0.15</code></td><td>Weight for stat-arb strategy in technicals</td></tr>
+          <tr><td><code>vol_lookback</code></td><td>risk_manager.py</td><td><code>60</code></td><td>Days of price history for volatility calculation</td></tr>
+          <tr><td><code>max_position_pct</code></td><td>risk_manager.py</td><td><code>0.25</code></td><td>Maximum position size as fraction of portfolio (low vol)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Code Examples -->
+  <section>
+    <h2 id="code-examples">Code Examples</h2>
+
+    <h3>Agent Function Pattern</h3>
+    <pre><code class="language-python">def warren_buffett(state: AgentState, agent_id: str = "warren_buffett"):
+    """Analyzes stocks using Warren Buffett's value investing principles."""
+    data = state["data"]
+    tickers = data["tickers"]
+    end_date = data["end_date"]
+    start_date = data["start_date"]
+
+    analysis_data = {}
+    for ticker in tickers:
+        prices = get_prices(ticker, start_date, end_date)
+        metrics = get_financial_metrics(ticker, end_date, limit=10)
+        insider = get_insider_trades(ticker, end_date, limit=20)
+
+        # Deterministic analysis
+        moat_score = analyze_moat(metrics)
+        intrinsic_value = compute_dcf(metrics, prices)
+        margin_of_safety = (intrinsic_value - prices[-1]) / intrinsic_value
+
+        analysis_data[ticker] = {
+            "moat_score": moat_score,
+            "intrinsic_value": intrinsic_value,
+            "margin_of_safety": margin_of_safety,
+            "insider_activity": summarize_insider(insider),
+        }
+
+    # LLM generates final signal from analysis
+    signal = call_llm(
+        prompt=build_buffett_prompt(analysis_data),
+        model_name=state["metadata"]["model_name"],
+        pydantic_model=WarrenBuffettSignal,
+    )
+    state["data"]["analyst_signals"][agent_id] = signal
+    return state</code></pre>
+
+    <h3>PortfolioDecision Model</h3>
+    <pre><code class="language-python">class PortfolioDecision(BaseModel):
+    """Represents a single trading decision for one ticker."""
+    action: Literal["buy", "sell", "short", "cover", "hold"]
+    quantity: int = Field(description="Number of shares to trade", ge=0)
+    confidence: float = Field(description="Confidence level 0-100", ge=0, le=100)
+    reasoning: str = Field(description="Brief explanation for the decision")
+
+class PortfolioManagerOutput(BaseModel):
+    """Container for all portfolio decisions."""
+    decisions: dict[str, PortfolioDecision]</code></pre>
+
+    <h3>Weighted Signal Combination (technicals.py)</h3>
+    <pre><code class="language-python">def combine_strategy_signals(signals: dict) -> dict:
+    """Combine technical strategy signals with configurable weights."""
+    weights = {
+        "trend_following": 0.25,
+        "momentum": 0.25,
+        "mean_reversion": 0.20,
+        "volatility": 0.15,
+        "stat_arb": 0.15,
+    }
+
+    weighted_score = sum(
+        signals[strategy]["score"] * weight
+        for strategy, weight in weights.items()
+        if strategy in signals
+    )
+
+    total_weight = sum(
+        weight for strategy, weight in weights.items()
+        if strategy in signals
+    )
+    normalized_score = weighted_score / total_weight if total_weight > 0 else 0
+
+    if normalized_score > 0.3:
+        signal = "bullish"
+    elif normalized_score < -0.3:
+        signal = "bearish"
+    else:
+        signal = "neutral"
+
+    return {
+        "signal": signal,
+        "confidence": min(abs(normalized_score) * 100, 100),
+        "strategy_scores": {k: signals[k]["score"] for k in weights if k in signals},
+    }</code></pre>
+  </section>
+
+</div><!-- /.container -->
+
+<!-- Footer -->
+<footer>
+  <a title="AI Hedge Fund — Source Code Wiki" href="../index.html">← Back to AI Hedge Fund Wiki</a>
+  &nbsp;·&nbsp;
+  <a title="AI Hedge Fund — Search Wiki" href="../search.html">🔍 Search</a>
+  <p style="margin-top:10px;">Generated 2026-04-02 · Source rev <code>b6dca8c</code></p>
+</footer>
+
+<!-- Back-to-Top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Diagram Overlay -->
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="inner">
+    <button class="close-btn" aria-label="Close diagram">&times;</button>
+    <div class="overlay-content"></div>
+  </div>
+</div>
+
+<!-- Mermaid -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- highlight.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
+
+<script>
+(function () {
+  /* ── Theme ── */
+  const THEME_KEY = 'neutra-ip-theme';
+  const toggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  const hljsLink = document.getElementById('hljs-theme');
+
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    toggle.textContent = t === 'dark' ? '🌙' : '☀️';
+    hljsLink.href = t === 'dark'
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  }
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+  toggle.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+
+  /* ── Mermaid ── */
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+  async function renderMermaid() {
+    var els = document.querySelectorAll('.mermaid');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var src = el.textContent.trim();
+      try {
+        var id = 'mermaid-' + i;
+        var result = await mermaid.render(id, src);
+        el.innerHTML = result.svg;
+      } catch (e) {
+        console.warn('Mermaid render error:', e);
+        el.innerHTML = '<p style="color:var(--accent4)">⚠ Diagram render error</p><pre>' + src + '</pre>';
+      }
+    }
+  }
+  renderMermaid();
+
+  /* ── highlight.js ── */
+  hljs.highlightAll();
+
+  /* ── Copy buttons ── */
+  document.querySelectorAll('pre > code').forEach(function (block) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(block.textContent).then(function () {
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    block.parentElement.appendChild(btn);
+  });
+
+  /* ── Auto TOC ── */
+  var tocList = document.getElementById('tocList');
+  document.querySelectorAll('section > h2[id]').forEach(function (h) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ── Reading time ── */
+  var text = document.getElementById('main').textContent || '';
+  var words = text.trim().split(/\s+/).length;
+  var mins = Math.max(1, Math.round(words / 220));
+  document.getElementById('readingTime').textContent = '~' + mins + ' min read';
+
+  /* ── Back-to-Top ── */
+  var btt = document.getElementById('backToTop');
+  window.addEventListener('scroll', function () {
+    btt.classList.toggle('visible', window.scrollY > 400);
+  });
+  btt.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Diagram Overlay ── */
+  var overlay = document.getElementById('diagramOverlay');
+if(!overlay)return;
+var overlayContent = overlay.querySelector('.overlay-content');
+  var closeBtn = overlay.querySelector('.close-btn');
+
+  document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+    wrap.addEventListener('click', function () {
+      var svg = wrap.querySelector('svg');
+      if (!svg) return;
+      var clone = svg.cloneNode(true);
+      clone.style.maxWidth = '90vw';
+      clone.style.maxHeight = '85vh';
+      overlayContent.innerHTML = '';
+      overlayContent.appendChild(clone);
+      overlay.classList.add('active');
+    });
+  });
+
+  closeBtn.addEventListener('click', function () { overlay.classList.remove('active'); });
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+
+  /* Wheel zoom on overlay */
+  overlay.querySelector('.inner').addEventListener('wheel', function (e) {
+    var svg = overlayContent.querySelector('svg');
+    if (!svg) return;
+    e.preventDefault();
+    var scale = parseFloat(svg.getAttribute('data-scale') || '1');
+    scale += e.deltaY < 0 ? 0.1 : -0.1;
+    scale = Math.max(0.3, Math.min(5, scale));
+    svg.setAttribute('data-scale', scale);
+    svg.style.transform = 'scale(' + scale + ')';
+    svg.style.transformOrigin = 'center center';
+  }, { passive: false });
+
+  /* ── Keyboard Navigation (j/k) ── */
+  var sections = Array.from(document.querySelectorAll('section > h2[id]'));
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var idx = -1;
+    var scrollY = window.scrollY + 80;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].offsetTop <= scrollY) { idx = i; break; }
+    }
+    if (e.key === 'j' && idx < sections.length - 1) {
+      sections[idx + 1].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'k' && idx > 0) {
+      sections[idx - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  /* ── Escape to close overlay ── */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="wiki-generated" content="2026-04-02">
+  <meta name="wiki-source" content="src/tools/">
+  <meta name="wiki-source-rev" content="b6dca8c">
+  <title>Tools — Financial Data API Layer | AI Hedge Fund Wiki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e}
+    [data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+    .skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+    .breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+    .theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+    main{max-width:960px;margin:0 auto;padding:32px 24px}
+    .hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:8px}.hero p{color:var(--text-muted);font-size:1.1rem}
+    .reading-time{font-size:13px;color:var(--text-muted);margin-top:8px}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}.stat-box .value{font-size:1.6rem;font-weight:700;color:var(--heading)}.stat-box .label{font-size:13px;color:var(--text-muted)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}.badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}.badge.blue{background:rgba(88,166,255,.15);color:var(--accent)}.badge.green{background:rgba(63,185,80,.15);color:var(--accent2)}.badge.yellow{background:rgba(210,153,34,.15);color:var(--accent3)}.badge.red{background:rgba(248,81,73,.15);color:var(--accent4)}
+    .intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box h3{color:var(--accent);margin-bottom:8px}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+    .toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:24px 0}.toc h2{font-size:1rem;color:var(--heading);margin-bottom:8px}.toc ul{list-style:none;padding-left:0}.toc li{padding:4px 0}.toc li.h3{padding-left:16px}.toc a{color:var(--accent);font-size:14px}
+    h2{font-size:1.5rem;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:1.2rem;color:var(--heading);margin:24px 0 12px}
+    .mermaid-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:20px 0;overflow-x:auto;cursor:pointer;position:relative}.mermaid-wrapper:hover::after{content:"Click to expand";position:absolute;top:8px;right:12px;font-size:12px;color:var(--text-muted)}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th,td{padding:10px 12px;border:1px solid var(--border);text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:16px 0}.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}.card h4{color:var(--heading);margin-bottom:8px}.card p{font-size:14px;color:var(--text-muted)}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:16px 0}code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}.copy-btn:hover{color:var(--accent)}
+    .dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:13px;line-height:1.8;margin:16px 0}
+    footer{text-align:center;padding:32px;border-top:1px solid var(--border);margin-top:48px;color:var(--text-muted);font-size:14px}footer a{color:var(--accent)}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:24px}.overlay.active{display:flex}.overlay-content{background:var(--surface);border-radius:12px;padding:32px;max-width:90vw;max-height:90vh;overflow:auto;position:relative}.overlay-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+    .back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    @media print{.skip-link,header .theme-toggle,.overlay,.back-to-top{display:none!important}}
+    @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.6rem}}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <header>
+    <nav class="breadcrumb"><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">AI Hedge Fund</a> › Tools</nav>
+    <button class="theme-toggle" aria-label="Toggle dark/light theme" onclick="toggleTheme()">🌙 Theme</button>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <h1>🔌 Tools — Financial Data API Layer</h1>
+      <p>Wraps the Financial Datasets API with caching, rate limiting, and Pydantic validation</p>
+      <div class="reading-time" id="reading-time"></div>
+    </section>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="value">2</div><div class="label">Files</div></div>
+      <div class="stat-box"><div class="value">371</div><div class="label">Lines</div></div>
+      <div class="stat-box"><div class="value">7</div><div class="label">API Functions</div></div>
+      <div class="stat-box"><div class="value">Python</div><div class="label">Language</div></div>
+    </div>
+
+    <div class="badges">
+      <span class="badge blue">🔵 REST API</span>
+      <span class="badge green">🟢 Rate Limiting</span>
+      <span class="badge yellow">🟡 Caching</span>
+      <span class="badge red">🔴 Pydantic Validation</span>
+    </div>
+
+    <div class="intro-box">
+      <h3>💡 What is this module?</h3>
+      <p>The <strong>tools</strong> module is the sole data-fetching layer for the AI Hedge Fund. Every piece of financial data — prices, metrics, insider trades, news — flows through here.</p>
+      <p class="analogy">"Think of it as a <strong>research librarian</strong> — you ask for a financial document, it knows exactly which shelf (API endpoint) to look on, checks if it already has a copy (cache), and politely waits if the library is busy (rate limiting)."</p>
+    </div>
+
+    <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+    <h2 id="architecture">Architecture Overview</h2>
+    <p>The tools module follows a layered design: public API functions delegate to a private <code>_make_api_request()</code> that handles HTTP requests, rate-limit retries, and error handling. Results flow through Pydantic models before being cached.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="graph TD
+    A[Agent / Caller] -->|get_prices, get_financial_metrics...| B[Public API Functions]
+    B --> C{Cache Hit?}
+    C -->|Yes| D[Return Cached Data]
+    C -->|No| E[_make_api_request]
+    E --> F[Financial Datasets API]
+    F -->|200 OK| G[Pydantic Validation]
+    F -->|429 Rate Limited| H[Backoff & Retry]
+    H --> E
+    G --> I[Store in Cache]
+    I --> D
+    style A fill:#58a6ff,stroke:#333,color:#000
+    style F fill:#3fb950,stroke:#333,color:#000
+    style H fill:#f85149,stroke:#333,color:#000">graph TD
+    A[Agent / Caller] -->|get_prices, get_financial_metrics...| B[Public API Functions]
+    B --> C{Cache Hit?}
+    C -->|Yes| D[Return Cached Data]
+    C -->|No| E[_make_api_request]
+    E --> F[Financial Datasets API]
+    F -->|200 OK| G[Pydantic Validation]
+    F -->|429 Rate Limited| H[Backoff & Retry]
+    H --> E
+    G --> I[Store in Cache]
+    I --> D
+    style A fill:#58a6ff,stroke:#333,color:#000
+    style F fill:#3fb950,stroke:#333,color:#000
+    style H fill:#f85149,stroke:#333,color:#000</pre>
+    </div>
+
+    <h2 id="data-flow">Data Flow</h2>
+    <p>Every API call follows the same pipeline: validate parameters, check cache, fetch from remote API with retry logic, parse through Pydantic, cache results, and return typed data to the caller.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="sequenceDiagram
+    participant Agent
+    participant api.py
+    participant Cache
+    participant FinancialDatasetsAPI
+    Agent->>api.py: get_prices(ticker, start, end)
+    api.py->>Cache: check prices cache
+    alt Cache Hit
+        Cache-->>api.py: cached prices
+    else Cache Miss
+        api.py->>FinancialDatasetsAPI: GET /prices/
+        FinancialDatasetsAPI-->>api.py: JSON response
+        api.py->>api.py: Pydantic parse (PriceResponse)
+        api.py->>Cache: store prices
+    end
+    api.py-->>Agent: list[Price]">sequenceDiagram
+    participant Agent
+    participant api.py
+    participant Cache
+    participant FinancialDatasetsAPI
+    Agent->>api.py: get_prices(ticker, start, end)
+    api.py->>Cache: check prices cache
+    alt Cache Hit
+        Cache-->>api.py: cached prices
+    else Cache Miss
+        api.py->>FinancialDatasetsAPI: GET /prices/
+        FinancialDatasetsAPI-->>api.py: JSON response
+        api.py->>api.py: Pydantic parse (PriceResponse)
+        api.py->>Cache: store prices
+    end
+    api.py-->>Agent: list[Price]</pre>
+    </div>
+
+    <h2 id="key-classes">Key Classes &amp; Functions</h2>
+    <table>
+      <thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>get_prices()</code></td><td>api.py</td><td>Function</td><td>Fetches OHLCV price data for a ticker and date range</td></tr>
+        <tr><td><code>get_financial_metrics()</code></td><td>api.py</td><td>Function</td><td>Retrieves fundamental financial metrics (P/E, ROE, margins, etc.)</td></tr>
+        <tr><td><code>search_line_items()</code></td><td>api.py</td><td>Function</td><td>Searches financial statement line items with flexible filters</td></tr>
+        <tr><td><code>get_insider_trades()</code></td><td>api.py</td><td>Function</td><td>Fetches SEC insider trading filings for a ticker</td></tr>
+        <tr><td><code>get_company_news()</code></td><td>api.py</td><td>Function</td><td>Retrieves recent news articles for a company</td></tr>
+        <tr><td><code>get_market_cap()</code></td><td>api.py</td><td>Function</td><td>Returns latest market capitalization via company facts endpoint</td></tr>
+        <tr><td><code>prices_to_df()</code></td><td>api.py</td><td>Function</td><td>Converts list of Price objects to a pandas DataFrame</td></tr>
+        <tr><td><code>get_price_data()</code></td><td>api.py</td><td>Function</td><td>High-level helper combining get_prices + prices_to_df</td></tr>
+        <tr><td><code>_make_api_request()</code></td><td>api.py</td><td>Function</td><td>Private HTTP caller with rate-limit retry (429 backoff)</td></tr>
+        <tr><td><code>BASE_URL</code></td><td>api.py</td><td>Constant</td><td><code>https://api.financialdatasets.ai/</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="interactions">Module Interactions</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Target</th><th>Interaction</th></tr></thead>
+      <tbody>
+        <tr><td>tools.api</td><td>data.cache</td><td>Stores and retrieves cached API responses via <code>get_cache()</code></td></tr>
+        <tr><td>tools.api</td><td>data.models</td><td>Parses API JSON responses into Pydantic models</td></tr>
+        <tr><td>Analyst agents</td><td>tools.api</td><td>Call <code>get_prices()</code>, <code>get_financial_metrics()</code>, etc.</td></tr>
+        <tr><td>tools.api</td><td>Financial Datasets API</td><td>Sends HTTP GET requests with API key authentication</td></tr>
+        <tr><td>tools.api</td><td>Environment</td><td>Reads <code>FINANCIAL_DATASETS_API_KEY</code> env var</td></tr>
+        <tr><td>tools.api</td><td>pandas</td><td><code>prices_to_df()</code> creates DataFrame from price data</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="deep-dive">Deep Dive</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>🔌 api.py</h4>
+        <p>Core API wrapper — 7 public functions + 1 private request handler. Manages all communication with the Financial Datasets API including rate limiting and caching.</p>
+      </div>
+      <div class="card">
+        <h4>⚡ Rate Limiting</h4>
+        <p>Implements linear backoff on 429 responses: <code>60s + 30s × attempt</code>. Retries up to 3 times before raising. Logs warnings for each retry attempt.</p>
+      </div>
+      <div class="card">
+        <h4>📦 Caching Strategy</h4>
+        <p>Uses the <code>data.cache</code> module for in-memory caching. Each API function checks cache before making network requests, reducing redundant calls.</p>
+      </div>
+      <div class="card">
+        <h4>✅ Pydantic Validation</h4>
+        <p>All API responses are parsed through Pydantic response models (<code>PriceResponse</code>, <code>FinancialMetricsResponse</code>, etc.) ensuring type safety.</p>
+      </div>
+    </div>
+
+    <h3 id="directory-map">Directory Map</h3>
+    <div class="dir-map">
+src/tools/<br>
+├── __init__.py &nbsp;&nbsp;&nbsp;# Package init — re-exports public API functions<br>
+└── api.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 371 LOC — Financial Datasets API wrapper
+    </div>
+
+    <h3 id="configuration">Configuration &amp; API Endpoints</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>BASE_URL</code></td><td><code>https://api.financialdatasets.ai/</code></td><td>API base URL for all endpoints</td></tr>
+        <tr><td>Prices endpoint</td><td><code>/prices/</code></td><td>Historical OHLCV price data</td></tr>
+        <tr><td>Metrics endpoint</td><td><code>/financial-metrics/</code></td><td>Fundamental financial metrics</td></tr>
+        <tr><td>Line items endpoint</td><td><code>/financials/search/line-items</code></td><td>Financial statement line item search</td></tr>
+        <tr><td>Insider trades endpoint</td><td><code>/insider-trades/</code></td><td>SEC insider trading data</td></tr>
+        <tr><td>News endpoint</td><td><code>/news/</code></td><td>Company news articles</td></tr>
+        <tr><td>Company facts endpoint</td><td><code>/company/facts/</code></td><td>Company details and market cap</td></tr>
+        <tr><td>Auth header</td><td><code>X-API-Key</code></td><td>API key from <code>FINANCIAL_DATASETS_API_KEY</code> env var</td></tr>
+        <tr><td>Rate limit backoff</td><td><code>60 + 30 × attempt</code> seconds</td><td>Linear backoff on HTTP 429</td></tr>
+        <tr><td>Max retries</td><td>3</td><td>Maximum retry attempts for rate-limited requests</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="code-examples">Code Examples</h3>
+    <pre><code class="language-python"># Fetching historical prices for a ticker
+from tools.api import get_prices, prices_to_df
+
+prices = get_prices(
+    ticker="AAPL",
+    start_date="2025-01-01",
+    end_date="2025-03-31"
+)
+df = prices_to_df(prices)
+print(df[["date", "close", "volume"]].head())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># Internal _make_api_request with rate-limit retry
+def _make_api_request(url: str, params: dict) -> dict:
+    headers = {"X-API-Key": os.getenv("FINANCIAL_DATASETS_API_KEY")}
+    for attempt in range(3):
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 429:
+            wait = 60 + 30 * attempt
+            logger.warning(f"Rate limited. Waiting {wait}s...")
+            time.sleep(wait)
+            continue
+        response.raise_for_status()
+        return response.json()
+    raise Exception("Max retries exceeded")</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  </main>
+
+  <footer>
+    <p><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">← Back to AI Hedge Fund Overview</a> · <a title="AI Hedge Fund — Search Wiki" href="../search.html">🔍 Search</a></p>
+    <p>Generated 2026-04-02 · Source rev <code>b6dca8c</code></p>
+  </footer>
+
+  <div class="overlay" id="diagram-overlay">
+    <div class="overlay-content">
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      <div id="overlay-diagram"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark' });
+    await mermaid.run({ querySelector: '.mermaid' });
+  </script>
+  <script>
+    /* Theme toggle */
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('neutra-ip-theme', next);
+      document.querySelector('.theme-toggle').textContent = next === 'dark' ? '🌙 Theme' : '☀️ Theme';
+    }
+    (function(){
+      const saved = localStorage.getItem('neutra-ip-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '🌙 Theme' : '☀️ Theme';
+      }
+    })();
+
+    /* TOC generation */
+    (function(){
+      const toc = document.getElementById('toc');
+      const ul = document.createElement('ul');
+      document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+        const li = document.createElement('li');
+        if (h.tagName === 'H3') li.classList.add('h3');
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      toc.appendChild(ul);
+    })();
+
+    /* Copy button */
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); });
+    }
+
+    /* Diagram overlay */
+    function openOverlay(wrapper) {
+      const overlay = document.getElementById('diagram-overlay');
+      const container = document.getElementById('overlay-diagram');
+      const svg = wrapper.querySelector('svg');
+      if (!svg) return;
+      container.innerHTML = '';
+      const clone = svg.cloneNode(true);
+      clone.style.maxWidth = '100%';
+      container.appendChild(clone);
+      overlay.classList.add('active');
+      let scale = 1;
+      container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        scale += e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.max(0.3, Math.min(3, scale));
+        clone.style.transform = 'scale(' + scale + ')';
+      });
+    }
+    function closeOverlay() { document.getElementById('diagram-overlay').classList.remove('active'); }
+    document.getElementById('diagram-overlay').addEventListener('click', function(e) { if (e.target === this) closeOverlay(); });
+
+    /* Back to top */
+    window.addEventListener('scroll', function() {
+      document.getElementById('back-to-top').style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+
+    /* Reading time */
+    (function(){
+      const text = document.getElementById('main-content').textContent;
+      const words = text.trim().split(/\s+/).length;
+      const mins = Math.ceil(words / 200);
+      document.getElementById('reading-time').textContent = '📖 ' + mins + ' min read';
+    })();
+
+    /* Keyboard navigation */
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const sections = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+      if (e.key === 'j' || e.key === 'k') {
+        const scrollY = window.scrollY + 100;
+        let idx = sections.findIndex(s => s.offsetTop > scrollY);
+        if (e.key === 'k') idx = Math.max(0, idx - 2); else if (idx < 0) idx = sections.length - 1;
+        if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    hljs.highlightAll();
+  </script>
+</body>
+</html>

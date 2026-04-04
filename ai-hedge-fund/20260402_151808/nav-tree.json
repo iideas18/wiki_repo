@@ -1,0 +1,46 @@
+{
+  "label": "AI Hedge Fund",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "Agents",
+      "path": "agents/index.html",
+      "children": []
+    },
+    {
+      "label": "Backtesting",
+      "path": "backtesting/index.html",
+      "children": []
+    },
+    {
+      "label": "CLI",
+      "path": "cli/index.html",
+      "children": []
+    },
+    {
+      "label": "Data",
+      "path": "data/index.html",
+      "children": []
+    },
+    {
+      "label": "Graph",
+      "path": "graph/index.html",
+      "children": []
+    },
+    {
+      "label": "LLM",
+      "path": "llm/index.html",
+      "children": []
+    },
+    {
+      "label": "Tools",
+      "path": "tools/index.html",
+      "children": []
+    },
+    {
+      "label": "Utils",
+      "path": "utils/index.html",
+      "children": []
+    }
+  ]
+}

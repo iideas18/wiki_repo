@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="wiki-generated" content="2026-04-02">
+  <meta name="wiki-source" content="src/data/">
+  <meta name="wiki-source-rev" content="b6dca8c">
+  <title>Data — Data Models &amp; Cache | AI Hedge Fund Wiki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e}
+    [data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+    .skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+    .breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+    .theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+    main{max-width:960px;margin:0 auto;padding:32px 24px}
+    .hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:8px}.hero p{color:var(--text-muted);font-size:1.1rem}
+    .reading-time{font-size:13px;color:var(--text-muted);margin-top:8px}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}.stat-box .value{font-size:1.6rem;font-weight:700;color:var(--heading)}.stat-box .label{font-size:13px;color:var(--text-muted)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}.badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}.badge.blue{background:rgba(88,166,255,.15);color:var(--accent)}.badge.green{background:rgba(63,185,80,.15);color:var(--accent2)}.badge.yellow{background:rgba(210,153,34,.15);color:var(--accent3)}.badge.red{background:rgba(248,81,73,.15);color:var(--accent4)}
+    .intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box h3{color:var(--accent);margin-bottom:8px}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+    .toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:24px 0}.toc h2{font-size:1rem;color:var(--heading);margin-bottom:8px}.toc ul{list-style:none;padding-left:0}.toc li{padding:4px 0}.toc li.h3{padding-left:16px}.toc a{color:var(--accent);font-size:14px}
+    h2{font-size:1.5rem;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:1.2rem;color:var(--heading);margin:24px 0 12px}
+    .mermaid-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:20px 0;overflow-x:auto;cursor:pointer;position:relative}.mermaid-wrapper:hover::after{content:"Click to expand";position:absolute;top:8px;right:12px;font-size:12px;color:var(--text-muted)}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th,td{padding:10px 12px;border:1px solid var(--border);text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:16px 0}.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}.card h4{color:var(--heading);margin-bottom:8px}.card p{font-size:14px;color:var(--text-muted)}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:16px 0}code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}.copy-btn:hover{color:var(--accent)}
+    .dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:13px;line-height:1.8;margin:16px 0}
+    footer{text-align:center;padding:32px;border-top:1px solid var(--border);margin-top:48px;color:var(--text-muted);font-size:14px}footer a{color:var(--accent)}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:24px}.overlay.active{display:flex}.overlay-content{background:var(--surface);border-radius:12px;padding:32px;max-width:90vw;max-height:90vh;overflow:auto;position:relative}.overlay-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+    .back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    @media print{.skip-link,header .theme-toggle,.overlay,.back-to-top{display:none!important}}
+    @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.6rem}}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <header>
+    <nav class="breadcrumb"><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">AI Hedge Fund</a> › Data</nav>
+    <button class="theme-toggle" aria-label="Toggle dark/light theme" onclick="toggleTheme()">🌙 Theme</button>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <h1>📋 Data — Data Models &amp; Cache</h1>
+      <p>Pydantic models for API schemas and an in-memory caching layer for financial data</p>
+      <div class="reading-time" id="reading-time"></div>
+    </section>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="value">3</div><div class="label">Files</div></div>
+      <div class="stat-box"><div class="value">245</div><div class="label">Lines</div></div>
+      <div class="stat-box"><div class="value">18</div><div class="label">Models</div></div>
+      <div class="stat-box"><div class="value">Python</div><div class="label">Language</div></div>
+    </div>
+
+    <div class="badges">
+      <span class="badge blue">🔵 Pydantic v2</span>
+      <span class="badge green">🟢 Type-Safe</span>
+      <span class="badge yellow">🟡 In-Memory Cache</span>
+      <span class="badge red">🔴 API Schema</span>
+    </div>
+
+    <div class="intro-box">
+      <h3>💡 What is this module?</h3>
+      <p>The <strong>data</strong> module defines the canonical shapes for every piece of financial data in the system — prices, metrics, trades, news, portfolio positions — plus a fast in-memory cache to avoid redundant API calls.</p>
+      <p class="analogy">"Think of it as a <strong>filing cabinet with standardized forms</strong> — every document that enters the system must fit into a pre-defined form (Pydantic model), and the cabinet keeps a copy so you never have to request the same document twice."</p>
+    </div>
+
+    <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+    <h2 id="architecture">Architecture Overview</h2>
+    <p>The data module provides two core services: schema definitions (models.py) and a caching layer (cache.py). Models are consumed by both the tools layer for API response parsing and by the agent layer for state management.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="graph TD
+    A[Financial Datasets API] -->|JSON| B[Pydantic Response Models]
+    B --> C[Domain Models]
+    C --> D[Cache Layer]
+    D --> E[Analyst Agents]
+    F[Agent State] --> G[AgentStateData / Metadata]
+    G --> E
+    H[Portfolio Manager] --> I[Portfolio / Position]
+    style B fill:#58a6ff,stroke:#333,color:#000
+    style D fill:#d29922,stroke:#333,color:#000
+    style C fill:#3fb950,stroke:#333,color:#000">graph TD
+    A[Financial Datasets API] -->|JSON| B[Pydantic Response Models]
+    B --> C[Domain Models]
+    C --> D[Cache Layer]
+    D --> E[Analyst Agents]
+    F[Agent State] --> G[AgentStateData / Metadata]
+    G --> E
+    H[Portfolio Manager] --> I[Portfolio / Position]
+    style B fill:#58a6ff,stroke:#333,color:#000
+    style D fill:#d29922,stroke:#333,color:#000
+    style C fill:#3fb950,stroke:#333,color:#000</pre>
+    </div>
+
+    <h2 id="data-flow">Data Flow &amp; Cache Lifecycle</h2>
+    <p>When a tool function fetches data, the response is parsed via a Pydantic response model, then the extracted domain objects are stored in the cache's internal dict. Subsequent requests for the same data return from cache without a network call.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="sequenceDiagram
+    participant Tool as tools.api
+    participant Model as data.models
+    participant Cache as data.cache
+    participant Agent as Analyst Agent
+    Tool->>Model: Parse JSON → PriceResponse
+    Model-->>Tool: list[Price]
+    Tool->>Cache: cache.prices[key] = data
+    Agent->>Cache: get_cache().get_prices(key)
+    alt Hit
+        Cache-->>Agent: list[Price]
+    else Miss
+        Cache-->>Agent: None
+        Agent->>Tool: get_prices(ticker, ...)
+    end">sequenceDiagram
+    participant Tool as tools.api
+    participant Model as data.models
+    participant Cache as data.cache
+    participant Agent as Analyst Agent
+    Tool->>Model: Parse JSON → PriceResponse
+    Model-->>Tool: list[Price]
+    Tool->>Cache: cache.prices[key] = data
+    Agent->>Cache: get_cache().get_prices(key)
+    alt Hit
+        Cache-->>Agent: list[Price]
+    else Miss
+        Cache-->>Agent: None
+        Agent->>Tool: get_prices(ticker, ...)
+    end</pre>
+    </div>
+
+    <h2 id="key-classes">Key Classes &amp; Models</h2>
+    <table>
+      <thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>Price</code></td><td>models.py</td><td>BaseModel</td><td>OHLCV price data — open, high, low, close, volume, date</td></tr>
+        <tr><td><code>FinancialMetrics</code></td><td>models.py</td><td>BaseModel</td><td>44 nullable float fields: market_cap, P/E, P/B, ROE, margins, growth rates</td></tr>
+        <tr><td><code>LineItem</code></td><td>models.py</td><td>BaseModel</td><td>Dynamic financial statement line item with <code>model_config = ConfigDict(extra="allow")</code></td></tr>
+        <tr><td><code>InsiderTrade</code></td><td>models.py</td><td>BaseModel</td><td>SEC insider trade: owner, relation, transaction type, shares, value</td></tr>
+        <tr><td><code>CompanyNews</code></td><td>models.py</td><td>BaseModel</td><td>News article: title, date, source, sentiment, summary</td></tr>
+        <tr><td><code>CompanyFacts</code></td><td>models.py</td><td>BaseModel</td><td>Company metadata and market capitalization</td></tr>
+        <tr><td><code>AnalystSignal</code></td><td>models.py</td><td>BaseModel</td><td>Signal from one analyst agent: action, confidence, reasoning</td></tr>
+        <tr><td><code>TickerAnalysis</code></td><td>models.py</td><td>BaseModel</td><td>Aggregated analysis for one ticker across all analysts</td></tr>
+        <tr><td><code>Portfolio</code></td><td>models.py</td><td>BaseModel</td><td>Portfolio state: cash, positions list, total value</td></tr>
+        <tr><td><code>Position</code></td><td>models.py</td><td>BaseModel</td><td>Single holding: ticker, shares, avg cost, current value</td></tr>
+        <tr><td><code>AgentStateData</code></td><td>models.py</td><td>TypedDict</td><td>Shared data dict: tickers, portfolio, dates, analyst signals</td></tr>
+        <tr><td><code>AgentStateMetadata</code></td><td>models.py</td><td>TypedDict</td><td>Config dict: show_reasoning, model_name, model_provider</td></tr>
+        <tr><td><code>PriceResponse</code></td><td>models.py</td><td>BaseModel</td><td>API response wrapper for prices endpoint</td></tr>
+        <tr><td><code>FinancialMetricsResponse</code></td><td>models.py</td><td>BaseModel</td><td>API response wrapper for financial-metrics endpoint</td></tr>
+        <tr><td><code>Cache</code></td><td>cache.py</td><td>Class</td><td>In-memory dict cache with separate stores per data type</td></tr>
+        <tr><td><code>get_cache()</code></td><td>cache.py</td><td>Function</td><td>Global singleton accessor — returns the one Cache instance</td></tr>
+        <tr><td><code>_merge_data()</code></td><td>cache.py</td><td>Method</td><td>Deduplication merge for list data using date/id keys</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="interactions">Module Interactions</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Target</th><th>Interaction</th></tr></thead>
+      <tbody>
+        <tr><td>tools.api</td><td>data.models</td><td>Parses API JSON into Pydantic response/domain models</td></tr>
+        <tr><td>tools.api</td><td>data.cache</td><td>Stores fetched data via <code>get_cache()</code> singleton</td></tr>
+        <tr><td>Analyst agents</td><td>data.models</td><td>Use <code>AnalystSignal</code>, <code>TickerAnalysis</code> for output</td></tr>
+        <tr><td>Portfolio manager</td><td>data.models</td><td>Manages <code>Portfolio</code> and <code>Position</code> instances</td></tr>
+        <tr><td>graph.state</td><td>data.models</td><td>References <code>AgentStateData</code> and <code>AgentStateMetadata</code></td></tr>
+        <tr><td>cli / API</td><td>data.cache</td><td>Cache persists across agent runs within a session</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="deep-dive">Deep Dive</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>📝 models.py (174 LOC)</h4>
+        <p>The schema backbone — 12 domain models, 6 response wrappers, 2 TypedDict state containers. Every field is typed and documented with Pydantic v2.</p>
+      </div>
+      <div class="card">
+        <h4>🗄️ cache.py (71 LOC)</h4>
+        <p>Simple but effective in-memory cache. Separate dicts for prices, metrics, line items, insider trades, and news. Dedup via <code>_merge_data()</code> on date/id keys.</p>
+      </div>
+      <div class="card">
+        <h4>📊 FinancialMetrics</h4>
+        <p>The largest model — 44 nullable float fields covering market_cap, pe_ratio, pb_ratio, return_on_equity, net_margin, revenue_growth, and many more fundamentals.</p>
+      </div>
+      <div class="card">
+        <h4>🔄 LineItem Flexibility</h4>
+        <p>Uses Pydantic's <code>extra="allow"</code> config to accept arbitrary financial statement fields, making it adaptable to any line item search result.</p>
+      </div>
+    </div>
+
+    <h3 id="directory-map">Directory Map</h3>
+    <div class="dir-map">
+src/data/<br>
+├── __init__.py &nbsp;&nbsp;&nbsp;# Package init — re-exports models and cache<br>
+├── models.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 174 LOC — Pydantic models &amp; TypedDict state<br>
+└── cache.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 71 LOC — In-memory caching with dedup merge
+    </div>
+
+    <h3 id="configuration">Model Configuration</h3>
+    <table>
+      <thead><tr><th>Model</th><th>Fields</th><th>Notable Config</th></tr></thead>
+      <tbody>
+        <tr><td><code>Price</code></td><td>date, open, high, low, close, volume</td><td>All fields required</td></tr>
+        <tr><td><code>FinancialMetrics</code></td><td>44 fields</td><td>All Optional[float] with None defaults</td></tr>
+        <tr><td><code>LineItem</code></td><td>ticker, period, extras</td><td><code>ConfigDict(extra="allow")</code></td></tr>
+        <tr><td><code>InsiderTrade</code></td><td>owner, relation, type, shares, value</td><td>SEC filing fields</td></tr>
+        <tr><td><code>CompanyNews</code></td><td>title, date, source, sentiment, summary</td><td>Nullable sentiment</td></tr>
+        <tr><td><code>CompanyFacts</code></td><td>name, ticker, market_cap, sector, industry</td><td>Computed from /company/facts/</td></tr>
+        <tr><td><code>AnalystSignal</code></td><td>action, confidence, reasoning</td><td>action ∈ {buy, sell, hold}</td></tr>
+        <tr><td><code>Portfolio</code></td><td>cash, positions, total_value</td><td>Computed total_value property</td></tr>
+        <tr><td><code>Cache</code></td><td>5 internal dicts</td><td>Global singleton via <code>get_cache()</code></td></tr>
+        <tr><td><code>_merge_data()</code></td><td>existing + new lists</td><td>Dedup by date or unique key</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="code-examples">Code Examples</h3>
+    <pre><code class="language-python"># Defining a Pydantic model with optional financial fields
+class FinancialMetrics(BaseModel):
+    ticker: str
+    report_period: str
+    period: str
+    market_cap: Optional[float] = None
+    pe_ratio: Optional[float] = None
+    pb_ratio: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    net_margin: Optional[float] = None
+    revenue_growth: Optional[float] = None
+    # ... 35+ more Optional[float] fields</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># Cache singleton with dedup merge
+class Cache:
+    _instance = None
+    def __init__(self):
+        self.prices = {}
+        self.financial_metrics = {}
+        self.line_items = {}
+        self.insider_trades = {}
+        self.company_news = {}
+
+    def _merge_data(self, existing, new_data, key_fn):
+        seen = {key_fn(item) for item in existing}
+        return existing + [i for i in new_data if key_fn(i) not in seen]
+
+def get_cache() -> Cache:
+    if Cache._instance is None:
+        Cache._instance = Cache()
+    return Cache._instance</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  </main>
+
+  <footer>
+    <p><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">← Back to AI Hedge Fund Overview</a> · <a title="AI Hedge Fund — Search Wiki" href="../search.html">🔍 Search</a></p>
+    <p>Generated 2026-04-02 · Source rev <code>b6dca8c</code></p>
+  </footer>
+
+  <div class="overlay" id="diagram-overlay">
+    <div class="overlay-content">
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      <div id="overlay-diagram"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark' });
+    await mermaid.run({ querySelector: '.mermaid' });
+  </script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('neutra-ip-theme', next);
+      document.querySelector('.theme-toggle').textContent = next === 'dark' ? '🌙 Theme' : '☀️ Theme';
+    }
+    (function(){
+      const saved = localStorage.getItem('neutra-ip-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '🌙 Theme' : '☀️ Theme';
+      }
+    })();
+
+    (function(){
+      const toc = document.getElementById('toc');
+      const ul = document.createElement('ul');
+      document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+        const li = document.createElement('li');
+        if (h.tagName === 'H3') li.classList.add('h3');
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      toc.appendChild(ul);
+    })();
+
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); });
+    }
+
+    function openOverlay(wrapper) {
+      const overlay = document.getElementById('diagram-overlay');
+      const container = document.getElementById('overlay-diagram');
+      const svg = wrapper.querySelector('svg');
+      if (!svg) return;
+      container.innerHTML = '';
+      const clone = svg.cloneNode(true);
+      clone.style.maxWidth = '100%';
+      container.appendChild(clone);
+      overlay.classList.add('active');
+      let scale = 1;
+      container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        scale += e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.max(0.3, Math.min(3, scale));
+        clone.style.transform = 'scale(' + scale + ')';
+      });
+    }
+    function closeOverlay() { document.getElementById('diagram-overlay').classList.remove('active'); }
+    document.getElementById('diagram-overlay').addEventListener('click', function(e) { if (e.target === this) closeOverlay(); });
+
+    window.addEventListener('scroll', function() {
+      document.getElementById('back-to-top').style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+
+    (function(){
+      const text = document.getElementById('main-content').textContent;
+      const words = text.trim().split(/\s+/).length;
+      const mins = Math.ceil(words / 200);
+      document.getElementById('reading-time').textContent = '📖 ' + mins + ' min read';
+    })();
+
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const sections = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+      if (e.key === 'j' || e.key === 'k') {
+        const scrollY = window.scrollY + 100;
+        let idx = sections.findIndex(s => s.offsetTop > scrollY);
+        if (e.key === 'k') idx = Math.max(0, idx - 2); else if (idx < 0) idx = sections.length - 1;
+        if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    hljs.highlightAll();
+  </script>
+</body>
+</html>

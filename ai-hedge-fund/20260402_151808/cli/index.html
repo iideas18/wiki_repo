@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="wiki-generated" content="2026-04-02">
+  <meta name="wiki-source" content="src/cli/">
+  <meta name="wiki-source-rev" content="b6dca8c">
+  <title>CLI — Command-Line Interface | AI Hedge Fund Wiki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--text:#c9d1d9;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--border:#30363d;--heading:#f0f6fc;--code-bg:#1c2128;--text-muted:#8b949e}
+    [data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--text:#1f2328;--border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--text-muted:#656d76}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+    .skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 4px 0}.skip-link:focus{top:0}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+    .breadcrumb{font-size:14px;color:var(--text-muted)}.breadcrumb a{color:var(--accent)}
+    .theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+    main{max-width:960px;margin:0 auto;padding:32px 24px}
+    .hero{text-align:center;padding:48px 0 32px}.hero h1{font-size:2.2rem;color:var(--heading);margin-bottom:8px}.hero p{color:var(--text-muted);font-size:1.1rem}
+    .reading-time{font-size:13px;color:var(--text-muted);margin-top:8px}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}.stat-box .value{font-size:1.6rem;font-weight:700;color:var(--heading)}.stat-box .label{font-size:13px;color:var(--text-muted)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}.badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}.badge.blue{background:rgba(88,166,255,.15);color:var(--accent)}.badge.green{background:rgba(63,185,80,.15);color:var(--accent2)}.badge.yellow{background:rgba(210,153,34,.15);color:var(--accent3)}.badge.red{background:rgba(248,81,73,.15);color:var(--accent4)}
+    .intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin:24px 0}.intro-box h3{color:var(--accent);margin-bottom:8px}.intro-box .analogy{font-style:italic;color:var(--text-muted)}
+    .toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin:24px 0}.toc h2{font-size:1rem;color:var(--heading);margin-bottom:8px}.toc ul{list-style:none;padding-left:0}.toc li{padding:4px 0}.toc li.h3{padding-left:16px}.toc a{color:var(--accent);font-size:14px}
+    h2{font-size:1.5rem;color:var(--heading);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:1.2rem;color:var(--heading);margin:24px 0 12px}
+    .mermaid-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:20px 0;overflow-x:auto;cursor:pointer;position:relative}.mermaid-wrapper:hover::after{content:"Click to expand";position:absolute;top:8px;right:12px;font-size:12px;color:var(--text-muted)}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}th,td{padding:10px 12px;border:1px solid var(--border);text-align:left}th{background:var(--surface);color:var(--heading);font-weight:600}tr:nth-child(even){background:var(--surface)}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:16px 0}.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}.card h4{color:var(--heading);margin-bottom:8px}.card p{font-size:14px;color:var(--text-muted)}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;position:relative;margin:16px 0}code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}.copy-btn:hover{color:var(--accent)}
+    .dir-map{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:13px;line-height:1.8;margin:16px 0}
+    footer{text-align:center;padding:32px;border-top:1px solid var(--border);margin-top:48px;color:var(--text-muted);font-size:14px}footer a{color:var(--accent)}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;justify-content:center;align-items:center;padding:24px}.overlay.active{display:flex}.overlay-content{background:var(--surface);border-radius:12px;padding:32px;max-width:90vw;max-height:90vh;overflow:auto;position:relative}.overlay-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+    .back-to-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    @media print{.skip-link,header .theme-toggle,.overlay,.back-to-top{display:none!important}}
+    @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.6rem}}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <header>
+    <nav class="breadcrumb"><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">AI Hedge Fund</a> › CLI</nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">🌙 Theme</button>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <h1>⌨️ CLI — Command-Line Interface</h1>
+      <p>Interactive CLI for analyst/model selection, ticker input, and argument parsing</p>
+      <div class="reading-time" id="reading-time"></div>
+    </section>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="value">2</div><div class="label">Files</div></div>
+      <div class="stat-box"><div class="value">288</div><div class="label">Lines</div></div>
+      <div class="stat-box"><div class="value">1</div><div class="label">Dataclass</div></div>
+      <div class="stat-box"><div class="value">Python</div><div class="label">Language</div></div>
+    </div>
+
+    <div class="badges">
+      <span class="badge blue">🔵 Questionary UI</span>
+      <span class="badge green">🟢 Interactive Selection</span>
+      <span class="badge yellow">🟡 Argparse</span>
+      <span class="badge red">🔴 <a href="../llm/index.html" title="LLM — LLM Provider Abstraction | AI Hedge Fund Wiki" class="xref">Ollama</a> Support</span>
+    </div>
+
+    <div class="intro-box">
+      <h3>💡 What is this module?</h3>
+      <p>The <strong>cli</strong> module is the front door to the AI Hedge Fund when running from the terminal. It collects all user inputs — which tickers to analyse, which analysts to run, which <a href="../llm/index.html">LLM</a> to use, date ranges, and portfolio parameters — and packages them into a <code>CLIInputs</code> dataclass.</p>
+      <p class="analogy">"Think of it as a <strong>concierge desk at a hotel</strong> — when you walk in, the concierge (CLI) greets you, asks what you need (ticker selection, model choice), validates your request (date parsing), and hands you a neatly prepared itinerary (CLIInputs) before sending you on your way."</p>
+    </div>
+
+    <nav class="toc" id="toc"><h2>Table of Contents</h2></nav>
+
+    <h2 id="architecture">Architecture Overview</h2>
+    <p>The CLI module has a single main entry point — <code>parse_cli_inputs()</code> — that orchestrates argparse for non-interactive flags and questionary for interactive prompts. The result is a <code>CLIInputs</code> dataclass consumed by the main orchestrator.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="graph TD
+    A[User Terminal] -->|python main.py AAPL MSFT| B[argparse]
+    B --> C[parse_cli_inputs]
+    C --> D{Interactive Mode?}
+    D -->|Yes| E[select_analysts — questionary checkbox]
+    D -->|Yes| F[select_model — questionary select]
+    D -->|No| G[Use CLI flags]
+    E --> H[resolve_dates]
+    F --> H
+    G --> H
+    H --> I[CLIInputs dataclass]
+    I --> J[main.py orchestrator]
+    K[utils.analysts] -->|ANALYST_ORDER| E
+    L[llm.models] -->|get_models_list| F
+    style C fill:#58a6ff,stroke:#333,color:#000
+    style I fill:#3fb950,stroke:#333,color:#000
+    style E fill:#d29922,stroke:#333,color:#000
+    style F fill:#d29922,stroke:#333,color:#000">graph TD
+    A[User Terminal] -->|python main.py AAPL MSFT| B[argparse]
+    B --> C[parse_cli_inputs]
+    C --> D{Interactive Mode?}
+    D -->|Yes| E[select_analysts — questionary checkbox]
+    D -->|Yes| F[select_model — questionary select]
+    D -->|No| G[Use CLI flags]
+    E --> H[resolve_dates]
+    F --> H
+    G --> H
+    H --> I[CLIInputs dataclass]
+    I --> J[main.py orchestrator]
+    K[utils.analysts] -->|ANALYST_ORDER| E
+    L[llm.models] -->|get_models_list| F
+    style C fill:#58a6ff,stroke:#333,color:#000
+    style I fill:#3fb950,stroke:#333,color:#000
+    style E fill:#d29922,stroke:#333,color:#000
+    style F fill:#d29922,stroke:#333,color:#000</pre>
+    </div>
+
+    <h2 id="data-flow">User Interaction Flow</h2>
+    <p>The CLI walks the user through a multi-step interactive flow. Each step collects one piece of configuration, with sensible defaults and validation at each stage.</p>
+    <div class="mermaid-wrapper" onclick="openOverlay(this)">
+      <pre class="mermaid" data-source="sequenceDiagram
+    participant User
+    participant CLI as parse_cli_inputs
+    participant Q as questionary
+    participant Args as argparse
+    participant Out as CLIInputs
+    User->>CLI: python main.py AAPL MSFT
+    CLI->>Args: Parse command-line arguments
+    Args-->>CLI: tickers, flags, dates
+    CLI->>Q: select_analysts() — checkbox prompt
+    Note over Q: Space to toggle, 'a' for all, Enter to confirm
+    Q-->>CLI: selected_analysts list
+    CLI->>Q: select_model() — select prompt
+    Note over Q: Arrow keys to browse, Enter to select
+    Q-->>CLI: model_name, model_provider
+    alt Ollama Selected
+        CLI->>Q: Custom model input prompt
+        Q-->>CLI: custom_model_name
+    end
+    CLI->>CLI: resolve_dates(start, end)
+    CLI->>Out: Build CLIInputs dataclass
+    Out-->>User: Ready for execution">sequenceDiagram
+    participant User
+    participant CLI as parse_cli_inputs
+    participant Q as questionary
+    participant Args as argparse
+    participant Out as CLIInputs
+    User->>CLI: python main.py AAPL MSFT
+    CLI->>Args: Parse command-line arguments
+    Args-->>CLI: tickers, flags, dates
+    CLI->>Q: select_analysts() — checkbox prompt
+    Note over Q: Space to toggle, 'a' for all, Enter to confirm
+    Q-->>CLI: selected_analysts list
+    CLI->>Q: select_model() — select prompt
+    Note over Q: Arrow keys to browse, Enter to select
+    Q-->>CLI: model_name, model_provider
+    alt Ollama Selected
+        CLI->>Q: Custom model input prompt
+        Q-->>CLI: custom_model_name
+    end
+    CLI->>CLI: resolve_dates(start, end)
+    CLI->>Out: Build CLIInputs dataclass
+    Out-->>User: Ready for execution</pre>
+    </div>
+
+    <h2 id="key-classes">Key Classes &amp; Functions</h2>
+    <table>
+      <thead><tr><th>Name</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>CLIInputs</code></td><td>input.py</td><td>Dataclass</td><td>Container for all CLI inputs: tickers, analysts, model, dates, cash, margin, flags</td></tr>
+        <tr><td><code>parse_cli_inputs()</code></td><td>input.py</td><td>Function</td><td>Main entry — orchestrates argparse + interactive prompts → CLIInputs</td></tr>
+        <tr><td><code>select_analysts()</code></td><td>input.py</td><td>Function</td><td>Questionary checkbox prompt for analyst selection (Space/a/Enter)</td></tr>
+        <tr><td><code>select_model()</code></td><td>input.py</td><td>Function</td><td>Questionary select prompt for LLM model + Ollama custom input</td></tr>
+        <tr><td><code>resolve_dates()</code></td><td>input.py</td><td>Function</td><td>Date validation — parses strings, applies defaults, ensures start &lt; end</td></tr>
+        <tr><td><code>add_common_args()</code></td><td>input.py</td><td>Function</td><td>Adds shared argparse arguments (tickers, model, show-reasoning)</td></tr>
+        <tr><td><code>add_date_args()</code></td><td>input.py</td><td>Function</td><td>Adds date-range arguments (--start-date, --end-date)</td></tr>
+        <tr><td><code>parse_tickers()</code></td><td>input.py</td><td>Function</td><td>Normalizes ticker input (uppercase, comma-split, dedup)</td></tr>
+        <tr><td><code>tickers</code></td><td>CLIInputs</td><td>Field</td><td><code>list[str]</code> — Uppercase ticker symbols</td></tr>
+        <tr><td><code>selected_analysts</code></td><td>CLIInputs</td><td>Field</td><td><code>list[str]</code> — Agent keys from ANALYST_CONFIG</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="interactions">Module Interactions</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Target</th><th>Interaction</th></tr></thead>
+      <tbody>
+        <tr><td>main.py</td><td>cli.input</td><td>Calls <code>parse_cli_inputs()</code> at startup</td></tr>
+        <tr><td>cli.input</td><td><a href="../utils/index.html">utils</a>.analysts</td><td>Reads <code>ANALYST_ORDER</code> and <code>ANALYST_CONFIG</code> for checkbox choices</td></tr>
+        <tr><td>cli.input</td><td>llm.models</td><td>Calls <code>get_models_list()</code> for model selection dropdown</td></tr>
+        <tr><td>cli.input</td><td>utils.ollama</td><td>Triggers Ollama container start when Ollama model is selected</td></tr>
+        <tr><td>cli.input</td><td>questionary</td><td>Uses checkbox and select prompts for interactive input</td></tr>
+        <tr><td>cli.input</td><td>argparse</td><td>Parses non-interactive CLI flags and positional arguments</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="deep-dive">Deep Dive</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>📦 CLIInputs Dataclass</h4>
+        <p>All user configuration in one object: <code>tickers</code>, <code>selected_analysts</code>, <code>model_name</code>, <code>model_provider</code>, <code>start_date</code>, <code>end_date</code>, <code>initial_cash</code>, <code>margin_requirement</code>, <code>show_reasoning</code>.</p>
+      </div>
+      <div class="card">
+        <h4>🎯 Analyst Selection</h4>
+        <p>Interactive checkbox with questionary — Space toggles individual analysts, 'a' selects all, Enter confirms. Shows analyst display_name and description from <code>ANALYST_CONFIG</code>.</p>
+      </div>
+      <div class="card">
+        <h4>🤖 Model Selection</h4>
+        <p>Dropdown showing all available models grouped by provider. When Ollama is selected, an additional text prompt asks for the custom model name to pull.</p>
+      </div>
+      <div class="card">
+        <h4>📅 Date Resolution</h4>
+        <p><code>resolve_dates()</code> handles multiple date formats, applies sensible defaults (last 3 months), and validates that start_date precedes end_date.</p>
+      </div>
+    </div>
+
+    <h3 id="directory-map">Directory Map</h3>
+    <div class="dir-map">
+src/cli/<br>
+├── __init__.py &nbsp;&nbsp;&nbsp;# Package init — re-exports parse_cli_inputs, CLIInputs<br>
+└── input.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 288 LOC — CLI entry point, interactive prompts, argparse
+    </div>
+
+    <h3 id="configuration">CLIInputs Fields Reference</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>tickers</code></td><td><code>list[str]</code></td><td>Required</td><td>Uppercase stock ticker symbols</td></tr>
+        <tr><td><code>selected_analysts</code></td><td><code>list[str]</code></td><td>All analysts</td><td>Agent keys from ANALYST_CONFIG</td></tr>
+        <tr><td><code>model_name</code></td><td><code>str</code></td><td><code>"gpt-4o"</code></td><td>LLM model identifier</td></tr>
+        <tr><td><code>model_provider</code></td><td><code>str</code></td><td><code>"OpenAI"</code></td><td>Provider from <a href="../llm/index.html" title="LLM — LLM Provider Abstraction | AI Hedge Fund Wiki" class="xref">ModelProvider</a> enum</td></tr>
+        <tr><td><code>start_date</code></td><td><code>str</code></td><td>3 months ago</td><td>Analysis start date (YYYY-MM-DD)</td></tr>
+        <tr><td><code>end_date</code></td><td><code>str</code></td><td>Today</td><td>Analysis end date (YYYY-MM-DD)</td></tr>
+        <tr><td><code>initial_cash</code></td><td><code>float</code></td><td><code>100000.0</code></td><td>Starting portfolio cash</td></tr>
+        <tr><td><code>margin_requirement</code></td><td><code>float</code></td><td><code>0.0</code></td><td>Required margin percentage</td></tr>
+        <tr><td><code>show_reasoning</code></td><td><code>bool</code></td><td><code>False</code></td><td>Enable verbose agent reasoning output</td></tr>
+        <tr><td><code>show_tool_calls</code></td><td><code>bool</code></td><td><code>False</code></td><td>Show individual API tool calls in output</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="code-examples">Code Examples</h3>
+    <pre><code class="language-python"># CLIInputs dataclass — the output of the CLI module
+from dataclasses import dataclass, field
+
+@dataclass
+class CLIInputs:
+    tickers: list[str] = field(default_factory=list)
+    selected_analysts: list[str] = field(default_factory=list)
+    model_name: str = "gpt-4o"
+    model_provider: str = "OpenAI"
+    start_date: str = ""
+    end_date: str = ""
+    initial_cash: float = 100_000.0
+    margin_requirement: float = 0.0
+    show_reasoning: bool = False
+    show_tool_calls: bool = False</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># Interactive analyst selection with questionary
+import questionary
+from utils.analysts import ANALYST_CONFIG, ANALYST_ORDER
+
+def select_analysts() -> list[str]:
+    choices = [
+        questionary.Choice(
+            title=f"{cfg['display_name']} — {cfg['description']}",
+            value=key,
+            checked=True,
+        )
+        for key in ANALYST_ORDER
+        if (cfg := ANALYST_CONFIG[key])
+    ]
+    selected = questionary.checkbox(
+        "Select analysts to run:",
+        choices=choices,
+        instruction="(Space=toggle, a=all, Enter=confirm)",
+    ).ask()
+    return selected or ANALYST_ORDER  # default to all</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+    <pre><code class="language-python"># Model selection with Ollama custom input support
+def select_model() -> tuple[str, str]:
+    models = get_models_list()
+    choices = [f"{m.display_name} ({m.provider.value})" for m in models]
+    answer = questionary.select("Select LLM model:", choices=choices).ask()
+
+    selected = models[choices.index(answer)]
+    if selected.provider == ModelProvider.OLLAMA:
+        custom = questionary.text(
+            "Enter Ollama model name:",
+            default=selected.model_name,
+        ).ask()
+        return custom, selected.provider.value
+
+    return selected.model_name, selected.provider.value</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  </main>
+
+  <footer>
+    <p><a title="AI Hedge Fund — Source Code Wiki" href="../index.html">← Back to AI Hedge Fund Overview</a> · <a title="AI Hedge Fund — Search Wiki" href="../search.html">🔍 Search</a></p>
+    <p>Generated 2026-04-02 · Source rev <code>b6dca8c</code></p>
+  </footer>
+
+  <div class="diagram-overlay" id="diagramOverlay">
+    <div class="overlay-content">
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+      <div id="overlay-diagram"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark' });
+    try{await mermaid.run({ querySelector: '.mermaid' });}catch(e){console.warn('mermaid:',e)}
+  </script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('neutra-ip-theme', next);
+      document.querySelector('.theme-toggle').textContent = next === 'dark' ? '🌙 Theme' : '☀️ Theme';
+    }
+    (function(){
+      const saved = localStorage.getItem('neutra-ip-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '🌙 Theme' : '☀️ Theme';
+      }
+    })();
+
+    (function(){
+      const toc = document.getElementById('toc');
+      const ul = document.createElement('ul');
+      document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+        const li = document.createElement('li');
+        if (h.tagName === 'H3') li.classList.add('h3');
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      toc.appendChild(ul);
+    })();
+
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); });
+    }
+
+    function openOverlay(wrapper) {
+      const overlay = document.getElementById('diagramOverlay');
+      const container = document.getElementById('overlay-diagram');
+      const svg = wrapper.querySelector('svg');
+      if (!svg) return;
+      container.innerHTML = '';
+      const clone = svg.cloneNode(true);
+      clone.style.maxWidth = '100%';
+      container.appendChild(clone);
+      overlay.classList.add('active');
+      let scale = 1;
+      container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        scale += e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.max(0.3, Math.min(3, scale));
+        clone.style.transform = 'scale(' + scale + ')';
+      });
+    }
+    function closeOverlay() { document.getElementById('diagramOverlay').classList.remove('active'); }
+    document.getElementById('diagramOverlay').addEventListener('click', function(e) { if (e.target === this) closeOverlay(); });
+
+    window.addEventListener('scroll', function() {
+      document.getElementById('backToTop').style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+
+    (function(){
+      const text = document.getElementById('main-content').textContent;
+      const words = text.trim().split(/\s+/).length;
+      const mins = Math.ceil(words / 200);
+      document.getElementById('reading-time').textContent = '📖 ' + mins + ' min read';
+    })();
+
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const sections = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+      if (e.key === 'j' || e.key === 'k') {
+        const scrollY = window.scrollY + 100;
+        let idx = sections.findIndex(s => s.offsetTop > scrollY);
+        if (e.key === 'k') idx = Math.max(0, idx - 2); else if (idx < 0) idx = sections.length - 1;
+        if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    hljs.highlightAll();
+  </script>
+</body>
+</html>
