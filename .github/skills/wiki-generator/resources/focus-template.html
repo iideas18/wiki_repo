@@ -180,6 +180,18 @@ pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);
 </details>
 </div>
 
+<!-- THE PROBLEM — what specific problem this mechanism solves -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent4);">&#10067; The Problem</h3>
+<p>{{THE_PROBLEM}} — 100+ words. What specific problem does this mechanism solve? What would happen without it? Paint a picture of the pain: "Without this, every request would..." or "The naive approach fails because..."</p>
+</div>
+
+<!-- THE APPROACH — how the solution works at a high level -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent2);">&#128161; The Approach</h3>
+<p>{{THE_APPROACH}} — 150+ words. How does this solution work, in narrative form? Walk through the key insight that makes the solution work. Don't just describe steps — explain WHY each step is necessary and what it contributes.</p>
+</div>
+
 <!-- TABLE OF CONTENTS (auto-generated from H2/H3 headings by footer JS) -->
 <h2 id="contents">Contents</h2>
 <nav class="toc" id="toc"></nav>
@@ -291,6 +303,39 @@ Result process(Input& input) {
   <tr><td>Edge case 2</td><td>What happens</td><td><code>file.cc:456</code></td></tr>
 </table>
 
+<!-- WHY NOT ALTERNATIVES — what other approaches exist and why they weren't chosen -->
+<h2 id="alternatives">&#128260; Why Not Alternatives?</h2>
+<p>Understanding why the current approach was chosen requires seeing what was rejected:</p>
+<table>
+  <tr><th>Alternative</th><th>How It Works</th><th>Why It Was Rejected</th><th>When It <em>Would</em> Be Better</th></tr>
+  <tr><td>Alternative A</td><td>Brief description</td><td>Specific reason: performance, complexity, correctness</td><td>Under what conditions this would actually be the right choice</td></tr>
+  <tr><td>Alternative B</td><td>Brief description</td><td>Specific reason</td><td>When it would win</td></tr>
+  <!-- Add 2-4 rows. These should be REAL alternatives a developer might consider. -->
+</table>
+
+<!-- COMPLEXITY & TRADEOFFS — honest assessment of costs -->
+<h2 id="complexity">&#9878;&#65039; Complexity &amp; Tradeoffs</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">What This Approach Costs</h3>
+<table>
+  <tr><th>Dimension</th><th>Cost</th><th>Benefit</th></tr>
+  <tr><td>Time complexity</td><td>O(?)</td><td>What this buys</td></tr>
+  <tr><td>Space complexity</td><td>O(?)</td><td>What this enables</td></tr>
+  <tr><td>Code complexity</td><td>Lines / indirection</td><td>What this simplifies elsewhere</td></tr>
+  <tr><td>Maintenance burden</td><td>What's hard to change</td><td>What's easy to extend</td></tr>
+</table>
+<p style="margin-top:1rem;"><strong>The honest truth:</strong> {{HONEST_ASSESSMENT}} — 50+ words. Where does this approach struggle? What would you change with unlimited time? What technical debt exists?</p>
+</div>
+
+<!-- FAILURE RECOVERY — what happens when things go wrong -->
+<h2 id="failure-recovery">&#128680; Failure Recovery</h2>
+<table>
+  <tr><th>Failure Scenario</th><th>Detection</th><th>Recovery Strategy</th><th>Data Loss Risk</th></tr>
+  <tr><td>Crash mid-operation</td><td>How detected</td><td>How the system recovers</td><td>&#128994; None / &#128308; Possible</td></tr>
+  <tr><td>Invalid input</td><td>Validation check</td><td>Error path</td><td>&#128994; None</td></tr>
+  <!-- Add 2-4 rows for realistic failure scenarios -->
+</table>
+
 <!-- CONFIGURATION relevant to this topic -->
 <h2 id="configuration">Configuration</h2>
 <table>
@@ -319,11 +364,12 @@ Result process(Input& input) {
 </details>
 
 <!-- NOTE: Keep the page rich enough to pass verify.sh.
-     Good focus pages usually end up 400-600 lines with:
-     - 2+ Mermaid diagrams
-     - 2+ code blocks
-  - 8-10 sections with a clear overview/mechanism/behavior split
-     - 1-2 tables beyond the configuration table
+     Good focus pages usually end up 500-800 lines with:
+     - 3+ Mermaid diagrams
+     - 3+ code blocks with annotations
+     - 10-14 sections including: overview, mechanism, problem/approach/alternatives, code walkthrough, edge cases, failure recovery, complexity analysis
+     - 2+ tables beyond the configuration table
+     - Every section answers "WHY" not just "WHAT"
 -->
 
 <!-- FOOTER -->

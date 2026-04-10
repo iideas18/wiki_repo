@@ -115,6 +115,19 @@ blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;
   </p>
 </div>
 
+<!-- PROJECT PHILOSOPHY — explains WHY this project exists and its design principles -->
+<h2>&#127919; Project Philosophy</h2>
+<p>{{PROJECT_PHILOSOPHY}} — Replace with 200+ words explaining: what problem this project solves and why it exists, what design principles guide the architecture (infer from code patterns), what the project prioritizes (performance? correctness? extensibility?), and how it fits in the broader ecosystem. Use narrative voice.</p>
+
+<!-- DESIGN DECISIONS — key architectural choices with alternatives and rationale -->
+<h2>&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+  <tr><td>Overall architecture</td><td>Describe the chosen approach</td><td>List 2-3 alternatives</td><td>Explain why this was the right call</td></tr>
+  <tr><td>Core data model</td><td>Describe the chosen approach</td><td>List alternatives</td><td>Explain rationale</td></tr>
+  <!-- Add 5-8 rows total -->
+</table>
+
 <!-- SYSTEM ARCHITECTURE — shows all major modules and their connections -->
 <h2>System Architecture</h2>
 <div class="diagram-container">
@@ -166,10 +179,30 @@ flowchart TD
 <h2>Navigation Guide</h2>
 <table style="max-width:700px">
   <tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
-  <tr><td><strong>0 — Project Hub</strong> (this page)</td><td>Project overview, module map, quick stats</td><td>Getting started, finding the right module</td></tr>
-  <tr><td><strong>1 — Module Overview</strong></td><td>Architecture diagram, key components, sub-module cards</td><td>Understanding a module's purpose and structure</td></tr>
-  <tr><td><strong>2 — Sub-Module Deep Dive</strong></td><td>Source-level structs, algorithms, configs, diagrams</td><td>Implementing, debugging, or extending code</td></tr>
+  <tr><td><strong>0 — Project Hub</strong> (this page)</td><td>Project philosophy, design decisions, module map, data flows</td><td>Getting started, understanding the big picture</td></tr>
+  <tr><td><strong>1 — Module Overview</strong></td><td>Design rationale, algorithm spotlight, narrated walkthrough, failure analysis</td><td>Understanding a module's purpose and design choices</td></tr>
+  <tr><td><strong>2 — Sub-Module Deep Dive</strong></td><td>Annotated code walkthroughs, design rationale, edge cases, implementation details</td><td>Implementing, debugging, or extending code</td></tr>
+  <tr><td><strong>Focus Pages</strong></td><td>Algorithm traces, alternatives comparison, complexity analysis, failure recovery</td><td>Deep understanding of a specific mechanism</td></tr>
 </table>
+
+<!-- KEY DATA FLOWS — major end-to-end flows through the system -->
+<h2>&#128279; Key Data Flows</h2>
+<p>How data moves through the system's major paths. Note the annotations explaining WHY each hand-off occurs.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Entry as Entry Point
+    participant Core as Core Module
+    participant Sub as Sub-System
+    participant Out as Output
+    Entry->>Core: Request (type)
+    Note over Entry,Core: WHY: Core validates before processing
+    Core->>Sub: Delegated work
+    Note over Core,Sub: WHY: Separation of concerns
+    Sub-->>Core: Result
+    Core-->>Entry: Response
+</pre>
+</div>
 
 <!-- CROSS-MODULE CONNECTION DIAGRAM
      Shows how the major modules interact at their boundaries.

@@ -197,6 +197,12 @@ find_latest_cache() {
   _proj_dir="${OUTPUT_BASE}/${PROJECT_NAME}"
   if [ ! -d "$_proj_dir" ]; then return 1; fi
   for dir in $(ls -dt "$_proj_dir"/[0-9]*_[0-9]* 2>/dev/null); do
+    # Check for 3-pass research artifacts (new format)
+    if [ -f "$dir/docs/_research/01-survey.md" ] && [ -f "$dir/docs/_research/_synthesis.md" ]; then
+      echo "$dir/docs"
+      return 0
+    fi
+    # Fallback: legacy single-pass manifest
     if [ -f "$dir/docs/_research/_manifest.json" ]; then
       echo "$dir/docs"
       return 0
@@ -224,6 +230,9 @@ esac
 # === Build the prompt ===
 PROMPT="Use the wiki-generator skill to generate a complete HTML wiki for the source code at ${SOURCE_DIR}. Save all generated HTML files to ${OUTPUT_DIR}."
 
+# Add 3-pass research instructions
+PROMPT="${PROMPT} Follow the 3-pass research approach: Phase 1A (broad survey), Phase 1B (per-module deep WHY analysis), and Phase 1C (cross-module synthesis). Save all research artifacts to ${OUTPUT_DIR}/docs/_research/ with filenames: 01-survey.md, <module>_deep.md for each module, and _synthesis.md."
+
 if [ "$CACHE_HIT" = "true" ]; then
   PROMPT="${PROMPT} Phase 1 research cache is FRESH at ${CACHE_DIR}/_research/. Copy the _research/ directory to the new output, then skip Phase 1 and start from Phase 1.5."
 elif [ "$NO_CACHE" = "true" ]; then
@@ -231,7 +240,7 @@ elif [ "$NO_CACHE" = "true" ]; then
 fi
 
 if [ "$CACHE_ONLY" = "true" ]; then
-  PROMPT="Use the wiki-generator skill Phase 1 ONLY: research the source code at ${SOURCE_DIR}, save research cache to ${OUTPUT_DIR}/docs/_research/, then STOP. Do not generate any HTML pages."
+  PROMPT="Use the wiki-generator skill Phase 1 ONLY (all 3 passes: 1A broad survey, 1B per-module deep analysis, 1C cross-module synthesis): research the source code at ${SOURCE_DIR}, save research cache to ${OUTPUT_DIR}/docs/_research/, then STOP. Do not generate any HTML pages."
 fi
 
 # === Dry-run output ===
@@ -331,9 +340,10 @@ if [ $EXIT_CODE -eq 0 ]; then
   PAGE_COUNT=$(find "$OUTPUT_DIR" -name '*.html' 2>/dev/null | wc -l)
   echo "[OK] Wiki generated: $OUTPUT_DIR ($PAGE_COUNT pages)"
 
-  # === Post-generation: update versions.json and inject version switcher ===
+  # === Post-generation: update versions, switcher, and hub index ===
   GEN_VERSIONS="${OUTPUT_BASE}/generate_versions.py"
   INJ_SWITCHER="${OUTPUT_BASE}/inject_version_switcher.py"
+  UPDATE_INDEX="${OUTPUT_BASE}/update_index.py"
   if [ -f "$GEN_VERSIONS" ]; then
     echo "[INFO] Regenerating versions.json for $PROJECT_NAME ..."
     python3 "$GEN_VERSIONS" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
@@ -341,6 +351,10 @@ if [ $EXIT_CODE -eq 0 ]; then
   if [ -f "$INJ_SWITCHER" ]; then
     echo "[INFO] Injecting version switcher for $PROJECT_NAME ..."
     python3 "$INJ_SWITCHER" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
+  fi
+  if [ -f "$UPDATE_INDEX" ]; then
+    echo "[INFO] Updating hub index.html for $PROJECT_NAME ..."
+    python3 "$UPDATE_INDEX" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
   fi
 else
   echo "[FAIL] Wiki generation failed (exit $EXIT_CODE). See $LOG_FILE" >&2

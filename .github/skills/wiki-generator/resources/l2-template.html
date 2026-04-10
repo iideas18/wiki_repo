@@ -145,6 +145,17 @@ pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);
 </details>
 </div>
 
+<!-- DESIGN RATIONALE — why this component is designed this way -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>{{DESIGN_RATIONALE}} — 150+ words explaining the design choices: what pattern does this follow and why? What constraints shaped the implementation? What trade-offs were made and what was sacrificed?</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>Example: data layout</td><td>Array of structs</td><td>Struct of arrays</td><td>Random access pattern dominates; cache locality for single items matters more than SIMD sweeps</td></tr>
+  <!-- Add 2-4 rows -->
+</table>
+</div>
+
 <!-- TABLE OF CONTENTS (auto-generated from H2/H3 headings by footer JS) -->
 <h2>Contents</h2>
 <nav class="toc" id="toc"></nav>
@@ -203,6 +214,35 @@ flowchart TD
 └── index.ext                  ← Role: entry point
 </code></pre>
 </details>
+
+<!-- ANNOTATED CODE WALKTHROUGH — line-by-line explanation of the most important code -->
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The most important code in this sub-module, annotated with WHY each piece exists:</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">{{KEY_FUNCTION_NAME}}</h4>
+<pre><code class="language-{{LANG}}">// Replace with actual code from the source
+void key_function() {
+    // ← WHY: Explain the purpose of this line
+    // ← WHY: What constraint or requirement drives this?
+}</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>Line N:</strong> What this does and WHY — what would break if removed</li>
+  <li><strong>Line M:</strong> The design choice here — why this approach over the obvious alternative</li>
+  <!-- Add annotations for 5-10 key lines -->
+</ul>
+</div>
+</div>
+
+<!-- EDGE CASES & BOUNDARIES — what the code handles (and doesn't) -->
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>Empty input</td><td>How it's handled</td><td>function_name:line</td><td>&#128994; Low</td></tr>
+  <tr><td>Concurrent access</td><td>How it's handled</td><td>function_name:line</td><td>&#128308; High</td></tr>
+  <!-- Add 3-6 rows covering known edge cases -->
+</table>
 
 <!-- DEEP-DIVE HUB — focus sub-pages are created during initial build (Phase 5).
      Replace summaries and links below with actual deep-dive topics from research. -->

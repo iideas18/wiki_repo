@@ -122,6 +122,16 @@ pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);
   <p>{{MODULE_DESC}}</p>
 </div>
 
+<!-- WHY THIS MODULE EXISTS — explains purpose and design rationale -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>{{MODULE_WHY}} — Replace with 150+ words explaining what problem this module solves, why it exists as a separate module (not merged into something else), and what the system would look like without it. Use narrative voice: "Without this module, every component would need to..."</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">{{MODULE_ANALOGY}} — A vivid metaphor mapping this module's core concept to everyday life. 3-5 sentences.</p>
+</details>
+</div>
+
 <!-- STAT ROW — customize metrics -->
 <div class="stat-row">
   <div class="stat-box"><div class="num">N</div><div class="label">Sub-Modules</div></div>
@@ -195,6 +205,66 @@ sequenceDiagram
 </div>
 <blockquote><strong>Key insight:</strong> {{MODULE_NAME}} owns X. {{SIBLING_MODULE}} owns Y. The protocol boundary handles the translation between them.</blockquote>
 -->
+
+<!-- DESIGN DECISIONS TABLE — key choices made in this module -->
+<h2>&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr><td>Data structure for X</td><td>Chosen approach</td><td>Alternative A, Alternative B</td><td>Rationale explaining WHY — what would go wrong with alternatives</td></tr>
+  <!-- Add 3-6 rows covering major design choices in this module -->
+</table>
+
+<!-- ALGORITHM SPOTLIGHT — deep dive into the most interesting algorithm -->
+<h2>&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">{{ALGORITHM_NAME}}</h3>
+<p><strong>The Problem:</strong> What specific problem does this algorithm solve?</p>
+<p><strong>The Approach:</strong> How does it work, step by step, in plain English?</p>
+<p><strong>Why This Algorithm:</strong> What alternatives exist and why weren't they chosen? What are the time/space complexity trade-offs?</p>
+<pre class="mermaid">
+graph TD
+    A[Input] --> B{Decision Point}
+    B -->|Case 1| C[Fast Path]
+    B -->|Case 2| D[Complex Path]
+    C --> E[Output]
+    D --> F[Sub-step] --> E
+    style C fill:#e8f5e9
+    style D fill:#fff3e0
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> Example input</p>
+<p><strong>Step 1:</strong> What happens first and why</p>
+<p><strong>Step 2:</strong> What happens next — note the key decision here</p>
+<p><strong>Result:</strong> Expected output, and what would happen if the algorithm were naive</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG — failure modes and how the module handles them -->
+<h2>&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr><td>Example failure</td><td>What causes it</td><td>How it's detected</td><td>How the code handles it, or what the user sees</td></tr>
+  <!-- Add 3-5 rows covering realistic failure scenarios -->
+</table>
+
+<!-- PERFORMANCE PROFILE — where time and memory are spent -->
+<h2>&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Path 1:</strong> Description — O(n) / O(1) — why this matters</li>
+  <li><strong>Path 2:</strong> Description — complexity — trade-off made</li>
+</ul>
+<h3>Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> What's allocated, when it's freed, and any caching strategies</li>
+  <li><strong>I/O:</strong> What external resources are accessed and how often</li>
+</ul>
+</div>
 
 <!-- SUB-MODULE CARDS — one per sub-module, link to submod/index.html -->
 <h2>Sub-Modules</h2>
