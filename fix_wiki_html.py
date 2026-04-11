@@ -401,6 +401,46 @@ class FileFixer:
         if "mermaid" not in self.text:
             return
 
+        # ── Strip emojis from mermaid blocks ──
+        # Mermaid v10 can choke on Unicode emoji characters inside node labels.
+        # Replace them with empty string to prevent parse failures.
+        emoji_re = re.compile(
+            "["
+            "\U0001F300-\U0001F9FF"  # Misc Symbols, Emoticons, Supplemental
+            "\U00002600-\U000027BF"  # Misc Symbols, Dingbats
+            "\U0000FE00-\U0000FE0F"  # Variation Selectors
+            "\U0000200D"             # Zero Width Joiner
+            "\U00002702-\U000027B0"  # Dingbats
+            "\U0000E000-\U0000F8FF"  # Private Use Area
+            "]+",
+            flags=re.UNICODE,
+        )
+
+        def _strip_emoji_in_mermaid(match):
+            full = match.group(0)
+            pre_tag = match.group(1)
+            content = match.group(2)
+            cleaned = emoji_re.sub("", content)
+            if cleaned != content:
+                return pre_tag + cleaned + "</pre>"
+            return full
+
+        changed_before = self.text
+        self.text = re.sub(
+            r'(<pre\s+class="mermaid">)(.*?)(</pre>)',
+            _strip_emoji_in_mermaid,
+            self.text,
+            flags=re.DOTALL,
+        )
+        emoji_count = 0
+        if self.text != changed_before:
+            # Count how many blocks were cleaned
+            old_blocks = re.findall(r'<pre\s+class="mermaid">.*?</pre>', changed_before, re.DOTALL)
+            new_blocks = re.findall(r'<pre\s+class="mermaid">.*?</pre>', self.text, re.DOTALL)
+            emoji_count = sum(1 for o, n in zip(old_blocks, new_blocks) if o != n)
+            self._log(f"strip emojis from {emoji_count} mermaid block(s)")
+            changed_before = self.text
+
         def _inside_try_block(text, pos):
             """Return True if *pos* sits between a try{ and its }catch."""
             depth = 0
@@ -558,6 +598,23 @@ def scan_issues(path: Path, text: str) -> list[str]:
 
     # Check for mermaid.run / mermaid.render without try-catch
     if "mermaid.run" in text or "mermaid.render" in text:
+
+        # Check for emojis inside mermaid blocks
+        emoji_re = re.compile(
+            "["
+            "\U0001F300-\U0001F9FF"
+            "\U00002600-\U000027BF"
+            "\U0000FE00-\U0000FE0F"
+            "\U0000200D"
+            "\U00002702-\U000027B0"
+            "]+",
+            flags=re.UNICODE,
+        )
+        mermaid_blocks = re.findall(r'<pre\s+class="mermaid">.*?</pre>', text, re.DOTALL)
+        emoji_blocks = sum(1 for b in mermaid_blocks if emoji_re.search(b))
+        if emoji_blocks:
+            issues.append(f"{rel}: {emoji_blocks} mermaid block(s) contain emojis (may break rendering)")
+
         def _inside_try(text, pos):
             depth = 0
             i = pos - 1

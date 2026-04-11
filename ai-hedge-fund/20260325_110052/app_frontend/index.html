@@ -108,13 +108,13 @@ flowchart TD
   App["App.tsx"] --> Layout["Layout.tsx"]
   Layout --> Providers["ReactFlowProvider → FlowProvider → TabsProvider → LayoutProvider → SidebarProvider"]
   Providers --> TopBar["TopBar ⌨ panel toggles"]
-  Providers --> TabBar["TabBar 🗂 tabs"]
-  Providers --> LeftSidebar["LeftSidebar 📂 flow list"]
-  Providers --> RightSidebar["RightSidebar 🧩 component palette"]
-  Providers --> BottomPanel["BottomPanel 📋 output/debug"]
+  Providers --> TabBar["TabBar  tabs"]
+  Providers --> LeftSidebar["LeftSidebar  flow list"]
+  Providers --> RightSidebar["RightSidebar  component palette"]
+  Providers --> BottomPanel["BottomPanel  output/debug"]
   Providers --> TabContent["TabContent"]
   TabContent --> FlowCanvas["Flow.tsx ← React Flow canvas"]
-  TabContent --> Settings["Settings ⚙ API keys / models"]
+  TabContent --> Settings["Settings  API keys / models"]
   FlowCanvas --> Nodes["AgentNode · StockAnalyzerNode · PortfolioManagerNode · PortfolioStartNode · JsonOutputNode · InvestmentReportNode"]
 </pre>
 </div>

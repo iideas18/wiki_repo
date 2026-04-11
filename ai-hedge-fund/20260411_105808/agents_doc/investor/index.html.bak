@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-11">
+<meta name="wiki-source" content="ai-hedge-fund/src/agents">
+<meta name="wiki-source-rev" content="c45b50f">
+<title>Investor-Inspired Agents — AI Hedge Fund Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.2rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.5rem}
+h2{color:var(--accent);font-size:1.5rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{color:var(--heading);font-size:1.2rem;margin:1.5rem 0 .5rem}
+h4{color:var(--accent2);font-size:1.05rem;margin:1rem 0 .3rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border)}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.5rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1rem 0 1.5rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1rem}.hero .subtitle{color:var(--accent);font-size:1.15rem;margin-bottom:.3rem}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.88rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{column-count:2;column-gap:2rem;margin:1rem 0}
+.toc ol{padding-left:1.2rem}.toc li{margin:.3rem 0}.toc a{color:var(--accent)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;text-decoration:none}.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text)}
+.back-to-top.visible{display:flex}
+.code-walk{counter-reset:step}.code-walk .step{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;counter-increment:step}
+.code-walk .step::before{content:"Step " counter(step);display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem;font-size:.9rem}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:1px 6px;border-radius:8px;margin-left:.5rem}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{color:#1f2328;background:#fff;max-width:100%}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--accent:#0969da;--heading:#1f2328;--code-bg:#f6f8fa}.card,.stat-box,.diagram-container{break-inside:avoid}}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.toc{column-count:1}}
+</style>
+<script>mermaid&&mermaid.initialize({startOnLoad:false});</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">&#9790;</button>
+
+<nav class="breadcrumb">
+  <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="Module Deep-Dive" href="../index.html">Agents</a> &rsaquo; Investor-Inspired Agents
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <p class="subtitle">Deep-Dive — Investor-Inspired Agents</p>
+  <h1 style="border:none;text-align:center;margin:0;padding:0">13 Investor-Inspired Agents</h1>
+  <p>A Board of Directors Where Every Member Has a Different Investment Bible</p>
+  <p style="margin-top:.8rem">
+    <span class="badge green">13 Agents</span>
+    <span class="badge blue">Hybrid Scoring + LLM</span>
+    <span class="badge yellow">13 Files</span>
+  </p>
+</div>
+
+<blockquote>
+<strong>💡 What is this?</strong> Imagine a boardroom with 13 legendary investors — each reads the same financial report but reaches different conclusions based on their personal philosophy. Warren Buffett looks for owner earnings and moats. Michael Burry hunts for hidden value others have abandoned. Nassim Taleb checks whether the company can survive a black swan. This module encodes each philosophy as an autonomous agent. They never talk to each other — they vote independently, like a board of directors with sealed ballots. The Risk Manager tallies the votes and applies constraints.
+</blockquote>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture — 13 Philosophies, One Interface</h2>
+
+<p>Every investor agent follows the same structural pattern despite encoding wildly different investment philosophies. This uniformity is by design: LangGraph's fan-out requires a consistent function signature, and the downstream Risk Manager expects a uniform signal format.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+    subgraph Value["Value Investors"]
+        WB["Warren Buffett\n🏛️ Owner Earnings"]
+        BG["Ben Graham\n📊 Net-Net Value"]
+        MB["Michael Burry\n🔍 Deep Value"]
+        CM["Charlie Munger\n🧠 Quality"]
+        JG["Joel Greenblatt\n✨ Magic Formula"]
+        AD["Aswath Damodaran\n📐 DCF"]
+    end
+
+    subgraph Growth["Growth Investors"]
+        PL["Peter Lynch\n📈 GARP"]
+        CW["Cathie Wood\n🚀 Disruption"]
+        BO["Bill O'Neil\n📊 CAN SLIM"]
+        PF["Phil Fisher\n🔬 Scuttlebutt"]
+    end
+
+    subgraph Macro["Macro / Risk"]
+        SD["Druckenmiller\n🌊 Macro"]
+        GS["George Soros\n♟️ Reflexivity"]
+        NT["Nassim Taleb\n🦢 Tail Risk"]
+    end
+
+    Value --> Signals["Signal Aggregation\n{signal, confidence, reasoning}"]
+    Growth --> Signals
+    Macro --> Signals
+    Signals --> RM["Risk Manager"]
+</pre>
+</div>
+
+<h2 id="key-functions">Key Functions &amp; Files</h2>
+
+<table>
+<thead><tr><th>File</th><th>Agent Function</th><th>Philosophy</th><th>Key Metrics</th></tr></thead>
+<tbody>
+<tr><td><code>warren_buffett.py</code></td><td><code>warren_buffett_agent(state)</code></td><td>Owner earnings, durable moats</td><td>Owner earnings, ROE &gt; 15%, debt payoff years, ROIC</td></tr>
+<tr><td><code>ben_graham.py</code></td><td><code>ben_graham_agent(state)</code></td><td>Deep value, margin of safety</td><td>Graham Number, P/E &lt; 15, P/B &lt; 1.5, current ratio &gt; 2</td></tr>
+<tr><td><code>michael_burry.py</code></td><td><code>michael_burry_agent(state)</code></td><td>Contrarian deep value</td><td>Solvency ratios, short interest, insider buying, FCF yield</td></tr>
+<tr><td><code>peter_lynch.py</code></td><td><code>peter_lynch_agent(state)</code></td><td>Growth at reasonable price</td><td>PEG ratio, earnings growth, revenue growth, debt/equity</td></tr>
+<tr><td><code>cathie_wood.py</code></td><td><code>cathie_wood_agent(state)</code></td><td>Disruptive innovation</td><td>TAM expansion, R&amp;D spend, revenue acceleration, market share</td></tr>
+<tr><td><code>bill_oneil.py</code></td><td><code>bill_oneil_agent(state)</code></td><td>CAN SLIM momentum + quality</td><td>Current earnings, annual earnings, relative strength, institutional sponsorship</td></tr>
+<tr><td><code>stanley_druckenmiller.py</code></td><td><code>stanley_druckenmiller_agent(state)</code></td><td>Macro momentum</td><td>Liquidity conditions, risk/reward asymmetry, trend strength</td></tr>
+<tr><td><code>george_soros.py</code></td><td><code>george_soros_agent(state)</code></td><td>Reflexivity theory</td><td>Sentiment feedback loops, market mispricing, price momentum</td></tr>
+<tr><td><code>nassim_taleb.py</code></td><td><code>nassim_taleb_agent(state)</code></td><td>Tail risk, antifragility</td><td>Downside volatility, debt exposure, optionality, convexity</td></tr>
+<tr><td><code>charlie_munger.py</code></td><td><code>charlie_munger_agent(state)</code></td><td>Mental models, quality</td><td>ROIC, competitive advantage period, management quality, margin trend</td></tr>
+<tr><td><code>joel_greenblatt.py</code></td><td><code>joel_greenblatt_agent(state)</code></td><td>Magic Formula</td><td>Earnings yield, return on capital, combined ranking</td></tr>
+<tr><td><code>phil_fisher.py</code></td><td><code>phil_fisher_agent(state)</code></td><td>Scuttlebutt, qualitative growth</td><td>R&amp;D effectiveness, sales growth, profit margin improvement</td></tr>
+<tr><td><code>aswath_damodaran.py</code></td><td><code>aswath_damodaran_agent(state)</code></td><td>Academic DCF valuation</td><td>WACC, risk-free rate, equity risk premium, terminal value</td></tr>
+</tbody>
+</table>
+
+<h2 id="data-flow">Data Flow — Warren Buffett Agent Execution</h2>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant LG as LangGraph
+    participant WB as warren_buffett_agent
+    participant API as tools/api.py
+    participant Calc as Score Computation
+    participant LLM as utils/llm.py
+    participant Out as AgentState
+
+    LG->>WB: invoke(state)
+    WB->>API: get_financial_metrics(ticker)
+    API-->>WB: income_stmt, balance_sheet, cash_flow
+    WB->>API: get_prices(ticker, start, end)
+    API-->>WB: daily OHLCV data
+    WB->>Calc: compute_owner_earnings()
+    Calc-->>WB: owner_earnings_score
+    WB->>Calc: compute_roe_analysis()
+    Calc-->>WB: roe_score
+    WB->>Calc: compute_moat_indicators()
+    Calc-->>WB: moat_score
+    WB->>Calc: compute_intrinsic_value()
+    Calc-->>WB: margin_of_safety
+    WB->>LLM: call_llm(buffett_prompt, scores)
+    LLM-->>WB: {signal, confidence, reasoning}
+    WB->>Out: merge analyst_signals["warren_buffett"]
+</pre>
+</div>
+
+<h2 id="interactions">Interactions with External Systems</h2>
+
+<table>
+<thead><tr><th>Interaction</th><th>Source</th><th>Target</th><th>Data Exchanged</th><th>Direction</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Financial data fetch</td><td>Any investor agent</td><td><code>tools/api.py</code></td><td>Income statements, balance sheets, cash flows</td><td>Request → Response</td><td>Results are cached; first requester pays API cost</td></tr>
+<tr><td>Price history fetch</td><td>Any investor agent</td><td><code>tools/api.py</code></td><td>Daily OHLCV price data for analysis window</td><td>Request → Response</td><td>Used for return calculations and volatility</td></tr>
+<tr><td>LLM synthesis call</td><td>Any investor agent</td><td><code>utils/llm.py</code></td><td>Agent-specific prompt + computed scores → structured signal</td><td>Request → Response</td><td>JSON schema enforced for output format</td></tr>
+<tr><td>State read</td><td>LangGraph runtime</td><td>Investor agent</td><td><code>AgentState</code> TypedDict (tickers, dates, portfolio)</td><td>Injected</td><td>Read-only; agents don't modify shared state fields</td></tr>
+<tr><td>Signal write</td><td>Investor agent</td><td><code>AgentState</code></td><td><code>analyst_signals[agent_name] = {signal, confidence, reasoning}</code></td><td>Merge</td><td>Uses LangGraph merge-dicts reducer; no overwrite risk</td></tr>
+<tr><td>Config lookup</td><td>Any investor agent</td><td><code>utils/analysts.py</code></td><td>Agent enable/disable flag, LLM model selection</td><td>Import</td><td><code>ANALYST_CONFIG</code> is the single source of truth</td></tr>
+<tr><td>Insider data fetch</td><td>Burry, Sentiment agents</td><td><code>tools/api.py</code></td><td>Insider transaction history, institutional ownership</td><td>Request → Response</td><td>Only some agents use this data source</td></tr>
+<tr><td>Analyst estimates</td><td>Lynch, O'Neil, Growth agents</td><td><code>tools/api.py</code></td><td>Consensus EPS estimates, revenue forecasts</td><td>Request → Response</td><td>Forward-looking data for growth projections</td></tr>
+</tbody>
+</table>
+
+<h2 id="code-walkthrough">Annotated Code Walkthrough — The Investor Agent Pattern</h2>
+
+<p>Every investor agent follows this exact pattern. We'll use <code>warren_buffett_agent</code> as the canonical example.</p>
+
+<div class="code-walk">
+<div class="step">
+<strong>Function signature and state extraction.</strong> The agent is a plain function — no class, no inheritance. It receives the full <code>AgentState</code> and extracts the fields it needs.
+<pre><code class="language-python">def warren_buffett_agent(state: AgentState) -> dict:
+    """Analyzes stocks using Warren Buffett's investment philosophy."""
+    tickers = state["tickers"]
+    start_date = state["start_date"]
+    end_date = state["end_date"]
+    analyst_signals = {}</code></pre>
+</div>
+
+<div class="step">
+<strong>Per-ticker loop.</strong> The agent iterates over each ticker independently. This loop is sequential within the agent but the agent itself runs in parallel with all other agents.
+<pre><code class="language-python">    for ticker in tickers:
+        # Fetch financial data via shared API layer
+        metrics = get_financial_metrics(ticker)
+        prices = get_prices(ticker, start_date, end_date)</code></pre>
+</div>
+
+<div class="step">
+<strong>Quantitative scoring — Owner Earnings.</strong> This is Buffett's signature metric. The computation is deterministic and grounded in real SEC filing data.
+<pre><code class="language-python">        # Owner Earnings = Net Income + D&amp;A - CapEx
+        owner_earnings = []
+        for period in metrics["income_statement"]:
+            net_income = period.get("net_income", 0)
+            depreciation = period.get("depreciation_amortization", 0)
+            capex = period.get("capital_expenditure", 0)
+            oe = net_income + depreciation - abs(capex)
+            owner_earnings.append(oe)
+
+        # Score: is the trend rising?
+        oe_trend = compute_trend(owner_earnings)
+        oe_score = 1 if oe_trend > 0 else -1</code></pre>
+</div>
+
+<div class="step">
+<strong>Quantitative scoring — ROE and Debt.</strong> Multiple sub-scores are computed independently. Each maps to a specific Buffett criterion.
+<pre><code class="language-python">        # ROE check: Buffett wants consistently > 15%
+        roe_values = [p.get("return_on_equity", 0) for p in metrics["ratios"]]
+        avg_roe = sum(roe_values) / len(roe_values) if roe_values else 0
+        roe_score = 1 if avg_roe > 0.15 else (-1 if avg_roe < 0.08 else 0)
+
+        # Debt payoff: can company pay off debt in < 4 years?
+        total_debt = metrics["balance_sheet"][-1].get("total_debt", 0)
+        avg_oe = sum(owner_earnings) / len(owner_earnings) if owner_earnings else 1
+        debt_years = total_debt / avg_oe if avg_oe > 0 else float("inf")
+        debt_score = 1 if debt_years < 4 else (-1 if debt_years > 10 else 0)</code></pre>
+</div>
+
+<div class="step">
+<strong>Intrinsic value via DCF.</strong> The agent computes a fair value estimate and compares it to the current market price. A wide margin of safety is bullish.
+<pre><code class="language-python">        # Two-stage DCF for intrinsic value
+        intrinsic = compute_intrinsic_value(
+            owner_earnings,
+            discount_rate=0.10,
+            terminal_growth=0.03
+        )
+        current_price = prices[-1]["close"]
+        margin_of_safety = (intrinsic - current_price) / intrinsic
+        value_score = 1 if margin_of_safety > 0.25 else (
+            -1 if margin_of_safety < -0.10 else 0
+        )</code></pre>
+</div>
+
+<div class="step">
+<strong>Assemble the scoring summary.</strong> All quantitative scores are packaged into a dictionary that will be passed to the LLM as grounding data.
+<pre><code class="language-python">        scoring_summary = {
+            "ticker": ticker,
+            "owner_earnings_trend": oe_score,
+            "roe_score": roe_score,
+            "debt_score": debt_score,
+            "margin_of_safety": round(margin_of_safety, 3),
+            "value_score": value_score,
+            "overall_quant_score": oe_score + roe_score + debt_score + value_score
+        }</code></pre>
+</div>
+
+<div class="step">
+<strong>LLM synthesis call.</strong> The LLM receives a role-specific prompt plus the quantitative data. It must return a structured JSON matching the signal schema.
+<pre><code class="language-python">        result = call_llm(
+            prompt=BUFFETT_SYSTEM_PROMPT,
+            data=scoring_summary,
+            output_schema=SignalSchema  # {signal, confidence, reasoning}
+        )
+        analyst_signals[ticker] = result</code></pre>
+</div>
+
+<div class="step">
+<strong>Return merged state.</strong> The agent returns only its contribution — the <code>analyst_signals</code> dict. LangGraph's merge-dicts reducer handles combining it with other agents' results.
+<pre><code class="language-python">    return {"analyst_signals": {"warren_buffett": analyst_signals}}</code></pre>
+</div>
+</div>
+
+<h2 id="design-rationale">Design Rationale</h2>
+
+<h3 id="why-one-file">Why One File Per Agent</h3>
+
+<p>Each investor agent is a single self-contained Python file with one exported function. There is no base class, no abstract interface, no shared mixin. This was a deliberate choice with three motivations:</p>
+
+<p><strong>1. Radical independence.</strong> Each agent can be modified, debugged, or deleted without touching any other file. Adding a new investor agent means creating one file and adding one entry to <code>ANALYST_CONFIG</code>. No inheritance hierarchy to navigate.</p>
+
+<p><strong>2. Prompt isolation.</strong> Each agent has its own system prompt (e.g., <code>BUFFETT_SYSTEM_PROMPT</code>) that captures the nuances of that investor's philosophy. A shared base class would encourage shared prompts, diluting the uniqueness of each agent's perspective.</p>
+
+<p><strong>3. Fan-out compatibility.</strong> LangGraph's fan-out requires callable functions. Using plain functions (not methods) eliminates instantiation overhead and makes the dispatch code trivially simple: just a list of function references.</p>
+
+<h3 id="why-hybrid-scoring">Why Hybrid Scoring + LLM</h3>
+
+<p>The hybrid approach — compute quantitative scores first, then ask the LLM to synthesize — solves the fundamental problem of LLM-based financial analysis: <strong>hallucination</strong>. Without grounding data, an LLM might fabricate financial metrics or apply the wrong investor's philosophy. By computing scores from real API data and passing them as structured input, the LLM is constrained to synthesize what's already been measured.</p>
+
+<p>The LLM still adds value by weighing qualitative factors that are hard to code: "Is a 12% ROE good for a capital-intensive utility company?" requires judgment. The LLM's role is <em>synthesis and explanation</em>, not <em>data retrieval</em>.</p>
+
+<h3 id="why-agent-prompts">Why Agent-Specific Prompts</h3>
+
+<p>Each agent has a unique system prompt that tells the LLM to adopt a specific persona: "You are Warren Buffett analyzing this stock…". This matters because different investors weigh the same metrics differently. A P/E of 25 is expensive to Graham but might be cheap to Cathie Wood if the company is disrupting a trillion-dollar market. The prompt encodes these philosophical differences without requiring different code paths.</p>
+
+<h2 id="focus-pages">Focus Topics</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>📊 Owner Earnings Analysis <span class="focus-badge">Focus</span></h4>
+    <p>Deep dive into Buffett's signature metric: how owner earnings are computed, why they differ from GAAP net income, and how the trend analysis drives the bullish/bearish signal.</p>
+  </div>
+  <div class="card">
+    <h4>🎯 Investor Prompt Engineering <span class="focus-badge">Focus</span></h4>
+    <p>How each agent's system prompt encodes decades of investment philosophy into a few hundred tokens. The art of making an LLM "think like Buffett" vs "think like Taleb."</p>
+  </div>
+  <div class="card">
+    <h4>📈 Signal Confidence Scoring <span class="focus-badge">Focus</span></h4>
+    <p>The mapping from quantitative sub-scores to a 0-100 confidence value. How agents handle disagreement between their quantitative scores and the LLM's qualitative assessment.</p>
+  </div>
+</div>
+
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+
+<table>
+<thead><tr><th>Scenario</th><th>Affected Agents</th><th>Handling</th></tr></thead>
+<tbody>
+<tr><td><strong>Missing financial data</strong> — ticker has no SEC filings (IPO, foreign ADR)</td><td>All investor agents</td><td>Agents check for empty <code>metrics</code> dict. If key financial statements are missing, the agent returns a <code>neutral</code> signal with confidence &lt; 30 and reasoning explaining data unavailability. No crash.</td></tr>
+<tr><td><strong>LLM timeout or error</strong> — API call exceeds 30-second timeout</td><td>All investor agents</td><td>Caught by try/except in <code>call_llm()</code>. The agent falls back to a purely quantitative signal: if <code>overall_quant_score &gt; 2</code>, emit bullish; if <code>&lt; -2</code>, bearish; else neutral. Confidence is capped at 50.</td></tr>
+<tr><td><strong>NaN / Inf values in calculations</strong> — division by zero in ratio computation</td><td>Graham (current ratio), Lynch (PEG), Greenblatt (earnings yield)</td><td>Each scoring function uses safe division: <code>x / y if y != 0 else 0</code>. NaN values are caught and replaced with neutral scores (0). The <code>scoring_summary</code> dict is validated before LLM submission.</td></tr>
+<tr><td><strong>Negative owner earnings</strong> — company is burning cash</td><td>Buffett, Munger</td><td>Negative owner earnings are a strong bearish signal. The DCF valuation returns 0 intrinsic value, triggering maximum margin-of-safety penalty. The LLM prompt explicitly notes negative OE.</td></tr>
+<tr><td><strong>Stale cache data</strong> — cached financial data is from a previous quarter</td><td>All investor agents</td><td>Cache keys include the analysis date window. Data fetched for a different date range triggers a fresh API call. TTL-based expiry ensures quarterly data is refreshed.</td></tr>
+</tbody>
+</table>
+
+<h2 id="configuration">Configuration Parameters</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Agent(s)</th><th>Default Value</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>discount_rate</code></td><td>Buffett, Graham, Damodaran</td><td><code>0.10</code> (10%)</td><td>Rate used to discount future cash flows in DCF valuation</td></tr>
+<tr><td><code>terminal_growth</code></td><td>Buffett, Graham, Damodaran</td><td><code>0.03</code> (3%)</td><td>Long-term growth rate for terminal value calculation</td></tr>
+<tr><td><code>roe_threshold</code></td><td>Buffett, Munger</td><td><code>0.15</code> (15%)</td><td>Minimum acceptable return on equity for "wonderful company"</td></tr>
+<tr><td><code>pe_max</code></td><td>Graham</td><td><code>15</code></td><td>Maximum P/E ratio for Graham's value screen</td></tr>
+<tr><td><code>pb_max</code></td><td>Graham</td><td><code>1.5</code></td><td>Maximum P/B ratio for Graham's value screen</td></tr>
+<tr><td><code>current_ratio_min</code></td><td>Graham</td><td><code>2.0</code></td><td>Minimum current ratio (current assets / current liabilities)</td></tr>
+<tr><td><code>peg_max</code></td><td>Lynch</td><td><code>1.0</code></td><td>Maximum PEG ratio for growth-at-reasonable-price</td></tr>
+<tr><td><code>margin_of_safety</code></td><td>Buffett, Graham, Burry</td><td><code>0.25</code> (25%)</td><td>Minimum discount to intrinsic value for bullish signal</td></tr>
+<tr><td><code>debt_payoff_max_years</code></td><td>Buffett</td><td><code>4</code></td><td>Max years to pay off debt with owner earnings</td></tr>
+</tbody>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+
+<pre><code>src/agents/
+├── warren_buffett.py           # 🏛️ Owner earnings, ROE, moat analysis
+├── ben_graham.py               # 📊 Graham Number, net-net, margin of safety
+├── michael_burry.py            # 🔍 Contrarian deep value, solvency, shorts
+├── peter_lynch.py              # 📈 PEG ratio, GARP methodology
+├── cathie_wood.py              # 🚀 Disruptive innovation, TAM expansion
+├── bill_oneil.py               # 📊 CAN SLIM screening
+├── stanley_druckenmiller.py    # 🌊 Macro momentum, risk/reward
+├── george_soros.py             # ♟️ Reflexivity, sentiment loops
+├── nassim_taleb.py             # 🦢 Tail risk, antifragility
+├── charlie_munger.py           # 🧠 Mental models, quality
+├── joel_greenblatt.py          # ✨ Magic formula (earnings yield + ROIC)
+├── phil_fisher.py              # 🔬 Scuttlebutt, qualitative growth
+└── aswath_damodaran.py         # 📐 Academic DCF valuation</code></pre>
+
+<h2 id="code-examples">Code Examples — Common Patterns</h2>
+
+<h3 id="example-graham-number">Graham Number Calculation</h3>
+
+<pre><code class="language-python">def compute_graham_number(eps, book_value_per_share):
+    """Ben Graham's intrinsic value formula: sqrt(22.5 * EPS * BVPS)."""
+    if eps <= 0 or book_value_per_share <= 0:
+        return 0  # Graham requires positive earnings and book value
+    return (22.5 * eps * book_value_per_share) ** 0.5</code></pre>
+
+<h3 id="example-peg">PEG Ratio with Safety Checks</h3>
+
+<pre><code class="language-python">def compute_peg_ratio(pe_ratio, earnings_growth_rate):
+    """Peter Lynch's PEG ratio: P/E divided by earnings growth rate.
+    A PEG < 1.0 suggests undervaluation relative to growth."""
+    if earnings_growth_rate <= 0:
+        return float("inf")  # No growth = infinite PEG
+    return pe_ratio / (earnings_growth_rate * 100)</code></pre>
+
+<h3 id="example-magic-formula">Greenblatt's Magic Formula Ranking</h3>
+
+<pre><code class="language-python">def compute_magic_formula_score(earnings_yield, return_on_capital):
+    """Joel Greenblatt: rank stocks by earnings yield + ROIC.
+    High earnings yield = cheap. High ROIC = good business."""
+    # Each metric produces a rank; lower combined rank = better
+    ey_score = 1 if earnings_yield > 0.10 else (0 if earnings_yield > 0.05 else -1)
+    roc_score = 1 if return_on_capital > 0.25 else (0 if return_on_capital > 0.10 else -1)
+    return ey_score + roc_score  # Range: [-2, 2]</code></pre>
+
+</main>
+
+<div class="footer">
+  <p>Generated 2026-04-11 from <code>c45b50f</code> &bull; <a title="Module Deep-Dive" href="../index.html">&larr; Back to Agents Overview</a> &bull; <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund Home</a></p>
+</div>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<button class="back-to-top" id="backToTop">&#8679;</button>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function reset(){scale=1;content.style.transform='scale(1)';}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var c=svg.cloneNode(true);c.style.maxWidth='90vw';c.style.width='90vw';content.appendChild(c);}reset();overlay.classList.add('active');});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');reset();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');reset();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();scale=Math.min(5,Math.max(0.5,scale+(e.deltaY>0?-0.1:0.1)));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var h=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var cur=null;h.forEach(function(el){if(el.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+el.id;a.textContent=el.textContent;li.appendChild(a);if(el.tagName==='H3'&&cur){var s=cur.querySelector('ol');if(!s){s=document.createElement('ol');cur.appendChild(s);}s.appendChild(li);}else{ol.appendChild(li);if(el.tagName==='H2')cur=li;}});toc.appendChild(ol);})();
+hljs.highlightAll();
+document.querySelectorAll('pre code').forEach(function(block){if(block.closest('.mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});block.parentElement.appendChild(btn);});
+(function(){var main=document.querySelector('main');if(!main)return;var words=main.textContent.split(/\s+/).length;var min=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+min+' min read';hero.appendChild(span);}})();
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var hs=Array.from(document.querySelectorAll('h2[id]'));if(!hs.length)return;var idx=-1;if(e.key==='j'||e.key==='k'){e.key==='j'?idx=hs.findIndex(function(h){return h.getBoundingClientRect().top>10;}):idx=hs.slice().reverse().findIndex(function(h){return h.getBoundingClientRect().top<-10;});if(e.key==='k'&&idx>=0)idx=hs.length-1-idx;if(idx>=0)hs[idx].scrollIntoView({behavior:'smooth'});}});
+</script>
+</body>
+</html>

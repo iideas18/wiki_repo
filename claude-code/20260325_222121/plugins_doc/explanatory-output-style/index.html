@@ -120,10 +120,10 @@ flowchart LR
     subgraph Hook["Hook Execution"]
         B --> C["hooks-handlers/session-start.sh"]
         C --> D["Read instruction template"]
-        D --> E["Inject ★ Insight format rules"]
+        D --> E["Inject  Insight format rules"]
     end
     subgraph Output["Claude Responds"]
-        E --> F["Code + ★ Insight blocks"]
+        E --> F["Code +  Insight blocks"]
         F --> G["2-3 educational points per block"]
         F --> H["Implementation rationale"]
         F --> I["Pattern identification"]
@@ -193,14 +193,14 @@ sequenceDiagram
     User->>CC: Start new session
     CC->>Hook: Fire SessionStart event
     Hook->>Template: Read instruction file
-    Template-->>Hook: ★ Insight format rules
+    Template-->>Hook:  Insight format rules
     Hook-->>CC: Return injected instructions
     CC->>Claude: System prompt + insight instructions
     User->>Claude: Ask a coding question
-    Claude-->>User: Code response + ★ Insight block
+    Claude-->>User: Code response +  Insight block
     Note over Claude,User: Each insight has 2-3 educational points
     User->>Claude: Follow-up question
-    Claude-->>User: Updated code + new ★ Insight block
+    Claude-->>User: Updated code + new  Insight block
 </pre>
 </div>
 

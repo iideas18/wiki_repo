@@ -126,12 +126,12 @@ flowchart TB
     subgraph Learning["Learning Mode"]
         E --> G["Identify decision point type"]
         G --> H["Explain context & constraints"]
-        H --> I["✋ Pause for user code"]
+        H --> I[" Pause for user code"]
         I --> J["Review & guide user's solution"]
     end
     subgraph Explanatory["Explanatory Mode"]
         F --> K["Implement code directly"]
-        K --> L["Add ★ Insight blocks"]
+        K --> L["Add  Insight blocks"]
     end
 </pre>
 </div>
@@ -204,19 +204,19 @@ sequenceDiagram
     Claude->>Claude: Analyze task components
 
     Note over Claude: Boilerplate → Auto-implement
-    Claude-->>Dev: ✅ Express middleware skeleton + ★ Insight
+    Claude-->>Dev:  Express middleware skeleton +  Insight
 
     Note over Claude: Algorithm choice → Decision point!
-    Claude-->>Dev: ✋ "Which rate limiting algorithm?<br/>Options: token bucket, sliding window, fixed window.<br/>Consider: burst tolerance, memory, fairness"
+    Claude-->>Dev:  "Which rate limiting algorithm?<br/>Options: token bucket, sliding window, fixed window.<br/>Consider: burst tolerance, memory, fairness"
 
     Dev->>Claude: "Token bucket — handles bursts well"
-    Claude-->>Dev: 👍 Review + ★ Insight on token bucket trade-offs
+    Claude-->>Dev:  Review +  Insight on token bucket trade-offs
 
     Note over Claude: Error handling → Decision point!
-    Claude-->>Dev: ✋ "Rate limit exceeded: 429 + retry-after?<br/>Or queue and process later?"
+    Claude-->>Dev:  "Rate limit exceeded: 429 + retry-after?<br/>Or queue and process later?"
 
     Dev->>Claude: "429 with Retry-After header"
-    Claude-->>Dev: ✅ Complete implementation + ★ Insight
+    Claude-->>Dev:  Complete implementation +  Insight
 </pre>
 </div>
 

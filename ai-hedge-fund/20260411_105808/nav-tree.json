@@ -1,0 +1,70 @@
+{
+  "label": "AI Hedge Fund",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "AI Analyst Agents",
+      "path": "agents_doc/index.html",
+      "children": [
+        {
+          "label": "Quantitative Agents",
+          "path": "agents_doc/analytical/index.html",
+          "children": []
+        },
+        {
+          "label": "Investor-Inspired Agents",
+          "path": "agents_doc/investor/index.html",
+          "children": []
+        },
+        {
+          "label": "Risk & Portfolio Management",
+          "path": "agents_doc/management/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Backtesting Engine",
+      "path": "backtesting_doc/index.html",
+      "children": [
+        {
+          "label": "Engine Core",
+          "path": "backtesting_doc/engine/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Data & Orchestration",
+      "path": "data_doc/index.html",
+      "children": [
+        {
+          "label": "Financial API & Data Models",
+          "path": "data_doc/api/index.html",
+          "children": []
+        },
+        {
+          "label": "LangGraph State & LLM Abstraction",
+          "path": "data_doc/graph/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Web Application",
+      "path": "webapp_doc/index.html",
+      "children": [
+        {
+          "label": "FastAPI Backend",
+          "path": "webapp_doc/backend/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Search",
+      "path": "search.html",
+      "children": []
+    }
+  ]
+}

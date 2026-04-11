@@ -1127,17 +1127,19 @@ flowchart LR
 
   <!-- ===== Theme Toggle Script ===== -->
   <script>
+document.querySelectorAll('pre.mermaid,.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute('data-theme');
       const next = current === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
-      localStorage.setItem('wiki-theme', next);
+      localStorage.setItem('neutra-ip-theme', next);
     }
 
     // Restore saved theme
     (function () {
-      const saved = localStorage.getItem('wiki-theme');
+      const saved = localStorage.getItem('neutra-ip-theme');
       if (saved) {
         document.documentElement.setAttribute('data-theme', saved);
       }

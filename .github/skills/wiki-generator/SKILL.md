@@ -708,6 +708,7 @@ function renderAllMermaid(theme) {
     - **L1 architecture diagrams** — the L1 flowchart must show class-level relationships across sub-modules with named subgraphs (one per sub-module/directory). Edges must be labeled with the actual interface contract (protocol name, API function, data type exchanged). This is the most important diagram in the wiki — it should take 20-30 Mermaid lines, not 8-10.
     - **L2 diagrams must be mechanism-specific** — don't repeat the L1 overview diagram. The L2 architecture diagram should show the internal class hierarchy of that specific sub-module. The L2 data-flow diagram should trace a concrete operation through that sub-module's classes.
     - **Minimum diagram complexity**: L1 architecture diagrams should have 12+ nodes and 10+ edges. L2 architecture diagrams should have 6+ nodes. Sequence diagrams should have 6+ participants and 8+ interactions.
+    - **NO emojis in Mermaid node labels** — Unicode emoji characters (🔍, 📊, 🚀, etc.) cause Mermaid v10 to fail silently during parsing. Use plain text descriptions only inside node labels, `participant` names, and `Note` text. Emojis in HTML headings and prose are fine — just not inside `<pre class="mermaid">` blocks.
 
 21. **Auto-generated TOC** — L1 and L2 pages use an empty `<nav class="toc" id="toc"></nav>` element that gets populated by footer JS from H2/H3 headings with `id` attributes. Do NOT manually write TOC `<ol>` entries — the JS handles this. Ensure all H2/H3 headings have `id` attributes for the auto-TOC to link to.
 

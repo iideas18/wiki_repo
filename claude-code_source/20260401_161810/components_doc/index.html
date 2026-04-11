@@ -1013,7 +1013,7 @@ sequenceDiagram
         el.innerHTML = code;
         var id = 'mermaid-diagram-' + idx;
         renderPromises.push(
-          mermaid.render(id, code).then(function(result) {
+          mermaid.render(id, code).then(function(result).catch(function(e){console.warn('mermaid:',e)}) {
             el.innerHTML = result.svg;
           }).catch(function(err) {
             console.warn('Mermaid render error:', err);

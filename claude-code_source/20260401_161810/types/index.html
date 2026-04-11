@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var src = el.textContent;
     el.setAttribute('data-source', src);
     var id = 'mmd-' + i;
-    mermaid.render(id, src).then(function(result) {
+    mermaid.render(id, src).then(function(result).catch(function(e){console.warn('mermaid:',e)}) {
       el.innerHTML = result.svg;
       el.classList.add('mermaid-rendered');
     }).catch(function(err) { console.error('Mermaid render error:', err); });

@@ -284,7 +284,7 @@ blockquote {
 <div class="diagram-container">
 <pre class="mermaid">
 flowchart TD
-  subgraph CorePipeline["🔧 Core Pipeline"]
+  subgraph CorePipeline[" Core Pipeline"]
     commands["commands\n101 slash commands"]
     tools["tools\n42 tool impls"]
     query["query\nexecution config"]
@@ -292,7 +292,7 @@ flowchart TD
     coordinator["coordinator\norchestration"]
   end
 
-  subgraph UILayer["🎨 UI Layer"]
+  subgraph UILayer[" UI Layer"]
     components["components\n31 UI groups"]
     hooks["hooks\nReact hooks"]
     ink["ink\ncustom renderer"]
@@ -301,14 +301,14 @@ flowchart TD
     vim["vim\nvim emulation"]
   end
 
-  subgraph Services["🌐 Services"]
+  subgraph Services[" Services"]
     services["services\nMCP/LSP/OAuth/analytics"]
     bridge["bridge\nIDE comm"]
     server["server\ndirect-connect"]
     remote["remote\nremote sessions"]
   end
 
-  subgraph DataState["📦 Data &amp; State"]
+  subgraph DataState[" Data &amp; State"]
     state["state\nglobal state"]
     context["context\nprompt assembly"]
     memdir["memdir\nmemory mgmt"]
@@ -317,7 +317,7 @@ flowchart TD
     schemas["schemas\nvalidation"]
   end
 
-  subgraph Infrastructure["⚙️ Infrastructure"]
+  subgraph Infrastructure[" Infrastructure"]
     utils["utils\nAPI/auth/bash/settings"]
     entrypoints["entrypoints\napp entry"]
     bootstrap["bootstrap\ninit sequence"]
@@ -622,7 +622,7 @@ flowchart TD
 <div class="diagram-container">
 <pre class="mermaid">
 sequenceDiagram
-    participant User as 👤 User Input
+    participant User as  User Input
     participant CLI as CLI Parser
     participant Screen as REPL Screen
     participant Query as Query Engine

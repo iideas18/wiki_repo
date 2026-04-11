@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-source" content="ai-hedge-fund/src/graph">
+<meta name="wiki-git-sha" content="c45b50f">
+<meta name="wiki-source-rev" content="c45b50f">
+<meta name="wiki-generated" content="2026-04-11">
+<meta name="description" content="Deep dive into LangGraph AgentState, state reducers, and the 13-provider LLM factory for the AI Hedge Fund.">
+<title>LangGraph State &amp; LLM Abstraction — AI Hedge Fund Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.2rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.5rem}
+h2{color:var(--accent);font-size:1.5rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{color:var(--heading);font-size:1.2rem;margin:1.5rem 0 .5rem}
+h4{color:var(--accent2);font-size:1.05rem;margin:1rem 0 .3rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border)}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.5rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1rem 0 1.5rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1rem}.hero .subtitle{color:var(--accent);font-size:1.15rem;margin-bottom:.3rem}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.88rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{column-count:2;column-gap:2rem;margin:1rem 0}
+.toc ol{padding-left:1.2rem}.toc li{margin:.3rem 0}.toc a{color:var(--accent)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;text-decoration:none}.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text)}
+.back-to-top.visible{display:flex}
+.code-walk{counter-reset:step}.code-walk .step{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;counter-increment:step}
+.code-walk .step::before{content:"Step " counter(step);display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem;font-size:.9rem}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:1px 6px;border-radius:8px;margin-left:.5rem}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{color:#1f2328;background:#fff;max-width:100%}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--accent:#0969da;--heading:#1f2328;--code-bg:#f6f8fa}.card,.stat-box,.diagram-container{break-inside:avoid}}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.toc{column-count:1}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">☾</button>
+
+<main id="main">
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="Financial API, Caching, State Management, and LLM Abstraction" href="../index.html">Data</a> &rsaquo; Graph &amp; LLM
+</nav>
+
+<div class="hero">
+  <h1>LangGraph State &amp; LLM Abstraction</h1>
+  <p class="subtitle">graph/state.py · llm/models.py</p>
+  <p>The shared nervous system — how 19 <a href="../../agents_doc/index.html">agents</a> coordinate through typed state and how one factory function connects to 13 LLM providers.</p>
+  <div style="margin-top:1rem">
+    <span class="badge red">AgentState TypedDict</span>
+    <span class="badge blue">13 LLM Providers</span>
+    <span class="badge green">Fan-Out / Fan-In</span>
+    <span class="badge yellow">Merge Reducers</span>
+  </div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The LangGraph state management and LLM provider abstraction form the invisible backbone of the system. AgentState is the shared data bus that all 19 agents write to and the management agents read from. The LLM factory abstracts 13 different AI providers behind a single function call, so agents don't need to know whether they're talking to OpenAI, Anthropic, or a local Ollama instance.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">AgentState is like a shared whiteboard in a meeting room — 19 analysts write their findings, each in their own clearly labeled section, and the portfolio manager reads all sections before making a decision. Nobody erases anyone else's writing; the merge-dict reducer ensures every contribution is preserved. The LLM factory, meanwhile, is like a universal TV remote — it works with any brand of TV, and you don't need to know the internal protocol to change the channel.</p>
+</details>
+</div>
+
+<h2 id="table-of-contents">Table of Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- ── Architecture ────────────────────────────────────────── -->
+<h2 id="architecture">Architecture</h2>
+
+<p>The state and LLM layers form the backbone of the LangGraph workflow. <code>AgentState</code> flows through a directed graph: starting at the <a href="../index.html">data</a>-fetch node, fanning out to 19 parallel analyst nodes, fanning back in to a risk-<a href="../../agents_doc/management/index.html">management</a> node, and finally reaching the portfolio-optimization node.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TB
+    subgraph State["graph/state.py — AgentState"]
+        MSG["messages: list[BaseMessage]<br/>reducer: operator.add"]
+        DATA["data: dict<br/>reducer: merge_dicts"]
+        META["metadata: dict<br/>reducer: merge_dicts"]
+    end
+
+    subgraph LLM["llm/models.py"]
+        ENUM["ModelProvider Enum<br/>(13 providers)"]
+        FACTORY["get_model(provider, model_name)"]
+        subgraph Providers["Provider SDKs"]
+            OAI["ChatOpenAI"]
+            ANT["ChatAnthropic"]
+            GOO["ChatGoogleGenerativeAI"]
+            GRQ["ChatGroq"]
+            DS["ChatDeepSeek"]
+            OLL["ChatOllama"]
+            OR["ChatOpenRouter"]
+            XAI["ChatXAI"]
+            GIG["ChatGigaChat"]
+            AZR["AzureChatOpenAI"]
+            ALI["ChatAlibaba"]
+            MTA["ChatMeta"]
+            MIS["ChatMistral"]
+        end
+    end
+
+    subgraph Workflow["LangGraph StateGraph"]
+        START["START"] --> FETCH["Data Fetch Node"]
+        FETCH --> FAN{"Fan-Out"}
+        FAN --> A1["Agent 1: Buffett"]
+        FAN --> A2["Agent 2: Wood"]
+        FAN --> A3["Agent 3: Soros"]
+        FAN --> AN["... Agent 19"]
+        A1 & A2 & A3 & AN --> JOIN{"Fan-In"}
+        JOIN --> RISK["Risk Manager"]
+        RISK --> PORT["Portfolio Optimizer"]
+        PORT --> END_NODE["END"]
+    end
+
+    State -->|flows through| Workflow
+    ENUM --> FACTORY
+    FACTORY --> Providers
+    Providers -->|model instance| A1 & A2 & A3 & AN
+</pre>
+</div>
+
+<!-- ── Key Classes ─────────────────────────────────────────── -->
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+
+<table>
+<thead><tr><th>Component</th><th>File</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>AgentState</code></td><td>graph/state.py</td><td>TypedDict</td><td>The central state object that flows through the entire LangGraph workflow. Contains three annotated fields with custom reducers.</td></tr>
+<tr><td><code>AgentState.messages</code></td><td>graph/state.py</td><td>Field</td><td><code>Annotated[list[BaseMessage], operator.add]</code> — append-only message history. Each agent's messages are concatenated, never overwritten.</td></tr>
+<tr><td><code>AgentState.data</code></td><td>graph/state.py</td><td>Field</td><td><code>Annotated[dict, merge_dicts]</code> — shared data store. Each agent writes to a unique key; <code>merge_dicts</code> combines all agents' outputs.</td></tr>
+<tr><td><code>AgentState.metadata</code></td><td>graph/state.py</td><td>Field</td><td><code>Annotated[dict, merge_dicts]</code> — workflow metadata (tickers, date ranges, configuration). Merged like <code>data</code>.</td></tr>
+<tr><td><code>merge_dicts()</code></td><td>graph/state.py</td><td>Function</td><td>Reducer that merges two dicts with <code>{**old, **new}</code> semantics. New keys are added; existing keys are overwritten by the latest write.</td></tr>
+<tr><td><code>ModelProvider</code></td><td>llm/models.py</td><td>Enum</td><td>13-member string enum: <code>OPENAI, ANTHROPIC, GOOGLE, GROQ, DEEPSEEK, OLLAMA, OPENROUTER, XAI, GIGACHAT, AZURE_OPENAI, ALIBABA, META, MISTRAL</code></td></tr>
+<tr><td><code>get_model()</code></td><td>llm/models.py</td><td>Function</td><td>Factory: accepts <code>ModelProvider</code> + optional <code>model_name</code>, returns a LangChain <code>BaseChatModel</code> instance configured with <a href="../api/index.html">API</a> keys and defaults.</td></tr>
+<tr><td><code>create_workflow()</code></td><td>graph/state.py</td><td>Function</td><td>Builds and compiles the <code>StateGraph</code>: registers nodes, adds edges (including fan-out/fan-in), returns a compiled runnable.</td></tr>
+</tbody>
+</table>
+
+<!-- ── Data Flow ───────────────────────────────────────────── -->
+<h2 id="data-flow">Data Flow: State Through the Workflow</h2>
+
+<p>This sequence shows how <code>AgentState</code> travels through the LangGraph, how reducers merge concurrent agent outputs, and how the final portfolio decision is made.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Main as main.py
+    participant WF as StateGraph
+    participant Fetch as Data Fetch Node
+    participant Fan as Fan-Out
+    participant Buffett as Buffett Agent
+    participant Wood as Wood Agent
+    participant FanIn as Fan-In
+    participant Risk as Risk Manager
+    participant Port as Portfolio Optimizer
+    participant LLM as get_model()
+
+    Main->>WF: invoke(initial_state)
+    WF->>Fetch: AgentState{messages:[], data:{}, metadata:{tickers:[...]}}
+    Fetch->>Fetch: Call get_prices(), get_financial_metrics()
+    Fetch-->>WF: AgentState{data:{prices:{AAPL:[...]}, metrics:{AAPL:[...]}}}
+
+    WF->>Fan: Fan-out to 19 agents (parallel)
+    Fan->>Buffett: AgentState (copy)
+    Fan->>Wood: AgentState (copy)
+
+    Buffett->>LLM: get_model(OPENAI)
+    LLM-->>Buffett: ChatOpenAI instance
+    Buffett->>Buffett: Analyze with value investing lens
+    Buffett-->>WF: {data: {"buffett_signal": {signal:"bullish", confidence:0.8}}}
+
+    Wood->>LLM: get_model(ANTHROPIC)
+    LLM-->>Wood: ChatAnthropic instance
+    Wood->>Wood: Analyze with innovation/growth lens
+    Wood-->>WF: {data: {"wood_signal": {signal:"bearish", confidence:0.6}}}
+
+    WF->>FanIn: merge_dicts all agent outputs
+    Note right of FanIn: data = {buffett_signal: ..., wood_signal: ..., ... × 19}
+
+    FanIn->>Risk: Merged AgentState
+    Risk->>Risk: Evaluate risk across all signals
+    Risk-->>WF: {data: {"risk_assessment": {...}}}
+
+    WF->>Port: AgentState with risk data
+    Port->>Port: Optimize portfolio allocation
+    Port-->>Main: Final AgentState with portfolio decisions
+</pre>
+</div>
+
+<!-- ── Code Walkthrough ────────────────────────────────────── -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough: <code>create_workflow()</code></h2>
+
+<p>Let's walk through how the LangGraph workflow is assembled — from an empty <code>StateGraph</code> to a compiled, runnable pipeline.</p>
+
+<div class="code-walk">
+
+<div class="step">
+<p><strong>Import and StateGraph initialization.</strong> The workflow starts by creating a <code>StateGraph</code> parameterized with <code>AgentState</code>. This tells LangGraph what shape the state has and which reducers to use.</p>
+<pre><code class="language-python">from langgraph.graph import StateGraph, START, END
+from graph.state import AgentState
+
+workflow = StateGraph(AgentState)</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Register the data-fetch node.</strong> The first node in the graph fetches all required financial data and populates the <code>data</code> field of the state. It runs once before any agents.</p>
+<pre><code class="language-python">workflow.add_node("fetch_data", fetch_data_node)</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Register analyst agent nodes.</strong> Each of the 19 analyst agents is added as a separate node. They all receive the same state but write to unique keys (e.g., <code>"buffett_signal"</code>, <code>"wood_signal"</code>).</p>
+<pre><code class="language-python">for agent_name, agent_fn in AGENT_REGISTRY.items():
+    workflow.add_node(agent_name, agent_fn)</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Fan-out edges.</strong> A conditional edge from <code>fetch_data</code> fans out to all 19 agent nodes in parallel. LangGraph executes these concurrently.</p>
+<pre><code class="language-python">workflow.add_edge(START, "fetch_data")
+for agent_name in AGENT_REGISTRY:
+    workflow.add_edge("fetch_data", agent_name)</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Fan-in edges.</strong> All agent nodes converge into the <code>risk_manager</code> node. LangGraph waits for all agents to complete, merging their state updates via <code>merge_dicts</code>, before executing risk management.</p>
+<pre><code class="language-python">for agent_name in AGENT_REGISTRY:
+    workflow.add_edge(agent_name, "risk_manager")
+workflow.add_node("risk_manager", risk_manager_node)</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Final nodes and compilation.</strong> The portfolio optimizer runs after risk assessment. <code>compile()</code> validates the graph structure and returns a runnable object.</p>
+<pre><code class="language-python">workflow.add_node("portfolio_optimizer", portfolio_node)
+workflow.add_edge("risk_manager", "portfolio_optimizer")
+workflow.add_edge("portfolio_optimizer", END)
+
+app = workflow.compile()</code></pre>
+</div>
+
+</div>
+
+<!-- ── Design Rationale ────────────────────────────────────── -->
+<h2 id="design-rationale">Design Rationale</h2>
+
+<h3 id="why-typeddict">Why TypedDict Instead of a Class?</h3>
+
+<p>LangGraph requires state to be a <code>TypedDict</code> with <code>Annotated</code> fields specifying reducers. This is not a limitation — it's a feature. TypedDict provides static type checking without runtime overhead, and the annotations declare <em>how</em> concurrent updates should be merged. A regular class would require custom merge logic in every method; TypedDict+reducers make it declarative.</p>
+
+<h3 id="why-merge-dicts">Why <code>merge_dicts</code> Instead of Overwrite?</h3>
+
+<p>In a fan-out/fan-in topology, 19 agents write to the same <code>data</code> dict concurrently. If the reducer used simple assignment (<code>state["data"] = new_data</code>), only the last agent's output would survive. The <code>merge_dicts</code> reducer does <code>{**old, **new}</code>, preserving all agents' outputs as long as they use unique keys. This is the "shared whiteboard" pattern — everyone writes in their own section.</p>
+
+<h3 id="why-factory-not-hierarchy">Why Factory Function Instead of Class Hierarchy?</h3>
+
+<p>A class hierarchy (e.g., <code>BaseLLM → OpenAILLM → AnthropicLLM</code>) would add complexity without benefit. Agents don't need polymorphism — they don't call provider-specific methods. They just need a <code>BaseChatModel</code> instance. The factory pattern provides exactly this: one function, one enum, one return type. Adding a new provider means adding one enum member and one case branch.</p>
+
+<!-- ── Deep-Dive Cards ─────────────────────────────────────── -->
+<h2 id="deep-dives">Deep-Dive Topics</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🔀 State Reducer Mechanics</h4>
+    <p>LangGraph reducers are functions that take <code>(old_value, new_value)</code> and return the merged result. <code>operator.add</code> concatenates lists — perfect for append-only message history. <code>merge_dicts</code> does shallow dict merge — each agent's unique key is preserved. The reducer runs <em>after</em> each node completes, before the next node receives state. This means a node never sees its own output in the state it receives — it sees the <em>previous</em> state.</p>
+  </div>
+  <div class="card">
+    <h4>🔌 LLM Provider Integration</h4>
+    <p>Each of the 13 providers requires different initialization: OpenAI needs <code>OPENAI_API_KEY</code>, Anthropic needs <code>ANTHROPIC_API_KEY</code>, Ollama needs a <code>base_url</code> for the local server, Azure needs <code>AZURE_OPENAI_ENDPOINT</code> + <code>AZURE_OPENAI_API_KEY</code> + deployment name. The factory encapsulates all of this. Agents just call <code>get_model(provider)</code> and get a working model — the env var lookup, default model selection, and SDK initialization happen inside the factory.</p>
+  </div>
+  <div class="card">
+    <h4>⚙️ Workflow Compilation</h4>
+    <p>When <code>workflow.compile()</code> is called, LangGraph validates the graph: every node must be reachable from START, every path must lead to END, and reducer annotations must be present on all state fields that receive concurrent writes. Compilation also determines the execution schedule — which nodes can run in parallel (the fan-out group) and which must run sequentially (risk → portfolio).</p>
+  </div>
+</div>
+
+<!-- ── ModelProvider Enum ──────────────────────────────────── -->
+<h2 id="model-providers">ModelProvider Enum — All 13 Providers</h2>
+
+<table>
+<thead><tr><th>Enum Member</th><th>SDK Class</th><th>Default Model</th><th>Env Variable</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>OPENAI</code></td><td><code>ChatOpenAI</code></td><td><code>gpt-4o</code></td><td><code>OPENAI_API_KEY</code></td><td>Primary provider; most agents default to this</td></tr>
+<tr><td><code>ANTHROPIC</code></td><td><code>ChatAnthropic</code></td><td><code>claude-3-5-sonnet</code></td><td><code>ANTHROPIC_API_KEY</code></td><td>Used for agents requiring long context</td></tr>
+<tr><td><code>GOOGLE</code></td><td><code>ChatGoogleGenerativeAI</code></td><td><code>gemini-2.0-flash</code></td><td><code>GOOGLE_API_KEY</code></td><td>Free tier available for development</td></tr>
+<tr><td><code>GROQ</code></td><td><code>ChatGroq</code></td><td><code>llama-3.3-70b</code></td><td><code>GROQ_API_KEY</code></td><td>Fast inference; open-source models</td></tr>
+<tr><td><code>DEEPSEEK</code></td><td><code>ChatDeepSeek</code></td><td><code>deepseek-chat</code></td><td><code>DEEPSEEK_API_KEY</code></td><td>Cost-effective reasoning model</td></tr>
+<tr><td><code>OLLAMA</code></td><td><code>ChatOllama</code></td><td><code>llama3</code></td><td>N/A (local)</td><td>Local inference; requires Ollama server running</td></tr>
+<tr><td><code>OPENROUTER</code></td><td><code>ChatOpenRouter</code></td><td><code>varies</code></td><td><code>OPENROUTER_API_KEY</code></td><td>Multi-model gateway; routes to cheapest provider</td></tr>
+<tr><td><code>XAI</code></td><td><code>ChatXAI</code></td><td><code>grok-beta</code></td><td><code>XAI_API_KEY</code></td><td>xAI's Grok model</td></tr>
+<tr><td><code>GIGACHAT</code></td><td><code>ChatGigaChat</code></td><td><code>GigaChat-Pro</code></td><td><code>GIGACHAT_API_KEY</code></td><td>Russian-market focused</td></tr>
+<tr><td><code>AZURE_OPENAI</code></td><td><code>AzureChatOpenAI</code></td><td><code>gpt-4o</code></td><td><code>AZURE_OPENAI_API_KEY</code></td><td>Enterprise deployments; requires endpoint + deployment name</td></tr>
+<tr><td><code>ALIBABA</code></td><td><code>ChatAlibaba</code></td><td><code>qwen-plus</code></td><td><code>ALIBABA_API_KEY</code></td><td>Qwen model family</td></tr>
+<tr><td><code>META</code></td><td><code>ChatMeta</code></td><td><code>llama-3.3-70b</code></td><td><code>META_API_KEY</code></td><td>Meta's Llama models via API</td></tr>
+<tr><td><code>MISTRAL</code></td><td><code>ChatMistral</code></td><td><code>mistral-large</code></td><td><code>MISTRAL_API_KEY</code></td><td>European AI lab; strong reasoning</td></tr>
+</tbody>
+</table>
+
+<!-- ── Edge Cases ──────────────────────────────────────────── -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+
+<table>
+<thead><tr><th>Scenario</th><th>Behavior</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr><td>Two agents write the same key to <code>data</code></td><td><code>merge_dicts</code> does <code>{**old, **new}</code> — the second write overwrites the first</td><td>Convention: each agent uses a unique key (e.g., <code>"buffett_signal"</code>). No enforcement in code — this is a team convention.</td></tr>
+<tr><td>Missing LLM API key</td><td><code>get_model()</code> raises an authentication error from the SDK (e.g., <code>AuthenticationError</code>)</td><td>Validate all required API keys at startup. Print a table of missing keys before running the workflow.</td></tr>
+<tr><td>Unsupported <code>ModelProvider</code> value</td><td><code>get_model()</code> raises <code>ValueError</code> — the match/case has no default branch for unknown providers</td><td>Since <code>ModelProvider</code> is an enum, Python prevents invalid values at assignment time. Only possible via unsafe casting.</td></tr>
+<tr><td>Agent node raises an exception</td><td>LangGraph catches the exception and marks the node as failed. Fan-in waits for all nodes; failed nodes produce no state update.</td><td>Wrap agent logic in try/except; return a neutral signal on failure rather than crashing the entire workflow.</td></tr>
+<tr><td>State grows very large (many messages)</td><td><code>operator.add</code> appends all messages — no truncation. State size grows linearly with agent count × message count.</td><td>In practice, each agent produces 2-3 messages. With 19 agents, total is ~60 messages — well within memory limits.</td></tr>
+<tr><td>Ollama server not running</td><td><code>ChatOllama</code> raises <code>ConnectionError</code> when attempting inference</td><td>Fall back to a cloud provider; or pre-check Ollama health endpoint at startup.</td></tr>
+</tbody>
+</table>
+
+<!-- ── Configuration ──────────────────────────────────────── -->
+<h2 id="configuration">Configuration</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Default</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Default LLM provider</td><td><code>ModelProvider.OPENAI</code></td><td>Agent code</td><td>Each agent chooses its own provider; most use OpenAI</td></tr>
+<tr><td>Temperature</td><td><code>0</code></td><td>Hardcoded in <code>get_model()</code></td><td>Deterministic outputs for financial analysis</td></tr>
+<tr><td>Model name</td><td>Provider-specific default</td><td><code>get_model()</code></td><td>Can be overridden via <code>model_name</code> parameter</td></tr>
+<tr><td>Ollama base URL</td><td><code>http://localhost:11434</code></td><td>Environment / default</td><td>Only used for <code>OLLAMA</code> provider</td></tr>
+<tr><td>Azure endpoint</td><td>From <code>AZURE_OPENAI_ENDPOINT</code></td><td>Environment</td><td>Required only for <code>AZURE_OPENAI</code> provider</td></tr>
+<tr><td>Fan-out parallelism</td><td>All 19 agents in parallel</td><td>Graph structure</td><td>LangGraph uses asyncio for concurrent node execution</td></tr>
+</tbody>
+</table>
+
+<!-- ── Code Examples ───────────────────────────────────────── -->
+<h2 id="code-examples">Code Examples</h2>
+
+<h3 id="example-agent-state">Defining AgentState</h3>
+
+<pre><code class="language-python">import operator
+from typing import Annotated, TypedDict
+from langchain_core.messages import BaseMessage
+
+def merge_dicts(a: dict, b: dict) -> dict:
+    """Shallow merge: new keys added, existing keys overwritten by b."""
+    return {**a, **b}
+
+class AgentState(TypedDict):
+    messages: Annotated[list[BaseMessage], operator.add]
+    data: Annotated[dict, merge_dicts]
+    metadata: Annotated[dict, merge_dicts]</code></pre>
+
+<h3 id="example-get-model">Using the LLM Factory</h3>
+
+<pre><code class="language-python">from llm.models import get_model, ModelProvider
+
+# Get default OpenAI model (gpt-4o, temperature=0)
+model = get_model(ModelProvider.OPENAI)
+
+# Get a specific Anthropic model
+model = get_model(ModelProvider.ANTHROPIC, model_name="claude-3-5-sonnet-20241022")
+
+# Use in an agent
+response = model.invoke([
+    {"role": "system", "content": "You are a value investing analyst."},
+    {"role": "user", "content": f"Analyze these metrics: {metrics_json}"}
+])</code></pre>
+
+<h3 id="example-agent-node">Writing an Agent Node</h3>
+
+<pre><code class="language-python">from graph.state import AgentState
+from llm.models import get_model, ModelProvider
+from data.models import AnalystSignal
+
+def buffett_agent(state: AgentState) -> dict:
+    """Warren Buffett-style value investing analysis."""
+    # Read shared data from state
+    prices = state["data"].get("prices", {})
+    metrics = state["data"].get("metrics", {})
+
+    # Get LLM instance
+    model = get_model(ModelProvider.OPENAI)
+
+    # Perform analysis (simplified)
+    prompt = f"Analyze as Warren Buffett: {metrics}"
+    response = model.invoke([{"role": "user", "content": prompt}])
+
+    # Return state update — merge_dicts will combine with other agents
+    return {
+        "messages": [response],
+        "data": {
+            "buffett_signal": AnalystSignal(
+                signal="bullish",
+                confidence=0.82,
+                reasoning=response.content
+            ).dict()
+        }
+    }</code></pre>
+
+<h3 id="example-running-workflow">Running the Complete Workflow</h3>
+
+<pre><code class="language-python">from graph.state import AgentState, create_workflow
+
+# Build and compile the graph
+app = create_workflow()
+
+# Define initial state
+initial_state: AgentState = {
+    "messages": [],
+    "data": {},
+    "metadata": {
+        "tickers": ["AAPL", "MSFT", "NVDA"],
+        "start_date": "2025-01-01",
+        "end_date": "2025-12-31",
+        "model_provider": "openai"
+    }
+}
+
+# Run the pipeline
+result = app.invoke(initial_state)
+
+# Access final portfolio decisions
+portfolio = result["data"]["portfolio_allocation"]
+print(portfolio)
+# {"AAPL": 0.35, "MSFT": 0.30, "NVDA": 0.25, "cash": 0.10}</code></pre>
+
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<footer class="footer">
+  <p>AI Hedge Fund Wiki — LangGraph State &amp; LLM Abstraction</p>
+  <p>Generated 2026-04-11 · Source SHA <code>c45b50f</code> · graph/state.py · llm/models.py</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function reset(){scale=1;content.style.transform='scale(1)';}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var c=svg.cloneNode(true);c.style.maxWidth='90vw';c.style.width='90vw';content.appendChild(c);}reset();overlay.classList.add('active');});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');reset();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');reset();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();scale=Math.min(5,Math.max(0.5,scale+(e.deltaY>0?-0.1:0.1)));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var h=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var cur=null;h.forEach(function(el){if(el.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+el.id;a.textContent=el.textContent;li.appendChild(a);if(el.tagName==='H3'&&cur){var s=cur.querySelector('ol');if(!s){s=document.createElement('ol');cur.appendChild(s);}s.appendChild(li);}else{ol.appendChild(li);if(el.tagName==='H2')cur=li;}});toc.appendChild(ol);})();
+hljs.highlightAll();
+document.querySelectorAll('pre code').forEach(function(block){if(block.closest('.mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});block.parentElement.appendChild(btn);});
+(function(){var main=document.querySelector('main');if(!main)return;var words=main.textContent.split(/\s+/).length;var min=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+min+' min read';hero.appendChild(span);}})();
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var hs=Array.from(document.querySelectorAll('h2[id]'));if(!hs.length)return;if(e.key==='j'){var idx=hs.findIndex(function(h){return h.getBoundingClientRect().top>10;});if(idx>=0)hs[idx].scrollIntoView({behavior:'smooth'});}if(e.key==='k'){var idx2=hs.slice().reverse().findIndex(function(h){return h.getBoundingClientRect().top<-10;});if(idx2>=0)hs[hs.length-1-idx2].scrollIntoView({behavior:'smooth'});}});
+</script>
+</body>
+</html>

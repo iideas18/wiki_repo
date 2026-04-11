@@ -367,13 +367,13 @@ document.addEventListener('DOMContentLoaded', function() {
   /* ── Theme Toggle ── */
   const toggle = document.getElementById('themeToggle');
   const html = document.documentElement;
-  const stored = localStorage.getItem('wiki-theme');
+  const stored = localStorage.getItem('neutra-ip-theme');
   if (stored) { html.setAttribute('data-theme', stored); }
   toggle.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
   toggle.addEventListener('click', function() {
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
-    localStorage.setItem('wiki-theme', next);
+    localStorage.setItem('neutra-ip-theme', next);
     toggle.textContent = next === 'dark' ? '☀️' : '🌙';
   });
 
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var src = el.textContent;
     el.setAttribute('data-source', src);
     var id = 'mmd-' + i;
-    mermaid.render(id, src).then(function(result) {
+    mermaid.render(id, src).then(function(result).catch(function(e){console.warn('mermaid:',e)}) {
       el.innerHTML = result.svg;
       el.classList.add('mermaid-rendered');
     }).catch(function(err) { console.error('Mermaid render error:', err); });
@@ -450,6 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Escape') overlay.classList.remove('active');
   });
 });
+
+var _ov=document.getElementById('diagramOverlay');if(_ov){_ov.addEventListener('wheel',function(e){e.preventDefault();var inner=_ov.querySelector('div')||_ov;var s=parseFloat(inner.dataset.scale||'1');s=Math.max(0.3,Math.min(5,s+(e.deltaY<0?0.15:-0.15)));inner.dataset.scale=s;inner.style.transform='scale('+s+')';},{passive:false});}
 </script>
 </body>
 </html>

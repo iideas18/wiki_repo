@@ -1,10 +1,17 @@
 [
   {
+    "timestamp": "20260411_105808",
+    "date": "2026-04-11",
+    "rev": "c45b50f",
+    "pages": 14,
+    "latest": true
+  },
+  {
     "timestamp": "20260402_151808",
     "date": "2026-04-02",
     "rev": "b6dca8c",
     "pages": 11,
-    "latest": true
+    "latest": false
   },
   {
     "timestamp": "20260325_110052",

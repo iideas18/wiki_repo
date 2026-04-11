@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-source" content="ai-hedge-fund/app/backend">
+<meta name="wiki-git-sha" content="c45b50f">
+<meta name="wiki-source-rev" content="c45b50f">
+<meta name="wiki-generated" content="2026-04-11">
+<meta name="description" content="Deep-dive into the FastAPI backend of the AI Hedge Fund web application — routes, services, repositories, SSE events, and database models.">
+<title>FastAPI Backend — AI Hedge Fund Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.2rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.5rem}
+h2{color:var(--accent);font-size:1.5rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{color:var(--heading);font-size:1.2rem;margin:1.5rem 0 .5rem}
+h4{color:var(--accent2);font-size:1.05rem;margin:1rem 0 .3rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border)}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.5rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1rem 0 1.5rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1rem}.hero .subtitle{color:var(--accent);font-size:1.15rem;margin-bottom:.3rem}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.88rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{column-count:2;column-gap:2rem;margin:1rem 0}
+.toc ol{padding-left:1.2rem}.toc li{margin:.3rem 0}.toc a{color:var(--accent)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;text-decoration:none}.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text)}
+.back-to-top.visible{display:flex}
+.code-walk{counter-reset:step}.code-walk .step{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;counter-increment:step}
+.code-walk .step::before{content:"Step " counter(step);display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem;font-size:.9rem}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:1px 6px;border-radius:8px;margin-left:.5rem}
+.intro-box{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:1.5rem;margin:1rem 0 1.5rem}
+.intro-box h3{color:var(--accent);margin-top:0}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{color:#1f2328;background:#fff;max-width:100%}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--accent:#0969da;--heading:#1f2328;--code-bg:#f6f8fa}.card,.stat-box,.diagram-container{break-inside:avoid}}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.toc{column-count:1}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">☾</button>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="FastAPI Backend with SSE Streaming and React Node-Graph UI" href="../index.html">Web App</a> &rsaquo; Backend
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1>FastAPI Backend</h1>
+  <p class="subtitle">REST <a href="../../data_doc/api/index.html">API</a> &middot; SSE Streaming &middot; Repository Pattern &middot; SQLAlchemy ORM</p>
+  <p>The server-side <a href="../../backtesting_doc/engine/index.html">engine</a> powering the AI Hedge Fund web application.</p>
+  <p>
+    <span class="badge blue">FastAPI</span>
+    <span class="badge green">SSE</span>
+    <span class="badge yellow">SQLAlchemy</span>
+    <span class="badge red">Alembic</span>
+  </p>
+</div>
+
+<div class="intro-box">
+  <h3>🍽️ The Restaurant Analogy</h3>
+  <p>Think of this FastAPI backend as a <strong>restaurant's kitchen</strong>. The React frontend is the <strong>dining room</strong> where customers (users) place orders (analysis requests). The API routes are the <strong>waiters</strong> — they take orders from the dining room and carry them into the kitchen. The services (<code>AgentService</code>, <code>BacktestService</code>, <code>GraphService</code>) are the <strong>chefs</strong> — they do the real cooking (orchestrating <a href="../../agents_doc/index.html">agents</a>, compiling graphs, running backtests). The repositories are the <strong>pantry managers</strong> — they know exactly where every ingredient (<a href="../../data_doc/index.html">data</a> record) is stored and how to retrieve it. And the SQLite database is the <strong>pantry</strong> itself — the physical storage where all ingredients and recipes are kept.</p>
+  <p>SSE streaming? That's the <strong>kitchen window</strong> where chefs slide finished plates out — the dining room can see dishes being completed one by one, rather than waiting for the entire multi-course meal to be ready.</p>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<!-- ============================================================ -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The FastAPI backend is the bridge between the React frontend and the AI trading engine. It exposes REST endpoints for managing flow configurations, executing analyses, and running backtests, while streaming real-time progress updates via Server-Sent Events. The service layer wraps the core run_hedge_fund() function with web-specific concerns: database persistence, SSE event emission, and per-agent model configuration from the visual graph editor.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">The backend is like a restaurant kitchen. The React frontend is the dining room where customers (users) place orders (configure and run analyses). The API routes are waiters carrying orders to the kitchen. The services are chefs preparing dishes (running agent ensembles). The database is the pantry keeping track of recipes (flow configurations) and past orders (run history). SSE streaming is the kitchen window where the waiter can see when each course is ready.</p>
+</details>
+</div>
+
+<h2 id="architecture">Architecture Overview</h2>
+
+<p>The backend follows a strict layered architecture: routes handle HTTP concerns, services contain business logic, and repositories manage data access. SSE streaming is an orthogonal concern that cuts across the service and route layers.</p>
+
+<div class="diagram-container" aria-label="Backend architecture diagram">
+<pre class="mermaid">
+flowchart TB
+    subgraph Routes["API Routes Layer"]
+        HFRoute["hedge_fund.py\n/api/hedge-fund/run\n/api/hedge-fund/backtest"]
+        FlowRoute["flows.py\n/api/flows CRUD"]
+        RunRoute["flow_runs.py\n/api/flow-runs"]
+        KeyRoute["api_keys.py\n/api/api-keys"]
+        ModelRoute["models.py\n/api/language-models"]
+        OllamaRoute["ollama.py\n/api/ollama/*"]
+    end
+
+    subgraph Services["Service Layer"]
+        AgentSvc["AgentService\nOrchestrates run_hedge_fund\nEmits SSE events"]
+        BTSvc["BacktestService\nHistorical replay engine"]
+        GraphSvc["GraphService\nDAG validation\nTopological sort\nConfig resolution"]
+    end
+
+    subgraph Repos["Repository Layer"]
+        FlowRepo["FlowRepository\nHedgeFundFlow CRUD"]
+        RunRepo["RunRepository\nFlowRun + Cycle persistence"]
+        KeyRepo["KeyRepository\nApiKey encryption/storage"]
+    end
+
+    subgraph DB["Database"]
+        SQLite[("SQLite\nWAL mode\nAlembic migrations")]
+    end
+
+    subgraph Streaming["SSE Stream"]
+        Events["BaseEvent\nStartEvent\nProgressUpdateEvent\nErrorEvent\nCompleteEvent"]
+        ESR["EventSourceResponse"]
+    end
+
+    HFRoute --> AgentSvc
+    HFRoute --> BTSvc
+    FlowRoute --> GraphSvc
+    RunRoute --> RunRepo
+    KeyRoute --> KeyRepo
+    ModelRoute --> AgentSvc
+
+    AgentSvc -->|"yields"| Events
+    Events --> ESR
+    ESR -.->|"SSE stream"| HFRoute
+
+    AgentSvc --> FlowRepo
+    BTSvc --> RunRepo
+    GraphSvc --> FlowRepo
+
+    FlowRepo --> SQLite
+    RunRepo --> SQLite
+    KeyRepo --> SQLite
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="key-components">Key Classes &amp; Functions</h2>
+
+<table>
+  <thead>
+    <tr><th>Name</th><th>Type</th><th>Location</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>run_hedge_fund_endpoint</code></td><td>Route handler</td><td>routes/hedge_fund.py</td><td>POST /api/hedge-fund/run — validates request, compiles <a href="../../data_doc/graph/index.html">graph</a>, invokes <a href="../index.html" title="Web Application — AI Hedge Fund Wiki" class="xref">AgentService</a>, returns EventSourceResponse.</td></tr>
+    <tr><td><code>run_backtest_endpoint</code></td><td>Route handler</td><td>routes/hedge_fund.py</td><td>POST /api/hedge-fund/backtest — accepts date range and flow, delegates to <a href="../index.html" title="Web Application — AI Hedge Fund Wiki" class="xref">BacktestService</a>.</td></tr>
+    <tr><td><code>create_flow</code></td><td>Route handler</td><td>routes/flows.py</td><td>POST /api/flows — validates and persists a new flow graph definition.</td></tr>
+    <tr><td><code>list_flows / get_flow</code></td><td>Route handler</td><td>routes/flows.py</td><td>GET /api/flows — returns all flows; GET /api/flows/{id} — returns single flow.</td></tr>
+    <tr><td><code>list_flow_runs</code></td><td>Route handler</td><td>routes/flow_runs.py</td><td>GET /api/flow-runs — returns paginated run history with status and results.</td></tr>
+    <tr><td><code>manage_api_keys</code></td><td>Route handler</td><td>routes/api_keys.py</td><td>CRUD for encrypted API keys — never returns plaintext after initial creation.</td></tr>
+    <tr><td><code>AgentService</code></td><td>Service class</td><td>services/agent_service.py</td><td>Core orchestrator. Wraps <code>run_hedge_fund()</code>, manages agent lifecycle, yields SSE events.</td></tr>
+    <tr><td><code>BacktestService</code></td><td>Service class</td><td>services/backtest_service.py</td><td>Replays agent pipeline over historical dates. Aggregates per-day results into performance metrics.</td></tr>
+    <tr><td><code>GraphService</code></td><td>Service class</td><td>services/graph_service.py</td><td>Validates DAG structure, runs topological sort, resolves per-node model configs into compiled workflow.</td></tr>
+    <tr><td><code>HedgeFundFlow</code></td><td>SQLAlchemy model</td><td>models/flow.py</td><td>Stores flow name, description, serialized graph JSON (nodes + edges + configs).</td></tr>
+    <tr><td><code>HedgeFundFlowRun</code></td><td>SQLAlchemy model</td><td>models/flow_run.py</td><td>Records a run: flow reference, parameters, status (running/completed/failed), aggregated results.</td></tr>
+    <tr><td><code>HedgeFundFlowRunCycle</code></td><td>SQLAlchemy model</td><td>models/flow_run_cycle.py</td><td>Per-agent output within a run — agent name, model used, raw output, structured analysis.</td></tr>
+    <tr><td><code>ApiKey</code></td><td>SQLAlchemy model</td><td>models/api_key.py</td><td>Provider name, encrypted key value, creation date, last-used timestamp.</td></tr>
+    <tr><td><code>BaseEvent</code></td><td>Pydantic model</td><td>events.py</td><td>Base class with <code>type</code> discriminator, <code>timestamp</code>, and <code>sequence</code> number.</td></tr>
+    <tr><td><code>StartEvent</code></td><td>Pydantic model</td><td>events.py</td><td>Emitted when a run begins — contains run_id, list of agents, and total expected steps.</td></tr>
+    <tr><td><code>ProgressUpdateEvent</code></td><td>Pydantic model</td><td>events.py</td><td>Emitted after each agent completes — agent name, status, intermediate results.</td></tr>
+    <tr><td><code>CompleteEvent</code></td><td>Pydantic model</td><td>events.py</td><td>Final event — contains aggregated portfolio recommendation and all agent outputs.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="data-flow">Request Lifecycle — Full SSE Data Flow</h2>
+
+<p>This sequence diagram traces every interaction from the moment a user triggers a run to the final result delivery, including error handling paths.</p>
+
+<div class="diagram-container" aria-label="Request lifecycle sequence diagram">
+<pre class="mermaid">
+sequenceDiagram
+    participant Browser as React Frontend
+    participant Route as POST /api/hedge-fund/run
+    participant GraphSvc as GraphService
+    participant FlowRepo as FlowRepository
+    participant DB as SQLite
+    participant AgentSvc as AgentService
+    participant HF as run_hedge_fund()
+    participant SSE as EventSourceResponse
+    participant Client as SSE Client (Browser)
+
+    Browser->>Route: POST {flow_id, tickers, date_range}
+    Route->>GraphSvc: compile(flow_id)
+    GraphSvc->>FlowRepo: get_by_id(flow_id)
+    FlowRepo->>DB: SELECT FROM hedge_fund_flows WHERE id=?
+    DB-->>FlowRepo: Row data
+    FlowRepo-->>GraphSvc: HedgeFundFlow instance
+    GraphSvc->>GraphSvc: validate_dag(nodes, edges)
+    GraphSvc->>GraphSvc: topological_sort(nodes, edges)
+    GraphSvc->>GraphSvc: resolve_model_configs(nodes)
+    GraphSvc-->>Route: CompiledWorkflow
+
+    Route->>AgentSvc: execute(workflow, tickers, dates)
+    Route-->>SSE: Return EventSourceResponse(event_generator)
+    Client->>SSE: Open EventSource connection
+
+    AgentSvc-->>SSE: StartEvent {run_id, agents: [...]}
+    SSE-->>Client: data: {"type":"start",...}
+
+    AgentSvc->>HF: run_hedge_fund(agents, tickers, dates)
+    loop For each agent in workflow
+        HF-->>AgentSvc: agent_result
+        AgentSvc->>FlowRepo: save_cycle(run_id, agent, result)
+        FlowRepo->>DB: INSERT INTO hedge_fund_flow_run_cycles
+        AgentSvc-->>SSE: ProgressUpdateEvent {agent, status, data}
+        SSE-->>Client: data: {"type":"progress",...}
+    end
+
+    AgentSvc->>FlowRepo: save_run(run_id, final_results)
+    FlowRepo->>DB: UPDATE hedge_fund_flow_runs SET status='completed'
+    AgentSvc-->>SSE: CompleteEvent {portfolio, recommendations}
+    SSE-->>Client: data: {"type":"complete",...}
+    Client-->>Browser: Render results UI
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough — SSE Streaming Endpoint</h2>
+
+<p>This walkthrough traces the SSE streaming mechanism from the route handler through the event generator, showing how each layer contributes to the real-time experience.</p>
+
+<div class="code-walk">
+  <div class="step">
+    <strong>Route receives the request.</strong> The route handler validates the incoming request body using a Pydantic model, extracting <code>flow_id</code>, <code>tickers</code>, and <code>date_range</code>. FastAPI automatically returns 422 if validation fails.
+    <pre><code class="language-python">@router.post("/api/hedge-fund/run")
+async def run_hedge_fund_endpoint(
+    request: RunRequest,
+    graph_service: GraphService = Depends(),
+    agent_service: AgentService = Depends(),
+):
+    workflow = graph_service.compile(request.flow_id)
+    event_gen = agent_service.execute(workflow, request.tickers, request.date_range)
+    return EventSourceResponse(event_gen)</code></pre>
+  </div>
+
+  <div class="step">
+    <strong><a href="../index.html" title="Web Application — AI Hedge Fund Wiki" class="xref">GraphService</a> compiles the flow.</strong> The service loads the flow's JSON graph from the database, validates it as a DAG, runs topological sort, and resolves each node's model configuration. The result is a <code>CompiledWorkflow</code> — a flat, ordered list of agent configs ready for sequential execution.
+  </div>
+
+  <div class="step">
+    <strong>AgentService creates an async generator.</strong> The <code>execute</code> method is an <code>async def</code> generator function. It first yields a <code>StartEvent</code>, then iterates over agents, yielding a <code>ProgressUpdateEvent</code> after each one completes.
+    <pre><code class="language-python">async def execute(self, workflow, tickers, date_range):
+    run_id = str(uuid4())
+    yield StartEvent(run_id=run_id, agents=[a.name for a in workflow.agents])
+
+    results = []
+    for i, agent_config in enumerate(workflow.agents):
+        try:
+            result = await self._run_agent(agent_config, tickers, date_range)
+            results.append(result)
+            self.repo.save_cycle(run_id, agent_config.name, result)
+            yield ProgressUpdateEvent(
+                agent=agent_config.name,
+                progress=(i + 1) / len(workflow.agents),
+                data=result.summary
+            )
+        except Exception as e:
+            yield ErrorEvent(agent=agent_config.name, error=str(e))
+
+    portfolio = self._aggregate(results)
+    self.repo.save_run(run_id, portfolio, status="completed")
+    yield CompleteEvent(portfolio=portfolio, run_id=run_id)</code></pre>
+  </div>
+
+  <div class="step">
+    <strong>FastAPI wraps the generator in EventSourceResponse.</strong> Each yielded event is serialized to JSON and formatted as an SSE message: <code>data: {json}\n\n</code>. The response uses <code>Content-Type: text/event-stream</code> and keeps the connection alive with periodic heartbeat comments.
+  </div>
+
+  <div class="step">
+    <strong>Browser receives events via EventSource.</strong> The React frontend opens an <code>EventSource</code> connection. Each incoming event is parsed and dispatched to the appropriate handler — updating the progress bar, showing agent results, or rendering final portfolio allocations.
+    <pre><code class="language-javascript">const source = new EventSource(`/api/hedge-fund/run/${runId}/stream`);
+source.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  switch (data.type) {
+    case 'start':    setAgents(data.agents); break;
+    case 'progress': updateProgress(data.agent, data.progress); break;
+    case 'error':    showError(data.agent, data.error); break;
+    case 'complete': showResults(data.portfolio); source.close(); break;
+  }
+};</code></pre>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="design-rationale">Design Rationale</h2>
+
+<h3 id="rationale-service-layer">Service Layer Separation</h3>
+
+<p>Routes are intentionally thin — they validate input, call a service, and return the response. All business logic lives in dedicated service classes. This separation provides three key benefits: (1) services can be unit-tested without spinning up a web server, (2) the same service can be used by multiple routes (e.g., <code>AgentService</code> serves both the run and model-listing endpoints), and (3) swapping the web framework (FastAPI → Flask) would only require rewriting the route layer, not the business logic.</p>
+
+<h3 id="rationale-repository">Repository Pattern</h3>
+
+<p>Services never call SQLAlchemy directly. Instead, they depend on repository interfaces that abstract away database operations. This indirection means tests can inject mock repositories (returning pre-built objects without touching SQLite), and the data layer can be swapped from SQLite to PostgreSQL by providing a new repository implementation — without changing a single line of service code.</p>
+
+<h3 id="rationale-sse">SSE Over WebSockets</h3>
+
+<p>The communication pattern between server and client during a run is strictly unidirectional: the server pushes progress updates to the client. WebSockets would be overkill — they add connection upgrade complexity, require explicit heartbeat <a href="../../agents_doc/management/index.html">management</a>, and don't auto-reconnect. SSE provides all of this out of the box: automatic reconnection with <code>Last-Event-ID</code>, standard HTTP transport (works through proxies and CDNs), and native browser support via the <code>EventSource</code> API. The only trade-off is the one-way limitation, which perfectly matches this use case.</p>
+
+<!-- ============================================================ -->
+<h2 id="deep-dive-cards">Deep-Dive Topics</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>SSE Event System</h4>
+    <p>The event hierarchy is built on Pydantic models. <code>BaseEvent</code> provides <code>type</code>, <code>timestamp</code>, and <code>sequence</code> fields. Subclasses (<code>StartEvent</code>, <code>ProgressUpdateEvent</code>, <code>ErrorEvent</code>, <code>CompleteEvent</code>) add domain-specific fields. The <code>type</code> field acts as a discriminator for frontend event routing. Sequence numbers enable gap detection on reconnect — if the client sees sequence 5 after sequence 3, it knows it missed an event.</p>
+  </div>
+  <div class="card">
+    <h4>Database Schema</h4>
+    <p>Four tables form the data model. <code>hedge_fund_flows</code> stores graph definitions. <code>hedge_fund_flow_runs</code> records execution metadata (status, timestamps, parameters). <code>hedge_fund_flow_run_cycles</code> captures per-agent output within a run. <code>api_keys</code> holds encrypted provider credentials. All tables use UUID primary keys and include <code>created_at</code> / <code>updated_at</code> timestamps managed by SQLAlchemy event hooks.</p>
+  </div>
+  <div class="card">
+    <h4>Graph Service Compilation</h4>
+    <p>The <code>GraphService</code> converts a React Flow graph (JSON with <code>nodes</code> and <code>edges</code> arrays) into an executable workflow via three passes: (1) DAG validation — cycle detection using DFS with coloring, (2) topological sort — Kahn's algorithm producing a linear execution order, and (3) config resolution — merging node-level model selections with global defaults. Invalid graphs return 422 errors with node-specific messages.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="database-models">Database Models</h2>
+
+<table>
+  <thead>
+    <tr><th>Model</th><th>Table</th><th>Key Columns</th><th>Relationships</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>HedgeFundFlow</code></td>
+      <td><code>hedge_fund_flows</code></td>
+      <td><code>id</code> (UUID), <code>name</code>, <code>description</code>, <code>graph_data</code> (JSON), <code>created_at</code>, <code>updated_at</code></td>
+      <td>Has many <code>HedgeFundFlowRun</code></td>
+    </tr>
+    <tr>
+      <td><code>HedgeFundFlowRun</code></td>
+      <td><code>hedge_fund_flow_runs</code></td>
+      <td><code>id</code> (UUID), <code>flow_id</code> (FK), <code>status</code>, <code>tickers</code>, <code>date_range</code>, <code>results</code> (JSON), <code>started_at</code>, <code>completed_at</code></td>
+      <td>Belongs to <code>HedgeFundFlow</code>; has many <code>HedgeFundFlowRunCycle</code></td>
+    </tr>
+    <tr>
+      <td><code>HedgeFundFlowRunCycle</code></td>
+      <td><code>hedge_fund_flow_run_cycles</code></td>
+      <td><code>id</code> (UUID), <code>run_id</code> (FK), <code>agent_name</code>, <code>model_used</code>, <code>output</code> (JSON), <code>duration_ms</code>, <code>created_at</code></td>
+      <td>Belongs to <code>HedgeFundFlowRun</code></td>
+    </tr>
+    <tr>
+      <td><code>ApiKey</code></td>
+      <td><code>api_keys</code></td>
+      <td><code>id</code> (UUID), <code>provider</code>, <code>encrypted_key</code>, <code>label</code>, <code>created_at</code>, <code>last_used_at</code></td>
+      <td>Standalone (no FK relationships)</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="route-reference">Route Reference</h2>
+
+<table>
+  <thead>
+    <tr><th>Method</th><th>Path</th><th>Description</th><th>Auth</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>POST</code></td><td><code>/api/hedge-fund/run</code></td><td>Execute an agent pipeline; returns SSE stream.</td><td>API key</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/hedge-fund/backtest</code></td><td>Run historical backtest over date range.</td><td>API key</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/flows</code></td><td>List all saved flow definitions.</td><td>None</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/flows</code></td><td>Create a new flow definition.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/flows/{id}</code></td><td>Retrieve a specific flow by ID.</td><td>None</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/api/flows/{id}</code></td><td>Update an existing flow definition.</td><td>None</td></tr>
+    <tr><td><code>DELETE</code></td><td><code>/api/flows/{id}</code></td><td>Delete a flow and its associated run history.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/flow-runs</code></td><td>List past run records with pagination.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/flow-runs/{id}</code></td><td>Retrieve a specific run with full results.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/api-keys</code></td><td>List stored API keys (masked values).</td><td>None</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/api-keys</code></td><td>Store a new encrypted API key.</td><td>None</td></tr>
+    <tr><td><code>DELETE</code></td><td><code>/api/api-keys/{id}</code></td><td>Remove a stored API key.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/language-models</code></td><td>List available models from all providers.</td><td>None</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/ollama/models</code></td><td>List locally available Ollama models.</td><td>None</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/ollama/pull</code></td><td>Pull a new Ollama model to local storage.</td><td>None</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+
+<table>
+  <thead>
+    <tr><th>Scenario</th><th>Behavior</th><th>Error Code</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SSE connection drops mid-run</strong></td>
+      <td>The agent pipeline continues executing server-side. Results are persisted to the database regardless. The client can reconnect and poll <code>/api/flow-runs/{id}</code> for final results. <code>EventSource</code> auto-reconnects with <code>Last-Event-ID</code>.</td>
+      <td>N/A (client-side)</td>
+    </tr>
+    <tr>
+      <td><strong>SQLite database lock</strong></td>
+      <td>With WAL mode enabled, readers never block writers and vice versa. A busy timeout of 5 seconds handles brief contention. If the timeout expires, the operation retries once before returning a 503.</td>
+      <td>503</td>
+    </tr>
+    <tr>
+      <td><strong>Invalid graph config (cycles)</strong></td>
+      <td>The <code>GraphService.validate_dag()</code> method detects cycles via DFS coloring. Returns a 422 with a message identifying the nodes involved in the cycle.</td>
+      <td>422</td>
+    </tr>
+    <tr>
+      <td><strong>Missing or expired API key</strong></td>
+      <td>When an agent attempts to call an LLM provider without a valid key, the service catches the auth error, emits an <code>ErrorEvent</code>, and marks the run as <code>failed</code> with a descriptive message.</td>
+      <td>SSE ErrorEvent</td>
+    </tr>
+    <tr>
+      <td><strong>Flow not found</strong></td>
+      <td>Requesting a run with a non-existent <code>flow_id</code> returns a 404 before any execution begins.</td>
+      <td>404</td>
+    </tr>
+    <tr>
+      <td><strong>Ollama not running</strong></td>
+      <td>Proxy endpoints to <code>/api/ollama/*</code> return a 502 with a message indicating the local Ollama service is unreachable.</td>
+      <td>502</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="configuration">Configuration</h2>
+
+<table>
+  <thead>
+    <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>DATABASE_URL</code></td><td><code>sqlite:///./hedge_fund.db</code></td><td>SQLAlchemy database connection string. Supports SQLite (file path) or PostgreSQL.</td></tr>
+    <tr><td><code>CORS_ORIGINS</code></td><td><code>["http://localhost:3000"]</code></td><td>Allowed origins for CORS. Set to <code>["*"]</code> for development; restrict in production.</td></tr>
+    <tr><td><code>API_KEY_ENCRYPTION_KEY</code></td><td>Auto-generated</td><td>Fernet encryption key for securing stored API keys. Persisted in <code>.env</code>.</td></tr>
+    <tr><td><code>OLLAMA_BASE_URL</code></td><td><code>http://localhost:11434</code></td><td>Base URL for the local Ollama API server.</td></tr>
+    <tr><td><code>SSE_HEARTBEAT_INTERVAL</code></td><td><code>15</code> (seconds)</td><td>Interval between SSE keepalive comments to prevent proxy timeouts.</td></tr>
+    <tr><td><code>SQLITE_BUSY_TIMEOUT</code></td><td><code>5000</code> (ms)</td><td>How long SQLite waits for a write lock before returning SQLITE_BUSY.</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="code-examples">Additional Code Examples</h2>
+
+<h3 id="ex-event-class">SSE Event Class Hierarchy</h3>
+
+<pre><code class="language-python">from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional, List, Any
+
+class BaseEvent(BaseModel):
+    type: str
+    timestamp: datetime = datetime.utcnow()
+    sequence: int = 0
+
+class StartEvent(BaseEvent):
+    type: str = "start"
+    run_id: str
+    agents: List[str]
+    total_steps: int
+
+class ProgressUpdateEvent(BaseEvent):
+    type: str = "progress"
+    agent: str
+    progress: float          # 0.0 to 1.0
+    status: str              # "running", "completed", "failed"
+    data: Optional[Any] = None
+
+class ErrorEvent(BaseEvent):
+    type: str = "error"
+    agent: str
+    error: str
+    recoverable: bool = False
+
+class CompleteEvent(BaseEvent):
+    type: str = "complete"
+    run_id: str
+    portfolio: dict
+    recommendations: List[dict]</code></pre>
+
+<h3 id="ex-flow-repo">Repository Pattern — FlowRepository</h3>
+
+<pre><code class="language-python">from sqlalchemy.orm import Session
+from models.flow import HedgeFundFlow
+from typing import Optional, List
+
+class FlowRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_by_id(self, flow_id: str) -> Optional[HedgeFundFlow]:
+        return self.db.query(HedgeFundFlow).filter(
+            HedgeFundFlow.id == flow_id
+        ).first()
+
+    def list_all(self) -> List[HedgeFundFlow]:
+        return self.db.query(HedgeFundFlow).order_by(
+            HedgeFundFlow.updated_at.desc()
+        ).all()
+
+    def create(self, name: str, graph_data: dict) -> HedgeFundFlow:
+        flow = HedgeFundFlow(name=name, graph_data=graph_data)
+        self.db.add(flow)
+        self.db.commit()
+        self.db.refresh(flow)
+        return flow
+
+    def delete(self, flow_id: str) -> bool:
+        flow = self.get_by_id(flow_id)
+        if not flow:
+            return False
+        self.db.delete(flow)
+        self.db.commit()
+        return True</code></pre>
+
+<h3 id="ex-graph-compile">GraphService — Topological Sort</h3>
+
+<pre><code class="language-python">from collections import deque
+from typing import List, Dict
+
+def topological_sort(nodes: List[dict], edges: List[dict]) -> List[str]:
+    """Kahn's algorithm for DAG topological ordering."""
+    in_degree: Dict[str, int] = {n["id"]: 0 for n in nodes}
+    adjacency: Dict[str, List[str]] = {n["id"]: [] for n in nodes}
+
+    for edge in edges:
+        src, tgt = edge["source"], edge["target"]
+        adjacency[src].append(tgt)
+        in_degree[tgt] += 1
+
+    queue = deque([nid for nid, deg in in_degree.items() if deg == 0])
+    order = []
+
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbor in adjacency[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    if len(order) != len(nodes):
+        raise ValueError("Graph contains a cycle — cannot compile to workflow")
+
+    return order</code></pre>
+
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="footer">
+  <p>AI Hedge Fund Wiki — FastAPI Backend Deep-Dive</p>
+  <p>Generated 2026-04-11 from commit <code>c45b50f</code> &middot; Source: <code>app/backend/</code></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function reset(){scale=1;content.style.transform='scale(1)';}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var c=svg.cloneNode(true);c.style.maxWidth='90vw';c.style.width='90vw';content.appendChild(c);}reset();overlay.classList.add('active');});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');reset();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');reset();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();scale=Math.min(5,Math.max(0.5,scale+(e.deltaY>0?-0.1:0.1)));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var h=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var cur=null;h.forEach(function(el){if(el.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+el.id;a.textContent=el.textContent;li.appendChild(a);if(el.tagName==='H3'&&cur){var s=cur.querySelector('ol');if(!s){s=document.createElement('ol');cur.appendChild(s);}s.appendChild(li);}else{ol.appendChild(li);if(el.tagName==='H2')cur=li;}});toc.appendChild(ol);})();
+hljs.highlightAll();
+document.querySelectorAll('pre code').forEach(function(block){if(block.closest('.mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});block.parentElement.appendChild(btn);});
+(function(){var main=document.querySelector('main');if(!main)return;var words=main.textContent.split(/\s+/).length;var min=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+min+' min read';hero.appendChild(span);}})();
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var hs=Array.from(document.querySelectorAll('h2[id]'));if(!hs.length)return;if(e.key==='j'){var idx=hs.findIndex(function(h){return h.getBoundingClientRect().top>10;});if(idx>=0)hs[idx].scrollIntoView({behavior:'smooth'});}if(e.key==='k'){var idx2=hs.slice().reverse().findIndex(function(h){return h.getBoundingClientRect().top<-10;});if(idx2>=0)hs[hs.length-1-idx2].scrollIntoView({behavior:'smooth'});}});
+</script>
+</body>
+</html>

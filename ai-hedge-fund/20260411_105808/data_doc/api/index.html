@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-source" content="ai-hedge-fund/src/tools">
+<meta name="wiki-git-sha" content="c45b50f">
+<meta name="wiki-source-rev" content="c45b50f">
+<meta name="wiki-generated" content="2026-04-11">
+<meta name="description" content="Deep dive into the Financial API client, Pydantic data models, and in-memory cache for the AI Hedge Fund.">
+<title>Financial API &amp; Data Models — AI Hedge Fund Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.2rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.5rem}
+h2{color:var(--accent);font-size:1.5rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{color:var(--heading);font-size:1.2rem;margin:1.5rem 0 .5rem}
+h4{color:var(--accent2);font-size:1.05rem;margin:1rem 0 .3rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border)}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.5rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1rem 0 1.5rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1rem}.hero .subtitle{color:var(--accent);font-size:1.15rem;margin-bottom:.3rem}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.88rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{column-count:2;column-gap:2rem;margin:1rem 0}
+.toc ol{padding-left:1.2rem}.toc li{margin:.3rem 0}.toc a{color:var(--accent)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;text-decoration:none}.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text)}
+.back-to-top.visible{display:flex}
+.code-walk{counter-reset:step}.code-walk .step{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;counter-increment:step}
+.code-walk .step::before{content:"Step " counter(step);display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem;font-size:.9rem}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:1px 6px;border-radius:8px;margin-left:.5rem}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{color:#1f2328;background:#fff;max-width:100%}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--accent:#0969da;--heading:#1f2328;--code-bg:#f6f8fa}.card,.stat-box,.diagram-container{break-inside:avoid}}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.toc{column-count:1}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">☾</button>
+
+<main id="main">
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="Financial API, Caching, State Management, and LLM Abstraction" href="../index.html">Data</a> &rsaquo; Financial API
+</nav>
+
+<div class="hero">
+  <h1>Financial API &amp; <a href="../index.html">Data</a> Models</h1>
+  <p class="subtitle">tools/api.py · data/models.py · data/cache.py</p>
+  <p>The external data gateway — fetching, validating, and caching every piece of financial information the <a href="../../agents_doc/index.html">agents</a> need.</p>
+  <div style="margin-top:1rem">
+    <span class="badge blue">5 API Endpoints</span>
+    <span class="badge green">In-Memory Cache</span>
+    <span class="badge yellow">15+ Pydantic Models</span>
+    <span class="badge red">Rate Limiting</span>
+  </div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The Financial API client is the system's single gateway to external market data. Every agent's analysis — from Warren Buffett's owner earnings calculation to the technical analyst's Hurst exponent — depends on this layer for prices, financial metrics, insider trades, and news. It wraps the financialdatasets.ai REST API with in-memory caching, rate-limit handling, and Pydantic validation, ensuring agents get clean, typed data without worrying about HTTP details.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the API client as a concierge at a financial library. You ask for 'AAPL prices, January to June' and the concierge knows exactly which shelf to check. If they've fetched the same book recently, it's still on the desk — no need to walk to the stacks again. And if the library is too busy (HTTP 429), the concierge politely waits 60 seconds before trying again, rather than pestering the librarian.</p>
+</details>
+</div>
+
+<h2 id="table-of-contents">Table of Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- ── Architecture ────────────────────────────────────────── -->
+<h2 id="architecture">Architecture</h2>
+
+<p>The API layer follows a three-tier pattern: <strong>functions</strong> expose clean interfaces to agents, the <strong>cache</strong> intercepts repeated queries, and <strong>Pydantic models</strong> validate every piece of data before it reaches agent logic.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+    subgraph Agent["Agent Code"]
+        CALL["get_prices('AAPL', ...)"]
+    end
+
+    subgraph API["tools/api.py"]
+        KEYGEN["Build cache key<br/>AAPL_2025-01-01_2025-12-31"]
+        HTTP["HTTP GET<br/>financialdatasets.ai"]
+        RETRY["Rate Limit Handler<br/>60s backoff × 3"]
+        PARSE["JSON → Pydantic"]
+    end
+
+    subgraph Cache["data/cache.py"]
+        LOOKUP["Cache Lookup"]
+        STORE["Cache Store<br/>(set-based dedup)"]
+        MEMORY["In-Memory Dict<br/>_cache: dict"]
+    end
+
+    subgraph Models["data/models.py"]
+        PRICE["Price"]
+        FM["FinancialMetrics"]
+        LI["LineItem"]
+        IT["InsiderTrade"]
+        CN["CompanyNews"]
+        CF["CompanyFacts"]
+    end
+
+    CALL --> KEYGEN
+    KEYGEN --> LOOKUP
+    LOOKUP -->|Hit| CALL
+    LOOKUP -->|Miss| HTTP
+    HTTP -->|429| RETRY
+    RETRY --> HTTP
+    HTTP --> PARSE
+    PARSE --> PRICE & FM & LI & IT & CN & CF
+    PARSE --> STORE
+    STORE --> MEMORY
+</pre>
+</div>
+
+<!-- ── Key Functions ───────────────────────────────────────── -->
+<h2 id="key-functions">Key Functions &amp; Methods</h2>
+
+<table>
+<thead><tr><th>Function</th><th>File</th><th>Parameters</th><th>Returns</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>get_prices()</code></td><td>tools/api.py</td><td><code>ticker, start_date, end_date</code></td><td><code>list[Price]</code></td><td>Fetches daily OHLCV price data. Checks cache first, calls API on miss, caches result with dedup on <code>time</code> field.</td></tr>
+<tr><td><code>get_financial_metrics()</code></td><td>tools/api.py</td><td><code>ticker, end_date, period, limit</code></td><td><code>list[FinancialMetrics]</code></td><td>Retrieves fundamental metrics: P/E ratio, ROE, debt-to-equity, operating margin, and 40+ more fields.</td></tr>
+<tr><td><code>search_line_items()</code></td><td>tools/api.py</td><td><code>ticker, line_items, end_date, period, limit</code></td><td><code>list[LineItem]</code></td><td>Searches financial statement line items by name (e.g., "revenue", "cost_of_goods_sold"). Returns matching items with values and periods.</td></tr>
+<tr><td><code>get_insider_trades()</code></td><td>tools/api.py</td><td><code>ticker, end_date, limit</code></td><td><code>list[InsiderTrade]</code></td><td>Fetches SEC insider trading filings — owner, transaction type, shares traded, price per share.</td></tr>
+<tr><td><code>get_company_news()</code></td><td>tools/api.py</td><td><code>ticker, end_date, limit</code></td><td><code>list[CompanyNews]</code></td><td>Retrieves recent news articles for sentiment analysis — title, source, published date, URL.</td></tr>
+<tr><td><code>get_market_cap()</code></td><td>tools/api.py</td><td><code>ticker</code></td><td><code>float</code></td><td>Returns the current market capitalization for a given ticker symbol.</td></tr>
+<tr><td><code>prices_to_df()</code></td><td>tools/api.py</td><td><code>prices: list[Price]</code></td><td><code>pd.DataFrame</code></td><td>Converts a list of Price objects to a pandas DataFrame indexed by date, with columns for OHLCV data.</td></tr>
+<tr><td><code>cache_get()</code></td><td>data/cache.py</td><td><code>key: str</code></td><td><code>list | None</code></td><td>Looks up a value by composite key. Returns <code>None</code> on miss.</td></tr>
+<tr><td><code>cache_set()</code></td><td>data/cache.py</td><td><code>key, data, dedup_field</code></td><td><code>None</code></td><td>Stores data with set-based dedup merge if an existing entry exists.</td></tr>
+<tr><td><code>Price</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>OHLCV record: <code>open, high, low, close, volume, time</code></td></tr>
+<tr><td><code>FinancialMetrics</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>40+ fundamental fields including <code>pe_ratio, roe, debt_to_equity, operating_margin, revenue_growth</code></td></tr>
+<tr><td><code>LineItem</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>Financial statement line: <code>name, value, period, fiscal_year</code></td></tr>
+<tr><td><code>InsiderTrade</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>SEC filing: <code>owner, transaction_type, shares, price_per_share, filing_date</code></td></tr>
+<tr><td><code>CompanyNews</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>News article: <code>title, source, date, url, sentiment</code></td></tr>
+<tr><td><code>CompanyFacts</code></td><td>data/models.py</td><td>—</td><td>Pydantic Model</td><td>Company metadata: <code>name, sector, industry, description, cik</code></td></tr>
+</tbody>
+</table>
+
+<!-- ── Data Flow ───────────────────────────────────────────── -->
+<h2 id="data-flow">Data Flow: Cache Hit vs. Cache Miss</h2>
+
+<p>This diagram illustrates the two code paths: a fast cache hit (left) and a full API roundtrip on cache miss (right), including rate limiting.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Agent as Analyst Agent
+    participant API as tools/api.py
+    participant Cache as data/cache.py
+    participant Ext as financialdatasets.ai
+    participant Model as data/models.py
+
+    Note over Agent,Model: Scenario 1 — Cache Hit
+    Agent->>API: get_prices("AAPL", "2025-01-01", "2025-06-30")
+    API->>Cache: lookup("AAPL_2025-01-01_2025-06-30")
+    Cache-->>API:  Hit — list[Price]
+    API-->>Agent: list[Price] (instant)
+
+    Note over Agent,Model: Scenario 2 — Cache Miss with Rate Limit
+    Agent->>API: get_prices("MSFT", "2025-01-01", "2025-06-30")
+    API->>Cache: lookup("MSFT_2025-01-01_2025-06-30")
+    Cache-->>API:  Miss
+    API->>Ext: GET /prices?ticker=MSFT&start_date=...
+    Ext-->>API: 429 Too Many Requests
+    Note right of API: Wait 60 seconds (attempt 1/3)
+    API->>Ext: GET /prices?ticker=MSFT&start_date=...
+    Ext-->>API: 200 OK — JSON payload
+    API->>Model: Parse JSON → Price objects
+    Model-->>API: Validated list[Price]
+    API->>Cache: store("MSFT_...", prices, dedup="time")
+    Cache-->>API: Stored (merged with any existing)
+    API-->>Agent: list[Price]
+</pre>
+</div>
+
+<!-- ── Annotated Code Walkthrough ──────────────────────────── -->
+<h2 id="code-walkthrough">Annotated Code Walkthrough: <code>get_prices()</code></h2>
+
+<p>Let's walk through the <code>get_prices()</code> function step-by-step, annotating each section with its purpose and design rationale.</p>
+
+<div class="code-walk">
+
+<div class="step">
+<p><strong>Function signature and cache key construction.</strong> The function accepts a ticker symbol and date range. The first thing it does is build a composite cache key — this ensures that different date ranges for the same ticker don't collide.</p>
+<pre><code class="language-python">def get_prices(ticker: str, start_date: str, end_date: str) -> list[Price]:
+    """Fetch daily OHLCV prices for a ticker within a date range."""
+    cache_key = f"{ticker}_{start_date}_{end_date}"</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Cache lookup.</strong> Before making any network call, check the in-memory cache. If data exists for this exact key, return immediately. This is the fast path — sub-millisecond.</p>
+<pre><code class="language-python">    cached = cache_get(cache_key)
+    if cached:
+        return cached</code></pre>
+</div>
+
+<div class="step">
+<p><strong>HTTP request with retry loop.</strong> On cache miss, issue the HTTP request to the external API. The retry loop handles rate limiting: if the server returns 429, wait 60 seconds and try again (up to 3 times).</p>
+<pre><code class="language-python">    url = f"{BASE_URL}/prices"
+    params = {"ticker": ticker, "start_date": start_date, "end_date": end_date}
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+
+    for attempt in range(3):
+        response = requests.get(url, params=params, headers=headers)
+        if response.status_code == 429:
+            time.sleep(60)
+            continue
+        response.raise_for_status()
+        break</code></pre>
+</div>
+
+<div class="step">
+<p><strong>JSON extraction.</strong> Parse the raw response body. The API returns a JSON object with a <code>prices</code> key containing the array of price records.</p>
+<pre><code class="language-python">    data = response.json()
+    raw_prices = data.get("prices", [])</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Pydantic validation.</strong> Each raw JSON record is parsed into a <code>Price</code> model. This validates types and required fields. If the API returns malformed data, Pydantic raises <code>ValidationError</code> — failing fast rather than propagating bad data downstream.</p>
+<pre><code class="language-python">    prices = [Price(**p) for p in raw_prices]</code></pre>
+</div>
+
+<div class="step">
+<p><strong>Cache storage with dedup.</strong> Store the validated prices in the cache. The <code>dedup_field="time"</code> parameter tells the cache to merge by timestamp — if prices for some dates already exist from a prior overlapping query, they won't be duplicated.</p>
+<pre><code class="language-python">    cache_set(cache_key, prices, dedup_field="time")
+    return prices</code></pre>
+</div>
+
+</div>
+
+<!-- ── Design Rationale ────────────────────────────────────── -->
+<h2 id="design-rationale">Design Rationale</h2>
+
+<h3 id="single-api-provider">Why a Single API Provider?</h3>
+
+<p>The system uses <code>financialdatasets.ai</code> as its sole external data source. This was a deliberate choice: maintaining a unified schema across multiple data providers introduces enormous complexity (field mapping, deduplication, conflict resolution). A single provider keeps the API layer thin, the Pydantic models simple, and the cache keys predictable. If a second provider is added in the future, the cache layer already supports key-based routing via the composite key pattern.</p>
+
+<h3 id="in-memory-cache">Why In-Memory Cache (Not Redis)?</h3>
+
+<p>The AI hedge fund runs as a single process. An in-memory Python dictionary provides:</p>
+<ul>
+  <li><strong>Zero serialization cost</strong> — Pydantic objects stay as Python objects</li>
+  <li><strong>Zero network latency</strong> — no TCP roundtrip to a cache server</li>
+  <li><strong>Simplicity</strong> — no infrastructure dependency, no connection pooling</li>
+</ul>
+<p>The tradeoff is that cache is lost on process restart. For a system that fetches data at the start of each analysis run, this is acceptable.</p>
+
+<h3 id="pydantic-validation">Why Pydantic Validation on Every Response?</h3>
+
+<p>External APIs are inherently untrusted. Field names change, types shift, new fields appear. Pydantic validation on every response ensures that if the API contract breaks, the system fails immediately with a clear <code>ValidationError</code> rather than silently propagating <code>None</code> values or wrong types into agent analysis.</p>
+
+<!-- ── Deep-Dive Cards ─────────────────────────────────────── -->
+<h2 id="deep-dives">Deep-Dive Topics</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>⏱️ Rate Limiting Strategy</h4>
+    <p>The API client uses a 60-second linear backoff when it receives HTTP 429 (Too Many Requests). Unlike exponential backoff, linear is used because the external API's rate window is fixed. After 3 failed attempts, the function raises an exception rather than blocking the pipeline indefinitely. The wait time is intentionally conservative — 60 seconds is longer than most API cooldown windows — to minimize the chance of a second 429.</p>
+  </div>
+  <div class="card">
+    <h4>🔀 Cache Merge Algorithm</h4>
+    <p>When storing data for a key that already has cached entries, the cache doesn't overwrite — it <em>merges</em>. The algorithm builds a set of existing values for the dedup field (e.g., timestamps), then appends only records whose dedup field value is not in the set. This handles overlapping date ranges gracefully: requesting Jan–Jun then Mar–Dec produces a single merged dataset with no duplicate records.</p>
+  </div>
+  <div class="card">
+    <h4>📋 Pydantic Data Models</h4>
+    <p>The 15+ Pydantic models serve as the system's type contract. <code>FinancialMetrics</code> alone has 40+ optional fields (every fundamental ratio you'd find on a Bloomberg terminal). Models use <code>Optional</code> fields extensively because not every company reports every metric. The <code>AnalystSignal</code> model is the output schema — what agents produce after analysis.</p>
+  </div>
+</div>
+
+<!-- ── Pydantic Models ─────────────────────────────────────── -->
+<h2 id="pydantic-models">Pydantic Models Reference</h2>
+
+<table>
+<thead><tr><th>Model</th><th>Key Fields</th><th>Used By</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>Price</code></td><td><code>open, high, low, close, volume, time</code></td><td>Technical analysis agents</td><td>Dedup key: <code>time</code>. Represents one trading day.</td></tr>
+<tr><td><code>FinancialMetrics</code></td><td><code>pe_ratio, roe, debt_to_equity, operating_margin, revenue_growth, current_ratio, book_value_per_share, …</code> (40+ fields)</td><td>Fundamental analysis agents</td><td>Most fields are <code>Optional[float]</code> — not all companies report all metrics.</td></tr>
+<tr><td><code>LineItem</code></td><td><code>name, value, period, fiscal_year, currency</code></td><td>Agents searching specific financial statement lines</td><td>Generic model for any income/balance/cash-flow line item.</td></tr>
+<tr><td><code>InsiderTrade</code></td><td><code>owner, transaction_type, shares, price_per_share, filing_date, ownership_type</code></td><td>Insider sentiment agents</td><td>Transaction types: Purchase, Sale, Option Exercise, etc.</td></tr>
+<tr><td><code>CompanyNews</code></td><td><code>title, source, date, url, sentiment</code></td><td>News/sentiment agents</td><td>Sentiment may be pre-computed by the API or left for agent analysis.</td></tr>
+<tr><td><code>CompanyFacts</code></td><td><code>name, sector, industry, description, cik, exchange</code></td><td>Context enrichment</td><td>Static metadata that rarely changes.</td></tr>
+<tr><td><code>AnalystSignal</code></td><td><code>signal (bullish/bearish/neutral), confidence, reasoning</code></td><td>All analyst agents (output)</td><td>The standardized output format every agent must produce.</td></tr>
+</tbody>
+</table>
+
+<!-- ── Edge Cases ──────────────────────────────────────────── -->
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+
+<table>
+<thead><tr><th>Scenario</th><th>Behavior</th><th>Code Path</th></tr></thead>
+<tbody>
+<tr><td>API returns 429 three times in a row</td><td>Function raises <code>requests.HTTPError</code> after exhausting retries</td><td>Retry loop exits without <code>break</code>; <code>raise_for_status()</code> on last 429 response</td></tr>
+<tr><td>API returns empty <code>prices</code> array</td><td>Returns empty <code>list[Price]</code>; caches the empty list (avoids repeated calls for tickers with no data)</td><td>Cache stores <code>[]</code>; agents must handle empty lists</td></tr>
+<tr><td>API response has unexpected fields</td><td>Pydantic ignores extra fields (default behavior); known fields are validated</td><td><code>Price(**p)</code> — extra keys discarded silently</td></tr>
+<tr><td>API response missing required fields</td><td>Pydantic raises <code>ValidationError</code>; function propagates the exception</td><td>Agents should wrap calls in try/except if graceful degradation is needed</td></tr>
+<tr><td>Network timeout or DNS failure</td><td><code>requests.ConnectionError</code> raised; not caught by retry loop (only 429 triggers retry)</td><td>Agent must handle or let LangGraph's error handling catch it</td></tr>
+<tr><td>Overlapping cache keys (e.g., "AAPL_Jan-Jun" + "AAPL_Mar-Dec")</td><td>Two separate cache entries; no cross-key merge. Dedup only happens within the same key.</td><td>Each key is independent — this is a known limitation</td></tr>
+</tbody>
+</table>
+
+<!-- ── Configuration ──────────────────────────────────────── -->
+<h2 id="configuration">Configuration</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Value</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>API Base URL</td><td><code>https://api.financialdatasets.ai</code></td><td>Constant in <code>tools/api.py</code></td><td>No environment variable; hardcoded</td></tr>
+<tr><td>API Key</td><td>From <code>FINANCIAL_DATASETS_API_KEY</code> env var</td><td>Environment</td><td>Required; no fallback</td></tr>
+<tr><td>Rate limit backoff</td><td>60 seconds</td><td>Constant in <code>tools/api.py</code></td><td>Applied on HTTP 429 only</td></tr>
+<tr><td>Max retries</td><td>3</td><td>Constant in <code>tools/api.py</code></td><td>After 3 failures, exception propagates</td></tr>
+<tr><td>Cache key format</td><td><code>f"{ticker}_{start}_{end}"</code></td><td>Computed in each function</td><td>Human-readable for debugging</td></tr>
+<tr><td>Cache dedup field (prices)</td><td><code>"time"</code></td><td>Hardcoded per function</td><td>Other functions may use different dedup fields</td></tr>
+</tbody>
+</table>
+
+<!-- ── Code Examples ───────────────────────────────────────── -->
+<h2 id="code-examples">Code Examples</h2>
+
+<h3 id="example-basic-usage">Basic Usage: Fetching Prices</h3>
+
+<pre><code class="language-python">from tools.api import get_prices, prices_to_df
+
+# Fetch AAPL prices for 2025
+prices = get_prices("AAPL", "2025-01-01", "2025-12-31")
+
+# Convert to DataFrame for analysis
+df = prices_to_df(prices)
+print(df.head())
+#            open    high     low   close     volume
+# 2025-01-02 185.2  187.4  184.8  186.9  45_230_100
+# 2025-01-03 186.9  188.1  185.5  187.3  38_910_200
+# ...</code></pre>
+
+<h3 id="example-financial-metrics">Fetching Financial Metrics</h3>
+
+<pre><code class="language-python">from tools.api import get_financial_metrics
+
+# Get the latest quarterly metrics for Tesla
+metrics = get_financial_metrics("TSLA", end_date="2025-12-31", period="quarterly", limit=4)
+
+for m in metrics:
+    print(f"{m.period}: P/E={m.pe_ratio}, ROE={m.roe}, D/E={m.debt_to_equity}")</code></pre>
+
+<h3 id="example-cache-behavior">Cache Behavior: Second Call Is Free</h3>
+
+<pre><code class="language-python">import time
+from tools.api import get_prices
+
+# First call: ~400ms (API roundtrip)
+t0 = time.time()
+prices1 = get_prices("NVDA", "2025-01-01", "2025-06-30")
+print(f"First call: {time.time() - t0:.3f}s")  # ~0.400s
+
+# Second call: &lt;1ms (cache hit)
+t1 = time.time()
+prices2 = get_prices("NVDA", "2025-01-01", "2025-06-30")
+print(f"Second call: {time.time() - t1:.6f}s")  # ~0.000012s
+
+assert prices1 == prices2  # Same data</code></pre>
+
+<h3 id="example-error-handling">Error Handling Pattern</h3>
+
+<pre><code class="language-python">from tools.api import get_prices
+from pydantic import ValidationError
+
+try:
+    prices = get_prices("INVALID_TICKER", "2025-01-01", "2025-12-31")
+    if not prices:
+        print("No data available for this ticker")
+except ValidationError as e:
+    print(f"API returned malformed data: {e}")
+except Exception as e:
+    print(f"API call failed: {e}")</code></pre>
+
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay">
+  <div class="diagram-overlay-content" id="diagramOverlayContent"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<footer class="footer">
+  <p>AI Hedge Fund Wiki — Financial API &amp; Data Models</p>
+  <p>Generated 2026-04-11 · Source SHA <code>c45b50f</code> · tools/api.py · data/models.py · data/cache.py</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function reset(){scale=1;content.style.transform='scale(1)';}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var c=svg.cloneNode(true);c.style.maxWidth='90vw';c.style.width='90vw';content.appendChild(c);}reset();overlay.classList.add('active');});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');reset();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');reset();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();scale=Math.min(5,Math.max(0.5,scale+(e.deltaY>0?-0.1:0.1)));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var h=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var cur=null;h.forEach(function(el){if(el.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+el.id;a.textContent=el.textContent;li.appendChild(a);if(el.tagName==='H3'&&cur){var s=cur.querySelector('ol');if(!s){s=document.createElement('ol');cur.appendChild(s);}s.appendChild(li);}else{ol.appendChild(li);if(el.tagName==='H2')cur=li;}});toc.appendChild(ol);})();
+hljs.highlightAll();
+document.querySelectorAll('pre code').forEach(function(block){if(block.closest('.mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});block.parentElement.appendChild(btn);});
+(function(){var main=document.querySelector('main');if(!main)return;var words=main.textContent.split(/\s+/).length;var min=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+min+' min read';hero.appendChild(span);}})();
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var hs=Array.from(document.querySelectorAll('h2[id]'));if(!hs.length)return;if(e.key==='j'){var idx=hs.findIndex(function(h){return h.getBoundingClientRect().top>10;});if(idx>=0)hs[idx].scrollIntoView({behavior:'smooth'});}if(e.key==='k'){var idx2=hs.slice().reverse().findIndex(function(h){return h.getBoundingClientRect().top<-10;});if(idx2>=0)hs[hs.length-1-idx2].scrollIntoView({behavior:'smooth'});}});
+</script>
+</body>
+</html>

@@ -1061,6 +1061,8 @@ flowchart TB
 
 <!-- ===== Mermaid Init ===== -->
 <script>
+document.querySelectorAll('pre.mermaid,.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+
 (function() {
   var THEME_KEY = 'neutra-ip-theme';
   var saved = null;

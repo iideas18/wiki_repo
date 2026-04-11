@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-11">
+<meta name="wiki-source" content="ai-hedge-fund/src/agents">
+<meta name="wiki-source-rev" content="c45b50f">
+<title>Quantitative Agents — AI Hedge Fund Wiki</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.2rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.5rem}
+h2{color:var(--accent);font-size:1.5rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+h3{color:var(--heading);font-size:1.2rem;margin:1.5rem 0 .5rem}
+h4{color:var(--accent2);font-size:1.05rem;margin:1rem 0 .3rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border)}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0;color:inherit}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.5rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1rem 0 1.5rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1rem}.hero .subtitle{color:var(--accent);font-size:1.15rem;margin-bottom:.3rem}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.88rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toc{column-count:2;column-gap:2rem;margin:1rem 0}
+.toc ol{padding-left:1.2rem}.toc li{margin:.3rem 0}.toc a{color:var(--accent)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.breadcrumb{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--accent)}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;text-decoration:none}.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text)}
+.back-to-top.visible{display:flex}
+.code-walk{counter-reset:step}.code-walk .step{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;counter-increment:step}
+.code-walk .step::before{content:"Step " counter(step);display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem;font-size:.9rem}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:1px 6px;border-radius:8px;margin-left:.5rem}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{color:#1f2328;background:#fff;max-width:100%}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--accent:#0969da;--heading:#1f2328;--code-bg:#f6f8fa}.card,.stat-box,.diagram-container{break-inside:avoid}}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.toc{column-count:1}}
+</style>
+<script>mermaid&&mermaid.initialize({startOnLoad:false});</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">&#9790;</button>
+
+<nav class="breadcrumb">
+  <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="Module Deep-Dive" href="../index.html">Agents</a> &rsaquo; Quantitative Agents
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <p class="subtitle">Deep-Dive — Quantitative / Analytical Agents</p>
+  <h1 style="border:none;text-align:center;margin:0;padding:0">6 Quantitative Agents</h1>
+  <p>The Mathematicians — Where Numbers Speak Louder Than Philosophies</p>
+  <p style="margin-top:.8rem">
+    <span class="badge yellow">6 Agents</span>
+    <span class="badge green">1 Pure Computation (No LLM)</span>
+    <span class="badge blue">5 Hybrid</span>
+  </p>
+</div>
+
+<blockquote>
+<strong>💡 What is this?</strong> If the 13 investor-inspired agents are a board of <em>philosophers</em> — each interpreting the same data through their personal worldview — then the 6 quantitative agents are a team of <em>mathematicians</em>. They don't care about Warren Buffett's opinion on moats or Taleb's views on tail risk. They compute. RSI, MACD, Bollinger Bands, Hurst exponent, P/E ratios, DCF models, growth rates, insider trading patterns. One of them — the Technical Analyst — doesn't even use an LLM. It's pure math: five strategies, weighted combination, final signal. No opinions, just numbers.
+</blockquote>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture — 6 Data-Driven Analysts</h2>
+
+<p>The quantitative agents sit alongside the investor agents in LangGraph's fan-out execution. They receive the same <code>AgentState</code> and produce the same <code>{signal, confidence, reasoning}</code> output format. The key difference is in their analysis methodology: quantitative agents rely on mathematical models and statistical computations rather than investment philosophies.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TB
+    subgraph Input["Shared Input"]
+        State["AgentState\n(tickers, dates, portfolio)"]
+        API["tools/api.py\n(prices, financials, news)"]
+    end
+
+    subgraph Quants["Quantitative Agents"]
+        TA["Technical Analyst\n📉 5-Strategy Weighted\n❌ No LLM"]
+        FA["Fundamentals Analyst\n📋 Financial Ratios\n✅ LLM"]
+        GA["Growth Analyst\n📈 Growth Metrics\n✅ LLM"]
+        SE["Sentiment Analyst\n💬 Insider Trading\n✅ LLM"]
+        NS["News Sentiment\n📰 NLP Analysis\n✅ LLM"]
+        VA["Valuation Analyst\n💰 DCF + Multiples\n✅ LLM"]
+    end
+
+    State --> TA & FA & GA & SE & NS & VA
+    API --> TA & FA & GA & SE & NS & VA
+    TA --> Signals["Signal Aggregation"]
+    FA --> Signals
+    GA --> Signals
+    SE --> Signals
+    NS --> Signals
+    VA --> Signals
+    Signals --> RM["Risk Manager"]
+</pre>
+</div>
+
+<h2 id="key-functions">Key Functions</h2>
+
+<table>
+<thead><tr><th>File</th><th>Agent Function</th><th>Uses LLM</th><th>Analysis Approach</th><th>Key Computations</th></tr></thead>
+<tbody>
+<tr><td><code>technicals.py</code></td><td><code>technical_analyst_agent(state)</code></td><td>❌</td><td>Pure computation, 5 weighted sub-strategies</td><td>RSI, MACD, Bollinger Bands, ADX, OBV, Hurst exponent, EMA crossover</td></tr>
+<tr><td><code>fundamentals.py</code></td><td><code>fundamentals_analyst_agent(state)</code></td><td>✅</td><td>Financial ratio analysis from SEC filings</td><td>P/E, P/B, EV/EBITDA, current ratio, quick ratio, ROE, ROA, debt/equity</td></tr>
+<tr><td><code>growth.py</code></td><td><code>growth_analyst_agent(state)</code></td><td>✅</td><td>Historical and projected growth metrics</td><td>Revenue growth rate, EPS growth, net income growth, R&amp;D-to-revenue</td></tr>
+<tr><td><code>sentiment.py</code></td><td><code>sentiment_analyst_agent(state)</code></td><td>✅</td><td>Insider trading pattern analysis</td><td>Insider buy/sell ratio, institutional ownership changes, director transactions</td></tr>
+<tr><td><code>news_sentiment.py</code></td><td><code>news_sentiment_agent(state)</code></td><td>✅</td><td>NLP-based news headline analysis</td><td>Sentiment scoring of recent news, topic classification, trend detection</td></tr>
+<tr><td><code>valuation.py</code></td><td><code>valuation_analyst_agent(state)</code></td><td>✅</td><td>Multi-method valuation comparison</td><td>DCF, comparable multiples, dividend discount, EV/Revenue, PEG</td></tr>
+</tbody>
+</table>
+
+<h2 id="data-flow">Data Flow — Technical Analyst (Pure Computation)</h2>
+
+<p>The Technical Analyst is the only agent in the entire system that produces a signal without calling an LLM. Its data flow is entirely deterministic.</p>
+
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant LG as LangGraph
+    participant TA as technical_analyst_agent
+    participant API as tools/api.py
+    participant S1 as Trend Following
+    participant S2 as Mean Reversion
+    participant S3 as Momentum
+    participant S4 as Volatility
+    participant S5 as Statistical Arb
+    participant Out as AgentState
+
+    LG->>TA: invoke(state)
+    TA->>API: get_prices(ticker, start, end)
+    API-->>TA: daily OHLCV + volume data
+    TA->>S1: compute_trend_signal(prices)
+    S1-->>TA: trend_score [-1, 1]
+    TA->>S2: compute_mean_reversion(prices)
+    S2-->>TA: reversion_score [-1, 1]
+    TA->>S3: compute_momentum_signal(prices)
+    S3-->>TA: momentum_score [-1, 1]
+    TA->>S4: compute_volatility_signal(prices)
+    S4-->>TA: volatility_score [-1, 1]
+    TA->>S5: compute_stat_arb_signal(prices)
+    S5-->>TA: stat_arb_score [-1, 1]
+    TA->>TA: weighted_combination(scores, weights)
+    TA->>Out: {signal, confidence, reasoning}
+</pre>
+</div>
+
+<h2 id="code-walkthrough">Annotated Code Walkthrough — Technical Analyst's 5-Strategy Weighted Combination</h2>
+
+<p>This is the most algorithmically dense agent in the system. Let's trace through its entire pipeline.</p>
+
+<div class="code-walk">
+<div class="step">
+<strong>Price data retrieval.</strong> The Technical Analyst needs only price and volume data — no financial statements, no earnings, no balance sheets. This makes it the fastest data-fetching agent.
+<pre><code class="language-python">def technical_analyst_agent(state: AgentState) -> dict:
+    tickers = state["tickers"]
+    start_date = state["start_date"]
+    end_date = state["end_date"]
+    analyst_signals = {}
+
+    for ticker in tickers:
+        prices = get_prices(ticker, start_date, end_date)
+        closes = [p["close"] for p in prices]
+        volumes = [p["volume"] for p in prices]
+        highs = [p["high"] for p in prices]
+        lows = [p["low"] for p in prices]</code></pre>
+</div>
+
+<div class="step">
+<strong>Strategy 1 — Trend Following (weight: 0.25).</strong> Uses EMA crossover (8-period vs 21-period) to detect trend direction. When short EMA crosses above long EMA, it's bullish.
+<pre><code class="language-python">def compute_trend_signal(closes):
+    ema_short = compute_ema(closes, period=8)
+    ema_long = compute_ema(closes, period=21)
+    # Positive when short-term momentum exceeds long-term
+    crossover = (ema_short[-1] - ema_long[-1]) / ema_long[-1]
+    return max(-1, min(1, crossover * 10))  # Scale and clamp</code></pre>
+</div>
+
+<div class="step">
+<strong>Strategy 2 — Mean Reversion (weight: 0.20).</strong> Uses Bollinger Bands to detect overbought/oversold conditions. Price below lower band suggests mean reversion upward.
+<pre><code class="language-python">def compute_mean_reversion(closes, window=20, num_std=2):
+    sma = sum(closes[-window:]) / window
+    std = (sum((c - sma)**2 for c in closes[-window:]) / window) ** 0.5
+    upper_band = sma + num_std * std
+    lower_band = sma - num_std * std
+    current = closes[-1]
+
+    if current < lower_band:
+        return 1.0   # Oversold — expect reversion up
+    elif current > upper_band:
+        return -1.0  # Overbought — expect reversion down
+    else:
+        # Linear interpolation within bands
+        return -2 * (current - lower_band) / (upper_band - lower_band) + 1</code></pre>
+</div>
+
+<div class="step">
+<strong>Strategy 3 — Momentum (weight: 0.25).</strong> Combines RSI (Relative Strength Index) and MACD (Moving Average Convergence Divergence) for a composite momentum score.
+<pre><code class="language-python">def compute_momentum_signal(closes):
+    rsi = compute_rsi(closes, period=14)
+    macd_line, signal_line = compute_macd(closes)
+
+    # RSI component: oversold (&lt;30) = bullish, overbought (&gt;70) = bearish
+    rsi_score = (50 - rsi) / 50  # Maps [0,100] to [1,-1]
+
+    # MACD component: positive histogram = bullish
+    macd_hist = macd_line - signal_line
+    macd_score = max(-1, min(1, macd_hist / abs(signal_line) if signal_line else 0))
+
+    return 0.5 * rsi_score + 0.5 * macd_score</code></pre>
+</div>
+
+<div class="step">
+<strong>Strategy 4 — Volatility (weight: 0.15).</strong> Uses ADX (Average Directional Index) to measure trend strength and ATR (Average True Range) for volatility-adjusted sizing signals.
+<pre><code class="language-python">def compute_volatility_signal(closes, highs, lows):
+    adx = compute_adx(highs, lows, closes, period=14)
+    atr = compute_atr(highs, lows, closes, period=14)
+    atr_pct = atr / closes[-1]  # ATR as % of price
+
+    # Strong trend (ADX > 25) + low vol = bullish trend confidence
+    # Weak trend (ADX < 20) + high vol = uncertainty
+    if adx > 25 and atr_pct < 0.03:
+        return 0.5   # Strong trend, contained volatility
+    elif adx < 20 and atr_pct > 0.05:
+        return -0.5  # Directionless, high volatility
+    return 0.0</code></pre>
+</div>
+
+<div class="step">
+<strong>Strategy 5 — Statistical Arbitrage (weight: 0.15).</strong> Computes the Hurst exponent to determine if the price series is mean-reverting, trending, or random.
+<pre><code class="language-python">def compute_stat_arb_signal(closes):
+    hurst = compute_hurst_exponent(closes, max_lag=20)
+
+    if hurst < 0.4:
+        # Mean-reverting: use reversion signal
+        return compute_mean_reversion(closes) * 0.8
+    elif hurst > 0.6:
+        # Trending: use momentum signal
+        return compute_trend_signal(closes) * 0.8
+    else:
+        # Random walk: no edge
+        return 0.0</code></pre>
+</div>
+
+<div class="step">
+<strong>Weighted combination.</strong> All 5 strategy scores are combined using pre-defined weights. The final score is mapped to the standard signal format without any LLM involvement.
+<pre><code class="language-python">        strategies = {
+            "trend": (compute_trend_signal(closes), 0.25),
+            "reversion": (compute_mean_reversion(closes), 0.20),
+            "momentum": (compute_momentum_signal(closes), 0.25),
+            "volatility": (compute_volatility_signal(closes, highs, lows), 0.15),
+            "stat_arb": (compute_stat_arb_signal(closes), 0.15),
+        }
+
+        final_score = sum(score * weight for score, weight in strategies.values())
+
+        # Map to signal format
+        if final_score > 0.2:
+            signal = "bullish"
+        elif final_score < -0.2:
+            signal = "bearish"
+        else:
+            signal = "neutral"
+
+        confidence = min(100, int(abs(final_score) * 100))
+        reasoning = "; ".join(f"{k}: {v[0]:.2f}" for k, v in strategies.items())
+
+        analyst_signals[ticker] = {
+            "signal": signal,
+            "confidence": confidence,
+            "reasoning": reasoning
+        }</code></pre>
+</div>
+</div>
+
+<h2 id="design-rationale">Design Rationale</h2>
+
+<h3 id="why-no-llm-technical">Why the Technical Analyst Uses No LLM</h3>
+
+<p>The Technical Analyst is the only agent in the system that produces signals through pure computation. This is not an oversight — it's a deliberate design choice based on three observations:</p>
+
+<p><strong>1. Technical analysis is entirely mathematical.</strong> RSI, MACD, Bollinger Bands, and ADX are well-defined mathematical formulas. An LLM adds zero information to a deterministic calculation. It would only add latency (3-8 seconds) and cost (API tokens) for no analytical benefit.</p>
+
+<p><strong>2. Reproducibility.</strong> A pure-computation agent produces identical results given identical inputs. This makes it invaluable for debugging and backtesting. If the Technical Analyst produces a different signal for the same data, there's a bug in the code — full stop. No need to worry about LLM temperature or prompt sensitivity.</p>
+
+<p><strong>3. Speed advantage.</strong> Without an LLM call, the Technical Analyst consistently finishes in under 500ms. In the fan-out architecture, this means its signal is always available first, providing an early read while other agents wait for LLM responses.</p>
+
+<h3 id="why-separate-quants">Why Separate Quantitative Agents from Investors</h3>
+
+<p>The quantitative agents could theoretically be folded into the investor category — after all, some investor agents also compute ratios. The separation exists because the quantitative agents have no investment philosophy. The Fundamentals Analyst doesn't care whether Graham or Buffett would approve of a P/E ratio of 25. It simply measures it, compares it to sector averages, and scores it. The LLM's role (when used) is synthesis, not philosophy.</p>
+
+<h2 id="algorithm-deep-dives">Algorithm Deep-Dives</h2>
+
+<h3 id="alg-hurst">Hurst Exponent — Rescaled Range Analysis</h3>
+
+<p>The Hurst exponent (H) characterizes the long-term memory of a time series. It's the foundation of the statistical arbitrage sub-strategy:</p>
+
+<ul>
+  <li><strong>H &lt; 0.5:</strong> Mean-reverting — price tends to return to the mean. Favor mean reversion strategies.</li>
+  <li><strong>H = 0.5:</strong> Random walk — no predictable pattern. No trading edge.</li>
+  <li><strong>H &gt; 0.5:</strong> Trending — momentum tends to persist. Favor trend-following strategies.</li>
+</ul>
+
+<pre><code class="language-python">def compute_hurst_exponent(prices, max_lag=20):
+    """Rescaled Range (R/S) analysis.
+
+    The key insight: if log(R/S) scales linearly with log(lag),
+    the slope gives us the Hurst exponent.
+    """
+    returns = [prices[i]/prices[i-1] - 1 for i in range(1, len(prices))]
+    lags = range(2, min(max_lag, len(returns) // 2))
+    log_lags, log_rs = [], []
+
+    for lag in lags:
+        chunks = [returns[i:i+lag] for i in range(0, len(returns)-lag, lag)]
+        rs_values = []
+        for chunk in chunks:
+            if len(chunk) < 2:
+                continue
+            mean = sum(chunk) / len(chunk)
+            cumdev = []
+            running = 0
+            for val in chunk:
+                running += (val - mean)
+                cumdev.append(running)
+            R = max(cumdev) - min(cumdev)
+            S = (sum((v - mean)**2 for v in chunk) / (len(chunk)-1)) ** 0.5
+            if S > 1e-10:
+                rs_values.append(R / S)
+        if rs_values:
+            import math
+            log_lags.append(math.log(lag))
+            log_rs.append(math.log(sum(rs_values)/len(rs_values)))
+
+    # Linear regression: slope = Hurst exponent
+    if len(log_lags) < 2:
+        return 0.5  # Not enough data; assume random walk
+    n = len(log_lags)
+    sx = sum(log_lags)
+    sy = sum(log_rs)
+    sxy = sum(x*y for x,y in zip(log_lags, log_rs))
+    sxx = sum(x*x for x in log_lags)
+    slope = (n * sxy - sx * sy) / (n * sxx - sx * sx)
+    return slope</code></pre>
+
+<h3 id="alg-adx">ADX — Average Directional Index</h3>
+
+<p>ADX measures trend strength regardless of direction. Values above 25 indicate a strong trend; below 20 indicates a range-bound market. The Technical Analyst uses this to decide whether to trust trend-following or mean-reversion signals.</p>
+
+<pre><code class="language-python">def compute_adx(highs, lows, closes, period=14):
+    """Compute ADX from directional movement indicators."""
+    plus_dm, minus_dm, tr_list = [], [], []
+    for i in range(1, len(closes)):
+        high_diff = highs[i] - highs[i-1]
+        low_diff = lows[i-1] - lows[i]
+        plus_dm.append(high_diff if high_diff > low_diff and high_diff > 0 else 0)
+        minus_dm.append(low_diff if low_diff > high_diff and low_diff > 0 else 0)
+        tr = max(highs[i] - lows[i],
+                 abs(highs[i] - closes[i-1]),
+                 abs(lows[i] - closes[i-1]))
+        tr_list.append(tr)
+
+    # Smoothed averages (Wilder's smoothing)
+    atr = wilder_smooth(tr_list, period)
+    plus_di = [100 * d / a if a > 0 else 0
+               for d, a in zip(wilder_smooth(plus_dm, period), atr)]
+    minus_di = [100 * d / a if a > 0 else 0
+                for d, a in zip(wilder_smooth(minus_dm, period), atr)]
+
+    # DX and ADX
+    dx = [100 * abs(p - m) / (p + m) if (p + m) > 0 else 0
+          for p, m in zip(plus_di, minus_di)]
+    adx = wilder_smooth(dx, period)
+    return adx[-1] if adx else 0</code></pre>
+
+<h3 id="alg-bollinger">Bollinger Bands — Dynamic Support and Resistance</h3>
+
+<p>Bollinger Bands create an envelope around a moving average using standard deviations. The mean reversion strategy uses these as dynamic overbought/oversold thresholds.</p>
+
+<pre><code class="language-python">def compute_bollinger_bands(closes, window=20, num_std=2):
+    """Returns (upper_band, middle_band, lower_band, bandwidth)."""
+    sma = sum(closes[-window:]) / window
+    variance = sum((c - sma)**2 for c in closes[-window:]) / window
+    std = variance ** 0.5
+    upper = sma + num_std * std
+    lower = sma - num_std * std
+    bandwidth = (upper - lower) / sma  # Normalized bandwidth
+    return upper, sma, lower, bandwidth</code></pre>
+
+<h2 id="focus-pages">Focus Topics</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>📊 Hurst Exponent &amp; Statistical Arbitrage <span class="focus-badge">Focus</span></h4>
+    <p>How rescaled range analysis detects regime changes between trending and mean-reverting markets, and how the Technical Analyst adapts its strategy weights accordingly.</p>
+  </div>
+  <div class="card">
+    <h4>🔀 Multi-Strategy Signal Fusion <span class="focus-badge">Focus</span></h4>
+    <p>The theory and practice of combining 5 independent strategy signals into a single composite score. Explores weight sensitivity, correlation between strategies, and regime-dependent performance.</p>
+  </div>
+  <div class="card">
+    <h4>📋 Fundamental Ratio Analysis <span class="focus-badge">Focus</span></h4>
+    <p>Deep dive into the Fundamentals Analyst's ratio computations: P/E, P/B, EV/EBITDA, current ratio, ROE, and how they compare to sector averages for scoring.</p>
+  </div>
+</div>
+
+<h2 id="edge-cases">Edge Cases &amp; Error Handling</h2>
+
+<table>
+<thead><tr><th>Scenario</th><th>Affected Agents</th><th>Handling</th></tr></thead>
+<tbody>
+<tr><td><strong>Empty price data</strong> — ticker has no price history in the requested window</td><td>Technical Analyst (critical), all quants</td><td>Technical Analyst returns <code>neutral</code> with confidence 0 and reasoning "Insufficient price data." Other agents check <code>len(prices) &gt; 0</code> before computation.</td></tr>
+<tr><td><strong>Division by zero in ratios</strong> — zero earnings, zero book value, zero revenue</td><td>Fundamentals, Growth, Valuation</td><td>Every ratio computation uses safe division: <code>numerator / denominator if denominator != 0 else 0</code>. NaN/Inf values are caught and replaced with neutral scores before LLM submission.</td></tr>
+<tr><td><strong>Too few data points for Hurst exponent</strong> — less than 40 price observations</td><td>Technical Analyst (stat_arb strategy)</td><td>Returns H=0.5 (random walk assumption). The stat_arb strategy outputs 0.0, contributing nothing to the weighted combination. Other strategies are unaffected.</td></tr>
+<tr><td><strong>Bollinger Band squeeze</strong> — standard deviation approaches zero</td><td>Technical Analyst (mean reversion)</td><td>When <code>std &lt; 1e-10</code>, the mean reversion signal returns 0.0 (neutral). This prevents division-by-near-zero in the band width calculation.</td></tr>
+<tr><td><strong>Missing insider trading data</strong> — no filings in SEC EDGAR for this ticker</td><td>Sentiment Analyst</td><td>Returns neutral signal with reduced confidence (&lt;30). Reasoning explicitly notes data unavailability.</td></tr>
+</tbody>
+</table>
+
+<h2 id="configuration">Configuration Parameters</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Agent</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>trend_weight</code></td><td>Technical</td><td><code>0.25</code></td><td>Weight for trend following (EMA crossover) strategy</td></tr>
+<tr><td><code>reversion_weight</code></td><td>Technical</td><td><code>0.20</code></td><td>Weight for mean reversion (Bollinger Bands) strategy</td></tr>
+<tr><td><code>momentum_weight</code></td><td>Technical</td><td><code>0.25</code></td><td>Weight for momentum (RSI + MACD) strategy</td></tr>
+<tr><td><code>volatility_weight</code></td><td>Technical</td><td><code>0.15</code></td><td>Weight for volatility (ADX + ATR) strategy</td></tr>
+<tr><td><code>stat_arb_weight</code></td><td>Technical</td><td><code>0.15</code></td><td>Weight for statistical arbitrage (Hurst) strategy</td></tr>
+<tr><td><code>rsi_period</code></td><td>Technical</td><td><code>14</code></td><td>Lookback period for RSI calculation</td></tr>
+<tr><td><code>ema_short</code></td><td>Technical</td><td><code>8</code></td><td>Short-term EMA period for trend crossover</td></tr>
+<tr><td><code>ema_long</code></td><td>Technical</td><td><code>21</code></td><td>Long-term EMA period for trend crossover</td></tr>
+<tr><td><code>bollinger_window</code></td><td>Technical</td><td><code>20</code></td><td>SMA window for Bollinger Bands</td></tr>
+<tr><td><code>bollinger_std</code></td><td>Technical</td><td><code>2.0</code></td><td>Number of standard deviations for band width</td></tr>
+<tr><td><code>adx_period</code></td><td>Technical</td><td><code>14</code></td><td>Period for ADX directional movement calculation</td></tr>
+<tr><td><code>hurst_max_lag</code></td><td>Technical</td><td><code>20</code></td><td>Maximum lag for Hurst exponent R/S analysis</td></tr>
+</tbody>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+
+<pre><code>src/agents/
+├── technicals.py        # 📉 Pure computation — 5-strategy weighted TA
+├── fundamentals.py      # 📋 P/E, P/B, EV/EBITDA, ROE, current ratio
+├── growth.py            # 📈 Revenue & earnings growth metrics
+├── sentiment.py         # 💬 Insider trading & institutional ownership
+├── news_sentiment.py    # 📰 NLP-based news headline analysis
+└── valuation.py         # 💰 DCF, comparable multiples, dividend discount</code></pre>
+
+</main>
+
+<div class="footer">
+  <p>Generated 2026-04-11 from <code>c45b50f</code> &bull; <a title="Module Deep-Dive" href="../index.html">&larr; Back to Agents Overview</a> &bull; <a title="AI Hedge Fund — Multi-Agent Investment Analysis System" href="../../index.html">AI Hedge Fund Home</a></p>
+</div>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<button class="back-to-top" id="backToTop">&#8679;</button>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay)return;var scale=1;function reset(){scale=1;content.style.transform='scale(1)';}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var c=svg.cloneNode(true);c.style.maxWidth='90vw';c.style.width='90vw';content.appendChild(c);}reset();overlay.classList.add('active');});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');reset();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');reset();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();scale=Math.min(5,Math.max(0.5,scale+(e.deltaY>0?-0.1:0.1)));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var h=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var cur=null;h.forEach(function(el){if(el.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+el.id;a.textContent=el.textContent;li.appendChild(a);if(el.tagName==='H3'&&cur){var s=cur.querySelector('ol');if(!s){s=document.createElement('ol');cur.appendChild(s);}s.appendChild(li);}else{ol.appendChild(li);if(el.tagName==='H2')cur=li;}});toc.appendChild(ol);})();
+hljs.highlightAll();
+document.querySelectorAll('pre code').forEach(function(block){if(block.closest('.mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},2000);});});block.parentElement.appendChild(btn);});
+(function(){var main=document.querySelector('main');if(!main)return;var words=main.textContent.split(/\s+/).length;var min=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+min+' min read';hero.appendChild(span);}})();
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;var hs=Array.from(document.querySelectorAll('h2[id]'));if(!hs.length)return;var idx=-1;if(e.key==='j'||e.key==='k'){e.key==='j'?idx=hs.findIndex(function(h){return h.getBoundingClientRect().top>10;}):idx=hs.slice().reverse().findIndex(function(h){return h.getBoundingClientRect().top<-10;});if(e.key==='k'&&idx>=0)idx=hs.length-1-idx;if(idx>=0)hs[idx].scrollIntoView({behavior:'smooth'});}});
+</script>
+</body>
+</html>

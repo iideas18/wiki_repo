@@ -1079,7 +1079,7 @@ sequenceDiagram
       root.setAttribute("data-theme", next);
 
       try {
-        localStorage.setItem("wiki-theme", next);
+        localStorage.setItem("neutra-ip-theme", next);
       } catch (e) {
         /* storage unavailable */
       }
@@ -1109,7 +1109,7 @@ sequenceDiagram
     /* Restore saved theme */
     (function () {
       try {
-        var saved = localStorage.getItem("wiki-theme");
+        var saved = localStorage.getItem("neutra-ip-theme");
         if (saved && saved !== document.documentElement.getAttribute("data-theme")) {
           document.documentElement.setAttribute("data-theme", saved);
         }

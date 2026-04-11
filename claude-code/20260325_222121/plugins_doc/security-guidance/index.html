@@ -128,7 +128,7 @@ flowchart LR
         E -->|"No"| I
     end
     subgraph Output["Result"]
-        H --> J["⚠️ Security advisory in response"]
+        H --> J[" Security advisory in response"]
         I --> K["Silent pass-through"]
     end
 </pre>
@@ -197,7 +197,7 @@ sequenceDiagram
     State-->>Hook: No prior warning for exec:src/api/handler.js
 
     Hook->>State: Write new entry with timestamp
-    Hook-->>CC: ⚠️ "child_process.exec detected — consider execFile() or spawn() with array args"
+    Hook-->>CC:  "child_process.exec detected — consider execFile() or spawn() with array args"
 
     CC-->>Dev: Show security advisory
     CC->>Claude: Proceed with file edit + advisory context
