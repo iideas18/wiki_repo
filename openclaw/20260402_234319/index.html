@@ -444,12 +444,12 @@ document.querySelectorAll('pre.mermaid').forEach(function(el){
         var base=projectBase+newTs+'/';
         newMain.querySelectorAll('[href]').forEach(function(el){
           var h=el.getAttribute('href');
-          if(h&&!/^(https?:|mailto:|#|\\/\\/)/.test(h)&&!h.startsWith('/'))
+          if(h&&!/^(https?:|mailto:|#|\/\/)/.test(h)&&!h.startsWith('/'))
             el.setAttribute('href',base+h);
         });
         newMain.querySelectorAll('[src]').forEach(function(el){
           var s=el.getAttribute('src');
-          if(s&&!/^(https?:|data:|blob:|\\/\\/)/.test(s)&&!s.startsWith('/'))
+          if(s&&!/^(https?:|data:|blob:|\/\/)/.test(s)&&!s.startsWith('/'))
             el.setAttribute('src',base+s);
         });
         var cur=document.querySelector('#main')||document.querySelector('main');
