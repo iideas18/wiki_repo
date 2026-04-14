@@ -320,86 +320,38 @@ document.querySelectorAll('pre code').forEach(function(block){var pre=block.pare
 .version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
 .version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
 @media print{.version-switcher{display:none!important}}</style>
-<script>\
-(function(){
+<script>(function(){
+  var versions=[{"timestamp":"20260325_222121","date":"2026-03-25","rev":"6aadfbd","pages":19,"latest":true}];
+  if(!versions||versions.length<2)return;
   var dirPath=location.pathname.replace(/[^/]*$/,'');
   var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
   var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
-  var versionsUrl=projectBase+'versions.json';
-  fetch(versionsUrl).then(function(r){return r.json()}).then(function(versions){
-    if(!versions||versions.length<2)return;
-    var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
-    /* Build UI */
-    var wrap=document.createElement('div');
-    wrap.className='version-switcher';
-    var lbl=document.createElement('span');
-    lbl.className='version-label';
-    lbl.textContent='Version:';
-    var sel=document.createElement('select');
-    sel.className='version-select';
-    sel.setAttribute('aria-label','Switch wiki version');
-    versions.forEach(function(v){
-      var o=document.createElement('option');
-      o.value=v.timestamp;
-      var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
-      o.textContent=v.date+rev+(v.latest?' (latest)':'');
-      if(v.timestamp===curTs)o.selected=true;
-      sel.appendChild(o);
-    });
-    wrap.appendChild(lbl);
-    wrap.appendChild(sel);
-    var hero=document.querySelector('.hero');
-    if(hero)hero.appendChild(wrap);
-    /* Version switch handler */
-    sel.addEventListener('change',function(){
-      var newTs=this.value;
-      if(newTs===curTs)return;
-      var newUrl=projectBase+newTs+'/index.html';
-      fetch(newUrl).then(function(r){return r.text()}).then(function(html){
-        var parser=new DOMParser();
-        var doc=parser.parseFromString(html,'text/html');
-        var newMain=doc.querySelector('#main')||doc.querySelector('main');
-        if(!newMain){location.href=newUrl;return}
-        var base=projectBase+newTs+'/';
-        newMain.querySelectorAll('[href]').forEach(function(el){
-          var h=el.getAttribute('href');
-          if(h&&!/^(https?:|mailto:|#|\/\/)/.test(h)&&!h.startsWith('/'))
-            el.setAttribute('href',base+h);
-        });
-        newMain.querySelectorAll('[src]').forEach(function(el){
-          var s=el.getAttribute('src');
-          if(s&&!/^(https?:|data:|blob:|\/\/)/.test(s)&&!s.startsWith('/'))
-            el.setAttribute('src',base+s);
-        });
-        var cur=document.querySelector('#main')||document.querySelector('main');
-        if(cur)cur.innerHTML=newMain.innerHTML;
-        /* Re-render mermaid diagrams in the new content */
-        var diagrams=document.querySelectorAll('pre.mermaid');
-        if(diagrams.length&&window.mermaid){
-          diagrams.forEach(function(el){
-            if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);
-            var src=el.getAttribute('data-source');
-            if(src){el.removeAttribute('data-processed');el.textContent=src;}
-          });
-          var t=document.documentElement.getAttribute('data-theme')||'dark';
-          try{
-            mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});
-            mermaid.run();
-          }catch(e){console.warn('mermaid re-render:',e);}
-        }
-        curTs=newTs;
-        var newHero=document.querySelector('.hero');
-        if(newHero){
-          for(var i=0;i<sel.options.length;i++)
-            sel.options[i].selected=(sel.options[i].value===newTs);
-          newHero.appendChild(wrap);
-        }
-        window.scrollTo({top:0,behavior:'smooth'});
-        history.pushState({version:newTs},'',newUrl);
-      }).catch(function(){location.href=newUrl});
-    });
-    window.addEventListener('popstate',function(){location.reload()});
-  }).catch(function(){});
+  var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
+  var wrap=document.createElement('div');
+  wrap.className='version-switcher';
+  var lbl=document.createElement('span');
+  lbl.className='version-label';
+  lbl.textContent='Version:';
+  var sel=document.createElement('select');
+  sel.className='version-select';
+  sel.setAttribute('aria-label','Switch wiki version');
+  versions.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v.timestamp;
+    var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+    o.textContent=v.date+rev+(v.latest?' (latest)':'');
+    if(v.timestamp===curTs)o.selected=true;
+    sel.appendChild(o);
+  });
+  wrap.appendChild(lbl);
+  wrap.appendChild(sel);
+  var hero=document.querySelector('.hero');
+  if(hero)hero.appendChild(wrap);
+  sel.addEventListener('change',function(){
+    var newTs=this.value;
+    if(newTs===curTs)return;
+    location.href=projectBase+newTs+'/index.html';
+  });
 })();</script>
 <!-- VERSION_SWITCHER_END -->
 </body></html>

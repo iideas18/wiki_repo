@@ -33,94 +33,49 @@ font-size:.85rem;cursor:pointer;font-family:inherit}
 .version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
 @media print{.version-switcher{display:none!important}}"""
 
-SWITCHER_JS = r"""\
-(function(){
-  var dirPath=location.pathname.replace(/[^/]*$/,'');
-  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
-  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
-  var versionsUrl=projectBase+'versions.json';
-  fetch(versionsUrl).then(function(r){return r.json()}).then(function(versions){
-    if(!versions||versions.length<2)return;
-    var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
-    /* Build UI */
-    var wrap=document.createElement('div');
-    wrap.className='version-switcher';
-    var lbl=document.createElement('span');
-    lbl.className='version-label';
-    lbl.textContent='Version:';
-    var sel=document.createElement('select');
-    sel.className='version-select';
-    sel.setAttribute('aria-label','Switch wiki version');
-    versions.forEach(function(v){
-      var o=document.createElement('option');
-      o.value=v.timestamp;
-      var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
-      o.textContent=v.date+rev+(v.latest?' (latest)':'');
-      if(v.timestamp===curTs)o.selected=true;
-      sel.appendChild(o);
-    });
-    wrap.appendChild(lbl);
-    wrap.appendChild(sel);
-    var hero=document.querySelector('.hero');
-    if(hero)hero.appendChild(wrap);
-    /* Version switch handler */
-    sel.addEventListener('change',function(){
-      var newTs=this.value;
-      if(newTs===curTs)return;
-      var newUrl=projectBase+newTs+'/index.html';
-      fetch(newUrl).then(function(r){return r.text()}).then(function(html){
-        var parser=new DOMParser();
-        var doc=parser.parseFromString(html,'text/html');
-        var newMain=doc.querySelector('#main')||doc.querySelector('main');
-        if(!newMain){location.href=newUrl;return}
-        var base=projectBase+newTs+'/';
-        newMain.querySelectorAll('[href]').forEach(function(el){
-          var h=el.getAttribute('href');
-          if(h&&!/^(https?:|mailto:|#|\/\/)/.test(h)&&!h.startsWith('/'))
-            el.setAttribute('href',base+h);
-        });
-        newMain.querySelectorAll('[src]').forEach(function(el){
-          var s=el.getAttribute('src');
-          if(s&&!/^(https?:|data:|blob:|\/\/)/.test(s)&&!s.startsWith('/'))
-            el.setAttribute('src',base+s);
-        });
-        var cur=document.querySelector('#main')||document.querySelector('main');
-        if(cur)cur.innerHTML=newMain.innerHTML;
-        /* Re-render mermaid diagrams in the new content */
-        var diagrams=document.querySelectorAll('pre.mermaid');
-        if(diagrams.length&&window.mermaid){
-          diagrams.forEach(function(el){
-            if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);
-            var src=el.getAttribute('data-source');
-            if(src){el.removeAttribute('data-processed');el.textContent=src;}
-          });
-          var t=document.documentElement.getAttribute('data-theme')||'dark';
-          try{
-            mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});
-            mermaid.run();
-          }catch(e){console.warn('mermaid re-render:',e);}
-        }
-        curTs=newTs;
-        var newHero=document.querySelector('.hero');
-        if(newHero){
-          for(var i=0;i<sel.options.length;i++)
-            sel.options[i].selected=(sel.options[i].value===newTs);
-          newHero.appendChild(wrap);
-        }
-        window.scrollTo({top:0,behavior:'smooth'});
-        history.pushState({version:newTs},'',newUrl);
-      }).catch(function(){location.href=newUrl});
-    });
-    window.addEventListener('popstate',function(){location.reload()});
-  }).catch(function(){});
-})();"""
+SWITCHER_JS_TEMPLATE = (
+    "(function(){\n"
+    "  var versions=/*VERSIONS_JSON*/;\n"
+    "  if(!versions||versions.length<2)return;\n"
+    "  var dirPath=location.pathname.replace(/[^/]*$/,'');\n"
+    r"  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);"+"\n"
+    r"  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;"+"\n"
+    "  var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);\n"
+    "  var wrap=document.createElement('div');\n"
+    "  wrap.className='version-switcher';\n"
+    "  var lbl=document.createElement('span');\n"
+    "  lbl.className='version-label';\n"
+    "  lbl.textContent='Version:';\n"
+    "  var sel=document.createElement('select');\n"
+    "  sel.className='version-select';\n"
+    "  sel.setAttribute('aria-label','Switch wiki version');\n"
+    "  versions.forEach(function(v){\n"
+    "    var o=document.createElement('option');\n"
+    "    o.value=v.timestamp;\n"
+    "    var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';\n"
+    "    o.textContent=v.date+rev+(v.latest?' (latest)':'');\n"
+    "    if(v.timestamp===curTs)o.selected=true;\n"
+    "    sel.appendChild(o);\n"
+    "  });\n"
+    "  wrap.appendChild(lbl);\n"
+    "  wrap.appendChild(sel);\n"
+    "  var hero=document.querySelector('.hero');\n"
+    "  if(hero)hero.appendChild(wrap);\n"
+    "  sel.addEventListener('change',function(){\n"
+    "    var newTs=this.value;\n"
+    "    if(newTs===curTs)return;\n"
+    "    location.href=projectBase+newTs+'/index.html';\n"
+    "  });\n"
+    "})();"
+)
 
 
-def build_snippet() -> str:
+def build_snippet(versions_json: str) -> str:
+    js = SWITCHER_JS_TEMPLATE.replace("/*VERSIONS_JSON*/", versions_json)
     return (
         f"\n{MARKER_START}\n"
         f"<style>{SWITCHER_CSS}</style>\n"
-        f"<script>{SWITCHER_JS}</script>\n"
+        f"<script>{js}</script>\n"
         f"{MARKER_END}\n"
     )
 
@@ -135,7 +90,7 @@ def strip_old_snippet(html: str) -> str:
     )
 
 
-def inject_into_file(index_path: Path, dry_run: bool = False) -> bool:
+def inject_into_file(index_path: Path, versions_json: str, dry_run: bool = False) -> bool:
     """Inject the version switcher into an index.html. Returns True if changed."""
     text = index_path.read_text(encoding="utf-8", errors="ignore")
     clean = strip_old_snippet(text)
@@ -144,7 +99,7 @@ def inject_into_file(index_path: Path, dry_run: bool = False) -> bool:
     if "</body>" not in clean:
         return False
 
-    snippet = build_snippet()
+    snippet = build_snippet(versions_json)
     new_text = clean.replace("</body>", snippet + "</body>")
 
     if new_text == text:
@@ -165,13 +120,15 @@ def process_project(project_dir: Path, dry_run: bool = False) -> int:
     if len(versions) < 1:
         return 0
 
+    versions_json = json.dumps(versions, separators=(",", ":"))
+
     count = 0
     for v in versions:
         ts = v["timestamp"]
         idx = project_dir / ts / "index.html"
         if not idx.is_file():
             continue
-        changed = inject_into_file(idx, dry_run=dry_run)
+        changed = inject_into_file(idx, versions_json, dry_run=dry_run)
         if changed:
             count += 1
             tag = " (dry-run)" if dry_run else ""
