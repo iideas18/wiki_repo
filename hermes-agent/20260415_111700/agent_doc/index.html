@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/agent">
+<meta name="wiki-source-rev" content="677f1227">
+<title>agent — Core Agent Engine</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!-- 3-level breadcrumb -->
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>agent</span></nav>
+
+<main id="main">
+<h1>agent &mdash; Core Agent Engine</h1>
+<div class="hero">
+  <p class="subtitle">Core Agent Engine</p>
+  <p>The orchestration and utility layer powering Hermes Agent &mdash; pluggable context management, memory provider abstraction, smart model routing, error classification, credential pooling, prompt building, and trajectory capture for RL training.</p>
+</div>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="why-this-module-exists" style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>The <code>agent/</code> module was extracted from a monolithic 3,600-line <code>run_agent.py</code> that had grown to mix orchestration logic with utility functions, making testing, maintenance, and extension increasingly painful. Without this separation, every change to error handling would risk breaking context compression; every new memory backend would require modifying the core conversation loop; and unit testing any individual subsystem would require spinning up the entire agent stack. By extracting pure, self-contained utilities into <code>agent/</code>, the project achieves clean separation of concerns: <code>run_agent.py</code> focuses solely on the conversation orchestration loop, while <code>agent/</code> provides the pluggable engines and services it consults. This modular architecture enables independent testing of compression, error classification, and credential management; allows third parties to swap implementations via abstract base classes (<code>ContextEngine</code>, <code>MemoryProvider</code>); and ensures the same utilities work across CLI, <a title="gateway — Multi-Platform Messaging Gateway" href="../gateway_doc/index.html">gateway</a>, and <a title="cron — Scheduled Task System" href="../cron/index.html">cron</a> contexts. When Anthropic releases a new caching strategy or a provider changes its error signatures, updates localize to a single file rather than scattering across the entire codebase.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of <code>agent/</code> as the engine room of a large ship. The bridge (run_agent.py) decides where to go and when to change course, but the engine room houses all the specialized machinery &mdash; the engines, fuel pumps, electrical generators, and damage-control systems &mdash; each operated by specialists. A captain doesn't rewire the generator to change heading; they issue orders through well-defined interfaces. Similarly, the orchestration loop doesn't know <em>how</em> context compression works internally; it simply asks the ContextEngine "should we compress?" and receives a clean answer. If the ship upgrades from diesel to electric, only the engine room changes &mdash; the bridge controls remain the same.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">28</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~15K</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">8</div><div class="label">Sub-Systems</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">Context Engine</span>
+  <span class="badge green">Memory Management</span>
+  <span class="badge yellow">Smart Routing</span>
+  <span class="badge red">Prompt Building</span>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph ContextMgmt["Context Management"]
+    CE["ContextEngine"]
+    CC["ContextCompressor"]
+    CR["ContextReferences"]
+  end
+  subgraph MemorySys["Memory System"]
+    MM["MemoryManager"]
+    MP["MemoryProvider"]
+  end
+  subgraph ModelRouting["Model and Routing"]
+    SMR["SmartModelRouting"]
+    CP["CredentialPool"]
+    UP["UsagePricing"]
+    MM2["ModelMetadata"]
+  end
+  subgraph ErrorSys["Error Handling"]
+    EC["ErrorClassifier"]
+    RU["RetryUtils"]
+    RLT["RateLimitTracker"]
+  end
+  subgraph Core["Core Pipeline"]
+    PB["PromptBuilder"]
+    TC["TrajectoryCapture"]
+    DI["Display"]
+  end
+
+  PB -->|"system prompt"| CE
+  CE -->|"compress check"| CC
+  CC -->|"summary request"| CE
+  PB -->|"memory context"| MM
+  MM -->|"recall/sync"| MP
+  PB -->|"route decision"| SMR
+  SMR -->|"model lookup"| MM2
+  SMR -->|"credential"| CP
+  CP -->|"cost tracking"| UP
+  EC -->|"retry policy"| RU
+  RU -->|"rate state"| RLT
+  CE -->|"token usage"| TC
+  TC -->|"formatted output"| DI
+  CR -->|"ref injection"| PB
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant PB as PromptBuilder
+    participant MM as MemoryManager
+    participant CE as ContextEngine
+    participant SMR as SmartModelRouting
+    participant CP as CredentialPool
+    participant LLM as LLM Provider
+    participant EC as ErrorClassifier
+    participant RU as RetryUtils
+    participant TC as TrajectoryCapture
+    participant DI as Display
+
+    U->>PB: User query
+    PB->>MM: prefetch_all() recall context
+    MM-->>PB: Memory context block
+    PB->>CE: Check context budget
+    CE->>CE: should_compress_preflight()
+    CE-->>PB: Token estimate OK
+    PB->>SMR: Route decision (simple vs complex)
+    SMR->>CP: Select credential
+    CP-->>SMR: API key + provider
+    SMR->>LLM: API call with messages
+    LLM-->>EC: Response or Exception
+    EC->>RU: Recovery action (retry/rotate/fallback)
+    RU-->>SMR: Retry with backoff
+    LLM-->>TC: Successful response + usage
+    TC->>DI: Format and render output
+    DI-->>U: Formatted response
+</pre>
+</div>
+
+<!-- NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="narrated-walkthrough" style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>user query through the agent pipeline</strong> as it flows through the entire agent module:</p>
+<ol style="line-height:2;">
+<li><strong>User Input Received</strong> &mdash; The user types a message. <code>SubdirectoryHintTracker</code> checks any recent tool calls for new directory paths and lazily loads <code>AGENTS.md</code> / <code>.cursorrules</code> hints if the agent has navigated to a new directory.</li>
+<li><strong>Memory Prefetch</strong> &mdash; <code>MemoryManager.prefetch_all()</code> fires across all registered providers (built-in + at most one external). Each provider retrieves relevant context from its backend. Results are merged into a fenced memory context block via <code>build_memory_context_block()</code>.</li>
+<li><strong>System Prompt Assembly</strong> &mdash; <code>prompt_builder._build_system_prompt()</code> constructs the system prompt by combining identity text, platform hints, the skills index (parsed from skill frontmatter via <code>skill_commands.py</code>), injected context files, and the memory block. Prompt injection detection scans <code>AGENTS.md</code> content for suspicious patterns.</li>
+<li><strong>Preflight Token Check</strong> &mdash; <code>model_metadata.estimate_messages_tokens_rough()</code> uses a 4-chars/token heuristic with provider-specific adjustments to estimate whether the assembled messages fit within the model's context window. If the estimate exceeds the threshold, <code>ContextEngine.should_compress_preflight()</code> signals compression is needed.</li>
+<li><strong>Context Compression (if triggered)</strong> &mdash; <code>ContextCompressor.compress()</code> prunes old tool results, protects head and tail messages, serializes middle turns, and calls the auxiliary LLM to generate a structured summary. If a previous summary exists, it uses iterative update mode to preserve accumulated facts.</li>
+<li><strong>Smart Routing Decision</strong> &mdash; <code>SmartModelRouting</code> evaluates whether the user message is "simple" (under 160 chars, under 28 words, no code blocks or complex keywords). If simple, it routes to a configured cheap model to save ~80% on token cost. Otherwise, the primary model is used.</li>
+<li><strong>Credential Selection</strong> &mdash; <code>CredentialPool</code> selects the next available API credential via round-robin or least-used strategy. Exhausted credentials (those with recent 429/402 errors) are skipped until their cooldown expires.</li>
+<li><strong>Prompt Caching</strong> &mdash; For Anthropic models, <code>apply_anthropic_cache_control()</code> injects up to 4 <code>cache_control</code> breakpoints (system prompt + last 3 non-system messages) to achieve ~75% input cost reduction on cache hits.</li>
+<li><strong>API Call &amp; Response</strong> &mdash; The request is sent to the selected LLM provider. Response headers (<code>x-ratelimit-*</code>) are parsed by <code>RateLimitTracker</code> to update RPM/TPM bucket state. <code>ContextEngine.update_from_response(usage)</code> records actual token counts.</li>
+<li><strong>Error Classification &amp; Recovery</strong> &mdash; If the API call throws an exception, <code>classify_api_error()</code> runs the error through a priority-ordered pipeline: provider-specific patterns, HTTP status codes, message pattern matching, transport heuristics, and context overflow detection. The resulting <code>ClassifiedError</code> determines whether to retry with backoff, rotate credentials, trigger compression, fall back to another model, or abort.</li>
+<li><strong>Trajectory Capture</strong> &mdash; On success, <code>TrajectoryCapture</code> records the full turn (input messages, output, tool calls, token usage, timing) for reinforcement learning training data. This creates structured datasets that can train future model versions.</li>
+<li><strong>Display Formatting</strong> &mdash; <code>display.py</code> formats the assistant response for terminal output with syntax highlighting, markdown rendering, and token usage statistics. The final formatted response is presented to the user, and <code>MemoryManager.sync_all()</code> writes the exchange to all registered memory providers in the background.</li>
+</ol>
+</div>
+
+<!-- DESIGN DECISIONS TABLE -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr>
+    <td>Context compression strategy</td>
+    <td>Lossy LLM summarization with iterative updates; previous summary preserved and incrementally updated on each compression</td>
+    <td>(A) Retrieve-augmented generation via vector DB; (B) Sliding window dropping oldest N turns; (C) Lossless DAG construction</td>
+    <td>Lossy summarization is simplest and works well for typical agent workflows. RAG requires external infrastructure; sliding window loses critical decision context from mid-conversation; DAG is complex to implement and maintain. Iterative updates prevent cascading information loss across multiple compressions in long sessions.</td>
+  </tr>
+  <tr>
+    <td>Memory provider abstraction</td>
+    <td>Single external provider limit &mdash; built-in always active plus at most one external (Honcho, Mem0, Hindsight, etc.)</td>
+    <td>(A) Multiple simultaneous providers with union schema; (B) Per-turn switchable provider</td>
+    <td>Prevents tool schema bloat (20+ memory <a title="tools — Agent Tool Implementations" href="../tools_doc/index.html">tools</a> confuse the model); avoids ambiguous ownership of facts across providers; forces explicit configuration choice. The single-provider constraint is the mental-model winner for both users and the LLM.</td>
+  </tr>
+  <tr>
+    <td>Smart model routing</td>
+    <td>Conservative heuristic: route to cheap model only when message is under 160 chars, under 28 words, no code blocks, no complex keywords</td>
+    <td>(A) ML-based complexity classifier; (B) Always use primary model; (C) User-selected per-turn</td>
+    <td>Conservative criteria ensure the cheap route only fires for clearly simple messages ("thanks", "what time is it?"). ML classifier adds training overhead and latency; always-primary wastes ~80% cost on trivial turns; user selection adds friction.</td>
+  </tr>
+  <tr>
+    <td>Credential pooling</td>
+    <td>Multi-key round-robin with exhaustion tracking and cooldown TTL per credential</td>
+    <td>(A) Single credential with retry; (B) Random selection; (C) Adaptive load balancing based on rate-limit headers</td>
+    <td>Round-robin distributes load evenly; exhaustion tracking with cooldown prevents retrying dead credentials; adaptive balancing requires header parsing first (adds latency) and not all providers return consistent headers.</td>
+  </tr>
+  <tr>
+    <td>Error classification taxonomy</td>
+    <td>Priority-ordered pipeline: provider-specific patterns, HTTP status codes, message patterns, transport heuristics, then fallback</td>
+    <td>(A) Machine-learned error classifier; (B) Per-provider manual error maps; (C) Simple regex catch-all</td>
+    <td>Deterministic and debuggable; no ML training overhead; centralized logic instead of scattered per-provider if/else blocks. Provider-specific patterns are folded in as high-priority matchers within the same pipeline.</td>
+  </tr>
+  <tr>
+    <td>Jittered backoff seed</td>
+    <td><code>time.time_ns() ^ (counter * 0x9E3779B9)</code> with process-level counter</td>
+    <td>(A) Pure <code>random.Random()</code>; (B) Fixed exponential backoff; (C) Rate-limit-header-adaptive delay</td>
+    <td>Pure random can produce collisions on coarse clocks; fixed backoff causes thundering herd when multiple sessions retry simultaneously. The counter-XOR-golden-ratio seed ensures diversity even when sessions start at the same instant.</td>
+  </tr>
+  <tr>
+    <td>Subdirectory hints injection</td>
+    <td>Lazy-loaded via tool results, not injected into system prompt</td>
+    <td>(A) Upfront filesystem scan at startup; (B) Batch inject all hints into system prompt</td>
+    <td>Lazy loading preserves prompt caching (no system prompt edits per turn). Upfront scanning adds startup latency. Tool-result injection is transparent to the model and avoids cache invalidation.</td>
+  </tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="context-compression-algorithm" style="margin-top:0;">Context Compression with Iterative Summary Updates</h3>
+<p><strong>The Problem:</strong> Long agent conversations can exceed the model's context window (e.g., 200K or 1M tokens). Naively dropping old messages loses critical decision context &mdash; file paths, design choices, error resolutions &mdash; that the agent needs to continue working effectively.</p>
+<p><strong>The Approach:</strong> When <code>last_prompt_tokens</code> exceeds a configurable threshold (default: 75% of max context), the compressor divides the conversation into three zones: a protected <strong>head</strong> (system prompt + opening exchange), a <strong>middle</strong> (summarization target), and a protected <strong>tail</strong> (recent messages by token budget, ~20K tokens). The middle is serialized with truncation (6K chars per message), then sent to an auxiliary LLM with a structured prompt requesting a handoff summary. On subsequent compressions, the <em>previous</em> summary is passed to the LLM with instructions to <em>update</em> it &mdash; moving items from "In Progress" to "Done", adding new facts, and preserving unresolved questions.</p>
+<p><strong>Why This Algorithm:</strong> Iterative updates prevent the cascading information loss that would occur if each compression started from scratch. A fresh summarization of the most recent middle chunk would forget facts from the <em>previous</em> compression. The iterative approach creates a durable, ever-growing handoff artifact. The summary budget scales with input size: <code>max(2000, min(0.20 * content_tokens, 12000))</code>, capped to avoid the summary itself consuming too much context.</p>
+<pre class="mermaid">
+graph TD
+    A["Conversation exceeds threshold"] --> B{"Previous summary exists?"}
+    B -->|"No"| C["Fresh summarization prompt"]
+    B -->|"Yes"| D["Iterative update prompt"]
+    C --> E["Prune old tool results"]
+    D --> E
+    E --> F["Protect head messages"]
+    F --> G["Protect tail by token budget"]
+    G --> H["Serialize middle turns"]
+    H --> I["Call auxiliary LLM"]
+    I --> J{"LLM call succeeded?"}
+    J -->|"Yes"| K["Insert summary + tail"]
+    J -->|"No"| L["Drop middle, enter 600s cooldown"]
+    K --> M["Store as _previous_summary"]
+    L --> M
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> A 180K-token conversation on a model with 200K context (threshold = 150K). This is the second compression; a previous summary of 3K tokens exists from an earlier compression.</p>
+<p><strong>Step 1:</strong> <code>should_compress(180000)</code> returns <code>true</code> since 180K &ge; 150K threshold.</p>
+<p><strong>Step 2:</strong> Tool pruning walks backward, replacing tool outputs older than the tail boundary with <code>"[Old tool output cleared]"</code>. This typically recovers 10-30K tokens cheaply.</p>
+<p><strong>Step 3:</strong> Head protection keeps messages 0-2 (system + first exchange). Tail protection accumulates backward until ~20K tokens are covered &mdash; roughly the last 8-12 messages.</p>
+<p><strong>Step 4:</strong> The middle turns (~140K tokens after pruning) are serialized with 6K char truncation per message. The previous 3K-token summary is included. The iterative update prompt instructs: "Update this summary. Preserve all file paths and decisions. Move completed items to Done."</p>
+<p><strong>Step 5:</strong> The auxiliary LLM generates a ~6K-token updated summary (budget = min(140K * 0.20, 12K) = 12K max). The output replaces the middle: head + summary message + tail. Total context drops from 180K to ~28K tokens.</p>
+<p><strong>Result:</strong> The conversation continues with full recent context and a structured summary preserving decisions from all prior compressions. Without iterative updates, facts from the first compression would be completely lost.</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="what-could-go-wrong">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr>
+    <td>Rate limit exhaustion</td>
+    <td>All credentials in the pool hit 429 rate limits simultaneously during high-concurrency usage</td>
+    <td><code>RateLimitTracker</code> parses <code>x-ratelimit-remaining</code> headers; <code>CredentialPool</code> tracks <code>last_error_code</code> per entry</td>
+    <td><code>jittered_backoff()</code> computes decorrelated delays; credentials enter cooldown until TTL expires or provider reset header received; worst case, user sees a retry-after delay message</td>
+  </tr>
+  <tr>
+    <td>Context overflow</td>
+    <td>Conversation grows beyond model context window; preflight check missed due to tool output expansion</td>
+    <td><code>classify_api_error()</code> matches HTTP 413 or "context", "token limit" patterns; also infers overflow when server disconnects on large sessions (&gt;80% context used)</td>
+    <td>Sets <code>should_compress=true</code> on the <code>ClassifiedError</code>; triggers <code>ContextCompressor.compress()</code> on next turn; tool pruning provides immediate relief</td>
+  </tr>
+  <tr>
+    <td>Memory backend failure</td>
+    <td>External memory provider (Honcho, Mem0, Hindsight) is unreachable or returns errors during prefetch/sync</td>
+    <td>Exception caught in <code>MemoryManager.prefetch_all()</code> per-provider try/except; logged at debug level</td>
+    <td>Non-fatal: failed provider is skipped; merged results from other providers (including built-in) are used. Sync failures are also non-fatal; data may be partially lost but conversation continues</td>
+  </tr>
+  <tr>
+    <td>Credential pool empty</td>
+    <td>All credentials exhausted (402 billing) with no remaining alternatives in the pool</td>
+    <td><code>CredentialPool.select_next()</code> returns <code>None</code> when all entries are in exhausted state</td>
+    <td>Falls through to the auxiliary client fallback chain (OpenRouter, Nous Portal, Codex, Anthropic); if entire chain is exhausted, returns error to user with clear "no credentials available" message</td>
+  </tr>
+  <tr>
+    <td>Compression LLM failure</td>
+    <td>Auxiliary LLM for summarization fails (all providers exhausted or network error)</td>
+    <td>Exception from <code>call_llm(task="compression")</code> caught in <code>ContextCompressor.compress()</code></td>
+    <td>Enters 600-second cooldown; drops middle turns without summary rather than crashing; accepts slightly reduced context budget until cooldown expires and compression can be retried</td>
+  </tr>
+  <tr>
+    <td>Prompt injection in context files</td>
+    <td>Malicious <code>AGENTS.md</code> or <code>.cursorrules</code> contains "ignore previous instructions" patterns</td>
+    <td>Regex scanning in <code>prompt_builder.py</code> detects exfiltration and override patterns during system prompt assembly</td>
+    <td>Suspicious content is flagged or stripped; injection attempt is logged; system prompt integrity is preserved</td>
+  </tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="hot-paths" style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Token estimation (<code>estimate_messages_tokens_rough</code>):</strong> Called on every turn for preflight checks &mdash; O(n) over message content using a 4-chars/token heuristic. Must be fast since it runs before every API call; avoids tokenizer imports for speed.</li>
+  <li><strong>Context compression:</strong> O(n) message traversal for pruning + one LLM API call. The LLM call dominates (2-10 seconds); the local pruning and serialization are negligible. Triggered only when threshold is crossed, typically every 15-30 turns.</li>
+  <li><strong>Error classification (<code>classify_api_error</code>):</strong> O(k) where k is the number of pattern matchers (~50). Runs only on exceptions. Priority ordering means common cases (429, 402) match early and short-circuit.</li>
+  <li><strong>Memory prefetch:</strong> Runs in parallel across providers; latency is max(provider_latencies). Built-in provider is local file I/O (~1ms); external providers add network latency (50-500ms).</li>
+  <li><strong>Prompt caching injection (<code>apply_anthropic_cache_control</code>):</strong> O(n) deep copy of messages + O(1) breakpoint insertion. Runs on every Anthropic API call but is fast compared to the API latency itself.</li>
+</ul>
+<h3 id="resource-usage">Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> Message history is the primary memory consumer, growing linearly with conversation length. Compression resets this to head + summary + tail (~28K tokens typical). <code>_previous_summary</code> is a single string retained across compressions. <code>CredentialPool</code> and <code>RateLimitTracker</code> maintain small fixed-size state per credential.</li>
+  <li><strong>I/O:</strong> External I/O is dominated by LLM API calls (1-30 seconds per call). Memory providers add network I/O during prefetch/sync (background). <code>TrajectoryCapture</code> writes structured JSON to disk asynchronously. <code>InsightsEngine</code> queries the local SQLite session database on demand.</li>
+  <li><strong>CPU:</strong> Minimal &mdash; the module is I/O-bound. The only CPU-intensive local operation is regex-based secret redaction in <code>redact.py</code>, which runs O(n) over output text with ~15 compiled patterns.</li>
+</ul>
+</div>
+
+<!-- KEY COMPONENTS TABLE -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <tr><th>Component</th><th>File</th><th>Role</th></tr>
+  <tr><td><code>PromptBuilder</code></td><td><code>prompt_builder.py</code></td><td>Assembles system prompt: identity, platform hints, skills index, context files with injection detection, memory blocks</td></tr>
+  <tr><td><code>ContextEngine</code></td><td><code>context_engine.py</code></td><td>Abstract base class for pluggable context management; defines lifecycle (init, compress, update, status)</td></tr>
+  <tr><td><code>ContextCompressor</code></td><td><code>context_compressor.py</code></td><td>Default context engine; lossy LLM summarization with iterative updates, tool pruning, head/tail protection</td></tr>
+  <tr><td><code>MemoryManager</code></td><td><code>memory_manager.py</code></td><td>Orchestrates built-in + one external memory provider; handles prefetch, sync, and single-external-provider constraint</td></tr>
+  <tr><td><code>MemoryProvider</code></td><td><code>memory_provider.py</code></td><td>Abstract base for persistent recall backends (Honcho, Hindsight, Mem0, built-in file store)</td></tr>
+  <tr><td><code>SmartModelRouting</code></td><td><code>smart_model_routing.py</code></td><td>Routes simple queries to a cheap model; conservative heuristic based on length, word count, and complexity indicators</td></tr>
+  <tr><td><code>CredentialPool</code></td><td><code>credential_pool.py</code></td><td>Multi-credential failover with round-robin rotation, exhaustion tracking, and cooldown TTL per credential</td></tr>
+  <tr><td><code>ErrorClassifier</code></td><td><code>error_classifier.py</code></td><td>Priority-ordered taxonomy mapping exceptions to recovery actions: retry, rotate, fallback, compress, abort</td></tr>
+  <tr><td><code>RetryUtils</code></td><td><code>retry_utils.py</code></td><td>Decorrelated exponential backoff with counter-based jitter to prevent thundering-herd retry spikes</td></tr>
+  <tr><td><code>RateLimitTracker</code></td><td><code>rate_limit_tracker.py</code></td><td>Parses <code>x-ratelimit-*</code> headers; tracks RPM/TPM buckets, remaining capacity, and reset times</td></tr>
+  <tr><td><code>TrajectoryCapture</code></td><td><code>trajectory.py</code></td><td>Records full turn data (messages, tool calls, usage, timing) as structured JSON for RL training datasets</td></tr>
+  <tr><td><code>UsagePricing</code></td><td><code>usage_pricing.py</code></td><td>Calculates per-turn and per-session cost from token usage and model pricing tables</td></tr>
+  <tr><td><code>AuxiliaryClient</code></td><td><code>auxiliary_client.py</code></td><td>Unified LLM resolution chain for side tasks (compression, title gen, vision); auto-fallback on 402</td></tr>
+  <tr><td><code>PromptCaching</code></td><td><code>prompt_caching.py</code></td><td>Injects Anthropic <code>cache_control</code> breakpoints (system + last 3 messages) for ~75% cost reduction</td></tr>
+  <tr><td><code>Display</code></td><td><code>display.py</code></td><td>Terminal output formatting with syntax highlighting, markdown rendering, and token usage statistics</td></tr>
+</table>
+
+<!-- SUB-MODULE CARDS (grouped by concern since no sub-directories) -->
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>Context Management</h4>
+    <p>Pluggable context engine with compression, references, and token tracking.</p>
+    <ul>
+      <li><code>context_engine.py</code> &mdash; Abstract base class</li>
+      <li><code>context_compressor.py</code> &mdash; Lossy summarization engine</li>
+      <li><code>context_references.py</code> &mdash; External reference injection</li>
+      <li><code>manual_compression_feedback.py</code> &mdash; User-triggered compression</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Memory System</h4>
+    <p>Provider-based persistent recall with 8+ backend support.</p>
+    <ul>
+      <li><code>memory_manager.py</code> &mdash; Multi-provider orchestration</li>
+      <li><code>memory_provider.py</code> &mdash; Abstract provider interface</li>
+      <li><code>insights.py</code> &mdash; Session analytics engine</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Model &amp; Routing</h4>
+    <p>Smart routing, metadata, credential management, and cost tracking.</p>
+    <ul>
+      <li><code>smart_model_routing.py</code> &mdash; Cheap-model route detection</li>
+      <li><code>model_metadata.py</code> &mdash; Context lengths, token estimation</li>
+      <li><code>credential_pool.py</code> &mdash; Multi-key rotation</li>
+      <li><code>usage_pricing.py</code> &mdash; Per-turn cost calculation</li>
+      <li><code>anthropic_adapter.py</code> &mdash; Anthropic-specific adaptations</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Skills Engine</h4>
+    <p>Skill discovery, parsing, and system prompt injection.</p>
+    <ul>
+      <li><code>skill_commands.py</code> &mdash; Skill index and payload loading</li>
+      <li><code>skill_utils.py</code> &mdash; Frontmatter parsing utilities</li>
+      <li><code>subdirectory_hints.py</code> &mdash; Lazy AGENTS.md discovery</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Error Handling</h4>
+    <p>Classification, retry logic, and rate limit awareness.</p>
+    <ul>
+      <li><code>error_classifier.py</code> &mdash; Priority-ordered error taxonomy</li>
+      <li><code>retry_utils.py</code> &mdash; Jittered exponential backoff</li>
+      <li><code>rate_limit_tracker.py</code> &mdash; RPM/TPM header parsing</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Utilities</h4>
+    <p>Cross-cutting concerns: prompts, caching, display, capture, security.</p>
+    <ul>
+      <li><code>prompt_builder.py</code> &mdash; System prompt construction</li>
+      <li><code>prompt_caching.py</code> &mdash; Anthropic cache breakpoints</li>
+      <li><code>auxiliary_client.py</code> &mdash; Side-task LLM fallback chain</li>
+      <li><code>copilot_acp_client.py</code> &mdash; Copilot ACP integration</li>
+      <li><code>trajectory.py</code> &mdash; RL training data capture</li>
+      <li><code>title_generator.py</code> &mdash; Async conversation titling</li>
+      <li><code>display.py</code> &mdash; Terminal output formatting</li>
+      <li><code>redact.py</code> &mdash; Secret masking (~15 regex patterns)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for agent/</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>agent/
+├── prompt_builder.py              ← System prompt assembly with injection detection
+├── context_engine.py              ← Abstract base for pluggable context management
+├── context_compressor.py          ← Lossy LLM summarization with iterative updates
+├── context_references.py          ← External reference injection into context
+├── memory_manager.py              ← Multi-provider memory orchestration
+├── memory_provider.py             ← Abstract base for recall backends
+├── skill_commands.py              ← Skill index loading and payload resolution
+├── skill_utils.py                 ← YAML frontmatter parsing for skills
+├── smart_model_routing.py         ← Cheap-model route detection heuristic
+├── model_metadata.py              ← Context lengths, token estimation (4 chars/tok)
+├── credential_pool.py             ← Multi-key rotation with exhaustion tracking
+├── error_classifier.py            ← Priority-ordered error taxonomy (50+ patterns)
+├── retry_utils.py                 ← Jittered exponential backoff (counter XOR seed)
+├── rate_limit_tracker.py          ← x-ratelimit-* header parsing, RPM/TPM buckets
+├── trajectory.py                  ← RL training data capture (structured JSON)
+├── usage_pricing.py               ← Per-turn and per-session cost calculation
+├── display.py                     ← Terminal formatting, syntax highlighting, stats
+├── anthropic_adapter.py           ← Anthropic-specific API adaptations
+├── auxiliary_client.py            ← Side-task LLM fallback chain resolution
+├── copilot_acp_client.py          ← GitHub Copilot ACP protocol client
+├── insights.py                    ← Session analytics (tokens, costs, tool usage)
+├── title_generator.py             ← Async background title generation
+├── redact.py                      ← Regex-based secret masking before output
+├── prompt_caching.py              ← Anthropic cache_control breakpoint injection
+├── subdirectory_hints.py          ← Lazy AGENTS.md/.cursorrules discovery
+├── manual_compression_feedback.py ← User-triggered manual compression support
+├── __init__.py                    ← Package init
+└── __pycache__/                   ← Bytecode cache (gitignored)
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>agent Wiki &mdash; Generated from source analysis on 2026-04-15 &bull; rev <code>677f1227</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

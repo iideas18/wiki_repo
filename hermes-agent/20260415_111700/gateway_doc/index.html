@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/gateway">
+<meta name="wiki-source-rev" content="677f1227">
+<title>gateway — Multi-Platform Messaging Gateway</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>gateway</span></nav>
+
+<main id="main">
+<h1>gateway &mdash; Multi-Platform Messaging Gateway</h1>
+<div class="hero">
+  <p class="subtitle">Multi-Platform Messaging Gateway</p>
+  <p>The gateway module serves as a unified messaging bridge, enabling autonomous communication across Telegram, Discord, Slack, WhatsApp, Signal, Matrix, Email, SMS, and 10+ other platforms through a single adapter abstraction. It manages persistent session contexts, implements session lifecycle policies, and intelligently routes outputs from scheduled jobs.</p>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">🔵 18+ Platforms</span>
+  <span class="badge green">🟢 Session Management</span>
+  <span class="badge yellow">🟡 Stream Rendering</span>
+  <span class="badge red">🔴 <a title="cron — Scheduled Task System" href="../cron/index.html">Cron</a> Delivery</span>
+</p>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>Without the gateway module, every scheduled job, every <a title="agent — Core Agent Engine" href="../agent_doc/index.html">agent</a> response, and every notification would need its own bespoke integration with each messaging platform. Teams running Hermes across Telegram, Discord, and Slack would maintain three separate codebases with three separate authentication flows, three separate message-formatting pipelines, and three separate session stores. Bug fixes would be multiplied by the number of platforms, and adding a new platform like Signal or Matrix would require changes in every component that ever sends a message.</p>
+<p>The gateway solves this by placing a single adapter abstraction between the Hermes agent core and the outside world. Platform adapters translate platform-specific events (Telegram updates, Discord interactions, Slack slash commands) into a normalized <code>InboundMessage</code> envelope and translate outbound <code>AgentResponse</code> objects back into platform-native formats. The session store ensures conversational context persists across messages without leaking between users or platforms. The delivery router decides which adapter receives the output of cron jobs without the scheduler needing to know anything about messaging protocols. This separation means a new platform can be added by implementing a single Python class — roughly 150–300 lines — with zero changes to the agent, scheduler, or plugin system.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the gateway as a multilingual hotel concierge desk. Guests arrive speaking different languages (Telegram, Discord, Slack, etc.), but behind the desk every request is logged in the same ledger (session store), routed to the same staff (agent core), and answered in the guest's own language. The concierge doesn't need to understand how the kitchen (<a title="plugins — Plugin System &amp; Memory Backends" href="../plugins_doc/index.html">plugins</a>) works — they just relay orders and deliver plates. Adding a new language is hiring one new translator, not retraining the entire hotel staff.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">40</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">18</div><div class="label">Platforms</div></div>
+  <div class="stat-box"><div class="num">~15K</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph External["External Platforms"]
+    TG["Telegram"]
+    DC["Discord"]
+    SL["Slack"]
+    WA["WhatsApp"]
+    SG["Signal"]
+    MX["Matrix"]
+    EM["Email"]
+    SMS["SMS"]
+    OT["Other Adapters"]
+  end
+
+  subgraph Gateway["Gateway Core"]
+    GR["GatewayRunner\n(run.py)"]
+    GC["GatewayConfig\n(config.py)"]
+    HR["HookRegistry\n(hooks.py)"]
+  end
+
+  subgraph Session["Session Layer"]
+    SS["SessionStore\n(session.py)"]
+    PS["PairingStore\n(pairing.py)"]
+  end
+
+  subgraph Output["Output Pipeline"]
+    SC["GatewayStreamConsumer\n(stream_consumer.py)"]
+    DR["DeliveryRouter\n(delivery.py)"]
+  end
+
+  subgraph Core["Hermes Core"]
+    AG["Agent Engine"]
+  end
+
+  TG & DC & SL & WA & SG & MX & EM & SMS & OT -->|InboundMessage| GR
+  GR --> SS
+  GR --> PS
+  GR --> HR
+  GC -.->|config| GR
+  GR -->|invoke| AG
+  AG -->|stream| SC
+  SC -->|render| TG & DC & SL & WA & SG & MX & EM & SMS & OT
+  DR -->|route cron output| GR
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant P as Platform (Telegram/Discord/...)
+    participant A as PlatformAdapter
+    participant GR as GatewayRunner
+    participant PS as PairingStore
+    participant SS as SessionStore
+    participant AG as Agent Engine
+    participant SC as StreamConsumer
+    participant HR as HookRegistry
+
+    P->>A: Platform-native event
+    A->>A: Parse into InboundMessage
+    A->>GR: dispatch(InboundMessage)
+    GR->>HR: fire(on_message_received)
+    GR->>PS: check_authorization(user_id)
+    PS-->>GR: authorized / denied
+    GR->>SS: get_or_create(session_key)
+    SS-->>GR: SessionContext (history, metadata)
+    GR->>SS: check_lifecycle(idle_timeout, daily_reset)
+    GR->>AG: invoke(prompt, context)
+    AG-->>SC: stream chunks
+    SC->>SC: batch & format chunks
+    SC->>A: send_message(formatted_chunk)
+    A->>P: Platform-native response
+    GR->>SS: persist(updated_context)
+    GR->>HR: fire(on_message_complete)
+</pre>
+</div>
+
+<!-- NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>Telegram message from a user</strong> as it flows through the entire gateway pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Webhook Arrival</strong> — Telegram sends an HTTPS POST to the bot's webhook endpoint. The <code>TelegramAdapter</code> receives the raw JSON payload containing the chat ID, user ID, message text, and any attachments. Latency: ~5 ms to parse.</li>
+<li><strong>Envelope Construction</strong> — The adapter calls <code>parse_update()</code> to transform the Telegram-specific JSON into a normalized <code>InboundMessage</code> dataclass with fields like <code>platform</code>, <code>user_id</code>, <code>channel_id</code>, <code>text</code>, and <code>attachments</code>. Platform quirks (e.g., Telegram's <code>chat.type</code> field) are abstracted away here.</li>
+<li><strong>Dispatch to GatewayRunner</strong> — The adapter calls <code>GatewayRunner.dispatch(msg)</code>. The runner is the central event loop — it doesn't know or care that this message came from Telegram. The <code>HookRegistry</code> fires <code>on_message_received</code> hooks (logging, rate-limit checks, analytics).</li>
+<li><strong>Authorization Check</strong> — The runner queries <code>PairingStore.check_authorization(user_id, channel_id)</code>. In DM mode, the user must have previously entered a valid pairing code. In group mode, the channel itself is the authorization scope. Unauthorized messages receive a polite rejection and the pipeline short-circuits.</li>
+<li><strong>Session Key Construction</strong> — The runner builds a composite session key: <code>f"{platform}:{channel_id}:{user_id}"</code> for DMs or <code>f"{platform}:{channel_id}"</code> for group chats. This key determines which conversation history is loaded. The algorithm is deliberately simple to make debugging straightforward.</li>
+<li><strong>Session Retrieval &amp; Lifecycle</strong> — <code>SessionStore.get_or_create(key)</code> loads the session from disk (JSON files) or creates a fresh one. Before returning it, the store checks lifecycle policies: if the session has been idle longer than <code>idle_timeout_minutes</code> (default: 120) or a new calendar day has started since the last message, the session is auto-reset to prevent context drift. The old session is archived, not deleted.</li>
+<li><strong>Agent Invocation</strong> — The runner passes the user's message plus the loaded <code>SessionContext</code> (conversation history, system prompt overrides, tool permissions) to the agent engine via <code>agent.invoke()</code>. The agent runs in a subprocess for crash isolation — if the agent segfaults or hangs, only that subprocess dies.</li>
+<li><strong>Stream Processing</strong> — As the agent produces output tokens, <code>GatewayStreamConsumer</code> receives them in real time. It batches tokens into display-friendly chunks (typically 50–100 tokens) to avoid flooding the platform's API with single-character messages. For platforms that support message editing (Telegram, Discord), it sends an initial message and then edits it in place — giving the user a "typing" effect.</li>
+<li><strong>Platform-Native Formatting</strong> — The stream consumer calls <code>adapter.send_message(chunk)</code>. Each adapter translates the generic Markdown output into platform-native formatting: Telegram uses HTML tags, Discord uses its own Markdown dialect, Slack uses Block Kit JSON, Email uses MIME multipart. Code blocks, images, and links are all platform-adapted.</li>
+<li><strong>Session Persistence</strong> — After the agent finishes, the runner calls <code>SessionStore.persist(key, updated_context)</code>. The updated context includes the new user message, the agent's full response, token counts, and a timestamp. The session file is written atomically (write to temp, then rename) to prevent corruption on crash.</li>
+<li><strong>Hook Finalization</strong> — The runner fires <code>on_message_complete</code> hooks. These typically handle analytics (response latency, token usage), quota tracking, and optional logging to an external observability service.</li>
+<li><strong>Cleanup &amp; Readiness</strong> — The adapter's event loop returns to listening for the next Telegram update. Total end-to-end latency for a simple query: 200–800 ms (dominated by LLM inference time). The gateway is immediately ready for the next message on any platform.</li>
+</ol>
+</div>
+
+<!-- DESIGN DECISIONS TABLE -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr>
+    <td>Platform integration pattern</td>
+    <td>Abstract adapter base class (<code>BasePlatformAdapter</code>) with one subclass per platform</td>
+    <td>Plugin-based hot-loading; shared webhook with routing table; direct API calls from agent</td>
+    <td>Adapters are statically registered at startup, making dependency injection easy to test. Each adapter owns its own event loop and authentication credentials, preventing one platform's issues from cascading. Adding a new platform means creating one file with ~200 lines, not modifying shared routing logic.</td>
+  </tr>
+  <tr>
+    <td>Agent crash isolation</td>
+    <td>Run each agent invocation in a subprocess with timeout</td>
+    <td>In-process thread pool; container-per-request; async coroutine</td>
+    <td>Subprocesses provide full memory isolation — a segfault or memory leak in the agent (or an imported tool) cannot bring down the gateway. The overhead (~20 ms spawn) is negligible compared to LLM inference time. Containers would add cold-start latency unsuitable for chat.</td>
+  </tr>
+  <tr>
+    <td>Session key construction</td>
+    <td>Composite string <code>platform:channel:user</code> for DMs, <code>platform:channel</code> for groups</td>
+    <td>UUID-based session IDs; hash-based keys; database auto-increment</td>
+    <td>Human-readable keys make debugging trivial — operators can <code>ls sessions/</code> and immediately see which platform and channel a session belongs to. Hash-based keys would require a reverse-lookup index. UUIDs would be opaque.</td>
+  </tr>
+  <tr>
+    <td>Progressive streaming output</td>
+    <td>Token batching with edit-in-place for platforms that support message editing</td>
+    <td>Wait for full response then send; send each token individually; split into fixed-size messages</td>
+    <td>Edit-in-place gives users immediate feedback ("the bot is thinking") without flooding the channel with dozens of messages. Waiting for full response feels unresponsive for long answers. Single-token sends hit rate limits on every platform tested.</td>
+  </tr>
+  <tr>
+    <td>Pairing-code authorization</td>
+    <td>One-time codes generated via CLI, stored in <code>PairingStore</code></td>
+    <td>OAuth2 per platform; shared API key; no authorization (public bot)</td>
+    <td>Pairing codes are platform-agnostic — the same code works for Telegram, Discord, or any adapter. OAuth2 would require per-platform redirect URIs and token refresh logic. Shared API keys are a security risk in group chats.</td>
+  </tr>
+  <tr>
+    <td>Session lifecycle management</td>
+    <td>Auto-reset on idle timeout (configurable) and daily boundary crossing</td>
+    <td>Manual reset only; fixed-length sessions; LRU eviction</td>
+    <td>Auto-reset prevents unbounded context growth that degrades LLM quality. Daily boundaries align with user expectations ("start fresh each morning"). The old session is archived, so context is recoverable if needed.</td>
+  </tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Session Key Construction &amp; Message Batching</h3>
+
+<h4>Session Key Construction</h4>
+<p><strong>The Problem:</strong> The gateway must route incoming messages to the correct conversation context. A user can talk to the bot in a Telegram DM, a Discord server channel, and a Slack thread simultaneously — each must have its own session. But in group chats, all users share a single context.</p>
+<p><strong>The Approach:</strong> Build a deterministic composite key from three fields: <code>platform</code>, <code>channel_id</code>, and optionally <code>user_id</code>. For DMs, the key is <code>{platform}:{channel_id}:{user_id}</code>. For group chats, the key is <code>{platform}:{channel_id}</code>. The platform prefix prevents collisions when the same numeric channel ID appears on different platforms (Telegram and Discord both use snowflake-like IDs).</p>
+<p><strong>Why This Algorithm:</strong> It's O(1) to construct, O(1) to look up in a dict, and — critically — human-readable. An operator debugging a session issue can <code>ls sessions/telegram:*</code> to find all Telegram sessions instantly. Hash-based keys (SHA-256 of the inputs) would be collision-free but opaque, requiring a secondary index for debugging.</p>
+
+<h4>Message Batching</h4>
+<p><strong>The Problem:</strong> LLM streaming produces tokens one-at-a-time (5–50 ms apart). Sending each token as a separate platform message would trigger rate limits (Telegram: 30 msgs/sec, Discord: 5 msgs/sec) and create a terrible user experience.</p>
+<p><strong>The Approach:</strong> The <code>GatewayStreamConsumer</code> accumulates tokens in a buffer. It flushes when: (a) the buffer reaches a threshold (50–100 tokens), (b) a natural break point is detected (double newline, code fence boundary), or (c) a time deadline passes (500 ms since last flush). On platforms supporting edit-in-place (Telegram, Discord), it sends one initial message and edits it repeatedly. On send-only platforms (SMS, Email), it waits for the full response.</p>
+<p><strong>Why This Algorithm:</strong> The multi-trigger flush strategy balances responsiveness against API rate limits. A pure token-count threshold would delay short responses. A pure timer would flush mid-word. The natural-break-point detection ensures chunks end at readable boundaries.</p>
+
+<pre class="mermaid">
+graph TD
+    A["Token arrives from LLM"] --> B{"Buffer full?\n(50+ tokens)"}
+    B -->|Yes| F["Flush buffer to platform"]
+    B -->|No| C{"Natural break?\n(newline/fence)"}
+    C -->|Yes| F
+    C -->|No| D{"Timer expired?\n(500ms)"}
+    D -->|Yes| F
+    D -->|No| E["Append to buffer,\nwait for next token"]
+    F --> G{"Platform supports\nedit-in-place?"}
+    G -->|Yes| H["Edit existing message"]
+    G -->|No| I["Append new message\n(or buffer until done)"]
+    H --> E
+    I --> E
+</pre>
+
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> A Telegram user asks "Explain quicksort." The LLM streams 200 tokens over 3 seconds.</p>
+<p><strong>Step 1:</strong> Tokens 1–12 arrive in 180 ms: <code>"Quicksort is a"</code>. Buffer has 12 tokens, no break point, timer not expired → keep buffering.</p>
+<p><strong>Step 2:</strong> Token 13 arrives at 200 ms, it's a newline after the first sentence. Natural break detected → flush. <code>adapter.send_message("Quicksort is a divide-and-conquer...")</code> creates message ID 42.</p>
+<p><strong>Step 3:</strong> Tokens 14–80 arrive over 1.2 seconds. At token 65, a double-newline is detected → flush via <code>adapter.edit_message(42, accumulated_text)</code>. The user sees the message grow in real time.</p>
+<p><strong>Step 4:</strong> Tokens 81–200 continue with periodic flushes at natural breaks and timer deadlines. Final flush on stream-end sends the complete response.</p>
+<p><strong>Result:</strong> The user sees 4–5 progressive edits to a single message over 3 seconds, instead of either (a) 200 individual messages or (b) a 3-second delay followed by a wall of text.</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="what-could-go-wrong">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr>
+    <td>Platform rate limit exceeded</td>
+    <td>Rapid message edits during streaming; multiple concurrent users on the same adapter</td>
+    <td>HTTP 429 response from platform API; <code>RetryAfter</code> header</td>
+    <td>Exponential backoff with jitter built into each adapter's <code>send_message()</code>. Stream consumer increases batch size dynamically when rate limits are detected. Worst case: user sees a slight delay in streaming updates.</td>
+  </tr>
+  <tr>
+    <td>Adapter crash / unhandled exception</td>
+    <td>Platform API breaking change; malformed webhook payload; network partition</td>
+    <td>Subprocess exit with non-zero code; exception caught by <code>GatewayRunner</code>'s try/except wrapper</td>
+    <td>Each adapter runs in its own async task. A crash in the Telegram adapter does not affect Discord or Slack. The runner logs the error, fires <code>on_adapter_error</code> hooks, and the adapter automatically restarts on the next incoming event. Sessions are persisted before agent invocation, so no context is lost.</td>
+  </tr>
+  <tr>
+    <td>Session file corruption</td>
+    <td>Process kill during session write; disk full; filesystem error</td>
+    <td>JSON parse error on session load; checksum mismatch</td>
+    <td>Sessions are written atomically (write to <code>.tmp</code>, then <code>os.rename()</code>). If the temp file is incomplete, the original session file remains intact. On parse error, the session is reset to empty with a warning logged. Archived sessions provide manual recovery.</td>
+  </tr>
+  <tr>
+    <td>SSRF via user-supplied URLs</td>
+    <td>User sends a message containing a URL that the agent attempts to fetch (e.g., via a web-browsing tool)</td>
+    <td>URL validation in the tool layer (not the gateway itself)</td>
+    <td>The gateway does not fetch user-supplied URLs — that responsibility belongs to individual <a title="tools — Agent Tool Implementations" href="../tools_doc/index.html">tools</a>, which implement allowlist/denylist filtering. The gateway's role is to pass the message to the agent verbatim. However, the <code>HookRegistry</code> supports <code>on_message_sanitize</code> hooks that can strip or flag suspicious URLs before agent invocation.</td>
+  </tr>
+  <tr>
+    <td>Memory exhaustion from unbounded sessions</td>
+    <td>Long-running conversations without lifecycle resets; sessions accumulating megabytes of context</td>
+    <td>Process RSS monitoring; session file size exceeding configurable threshold</td>
+    <td>Session lifecycle policies (idle timeout, daily reset) prevent unbounded growth. Additionally, <code>SessionStore</code> enforces a <code>max_turns</code> limit (default: 200) — older turns are evicted FIFO. The session metadata tracks total token count for monitoring.</td>
+  </tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in the gateway module:</p>
+<ul>
+  <li><strong>Message Dispatch (<code>GatewayRunner.dispatch</code>):</strong> O(1) adapter lookup by platform name, O(1) session key construction, O(1) session dict lookup. Total overhead before agent invocation: &lt;5 ms. This path is hot because every single inbound message traverses it.</li>
+  <li><strong>Stream Consumer Flush (<code>GatewayStreamConsumer.flush</code>):</strong> O(n) where n = buffered tokens (typically 50–100). Formatting is string concatenation, no regex. Called 3–10 times per agent response. The real bottleneck is the platform API call latency (50–200 ms), not the flush logic itself.</li>
+  <li><strong>Session Serialization (<code>SessionStore.persist</code>):</strong> O(m) where m = session turns. JSON serialization of 100+ turns can take 5–15 ms. Mitigated by writing asynchronously in a background task — the user-facing response is sent before persistence completes.</li>
+</ul>
+<h3>Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> Each active session consumes 10–500 KB depending on conversation length. With 1,000 concurrent sessions, baseline memory is ~50–500 MB. Sessions are loaded on-demand and evicted from the in-memory cache after <code>cache_ttl_minutes</code> (default: 30). Agent subprocesses are forked per request and cleaned up after completion.</li>
+  <li><strong>I/O:</strong> Session reads/writes hit local disk (SSD). Each message triggers 1 read + 1 write. Platform API calls are the dominant I/O: 2–8 HTTPS requests per message (initial send + edits during streaming). Webhook ingestion is passive — platforms push to us, no polling.</li>
+  <li><strong>CPU:</strong> Minimal — the gateway is I/O-bound. Token batching and message formatting use basic string operations. The LLM inference (the actual CPU/GPU workload) happens in the agent subprocess or on a remote API server, not in the gateway process.</li>
+</ul>
+</div>
+
+<!-- KEY COMPONENTS TABLE -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <tr><th>Component</th><th>File</th><th>Responsibility</th><th>Key Interfaces</th></tr>
+  <tr><td><strong>GatewayRunner</strong></td><td><code>run.py</code></td><td>Central event loop; receives dispatched messages, orchestrates session lookup, agent invocation, and response delivery</td><td><code>dispatch(msg)</code>, <code>start()</code>, <code>shutdown()</code></td></tr>
+  <tr><td><strong>BasePlatformAdapter</strong></td><td><code>platforms/base.py</code></td><td>Abstract base class defining the contract all platform adapters must implement</td><td><code>parse_event()</code>, <code>send_message()</code>, <code>edit_message()</code>, <code>start_listening()</code></td></tr>
+  <tr><td><strong>SessionStore</strong></td><td><code>session.py</code></td><td>Persistent session storage with lifecycle management (idle timeout, daily reset, max turns)</td><td><code>get_or_create(key)</code>, <code>persist(key, ctx)</code>, <code>reset(key)</code></td></tr>
+  <tr><td><strong>DeliveryRouter</strong></td><td><code>delivery.py</code></td><td>Routes cron job outputs to the correct adapter and channel based on delivery rules</td><td><code>route(job_output)</code>, <code>register_rule()</code></td></tr>
+  <tr><td><strong>GatewayConfig</strong></td><td><code>config.py</code></td><td>Centralized configuration: platform credentials, timeouts, feature flags, session policies</td><td><code>load()</code>, <code>get(key)</code>, <code>validate()</code></td></tr>
+  <tr><td><strong>PairingStore</strong></td><td><code>pairing.py</code></td><td>DM authorization via one-time pairing codes; maps user IDs to authorization status</td><td><code>check_authorization()</code>, <code>create_code()</code>, <code>redeem_code()</code></td></tr>
+  <tr><td><strong>GatewayStreamConsumer</strong></td><td><code>stream_consumer.py</code></td><td>Progressive rendering of LLM streaming output; batches tokens and manages edit-in-place</td><td><code>on_token(token)</code>, <code>flush()</code>, <code>finalize()</code></td></tr>
+  <tr><td><strong>HookRegistry</strong></td><td><code>hooks.py</code></td><td>Lifecycle event hooks for extensibility (logging, analytics, sanitization, rate limiting)</td><td><code>register(event, fn)</code>, <code>fire(event, ctx)</code></td></tr>
+  <tr><td><strong>TelegramAdapter</strong></td><td><code>platforms/telegram.py</code></td><td>Telegram Bot API integration; webhook-based, supports message editing for streaming</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>DiscordAdapter</strong></td><td><code>platforms/discord.py</code></td><td>Discord bot integration via discord.py; supports interactions, embeds, and message editing</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>SlackAdapter</strong></td><td><code>platforms/slack.py</code></td><td>Slack integration via Bolt SDK; Block Kit formatting, slash commands, thread replies</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>WhatsAppAdapter</strong></td><td><code>platforms/whatsapp.py</code></td><td>WhatsApp Business API integration; template messages, media handling</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>SignalAdapter</strong></td><td><code>platforms/signal.py</code></td><td>Signal integration via signal-cli; encrypted messaging, group support</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>MatrixAdapter</strong></td><td><code>platforms/matrix.py</code></td><td>Matrix protocol integration via matrix-nio; room-based conversations, E2EE support</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>EmailAdapter</strong></td><td><code>platforms/email.py</code></td><td>Email integration via IMAP/SMTP; MIME multipart formatting, attachment handling</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+  <tr><td><strong>SMSAdapter</strong></td><td><code>platforms/sms.py</code></td><td>SMS integration via Twilio; character-limit-aware message splitting</td><td>Inherits <code>BasePlatformAdapter</code></td></tr>
+</table>
+
+<!-- SUB-MODULE CARDS -->
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <a class="card" href="#">
+    <h4>Core</h4>
+    <p>Central gateway orchestration, configuration, and session management.</p>
+    <ul>
+      <li><code>run.py</code> — GatewayRunner event loop</li>
+      <li><code>config.py</code> — GatewayConfig loader and validator</li>
+      <li><code>session.py</code> — SessionStore with lifecycle policies</li>
+      <li><code>pairing.py</code> — PairingStore for DM authorization</li>
+      <li><code>hooks.py</code> — HookRegistry for lifecycle events</li>
+    </ul>
+  </a>
+  <a class="card" href="#">
+    <h4>Platforms</h4>
+    <p>18+ platform adapters implementing <code>BasePlatformAdapter</code>.</p>
+    <ul>
+      <li><code>base.py</code> — Abstract adapter contract</li>
+      <li><code>telegram.py</code> — Telegram Bot API (webhooks, edit-in-place)</li>
+      <li><code>discord.py</code> — Discord bot (interactions, embeds)</li>
+      <li><code>slack.py</code> — Slack Bolt (Block Kit, slash commands)</li>
+      <li><code>whatsapp.py</code>, <code>signal.py</code>, <code>matrix.py</code> — Encrypted platforms</li>
+      <li><code>email.py</code>, <code>sms.py</code> — Async/offline platforms</li>
+      <li>10+ additional adapters (IRC, Mattermost, Teams, etc.)</li>
+    </ul>
+  </a>
+  <a class="card" href="#">
+    <h4>Delivery &amp; Streaming</h4>
+    <p>Output pipeline for cron delivery and progressive LLM rendering.</p>
+    <ul>
+      <li><code>delivery.py</code> — DeliveryRouter for scheduled job output</li>
+      <li><code>stream_consumer.py</code> — Token batching and edit-in-place rendering</li>
+      <li>Adaptive flush strategies per platform capability</li>
+      <li>Rate-limit-aware backoff and retry logic</li>
+    </ul>
+  </a>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for gateway</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>gateway/
+├── run.py                         ← GatewayRunner: main event loop &amp; dispatch
+├── config.py                      ← GatewayConfig: YAML/env config loader
+├── session.py                     ← SessionStore: persistent context w/ lifecycle
+├── pairing.py                     ← PairingStore: DM authorization codes
+├── hooks.py                       ← HookRegistry: lifecycle event system
+├── delivery.py                    ← DeliveryRouter: cron output routing
+├── stream_consumer.py             ← GatewayStreamConsumer: token batching
+├── models.py                      ← InboundMessage, AgentResponse dataclasses
+├── platforms/
+│   ├── __init__.py                ← Adapter registry &amp; auto-discovery
+│   ├── base.py                    ← BasePlatformAdapter (abstract)
+│   ├── telegram.py                ← Telegram Bot API adapter
+│   ├── discord.py                 ← Discord bot adapter
+│   ├── slack.py                   ← Slack Bolt adapter
+│   ├── whatsapp.py                ← WhatsApp Business API adapter
+│   ├── signal.py                  ← Signal-cli adapter
+│   ├── matrix.py                  ← Matrix (matrix-nio) adapter
+│   ├── email.py                   ← IMAP/SMTP email adapter
+│   ├── sms.py                     ← Twilio SMS adapter
+│   ├── irc.py                     ← IRC adapter
+│   ├── mattermost.py              ← Mattermost adapter
+│   ├── teams.py                   ← Microsoft Teams adapter
+│   ├── line.py                    ← LINE Messaging adapter
+│   ├── wechat.py                  ← WeChat adapter
+│   ├── viber.py                   ← Viber adapter
+│   ├── rocket_chat.py             ← Rocket.Chat adapter
+│   ├── zulip.py                   ← Zulip adapter
+│   └── mumble.py                  ← Mumble adapter
+├── tests/
+│   ├── test_runner.py             ← GatewayRunner unit tests
+│   ├── test_session.py            ← SessionStore tests
+│   ├── test_delivery.py           ← DeliveryRouter tests
+│   ├── test_stream_consumer.py    ← StreamConsumer tests
+│   └── conftest.py                ← Shared fixtures &amp; mock adapters
+└── README.md                      ← Module documentation
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>gateway Wiki &mdash; Generated from source analysis &middot; 2026-04-15 &middot; rev <code>677f1227</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

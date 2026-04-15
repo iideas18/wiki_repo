@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/hermes_cli">
+<meta name="wiki-source-rev" content="677f1227">
+<title>hermes_cli — Command-Line Interface</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!-- 3-level breadcrumb -->
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>hermes_cli</span></nav>
+
+<main id="main">
+<h1>hermes_cli &mdash; Command-Line Interface</h1>
+<div class="hero">
+  <p class="subtitle">Command-Line Interface</p>
+  <p>The unified command-line interface and terminal UI for Hermes <a title="agent — Core Agent Engine" href="../agent_doc/index.html">Agent</a> &mdash; orchestrating interactive chat sessions, configuration, authentication, model selection, <a title="gateway — Multi-Platform Messaging Gateway" href="../gateway_doc/index.html">gateway</a> management, tool discovery, multi-profile support, setup wizards, and a skin/theming engine across 50 files and ~25,000 lines of Python.</p>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">&#128309; 150+ Commands</span>
+  <span class="badge green">&#128994; 100+ Providers</span>
+  <span class="badge yellow">&#128993; Multi-Profile</span>
+  <span class="badge red">&#128308; Setup Wizard</span>
+</p>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>Without <code>hermes_cli</code>, every tool that wanted to interact with an Hermes agent would need to implement its own argument parsing, authentication handshake, provider discovery, configuration loading, and terminal rendering logic. The CLI module exists to collapse all of those responsibilities into a single, cohesive entry point that speaks the language of the terminal user. It absorbs the complexity of 100+ model providers, multiple authentication strategies (OAuth device-code flows, API-key vaults, rotating credential pools), YAML-based multi-profile configuration, and a curses-driven interactive UI &mdash; so that the agent core can remain a pure reasoning engine free from I/O concerns. It also serves as the <em>only</em> place where managed-mode detection occurs, meaning enterprise deployments that inject corporate policies only need to hook into this one module. If <code>hermes_cli</code> were removed, every downstream consumer &mdash; scripts, CI runners, IDE extensions &mdash; would have to re-derive these capabilities independently, creating a combinatorial explosion of configuration bugs and auth failures.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of <code>hermes_cli</code> as the cockpit of an airliner. The engines (agent core), navigation systems (providers), and fuel management (auth/credentials) are all complex subsystems, but the pilot interacts with them through a unified instrument panel with standardized gauges, switches, and checklists. The cockpit doesn&rsquo;t fly the plane &mdash; it translates human intent into system commands, handles pre-flight checks (setup wizard), manages multiple flight profiles (multi-profile), and provides clear warnings when something goes wrong (doctor diagnostics). Without it, you&rsquo;d be hot-wiring avionics by hand.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">50</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">150+</div><div class="label">Commands</div></div>
+  <div class="stat-box"><div class="num">~25K</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Entry["Entry &amp; Parsing"]
+    MAIN["main.py\nargparse entry"]
+    CMDS["commands.py\nCommandDef registry"]
+  end
+  subgraph Config["Configuration"]
+    CFG["config.py\nYAML loader"]
+    PROF["profiles.py\nMulti-profile"]
+    SETUP["setup.py\nSetup wizard"]
+    BACKUP["backup.py\nBackup/restore"]
+  end
+  subgraph Auth["Auth &amp; Providers"]
+    AUTH["auth.py\nOAuth / API keys"]
+    PROV["providers.py\nProvider metadata"]
+    RPROV["runtime_provider.py\nRuntime resolution"]
+  end
+  subgraph Models["Model Layer"]
+    MOD["models.py\nModel registry"]
+    MSWITCH["model_switch.py\nHot-swap"]
+    MNORM["model_normalize.py\nName normalization"]
+  end
+  subgraph UI["Terminal UI"]
+    CURSES["curses_ui.py\nMulti-select"]
+    SKIN["skin_engine.py\nTheming"]
+    CB["callbacks.py\nEvent callbacks"]
+  end
+  subgraph Services["Gateway &amp; Services"]
+    GW["gateway.py\nLifecycle CLI"]
+    SKILLS["skills_hub.py\nSkills discovery"]
+    DOCTOR["doctor.py\nDiagnostics"]
+  end
+  MAIN --> CMDS
+  MAIN --> CFG
+  CFG --> PROF
+  CFG --> SETUP
+  CMDS --> AUTH
+  CMDS --> PROV
+  PROV --> RPROV
+  RPROV --> MOD
+  MOD --> MSWITCH
+  MOD --> MNORM
+  CMDS --> CURSES
+  CURSES --> SKIN
+  CMDS --> GW
+  CMDS --> SKILLS
+  CMDS --> DOCTOR
+  AUTH --> CB
+  CFG --> BACKUP
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  USER["&#128100; User types\n'hermes chat -m gpt-4'"] --> ARGPARSE["Argparse\nparse_args()"]
+  ARGPARSE --> PROFILE["Profile Pre-Parse\nload active profile"]
+  PROFILE --> CONFIG["Config Loader\nYAML merge + managed-mode"]
+  CONFIG --> AUTHFLOW["Auth Resolution\nOAuth / API key / pool"]
+  AUTHFLOW --> PROVIDER["Provider Resolution\npriority chain lookup"]
+  PROVIDER --> MODEL["Model Normalization\ncanonical name + routing"]
+  MODEL --> AGENT["Agent Core\nreasoning engine"]
+  AGENT --> CALLBACKS["Callbacks\nstreaming events"]
+  CALLBACKS --> DISPLAY["Terminal Display\nskin engine + curses"]
+  DISPLAY --> USER
+</pre>
+</div>
+
+<!-- NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong><code>hermes chat -m gpt-4</code></strong> command as it flows through the entire hermes_cli pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Shell invocation</strong> &mdash; The user runs <code>hermes chat -m gpt-4</code>. Python&rsquo;s <code>__main__</code> hook calls <code>main.py:main()</code>.</li>
+<li><strong>Profile pre-parse</strong> &mdash; Before full argument parsing, <code>profiles.py</code> scans <code>sys.argv</code> for <code>--profile</code> to determine which config directory to load. This two-pass design lets profile selection happen before any config-dependent defaults are resolved.</li>
+<li><strong>Argparse dispatch</strong> &mdash; <code>main.py</code> builds the full <code>ArgumentParser</code> with 150+ sub-commands registered from <code>commands.py:CommandDef</code> instances. The <code>chat</code> sub-command is matched and its handler <code>cmd_chat()</code> is selected.</li>
+<li><strong>Config loading</strong> &mdash; <code>config.py</code> reads <code>~/.hermes/config.yaml</code> (or the profile-specific path), merges environment overrides, and performs managed-mode detection by checking for a <code>.hermes-managed</code> sentinel file. Managed mode restricts which providers and settings are available.</li>
+<li><strong>Auth resolution</strong> &mdash; <code>auth.py</code> determines the authentication strategy for the requested provider. For OpenAI, it checks (in order): environment variable <code>OPENAI_API_KEY</code>, credential pool file with file-locking, stored OAuth token, and finally falls back to an interactive OAuth device-code flow that prints a URL and waits for the user to authorize.</li>
+<li><strong>Provider resolution</strong> &mdash; <code>providers.py</code> looks up the provider metadata for <code>gpt-4</code>, while <code>runtime_provider.py</code> applies the runtime priority chain: explicit <code>-m</code> flag &gt; profile default &gt; config default &gt; environment variable &gt; built-in fallback.</li>
+<li><strong>Model normalization</strong> &mdash; <code>model_normalize.py</code> canonicalizes <code>gpt-4</code> into its full API identifier (e.g., <code>gpt-4-0613</code>), resolving aliases and version shortcuts. <code>model_switch.py</code> prepares the hot-swap machinery so the user can change models mid-session with <code>/model</code>.</li>
+<li><strong>Agent initialization</strong> &mdash; The CLI constructs the agent core with the resolved provider, model, and credential, then attaches <code>callbacks.py</code> event handlers for streaming token display, tool-call rendering, and error surfacing.</li>
+<li><strong>Interactive loop</strong> &mdash; <code>curses_ui.py</code> (with graceful fallback to plain <code>input()</code> on dumb terminals) presents the prompt. The <code>skin_engine.py</code> applies the active theme&rsquo;s color palette to all output elements.</li>
+<li><strong>Slash-command dispatch</strong> &mdash; If the user types <code>/skills</code>, the input is intercepted by the command registry before reaching the agent. <code>skills_hub.py</code> queries the Skills Hub API, presents results via <code>curses_ui.py</code> multi-select, and installs chosen skills.</li>
+<li><strong>Session teardown</strong> &mdash; On <code>/exit</code> or Ctrl-C, the CLI gracefully shuts down the agent, flushes any pending gateway connections (<code>gateway.py</code>), and writes session history to disk.</li>
+</ol>
+</div>
+
+<!-- DESIGN DECISIONS -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr>
+    <td>Command registry pattern</td>
+    <td><code>CommandDef</code> dataclass instances registered in a flat list</td>
+    <td>Decorator-based auto-discovery; class-based command hierarchy</td>
+    <td>A flat list of dataclasses makes commands trivially introspectable at startup (for help generation, fuzzy matching, and managed-mode filtering) without import-time side effects. Decorators would scatter registration across dozens of files, making it hard to enumerate all commands without importing everything.</td>
+  </tr>
+  <tr>
+    <td>Profile pre-parse (two-pass argv)</td>
+    <td>Scan <code>sys.argv</code> for <code>--profile</code> before building the full parser</td>
+    <td>Single-pass with lazy config; config path as env var only</td>
+    <td>The full argparse tree depends on config values (e.g., default model, available providers), so the config directory must be known before argument defaults are resolved. A two-pass approach keeps the user-facing API clean (<code>--profile</code> works like any other flag) while avoiding circular dependencies.</td>
+  </tr>
+  <tr>
+    <td>Auth store file locking</td>
+    <td><code>fcntl.flock()</code> on the credential pool JSON file</td>
+    <td>SQLite for credentials; in-memory only; OS keychain</td>
+    <td>File locking is zero-dependency and works across all Unix platforms. SQLite adds a dependency and complicates atomic reads for a file that changes rarely. OS keychains are platform-specific and don&rsquo;t support the pool-rotation pattern (multiple valid keys for the same provider, round-robined to distribute rate limits).</td>
+  </tr>
+  <tr>
+    <td>Managed-mode detection</td>
+    <td>Sentinel file <code>.hermes-managed</code> in the config directory</td>
+    <td>Config key in YAML; environment variable; server-side flag</td>
+    <td>A sentinel file can be dropped by an MDM or provisioning script without modifying the user&rsquo;s config. It&rsquo;s visible in <code>ls</code>, easy to debug, and survives config resets. Environment variables are invisible and easy to override; a YAML key could be accidentally deleted by the user.</td>
+  </tr>
+  <tr>
+    <td>Curses graceful degradation</td>
+    <td>Try <code>curses.wrapper()</code>, catch <code>curses.error</code>, fall back to plain <code>input()</code></td>
+    <td>Always use plain I/O; require curses; use a TUI framework like Textual</td>
+    <td>Many CI <a title="environments — RL Training Environments" href="../environments_doc/index.html">environments</a> and minimal Docker containers lack a proper terminal. Graceful fallback means the same binary works everywhere &mdash; rich UI when available, functional CLI when not &mdash; without requiring users to install a TUI framework or configure <code>TERM</code>.</td>
+  </tr>
+  <tr>
+    <td>Skin engine as data-driven config</td>
+    <td>JSON/YAML theme files mapping semantic tokens to ANSI codes</td>
+    <td>Hardcoded ANSI strings; CSS-like stylesheet; plugin-based themes</td>
+    <td>Data-driven themes can be shipped, shared, and overridden without code changes. Users can create custom skins by copying a JSON file, and managed-mode deployments can enforce a corporate theme by dropping a skin file into the config directory.</td>
+  </tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Provider Resolution Priority Chain</h3>
+<p><strong>The Problem:</strong> When the user requests a model like <code>gpt-4</code>, multiple configuration sources may specify different providers and credentials. The CLI must deterministically resolve which provider endpoint and API key to use, respecting explicit overrides while providing sensible defaults.</p>
+<p><strong>The Approach:</strong> The resolution follows a strict priority chain evaluated top-to-bottom. At each level, if a value is found, it is used and lower levels are skipped. The chain is: (1) explicit CLI flag (<code>-m</code>/<code>--provider</code>), (2) active profile&rsquo;s default, (3) global config default, (4) environment variable (<code>HERMES_PROVIDER</code>), (5) built-in fallback. Each level can specify both the provider and the model independently, so a user can override the model while inheriting the profile&rsquo;s provider.</p>
+<p><strong>Why This Algorithm:</strong> A simple &ldquo;last-write-wins&rdquo; merge would create unpredictable behavior when environment variables and config files interact. The explicit priority chain makes the outcome deterministic and debuggable &mdash; users can run <code>hermes doctor</code> to see exactly which level each setting was resolved from. The time complexity is O(1) per setting (constant number of levels), so it adds zero overhead to startup.</p>
+<pre class="mermaid">
+graph TD
+    INPUT["Model request\n'gpt-4'"] --> CLI_FLAG{"-m flag\nprovided?"}
+    CLI_FLAG -->|Yes| USE_FLAG["Use CLI flag\nprovider + model"]
+    CLI_FLAG -->|No| PROFILE{Profile\ndefault set?}
+    PROFILE -->|Yes| USE_PROFILE["Use profile\ndefault"]
+    PROFILE -->|No| CONFIG{Global config\ndefault set?}
+    CONFIG -->|Yes| USE_CONFIG["Use config\ndefault"]
+    CONFIG -->|No| ENV{ENV var\nHERMES_PROVIDER?}
+    ENV -->|Yes| USE_ENV["Use env var"]
+    ENV -->|No| FALLBACK["Built-in\nfallback provider"]
+    USE_FLAG --> NORMALIZE["model_normalize.py\nCanonicalize name"]
+    USE_PROFILE --> NORMALIZE
+    USE_CONFIG --> NORMALIZE
+    USE_ENV --> NORMALIZE
+    FALLBACK --> NORMALIZE
+    NORMALIZE --> RESOLVE["runtime_provider.py\nBuild API client"]
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> User runs <code>hermes chat -m claude-3</code> with profile &ldquo;work&rdquo; that defaults to <code>gpt-4</code> and a global config that defaults to <code>gpt-3.5-turbo</code>.</p>
+<p><strong>Step 1:</strong> Check CLI flag &mdash; <code>-m claude-3</code> is present. Use it immediately.</p>
+<p><strong>Step 2:</strong> Skip profile default (<code>gpt-4</code>) and global default (<code>gpt-3.5-turbo</code>) &mdash; CLI flag has highest priority.</p>
+<p><strong>Step 3:</strong> <code>model_normalize.py</code> resolves <code>claude-3</code> to <code>claude-3-sonnet-20240229</code> and determines the provider is Anthropic.</p>
+<p><strong>Step 4:</strong> <code>auth.py</code> looks up Anthropic credentials in the priority chain (env var <code>ANTHROPIC_API_KEY</code> &gt; credential pool &gt; OAuth).</p>
+<p><strong>Result:</strong> The session uses <code>claude-3-sonnet-20240229</code> via Anthropic, regardless of profile or config defaults. If the user had omitted <code>-m</code>, the &ldquo;work&rdquo; profile&rsquo;s <code>gpt-4</code> default would have been used instead.</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="what-could-go-wrong">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr>
+    <td>OAuth device-code timeout</td>
+    <td>User doesn&rsquo;t complete browser authorization within the provider&rsquo;s TTL (typically 5&ndash;15 minutes)</td>
+    <td><code>auth.py</code> polls the token endpoint and receives an <code>expired_token</code> error</td>
+    <td>The CLI prints a clear message explaining the timeout, offers to restart the flow, and suggests using an API key instead if repeated failures occur</td>
+  </tr>
+  <tr>
+    <td>Credential pool exhaustion</td>
+    <td>All API keys in the pool have hit their rate limits simultaneously</td>
+    <td><code>auth.py</code> tracks per-key 429 responses and detects when the rotation cycle has no remaining keys</td>
+    <td>Backs off with exponential retry, logs which keys are exhausted and their reset times, and switches to a fallback provider if configured in the profile</td>
+  </tr>
+  <tr>
+    <td>Curses initialization failure</td>
+    <td>Running in a non-interactive terminal (CI, Docker without TTY, piped input)</td>
+    <td><code>curses_ui.py</code> catches <code>curses.error</code> and <code>_curses.error</code> during <code>wrapper()</code> initialization</td>
+    <td>Silently falls back to plain <code>input()</code>/<code>print()</code> I/O. All features remain functional; only multi-select pickers and colored output are lost</td>
+  </tr>
+  <tr>
+    <td>Config file corruption</td>
+    <td>Interrupted write during config save, manual editing errors, or encoding issues</td>
+    <td><code>config.py</code> catches <code>yaml.YAMLError</code> and validates the parsed structure against a schema</td>
+    <td><code>backup.py</code> maintains rotating backups of the config. On corruption, the CLI offers to restore from the most recent valid backup or re-run the setup wizard</td>
+  </tr>
+  <tr>
+    <td>Gateway connection loss</td>
+    <td>Network interruption, gateway process crash, or port conflict</td>
+    <td><code>gateway.py</code> monitors the health-check endpoint and detects socket errors</td>
+    <td>Attempts reconnection with backoff. If the gateway process crashed, offers to restart it. Queued requests are retried after reconnection</td>
+  </tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Startup to first prompt:</strong> Profile pre-parse + config load + auth check &mdash; target &lt;500ms. The two-pass argv scan is O(n) on argument count (negligible). Config loading is I/O-bound on a single YAML file (~1ms). Auth is the bottleneck only when an OAuth flow is triggered (user-interactive, not counted).</li>
+  <li><strong>Command dispatch:</strong> Slash-command lookup in the <code>CommandDef</code> registry &mdash; O(n) linear scan over ~150 entries with short-circuit on prefix match. At 150 entries this is sub-microsecond; a hash map would save nothing and lose fuzzy-match capability.</li>
+  <li><strong>Streaming token rendering:</strong> <code>callbacks.py</code> receives tokens one at a time and writes to stdout. The skin engine applies ANSI codes per-token &mdash; O(1) per token. Buffering is left to the terminal emulator.</li>
+</ul>
+<h3>Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> The command registry, provider metadata, and model catalog are loaded once at startup (~2MB). Conversation history is held in memory for the session duration; long sessions with tool calls can grow to tens of MB. No explicit caching layer &mdash; the agent core owns response caching.</li>
+  <li><strong>I/O:</strong> Config files are read once at startup and written only on explicit save. The credential pool file is opened with <code>flock()</code> for each auth check (~1 read per command). Gateway health checks are periodic (every 30s) and use a single HTTP GET.</li>
+  <li><strong>Network:</strong> Provider API calls are pass-through to the agent core. The CLI itself makes network calls only for OAuth flows (token endpoint polling) and Skills Hub queries (on-demand).</li>
+</ul>
+</div>
+
+<!-- KEY COMPONENTS TABLE -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <tr><th>File</th><th>Lines</th><th>Role</th><th>Key Responsibilities</th></tr>
+  <tr><td><code>main.py</code></td><td>~4500</td><td>Entry point</td><td>Argparse setup, <code>cmd_*</code> handler dispatch, profile pre-parse, startup orchestration</td></tr>
+  <tr><td><code>commands.py</code></td><td>~800</td><td>Command registry</td><td><code>CommandDef</code> dataclass definitions for 150+ slash commands, help text, permission flags</td></tr>
+  <tr><td><code>config.py</code></td><td>~600</td><td>Config loader</td><td>YAML parsing, env-var override merge, managed-mode sentinel detection, schema validation</td></tr>
+  <tr><td><code>auth.py</code></td><td>~3200</td><td>Authentication</td><td>OAuth device-code flow, API key management, credential pool rotation, file locking, token refresh</td></tr>
+  <tr><td><code>setup.py</code></td><td>~700</td><td>Setup wizard</td><td>Interactive first-run configuration, provider selection, API key entry, config file generation</td></tr>
+  <tr><td><code>models.py</code></td><td>~1200</td><td>Model registry</td><td>Known-model catalog, capability metadata, pricing info, context-window limits</td></tr>
+  <tr><td><code>model_switch.py</code></td><td>~400</td><td>Hot-swap</td><td>Mid-session model switching via <code>/model</code> command, session state migration</td></tr>
+  <tr><td><code>model_normalize.py</code></td><td>~350</td><td>Name normalization</td><td>Alias resolution, version suffix handling, canonical API identifier mapping</td></tr>
+  <tr><td><code>providers.py</code></td><td>~900</td><td>Provider metadata</td><td>Static registry of provider endpoints, auth methods, rate limits, feature flags</td></tr>
+  <tr><td><code>runtime_provider.py</code></td><td>~500</td><td>Runtime resolution</td><td>Priority chain evaluation, API client construction, endpoint URL assembly</td></tr>
+  <tr><td><code>curses_ui.py</code></td><td>~600</td><td>Terminal UI</td><td>Curses multi-select picker, scrolling list, graceful fallback to plain I/O</td></tr>
+  <tr><td><code>skin_engine.py</code></td><td>~450</td><td>Theming</td><td>Data-driven ANSI color themes, semantic token mapping, custom skin loading</td></tr>
+  <tr><td><code>skills_hub.py</code></td><td>~500</td><td>Skills discovery</td><td>Skills Hub API client, search/install/update workflows, dependency resolution</td></tr>
+  <tr><td><code>gateway.py</code></td><td>~550</td><td>Gateway CLI</td><td>Gateway process start/stop/restart, health monitoring, port management</td></tr>
+  <tr><td><code>doctor.py</code></td><td>~400</td><td>Diagnostics</td><td>System checks, config validation, auth verification, provider connectivity tests</td></tr>
+</table>
+
+<!-- SUB-MODULE CARDS -->
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>&#128736;&#65039; Core (Entry &amp; Config)</h4>
+    <p>The foundational trio that bootstraps every CLI session &mdash; parsing arguments, loading configuration, and dispatching commands.</p>
+    <ul>
+      <li><code>main.py</code> &mdash; argparse entry, cmd_* handlers</li>
+      <li><code>commands.py</code> &mdash; CommandDef registry</li>
+      <li><code>config.py</code> &mdash; YAML config loader</li>
+      <li><code>profiles.py</code> &mdash; Multi-profile isolation</li>
+      <li><code>setup.py</code> &mdash; Interactive setup wizard</li>
+      <li><code>backup.py</code> &mdash; Config backup/restore</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#128274; Auth &amp; Providers</h4>
+    <p>Handles all credential management and provider endpoint resolution across 100+ services.</p>
+    <ul>
+      <li><code>auth.py</code> &mdash; OAuth, API keys, credential pools</li>
+      <li><code>providers.py</code> &mdash; Provider metadata registry</li>
+      <li><code>runtime_provider.py</code> &mdash; Runtime priority resolution</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#129302; Models</h4>
+    <p>Model catalog, alias resolution, and mid-session model hot-swapping.</p>
+    <ul>
+      <li><code>models.py</code> &mdash; Known-model catalog</li>
+      <li><code>model_switch.py</code> &mdash; Hot-swap machinery</li>
+      <li><code>model_normalize.py</code> &mdash; Name normalization</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#127912; UI/UX</h4>
+    <p>Terminal rendering, interactive pickers, theming, and event-driven output.</p>
+    <ul>
+      <li><code>curses_ui.py</code> &mdash; Curses multi-select</li>
+      <li><code>skin_engine.py</code> &mdash; Data-driven theming</li>
+      <li><code>callbacks.py</code> &mdash; Agent event callbacks</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#127760; Gateway &amp; Services</h4>
+    <p>External service integration &mdash; gateway lifecycle, skills marketplace, and diagnostic tooling.</p>
+    <ul>
+      <li><code>gateway.py</code> &mdash; Gateway lifecycle CLI</li>
+      <li><code>skills_hub.py</code> &mdash; Skills Hub integration</li>
+      <li><code>skills_config.py</code> &mdash; Skills configuration</li>
+      <li><code>doctor.py</code> &mdash; System diagnostics</li>
+    </ul>
+  </div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for hermes_cli</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>hermes_cli/
+├── main.py                    ← Entry point: argparse, cmd_* dispatch (~4500 LOC)
+├── commands.py                ← CommandDef registry for 150+ slash commands
+├── config.py                  ← YAML config loader, managed-mode detection
+├── profiles.py                ← Multi-profile isolation and switching
+├── setup.py                   ← Interactive first-run setup wizard
+├── backup.py                  ← Config backup and restore utilities
+├── auth.py                    ← Multi-provider auth, OAuth, credential pools (~3200 LOC)
+├── providers.py               ← Static provider metadata registry
+├── runtime_provider.py        ← Runtime provider priority chain resolution
+├── models.py                  ← Known-model catalog with capabilities/pricing
+├── model_switch.py            ← Mid-session model hot-swap
+├── model_normalize.py         ← Model name alias resolution
+├── curses_ui.py               ← Curses multi-select with graceful fallback
+├── skin_engine.py             ← Data-driven ANSI theming engine
+├── callbacks.py               ← Agent event callback handlers
+├── gateway.py                 ← Gateway process lifecycle CLI
+├── skills_hub.py              ← Skills Hub API client and workflows
+├── skills_config.py           ← Skills configuration management
+├── doctor.py                  ← Diagnostic checks and system validation
+├── constants.py               ← Shared constants and defaults
+├── exceptions.py              ← Module-specific exception hierarchy
+├── utils.py                   ← Shared utility functions
+├── types.py                   ← Type definitions and protocols
+└── __init__.py                ← Package init, version export
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>hermes_cli Wiki &mdash; Generated from source analysis on 2026-04-15 &mdash; rev <code>677f1227</code></p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

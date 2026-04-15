@@ -1,0 +1,9 @@
+{
+  "source_sha": "677f1227",
+  "source_path": "/mnt/disk1/zy/internal_wiki/.git-clones/hermes-agent",
+  "source_file_count": 870,
+  "cache_date": "2026-04-15T11:17:00Z",
+  "depth": 3,
+  "language": "python",
+  "modules": ["agent", "gateway", "hermes_cli", "tools", "plugins", "environments", "cron", "acp_adapter"]
+}

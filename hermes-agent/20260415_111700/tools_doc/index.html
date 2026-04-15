@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/tools">
+<meta name="wiki-source-rev" content="677f1227">
+<title>tools — Agent Tool Implementations</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!-- 3-level breadcrumb -->
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>tools</span></nav>
+
+<main id="main">
+<h1>tools &mdash; <a title="agent — Core Agent Engine" href="../agent_doc/index.html">Agent</a> Tool Implementations</h1>
+<div class="hero">
+  <p class="subtitle">Agent Tool Implementations</p>
+  <p>Central orchestration hub for all agent capabilities — 40+ production tools with pluggable execution backends, dynamic MCP integration, multi-layer security, and a thread-safe registry powering terminal execution, browser automation, file operations, web search, code sandboxing, delegation, memory, skills, vision, TTS/STT, and more.</p>
+</div>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>Without the <code>tools/</code> module, every component in Hermes Agent — the CLI, the <a title="gateway — Multi-Platform Messaging Gateway" href="../gateway_doc/index.html">gateway</a>, the batch runner — would need to independently implement command execution, file I/O, web scraping, and dozens of other capabilities. Each would maintain its own subprocess management, its own security checks, its own error handling. The result would be a fragmented, inconsistent, and deeply unsafe system where adding a single new capability means touching every integration point.</p>
+<p>The tools module solves this by providing a <strong>single, unified registry</strong> where every agent capability is declared with its schema, handler, security gates, and resource limits. A thread-safe dispatch mechanism routes LLM tool calls to the correct handler, manages async/sync bridging, enforces per-tool and per-turn output budgets to prevent context-window overflow, and applies security policies (write deny lists, dangerous command approval, skill scanning) before any side-effecting operation executes. The pluggable environment system means the same <code>terminal()</code> call works identically whether the agent is running locally, inside Docker, over SSH, on Modal cloud, in a Singularity container, or through a Daytona workspace — all without the LLM or higher layers knowing the difference.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the tools module as a <strong>hospital switchboard</strong>. When a doctor (the LLM) needs an X-ray, a blood test, or a prescription filled, they don't walk to each department — they call the switchboard. The switchboard knows which department handles each request, checks that the doctor has authorization, routes the call to the right specialist, and delivers results back in a standard format. If the radiology department moves to a new building (a Docker container instead of localhost), the switchboard updates the routing — the doctor's workflow doesn't change. And if someone tries to order a dangerous procedure, the switchboard flags it for approval before it goes through.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">70</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">40+</div><div class="label">Tools</div></div>
+  <div class="stat-box"><div class="num">~37K</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="label">Backends</div></div>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">&#128309; 40+ Tools</span>
+  <span class="badge green">&#128994; 6 Backends</span>
+  <span class="badge yellow">&#128993; MCP Support</span>
+  <span class="badge red">&#128308; Security First</span>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- KEY COMPONENTS TABLE -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <tr><th>File</th><th>Purpose</th><th>Key Details</th></tr>
+  <tr><td><code>registry.py</code></td><td>Thread-safe tool registry &amp; dispatch hub</td><td>RWLock-protected <code>_tools</code> dict; register/deregister/dispatch; snapshot isolation for readers during mutations</td></tr>
+  <tr><td><code>terminal_tool.py</code></td><td>Terminal command execution</td><td>Routes commands through environment backends; CWD tracking; timeout enforcement; interrupt-safe polling</td></tr>
+  <tr><td><code>file_tools.py</code></td><td>File read/search/stat operations</td><td>Blocked device paths; large-file hints; offset+limit pagination; 100K char default cap</td></tr>
+  <tr><td><code>file_operations.py</code></td><td>File write/create/patch/move</td><td>Write deny list for sensitive paths (~/.ssh, /etc/sudoers); <code>ShellFileOperations</code> unified API</td></tr>
+  <tr><td><code>patch_parser.py</code></td><td>Unified diff &amp; search-replace patch parser</td><td>Parses both unified diff format and search/replace blocks; applies patches atomically</td></tr>
+  <tr><td><code>browser_tool.py</code></td><td>Browser automation via Playwright</td><td>Headless Chrome; screenshot capture; DOM interaction; configurable viewport</td></tr>
+  <tr><td><code>web_tools.py</code></td><td>Web search &amp; content extraction</td><td>Pluggable backends: Exa, Firecrawl, Tavily, Parallel; LLM-based intelligent extraction</td></tr>
+  <tr><td><code>code_execution_tool.py</code></td><td>Sandboxed code execution</td><td>Isolated Python/script execution; configurable timeout (default 300s); max 50 tool calls within sandbox</td></tr>
+  <tr><td><code>delegate_tool.py</code></td><td>Sub-agent delegation</td><td>Spawns child <code>AIAgent</code> instances with restricted toolsets; max 3 concurrent children</td></tr>
+  <tr><td><code>skill_manager_tool.py</code></td><td>Skill CRUD operations</td><td>Create, read, update, delete skills in <code>~/.hermes/skills/</code>; format validation</td></tr>
+  <tr><td><code>skills_hub.py</code></td><td>Community skill registry</td><td>Adapter pattern via <code>SkillSource</code> ABC; GitHub, bundled, and hub sources; quarantine + audit</td></tr>
+  <tr><td><code>mcp_tool.py</code></td><td>MCP server integration</td><td>Dynamic tool discovery via <code>list_changed</code> notifications; stdio/HTTP transport; OAuth PKCE flow</td></tr>
+  <tr><td><code>approval.py</code></td><td>Dangerous command approval</td><td>Regex-based pattern matching; LLM auto-approval for low-risk; per-session allowlist</td></tr>
+  <tr><td><code>checkpoint_manager.py</code></td><td>Filesystem snapshots via shadow git</td><td>Transparent git-based checkpoints for rollback; configurable timeout [10–60s]</td></tr>
+  <tr><td><code>tool_result_storage.py</code></td><td>3-layer result persistence</td><td>Per-tool threshold → per-result persistence → per-turn budget (200K chars); preview + disk spill</td></tr>
+</table>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Core["Core Infrastructure"]
+    REG["registry.py\nTool Registry"]
+    APPROV["approval.py\nSecurity Gate"]
+    STORAGE["tool_result_storage.py\nResult Persistence"]
+    BUDGET["budget_config.py\nResource Limits"]
+  end
+
+  subgraph Terminal["Terminal &amp; Environments"]
+    TERM["terminal_tool.py"]
+    LOCAL["LocalEnvironment"]
+    DOCKER["DockerEnvironment"]
+    SSH_E["SSHEnvironment"]
+    MODAL["ModalEnvironment"]
+    DAYTONA["DaytonaEnvironment"]
+    SING["SingularityEnvironment"]
+  end
+
+  subgraph FileOps["File Operations"]
+    FTOOLS["file_tools.py\nRead / Search"]
+    FOPS["file_operations.py\nWrite / Patch"]
+    PATCH["patch_parser.py"]
+  end
+
+  subgraph Web["Web &amp; Browser"]
+    BROWSER["browser_tool.py"]
+    WEBTOOLS["web_tools.py"]
+  end
+
+  subgraph Skills["Skills &amp; Memory"]
+    SKILLMGR["skill_manager_tool.py"]
+    HUB["skills_hub.py"]
+    GUARD["skills_guard.py"]
+    MEMORY["memory_tool.py"]
+  end
+
+  subgraph Integration["External Integration"]
+    MCP["mcp_tool.py\nMCP Protocol"]
+    DELEGATE["delegate_tool.py\nSub-Agents"]
+    CODE["code_execution_tool.py\nSandbox"]
+  end
+
+  REG --> TERM
+  REG --> FTOOLS
+  REG --> BROWSER
+  REG --> SKILLMGR
+  REG --> MCP
+  REG --> DELEGATE
+  REG --> CODE
+  APPROV --> TERM
+  APPROV --> FOPS
+  TERM --> LOCAL
+  TERM --> DOCKER
+  TERM --> SSH_E
+  TERM --> MODAL
+  TERM --> DAYTONA
+  TERM --> SING
+  FTOOLS --> FOPS
+  FOPS --> PATCH
+  SKILLMGR --> HUB
+  HUB --> GUARD
+  STORAGE --> BUDGET
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  LLM["LLM Tool Call\n{name, args}"]
+  DISPATCH["registry.dispatch()"]
+  CHECK["check_fn\nToolset Available?"]
+  APPROVE["approval.py\nDangerous?"]
+  HANDLER["Tool Handler\nexecute()"]
+  ASYNC{"Async\nHandler?"}
+  BRIDGE["_run_async()\nCoroutine Bridge"]
+  RESULT["JSON Result String"]
+  PERSIST{"Size >\nThreshold?"}
+  DISK["Persist to Disk\nReturn Preview"]
+  INLINE["Return Inline"]
+  TURNBUDGET{"Turn Budget\nExceeded?"}
+  SPILL["Spill Largest\nto Disk"]
+  FINAL["Final Response\nto LLM"]
+
+  LLM --> DISPATCH
+  DISPATCH --> CHECK
+  CHECK -->|Pass| APPROVE
+  CHECK -->|Fail| RESULT
+  APPROVE -->|Approved| HANDLER
+  APPROVE -->|Blocked| RESULT
+  HANDLER --> ASYNC
+  ASYNC -->|Yes| BRIDGE --> RESULT
+  ASYNC -->|No| RESULT
+  RESULT --> PERSIST
+  PERSIST -->|Yes| DISK --> TURNBUDGET
+  PERSIST -->|No| INLINE --> TURNBUDGET
+  TURNBUDGET -->|Yes| SPILL --> FINAL
+  TURNBUDGET -->|No| FINAL
+</pre>
+</div>
+
+<!-- END-TO-END NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong><code>terminal("ls -la /workspace")</code> command</strong> as it flows through the entire tools pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>LLM Generates Tool Call</strong> — The model emits a function call: <code>{"name": "terminal", "args": {"command": "ls -la /workspace"}}</code>. The agent runtime receives this as a structured tool-use block.</li>
+<li><strong>Registry Dispatch</strong> — <code>model_tools.py</code> calls <code>registry.dispatch("terminal", args)</code>. The registry looks up the <code>ToolEntry</code> for "terminal", verifying the toolset's <code>check_fn</code> returns <code>true</code> (terminal is always available).</li>
+<li><strong>Approval Check</strong> — <code>approval.py</code> scans the command against <code>DANGEROUS_PATTERNS</code> (regex list for <code>rm -rf /</code>, <code>chmod 777</code>, <code>sudo</code>, etc.). <code>ls -la</code> matches no patterns, so execution proceeds without prompting.</li>
+<li><strong>Environment Resolution</strong> — <code>terminal_tool.py</code> resolves the execution backend: check the <code>env</code> parameter, then <code>TERMINAL_ENV</code> env var, then <code>config.yaml</code>, then fall back to <code>"local"</code>. For this walkthrough, we get <code>LocalEnvironment</code>.</li>
+<li><strong>Session Snapshot Sourcing</strong> — <code>BaseEnvironment._wrap_command()</code> prepends the session snapshot (captured at <code>init_session()</code>) — sourcing env vars, functions, and aliases. It then <code>cd</code>s to the tracked CWD.</li>
+<li><strong>Subprocess Spawn</strong> — <code>LocalEnvironment._run_bash()</code> spawns <code>subprocess.Popen(["bash", "-c", wrapped_cmd])</code> with stdout/stderr piped. This is the spawn-per-call pattern — a fresh bash for every command.</li>
+<li><strong>Interrupt-Safe Polling</strong> — <code>_wait_for_process()</code> polls every 0.5 seconds, checking both process completion (<code>proc.poll()</code>) and user interrupt (<code>is_interrupted()</code>). If the 600-second timeout hits, it sends SIGTERM → 5s grace → SIGKILL.</li>
+<li><strong>Output Parsing</strong> — The wrapper emits CWD markers (<code>__HERMES_CWD_{session_id}__</code>) and exit code markers. The parser extracts the actual command output, the new CWD, and the return code.</li>
+<li><strong>CWD Persistence</strong> — The new CWD is written to <code>/tmp/hermes-cwd-{session_id}.txt</code> so the next command starts in the right directory.</li>
+<li><strong>Result Sizing</strong> — <code>tool_result_storage.py</code> checks the output size against the per-tool threshold (terminal defaults to 100K chars). Our <code>ls -la</code> output is small, so it returns inline.</li>
+<li><strong>JSON Serialization</strong> — The handler returns <code>{"returncode": 0, "stdout": "total 42\ndrwxr-xr-x ...", "cwd": "/workspace"}</code> as a JSON string.</li>
+<li><strong>Response to LLM</strong> — The serialized result is sent back to the model as a tool-result content block, completing the round-trip in typically &lt;100ms for local commands.</li>
+</ol>
+</div>
+
+<!-- DESIGN DECISIONS -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr>
+    <td>Command execution model</td>
+    <td>Spawn-per-call: fresh bash process per command</td>
+    <td>Persistent shell session (PTY), shared subprocess</td>
+    <td>Eliminates shell state pollution between commands. Session snapshot captures env vars/functions cheaply. Remote backends (Docker, SSH, Modal) naturally align with stateless calls. Easier to enforce timeouts and interrupts per-call.</td>
+  </tr>
+  <tr>
+    <td>Result size management</td>
+    <td>3-layer defense: per-tool threshold, per-result persistence, per-turn aggregate budget</td>
+    <td>Single global output cap, no persistence</td>
+    <td>Per-tool allows search_files (inherently huge) to have a higher cap than read_file. Per-turn budget catches cascading medium-sized results. Preview (1.5 KB) balances readability + token efficiency. Model can always <code>read_file()</code> persisted content — no information loss.</td>
+  </tr>
+  <tr>
+    <td>Tool discovery mechanism</td>
+    <td>Thread-safe registry with dynamic register/deregister</td>
+    <td>Hardcoded tool list, config-file enumeration</td>
+    <td>MCP servers need to add/remove tools at runtime without agent restart. Tools scattered across 50+ modules — centralized registry avoids maintaining parallel lists. RWLock + snapshots ensure readers see stable state during concurrent mutations.</td>
+  </tr>
+  <tr>
+    <td>Skill installation security</td>
+    <td>Regex-based static analysis with trust-level-aware policy</td>
+    <td>Full sandboxed execution, no scanning</td>
+    <td>Externally-sourced code is inherently risky (data exfiltration, persistence, destruction). Regex patterns catch obvious red flags without requiring expensive sandboxed execution. Trust levels (builtin &gt; trusted &gt; community) reduce false positives.</td>
+  </tr>
+  <tr>
+    <td>Skill sync strategy</td>
+    <td>Manifest-based: track origin hash, only update if user hasn't customized</td>
+    <td>Overwrite on every update, git-merge based sync</td>
+    <td>User customizations must not be lost on agent update. Manifest detects modifications via hash mismatch. Respects user deletions (won't re-add deleted skills). Supports clean v1→v2 format migration.</td>
+  </tr>
+  <tr>
+    <td>Environment abstraction</td>
+    <td>Polymorphism via <code>BaseEnvironment</code> with <code>_run_bash()</code> override</td>
+    <td>Strategy pattern, configuration-driven dispatch</td>
+    <td>All 6 backends share snapshot/CWD/timeout logic. Each subclass overrides only the backend-specific <code>_run_bash()</code> method. Adding a new backend requires implementing a single method — no changes to the rest of the pipeline.</td>
+  </tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Tool Approval Flow &amp; Security Pipeline</h3>
+<p><strong>The Problem:</strong> An autonomous AI agent that can execute arbitrary shell commands is inherently dangerous. It could <code>rm -rf /</code>, exfiltrate credentials via <code>curl</code>, or escalate privileges with <code>sudo</code>. The system needs to detect dangerous operations and gate them behind approval — without blocking legitimate work or creating excessive friction.</p>
+<p><strong>The Approach:</strong> A multi-stage security pipeline evaluates every side-effecting operation. First, regex-based pattern matching scans commands against a curated list of dangerous patterns (recursive deletion, world-writable permissions, credential access). If a match is found, the system attempts LLM-based auto-approval: a cheap model evaluates whether the command is actually low-risk in context. If auto-approval fails, the user is prompted interactively (CLI) or the command is logged and rejected (gateway). Approved commands are added to a per-session allowlist so repeated similar operations don't trigger re-approval. For file writes, a separate deny list blocks writes to sensitive paths (<code>~/.ssh/</code>, <code>/etc/sudoers</code>, <code>~/.hermes/.env</code>) unconditionally.</p>
+<p><strong>Why This Algorithm:</strong> Pure regex matching would generate too many false positives (blocking harmless <code>rm</code> on temp files). Pure LLM-based analysis would be too slow and expensive for every command. The layered approach — fast regex filter → smart LLM analysis → user approval fallback — balances security, speed, and usability. Per-session allowlists prevent approval fatigue during iterative development.</p>
+<pre class="mermaid">
+graph TD
+    CMD["Command Input"]
+    REGEX{"Regex Match\nDANGEROUS_PATTERNS?"}
+    SAFE["Execute Immediately"]
+    WDENY{"Write Deny\nList Check?"}
+    BLOCK["Block: Protected Path"]
+    AUTO{"LLM Auto-Approve\nLow-risk in context?"}
+    ALLOW["Add to Session Allowlist"]
+    PROMPT{"User Approval\nCLI / Gateway?"}
+    EXEC["Execute Command"]
+    REJECT["Reject + Log"]
+
+    CMD --> WDENY
+    WDENY -->|"Denied Path"| BLOCK
+    WDENY -->|"Allowed Path"| REGEX
+    REGEX -->|"No Match"| SAFE
+    REGEX -->|"Match Found"| AUTO
+    AUTO -->|"Low Risk"| ALLOW --> EXEC
+    AUTO -->|"High Risk"| PROMPT
+    PROMPT -->|"Approved"| ALLOW
+    PROMPT -->|"Denied"| REJECT
+    SAFE --> EXEC
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> Command = <code>rm -rf /tmp/hermes-build-cache/*</code></p>
+<p><strong>Step 1 (Write Deny):</strong> Path <code>/tmp/hermes-build-cache/</code> is not in the deny list — proceed.</p>
+<p><strong>Step 2 (Regex):</strong> Pattern <code>\brm\s+(-[^\s]*\s+)*\/</code> matches because <code>rm -rf /</code> prefix is detected. Flag as dangerous.</p>
+<p><strong>Step 3 (Auto-Approve):</strong> LLM evaluates context: "Deleting a build cache directory under /tmp, not system files." Verdict: <em>low risk</em>. Auto-approved.</p>
+<p><strong>Step 4 (Allowlist):</strong> Command pattern added to session allowlist. Future <code>rm -rf /tmp/hermes-*</code> commands skip approval entirely.</p>
+<p><strong>Result:</strong> Command executes. If it had been <code>rm -rf /etc/*</code>, the LLM would have flagged it as high-risk, prompting the user. A naive regex-only system would have blocked the harmless cache cleanup.</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="what-could-go-wrong">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr>
+    <td>Context window overflow</td>
+    <td>Tool returns massive output (e.g., <code>find /</code> or <code>cat</code> on a large file)</td>
+    <td>Per-tool threshold check + per-turn aggregate budget monitor</td>
+    <td>3-layer persistence: large outputs spill to disk with a 1.5 KB preview. Model can <code>read_file()</code> the persisted content. Turn budget catches cascading medium results.</td>
+  </tr>
+  <tr>
+    <td>Command hangs indefinitely</td>
+    <td>Process reads from stdin, waits on network, or enters infinite loop</td>
+    <td><code>_wait_for_process()</code> polls every 0.5s with hard timeout (default 600s)</td>
+    <td>SIGTERM → 5-second grace period → SIGKILL. Blocked device paths (<code>/dev/stdin</code>, <code>/dev/tty</code>) are pre-emptively denied.</td>
+  </tr>
+  <tr>
+    <td>MCP server connection failure</td>
+    <td>MCP server process crashes, network timeout, or misconfigured transport</td>
+    <td>Exponential backoff with up to 5 retries; connection error exceptions</td>
+    <td>Graceful degradation: MCP toolset becomes unavailable but all built-in tools continue working. Error returned to model so it can adapt.</td>
+  </tr>
+  <tr>
+    <td>Credential exfiltration attempt</td>
+    <td>Agent tries to <code>curl</code> sensitive files or write to <code>~/.ssh/authorized_keys</code></td>
+    <td>Write deny list checks path prefixes (<code>~/.ssh/</code>, <code>~/.aws/</code>, <code>~/.docker/</code>); dangerous command regex</td>
+    <td>Operation blocked before execution with clear error message. Approval system catches <code>curl</code>-based exfiltration patterns.</td>
+  </tr>
+  <tr>
+    <td>OAuth token expiration</td>
+    <td>Managed gateway or MCP OAuth token expires mid-session</td>
+    <td><code>read_nous_access_token()</code> checks expiry with 120s skew</td>
+    <td>Automatic refresh via <code>hermes_cli.auth</code>; fall back to cached token; if both fail, OAuth-dependent tools degrade gracefully.</td>
+  </tr>
+  <tr>
+    <td>Sandbox subprocess timeout</td>
+    <td>Code execution tool runs a script that exceeds the 300s timeout</td>
+    <td>Timeout enforcement in <code>code_execution_tool.py</code> + environment-level <code>_wait_for_process</code></td>
+    <td>Subprocess killed; error result returned to model with timeout message. Max tool-call limit (50) prevents runaway tool loops within sandbox.</td>
+  </tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Registry Dispatch:</strong> O(1) dict lookup per tool call — the critical path for every agent action. RWLock ensures readers never block each other; writes (MCP tool registration) acquire exclusive lock briefly.</li>
+  <li><strong>Session Snapshot Sourcing:</strong> Captured once at <code>init_session()</code>, sourced before each command via <code>_wrap_command()</code>. Avoids <code>bash -l</code> overhead (~200ms per call). Snapshot is typically &lt;5 KB of env vars + function definitions.</li>
+  <li><strong>Result Persistence Check:</strong> O(1) size comparison per tool result. The 3-layer budget enforcement sorts results by size (O(n log n) for n results per turn) but n is typically &lt;10.</li>
+  <li><strong>Approval Regex Scan:</strong> ~15 regex patterns evaluated per command — typically completes in &lt;1ms. Compiled regex objects are cached at module import.</li>
+</ul>
+<h3>Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> Registry holds ~40 <code>ToolEntry</code> objects in-memory (~50 KB). MCP tools are added dynamically but follow the same lightweight pattern. Environment objects are per-session singletons. Lazy imports (TTS, voice, browser) avoid loading heavy libraries until first use.</li>
+  <li><strong>I/O:</strong> Local commands spawn subprocesses (fork cost ~1-5ms). Docker/SSH/Modal commands add network round-trip (~10-100ms). Result persistence writes to <code>/tmp/hermes-results/</code> only when thresholds are exceeded. Checkpoint manager does git operations with configurable timeout [10-60s].</li>
+  <li><strong>Concurrency:</strong> Registry supports concurrent reads via RWLock snapshots. Delegate tool caps concurrent sub-agents at 3 (configurable). Gateway sessions maintain isolated approval state via <code>session_context</code> context vars.</li>
+</ul>
+</div>
+
+<!-- SUB-MODULE CARDS BY CATEGORY -->
+<h2 id="sub-modules">Sub-Modules</h2>
+
+<h3 id="cat-terminal">Terminal &amp; <a title="environments — RL Training Environments" href="../environments_doc/index.html">Environments</a></h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>terminal_tool.py</h4>
+    <p>Primary command execution interface for the agent. Routes commands through the configured environment backend.</p>
+    <ul><li>CWD tracking via markers</li><li>Timeout enforcement (default 600s)</li><li>Disk usage warnings</li><li>Interrupt-safe polling</li></ul>
+  </div>
+  <div class="card">
+    <h4>environments/</h4>
+    <p>Six pluggable execution backends behind the <code>BaseEnvironment</code> abstraction.</p>
+    <ul><li><code>local.py</code> — subprocess.Popen</li><li><code>docker.py</code> — docker exec</li><li><code>ssh.py</code> — remote SSH</li><li><code>modal.py</code> — Modal cloud</li><li><code>daytona.py</code> — HTTP API</li><li><code>singularity.py</code> — HPC containers</li></ul>
+  </div>
+</div>
+
+<h3 id="cat-file">File Operations</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>file_tools.py</h4>
+    <p>Read-side file operations: read_file, search_files, list_directory, file_stat.</p>
+    <ul><li>Blocked device path protection</li><li>Large file hints (&gt;512 KB)</li><li>Offset + limit pagination</li></ul>
+  </div>
+  <div class="card">
+    <h4>file_operations.py</h4>
+    <p>Write-side operations: create, write, move, delete files via <code>ShellFileOperations</code>.</p>
+    <ul><li>Write deny list for sensitive paths</li><li>Prefix-walk directory escape detection</li><li>Unified API across all backends</li></ul>
+  </div>
+  <div class="card">
+    <h4>patch_parser.py</h4>
+    <p>Parses unified diffs and search-replace blocks for atomic file patching.</p>
+    <ul><li>Supports both diff formats</li><li>Atomic apply-or-fail semantics</li></ul>
+  </div>
+</div>
+
+<h3 id="cat-web">Browser &amp; Web</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>browser_tool.py</h4>
+    <p>Headless browser automation via Playwright for web interaction.</p>
+    <ul><li>Screenshot capture</li><li>DOM interaction &amp; element queries</li><li>Configurable viewport</li></ul>
+  </div>
+  <div class="card">
+    <h4>web_tools.py</h4>
+    <p>Web search and content extraction with pluggable backends.</p>
+    <ul><li>Exa, Firecrawl, Tavily, Parallel</li><li>LLM-based intelligent extraction</li><li>Configurable via <code>config.yaml</code></li></ul>
+  </div>
+</div>
+
+<h3 id="cat-skills">Skills &amp; Memory</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>skill_manager_tool.py</h4>
+    <p>CRUD operations for agent skills stored in <code>~/.hermes/skills/</code>.</p>
+    <ul><li>Create / read / update / delete</li><li>Format validation</li></ul>
+  </div>
+  <div class="card">
+    <h4>skills_hub.py &amp; skills_tool.py</h4>
+    <p>Community skill registry with adapter pattern (<code>SkillSource</code> ABC).</p>
+    <ul><li>GitHub, bundled, and hub sources</li><li>Quarantine + audit logging</li><li>Manifest-based sync</li></ul>
+  </div>
+  <div class="card">
+    <h4>skills_guard.py</h4>
+    <p>Trust-level-aware security scanning for skill installation.</p>
+    <ul><li>Regex-based static analysis</li><li>Trust levels: builtin &gt; trusted &gt; community</li><li>Install policy matrix</li></ul>
+  </div>
+  <div class="card">
+    <h4>memory_tool.py</h4>
+    <p>Persistent memory via Markdown files injected into system prompt.</p>
+    <ul><li>Stored in <code>HERMES_HOME/memories/</code></li><li>Auto-loaded at session start</li></ul>
+  </div>
+</div>
+
+<h3 id="cat-code">Code Execution &amp; Delegation</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>code_execution_tool.py</h4>
+    <p>Sandboxed script execution with resource limits.</p>
+    <ul><li>Configurable timeout (default 300s)</li><li>Max 50 tool calls within sandbox</li><li>RPC back to parent for tool dispatch</li></ul>
+  </div>
+  <div class="card">
+    <h4>delegate_tool.py</h4>
+    <p>Spawns child <code>AIAgent</code> instances with restricted toolsets.</p>
+    <ul><li>Max 3 concurrent children</li><li>Isolated context per sub-agent</li><li>Task-specific toolset restriction</li></ul>
+  </div>
+</div>
+
+<h3 id="cat-comm">Communication &amp; Media</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>send_message_tool.py</h4>
+    <p>Agent-to-user messaging for status updates and notifications.</p>
+    <ul><li>Structured message delivery</li></ul>
+  </div>
+  <div class="card">
+    <h4>tts_tool.py &amp; voice_mode.py</h4>
+    <p>Text-to-speech and voice interaction with 6 provider backends.</p>
+    <ul><li>Edge, ElevenLabs, OpenAI, Mistral, MiniMax, NeuTTS</li><li>Lazy imports for headless compatibility</li></ul>
+  </div>
+  <div class="card">
+    <h4>vision_tools.py &amp; image_generation_tool.py</h4>
+    <p>Vision analysis and image generation capabilities.</p>
+    <ul><li>Vision: auxiliary model routing</li><li>Image gen: FAL.ai (FLUX + Clarity Upscaler)</li><li>30s download timeout</li></ul>
+  </div>
+</div>
+
+<h3 id="cat-security">Security &amp; Infrastructure</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>approval.py</h4>
+    <p>Multi-stage dangerous command detection and approval pipeline.</p>
+    <ul><li>Regex pattern matching</li><li>LLM auto-approve for low-risk</li><li>Per-session allowlist</li></ul>
+  </div>
+  <div class="card">
+    <h4>path_security.py &amp; url_safety.py</h4>
+    <p>Path traversal prevention and URL safety validation.</p>
+    <ul><li>Canonical path resolution</li><li>URL scheme validation</li></ul>
+  </div>
+  <div class="card">
+    <h4>checkpoint_manager.py</h4>
+    <p>Transparent filesystem snapshots via shadow git repositories.</p>
+    <ul><li>Configurable timeout [10–60s]</li><li>Rollback support</li></ul>
+  </div>
+  <div class="card">
+    <h4>registry.py &amp; process_registry.py</h4>
+    <p>Thread-safe tool registry and background process tracking.</p>
+    <ul><li>RWLock for concurrent reads</li><li>Snapshot isolation during mutations</li><li>Dynamic MCP tool registration</li></ul>
+  </div>
+</div>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for tools</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>tools/
+├── environments/                  ← Pluggable execution backends
+│   ├── base.py                    ← BaseEnvironment ABC (snapshot, CWD, timeout)
+│   ├── local.py                   ← Local subprocess backend
+│   ├── docker.py                  ← Docker container backend
+│   ├── ssh.py                     ← Remote SSH backend
+│   ├── modal.py                   ← Modal cloud backend
+│   ├── daytona.py                 ← Daytona HTTP API backend
+│   └── singularity.py             ← Singularity/HPC container backend
+├── browser_providers/             ← Browser automation backends
+├── registry.py                    ← Thread-safe tool registry &amp; dispatch
+├── process_registry.py            ← Background process tracking
+├── terminal_tool.py               ← Terminal command execution
+├── file_tools.py                  ← File read / search / stat
+├── file_operations.py             ← File write / create / patch / move
+├── patch_parser.py                ← Unified diff &amp; search-replace parser
+├── browser_tool.py                ← Headless browser automation
+├── web_tools.py                   ← Web search &amp; content extraction
+├── code_execution_tool.py         ← Sandboxed script execution
+├── delegate_tool.py               ← Sub-agent delegation
+├── skill_manager_tool.py          ← Skill CRUD operations
+├── skills_tool.py                 ← Skill discovery &amp; execution
+├── skills_hub.py                  ← Community skill registry (SkillSource)
+├── skills_guard.py                ← Trust-aware security scanning
+├── skills_sync.py                 ← Manifest-based skill sync
+├── mcp_tool.py                    ← MCP server integration
+├── mcp_oauth.py                   ← OAuth PKCE for MCP
+├── memory_tool.py                 ← Persistent memory files
+├── send_message_tool.py           ← Agent-to-user messaging
+├── tts_tool.py                    ← Text-to-speech (6 providers)
+├── voice_mode.py                  ← Voice interaction mode
+├── vision_tools.py                ← Vision model routing
+├── image_generation_tool.py       ← Image generation (FAL.ai)
+├── transcription_tools.py         ← Audio transcription
+├── approval.py                    ← Dangerous command approval
+├── path_security.py               ← Path traversal prevention
+├── tirith_security.py             ← Extended security policies
+├── url_safety.py                  ← URL scheme validation
+├── tool_result_storage.py         ← 3-layer result persistence
+├── budget_config.py               ← Per-tool/turn resource limits
+├── checkpoint_manager.py          ← Shadow git filesystem snapshots
+├── managed_tool_gateway.py        ← Nous hosted tool gateway client
+├── todo_tool.py                   ← Todo/task tracking
+└── auxiliary_client.py            ← Cheap LLM calls for tool support
+</code></pre>
+</details>
+
+<!-- CONFIGURATION REFERENCE -->
+<h2 id="configuration">&#9881;&#65039; Configuration Reference</h2>
+<table>
+  <tr><th>Parameter</th><th>Source</th><th>Default</th><th>Purpose</th></tr>
+  <tr><td><code>TERMINAL_ENV</code></td><td>env var</td><td><code>local</code></td><td>Backend selection: local, docker, modal, ssh, singularity, daytona</td></tr>
+  <tr><td><code>TERMINAL_MAX_FOREGROUND_TIMEOUT</code></td><td>env var</td><td><code>600</code></td><td>Hard cap on foreground command timeout (seconds)</td></tr>
+  <tr><td><code>TERMINAL_DISK_WARNING_GB</code></td><td>env var</td><td><code>500</code></td><td>Disk usage warning threshold in GB</td></tr>
+  <tr><td><code>file_read_max_chars</code></td><td>config.yaml</td><td><code>100000</code></td><td>Max characters per read_file call (~25-35K tokens)</td></tr>
+  <tr><td><code>web.backend</code></td><td>config.yaml</td><td>—</td><td>Web backend: exa, firecrawl, parallel, tavily</td></tr>
+  <tr><td><code>mcp_servers</code></td><td>config.yaml</td><td><code>{}</code></td><td>Dict of MCP server configs (stdio/HTTP, env vars, timeouts, OAuth)</td></tr>
+  <tr><td><code>code_execution.timeout</code></td><td>config.yaml</td><td><code>300</code></td><td>Sandbox script timeout in seconds</td></tr>
+  <tr><td><code>delegation.max_concurrent_children</code></td><td>config.yaml</td><td><code>3</code></td><td>Max parallel sub-agents</td></tr>
+  <tr><td><code>tts.provider</code></td><td>config.yaml</td><td>—</td><td>TTS backend: edge, elevenlabs, openai, mistral, minimax, neutts</td></tr>
+  <tr><td><code>HERMES_CHECKPOINT_TIMEOUT</code></td><td>env var</td><td><code>30</code></td><td>Git subprocess timeout for snapshots (clamped to [10, 60])</td></tr>
+</table>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>tools Wiki &mdash; Generated from source analysis &bull; <code>hermes-agent/tools</code> @ <code>677f1227</code> &bull; 2026-04-15</p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

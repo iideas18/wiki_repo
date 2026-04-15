@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/plugins">
+<meta name="wiki-source-rev" content="677f1227">
+<title>plugins — Plugin System &amp; Memory Backends</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!-- 3-level breadcrumb -->
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>plugins</span></nav>
+
+<main id="main">
+<h1>plugins &mdash; Plugin System &amp; Memory Backends</h1>
+<div class="hero">
+  <p class="subtitle">Plugin System &amp; Memory Backends</p>
+  <p>Dynamic plugin discovery and loading infrastructure for context engines and memory providers. YAML-manifest-driven architecture with 8 hot-swappable memory backends, from local vector stores to cloud APIs.</p>
+</div>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>Without the plugins module, every memory backend would need to be hard-coded into the <a title="agent — Core Agent Engine" href="../agent_doc/index.html">agent</a>&rsquo;s core initialization path. Adding a new memory provider&mdash;say, a knowledge-graph backend or a cloud-hosted vector store&mdash;would require modifying the agent entry point, importing heavyweight SDKs unconditionally, and redeploying the entire system. The plugins module decouples <em>what backends exist</em> from <em>which backend is active</em>. It provides a filesystem-based discovery mechanism that scans for <code>plugin.yaml</code> manifests at startup, presents available options to the CLI without importing anything, and only loads the one backend selected in <code>config.yaml</code>. This lazy-loading architecture means the agent starts quickly even when 8 backends are installed, and users can swap memory strategies&mdash;from Holographic&rsquo;s local embeddings to Honcho&rsquo;s dialectic modeling to Mem0&rsquo;s external service&mdash;with a single config change and zero code modifications. The plugin system also isolates dependency failures: if Honcho&rsquo;s SDK is missing, that provider shows as &ldquo;unavailable&rdquo; but every other backend continues to work. This is essential for a tool that runs across vastly different <a title="environments — RL Training Environments" href="../environments_doc/index.html">environments</a>, from GPU-equipped research servers to lightweight CI containers.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the plugins module as a universal power strip with interchangeable adapters. The agent is the appliance that needs power (memory), and each backend is a different country&rsquo;s plug format. The plugin system is the adapter mechanism: it inspects each adapter&rsquo;s label (the <code>plugin.yaml</code> manifest) to know what&rsquo;s available, but only clicks in the one adapter you&rsquo;ve selected. You can swap adapters without rewiring the appliance, and a broken adapter doesn&rsquo;t prevent the others from working.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">17</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">8</div><div class="label">Backends</div></div>
+  <div class="stat-box"><div class="num">~5K</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">&#128309; Plugin System</span>
+  <span class="badge green">&#128994; 8 Memory Backends</span>
+  <span class="badge yellow">&#128992; YAML Manifest</span>
+  <span class="badge red">&#128308; Hot-Swappable</span>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<p>The plugin system follows a <strong>registry + lazy loading</strong> pattern. At startup, the discovery layer scans the filesystem for <code>plugin.yaml</code> manifests in each backend directory. Only the backend selected in <code>config.yaml</code> is actually imported via Python&rsquo;s <code>importlib</code> machinery. This keeps startup fast and avoids pulling in heavyweight SDK dependencies for unused backends.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Discovery["Discovery Layer"]
+    ConfigYAML["config.yaml<br/>memory.provider = X"] --> Scanner["discover_memory_providers()"]
+    Scanner --> PluginYAML["plugin.yaml<br/>per backend"]
+  end
+  subgraph Loading["Loading Layer"]
+    PluginYAML --> Loader["load_memory_provider(name)"]
+    Loader --> ImportLib["importlib.util<br/>spec_from_file_location()"]
+    ImportLib --> Register["register() pattern<br/>OR subclass detection"]
+  end
+  subgraph Backends["Memory Backends"]
+    Register --> Holo["holographic/<br/>Local Vector Store"]
+    Register --> Honcho["honcho/<br/>Dialectic Modeling"]
+    Register --> Super["supermemory/<br/>Cloud API"]
+    Register --> Others["hindsight / byterover<br/>openviking / mem0 / retaindb"]
+  end
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<p>When the agent needs to store or recall a memory, the request flows through a well-defined chain: from the agent&rsquo;s memory manager, through the plugin loader, into the active backend, and down to the storage layer. Only one backend is active at any time, selected at startup.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  Agent["AIAgent<br/>Initialization"] --> Config["Read config.yaml<br/>memory.provider"]
+  Config --> Discover["discover_memory_providers()<br/>Scan filesystem + plugin.yaml"]
+  Discover --> Check{"Provider<br/>available?"}
+  Check -->|Yes| Load["load_memory_provider(name)<br/>importlib dynamic import"]
+  Check -->|No| Warn["logger.warning()<br/>Provider unavailable"]
+  Load --> Dual{"Detection<br/>mode"}
+  Dual -->|register()| Collector["_ProviderCollector<br/>captures instance"]
+  Dual -->|subclass| Inspect["Find MemoryProvider<br/>subclass in module"]
+  Collector --> Instance["MemoryProvider<br/>Instance"]
+  Inspect --> Instance
+  Instance --> Store["store(key, value)<br/>Save memory"]
+  Instance --> Recall["recall(query)<br/>Retrieve memory"]
+  Store --> Backend["Active Backend<br/>Storage Layer"]
+  Recall --> Backend
+</pre>
+</div>
+
+<!-- NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>memory save-and-recall operation</strong> as it flows through the entire plugins pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Agent Startup</strong> &mdash; <code>AIAgent.__init__()</code> reads <code>config.yaml</code> and finds <code>memory.provider: holographic</code>. It calls <code>load_memory_provider("holographic")</code>.</li>
+<li><strong>Discovery Scan</strong> &mdash; <code>discover_memory_providers()</code> walks <code>plugins/memory/</code>, finding 8 subdirectories. For each, it reads <code>plugin.yaml</code> to extract the name, description, and availability flag&mdash;without importing any Python code.</li>
+<li><strong>Availability Check</strong> &mdash; The holographic backend&rsquo;s <code>plugin.yaml</code> declares no external dependencies, so it passes the availability check. Backends like <code>honcho</code> or <code>mem0</code> would check for API keys in environment variables.</li>
+<li><strong>Dynamic Import</strong> &mdash; <code>importlib.util.spec_from_file_location()</code> creates a module spec for <code>plugins/memory/holographic/__init__.py</code>. The loader registers parent packages in <code>sys.modules</code> first, enabling relative imports within the plugin.</li>
+<li><strong>Submodule Registration</strong> &mdash; Before executing the main module, the loader pre-registers all <code>.py</code> files in the holographic directory (<code>store.py</code>, <code>retrieval.py</code>, <code>holographic.py</code>) so that <code>from .store import MemoryStore</code> works correctly.</li>
+<li><strong>Provider Extraction</strong> &mdash; The loader first tries <code>mod.register(collector)</code>&mdash;if the module uses the register pattern, the <code>_ProviderCollector</code> captures the instance. If that fails, it falls back to scanning the module for a <code>MemoryProvider</code> subclass and instantiating it directly.</li>
+<li><strong>Instance Ready</strong> &mdash; The <code>HolographicMemory</code> instance is returned to the agent. It holds a local vector store, an embedding model reference, and retrieval configuration.</li>
+<li><strong>Memory Save</strong> &mdash; During a conversation, the agent calls <code>provider.store("user prefers dark mode", embedding)</code>. The holographic backend computes an embedding vector, adds it to the local FAISS-like index, and persists the mapping to disk.</li>
+<li><strong>Memory Recall</strong> &mdash; Later, the agent calls <code>provider.recall("what theme does the user like?")</code>. The holographic backend embeds the query, performs cosine similarity search against the stored vectors, and returns the top-k matches ranked by relevance.</li>
+<li><strong>CLI Discovery</strong> &mdash; Meanwhile, <code>discover_plugin_cli_commands()</code> checks only the <em>active</em> provider&rsquo;s <code>cli.py</code>. If holographic has CLI commands (e.g., <code>hermes memory list</code>), they&rsquo;re registered into the main argparse tree. Unused providers&rsquo; CLI modules are never imported.</li>
+</ol>
+</div>
+
+<!-- DESIGN DECISIONS TABLE -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr>
+    <td>Plugin metadata format</td>
+    <td>YAML manifests (<code>plugin.yaml</code>)</td>
+    <td>Python decorators, <code>setup.py</code> entry points, JSON config</td>
+    <td>YAML can be read without importing Python code&mdash;critical for fast CLI help and discovery. Entry points require pip installation; decorators require import.</td>
+  </tr>
+  <tr>
+    <td>Plugin discovery strategy</td>
+    <td>Eager discovery, lazy loading</td>
+    <td>Lazy discovery (scan on first use), eager loading (import all at startup)</td>
+    <td>Eager discovery is cheap (filesystem scan + YAML parse). Lazy loading avoids importing heavy SDKs (Honcho, Mem0) for backends that aren&rsquo;t active. Best of both worlds.</td>
+  </tr>
+  <tr>
+    <td>Backend abstraction</td>
+    <td><code>MemoryProvider</code> base class + dual detection (register / subclass)</td>
+    <td>Single registration mode, ABC-only, duck typing</td>
+    <td>Dual detection maximizes compatibility. Old plugins use <code>register(ctx)</code> matching the general plugin system; new plugins use direct subclassing. Neither breaks the other.</td>
+  </tr>
+  <tr>
+    <td>Single-active pattern</td>
+    <td>Only ONE memory provider active at runtime</td>
+    <td>Multiple concurrent providers, chained providers, priority cascade</td>
+    <td>Agent initialization needs deterministic behavior. Mixing strategies would complicate the API surface and create ambiguity about which backend handles a given query. Config clarity beats flexibility here.</td>
+  </tr>
+  <tr>
+    <td>Holographic as local-first default</td>
+    <td>Zero-dependency local vector store as the default backend</td>
+    <td>Cloud-first default (Supermemory), no default</td>
+    <td>Local-first ensures the agent works out of the box without API keys or network access. Users can opt into cloud backends when they need cross-device sync or larger scale.</td>
+  </tr>
+  <tr>
+    <td>CLI command scoping</td>
+    <td>Only the active provider&rsquo;s CLI commands are registered</td>
+    <td>Register all providers&rsquo; CLI commands, namespace by provider name</td>
+    <td>Avoids conflicting commands (e.g., two providers both defining <code>memory list</code>). Keeps CLI clean and avoids importing SDKs for unused providers.</td>
+  </tr>
+  <tr>
+    <td>sys.modules pre-registration</td>
+    <td>Register parent packages and sibling modules in <code>sys.modules</code> before <code>exec_module()</code></td>
+    <td>Require absolute imports only, use <code>__import__</code></td>
+    <td>Plugins need relative imports (<code>from .store import MemoryStore</code>) to work naturally. Pre-registration prevents ImportError loops when submodules reference each other.</td>
+  </tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Holographic Vector Similarity Retrieval</h3>
+<p><strong>The Problem:</strong> When the agent needs to recall past interactions, it must find the most semantically relevant memories from potentially thousands of stored entries. Simple keyword matching fails because natural language queries rarely use the same words as stored memories (&ldquo;what theme does the user like?&rdquo; vs. &ldquo;user prefers dark mode&rdquo;).</p>
+<p><strong>The Approach:</strong> Holographic converts both stored memories and recall queries into dense embedding vectors using a local embedding model. At recall time, it computes the cosine similarity between the query vector and every stored vector, then returns the top-k results above a configurable similarity threshold. The local vector index is organized for batch retrieval, allowing the agent to fetch related memories in a single pass.</p>
+<p><strong>Why This Algorithm:</strong> Cosine similarity on dense embeddings captures semantic meaning that keyword search misses. Alternatives like BM25 (term frequency) would fail on paraphrased content. Full-text search with stemming would miss conceptual similarity. The trade-off is memory: each embedding vector requires storage proportional to the model&rsquo;s hidden dimension (typically 384&ndash;768 floats). For a local-first backend, this is acceptable&mdash;even 100K memories at 768 dimensions is only ~300 MB.</p>
+<pre class="mermaid">
+graph TD
+    A["Query: 'what theme?'"] --> B["Embed query<br/>→ vector q"]
+    B --> C{"Index size<br/>> threshold?"}
+    C -->|"Small (< 10K)"| D["Brute-force cosine<br/>similarity scan"]
+    C -->|"Large (10K+)"| E["Approximate NN<br/>with HNSW index"]
+    D --> F["Rank by similarity"]
+    E --> F
+    F --> G{"Score ><br/>min_threshold?"}
+    G -->|Yes| H["Return top-k<br/>memories"]
+    G -->|No| I["Return empty<br/>(no relevant memories)"]
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> 3 stored memories: &ldquo;user prefers dark mode&rdquo; (vec A), &ldquo;last session discussed Python&rdquo; (vec B), &ldquo;user&rsquo;s timezone is PST&rdquo; (vec C). Query: &ldquo;what theme does the user like?&rdquo;</p>
+<p><strong>Step 1:</strong> Embed the query into vector q. The embedding model maps &ldquo;theme&rdquo; and &ldquo;dark mode&rdquo; into nearby regions of the vector space.</p>
+<p><strong>Step 2:</strong> Compute cosine similarity: sim(q, A) = 0.87, sim(q, B) = 0.23, sim(q, C) = 0.31. Memory A scores highest because &ldquo;theme&rdquo; and &ldquo;dark mode&rdquo; are semantically linked.</p>
+<p><strong>Step 3:</strong> With min_threshold = 0.5 and top_k = 3, only memory A (0.87) passes. Memories B and C are filtered out.</p>
+<p><strong>Result:</strong> Returns &ldquo;user prefers dark mode&rdquo; with similarity 0.87. A naive keyword search for &ldquo;theme&rdquo; would return nothing because no stored memory contains the word &ldquo;theme.&rdquo;</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="what-could-go-wrong">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr>
+    <td>Missing API key for cloud backend</td>
+    <td>User selects <code>honcho</code> or <code>mem0</code> provider but env var (<code>HONCHO_API_KEY</code>, <code>MEM0_API_KEY</code>) is unset</td>
+    <td><code>discover_memory_providers()</code> checks availability flags in <code>plugin.yaml</code> and env vars; marks provider as unavailable</td>
+    <td>Provider appears as &ldquo;unavailable&rdquo; in CLI listing. Agent falls back to warning log. No crash&mdash;user sees actionable message about which env var to set.</td>
+  </tr>
+  <tr>
+    <td>Malformed plugin directory</td>
+    <td>A backend directory exists but lacks <code>__init__.py</code> or has syntax errors in its Python files</td>
+    <td><code>discover_*() </code> wraps each directory scan in try/except; skips broken directories with <code>logger.warning()</code></td>
+    <td>Graceful degradation: the broken backend is skipped, other backends remain available. No crash at startup.</td>
+  </tr>
+  <tr>
+    <td>Relative import failure inside plugin</td>
+    <td>A plugin uses <code>from .store import X</code> but <code>sys.modules</code> pre-registration missed a submodule or ran in wrong order</td>
+    <td><code>ImportError</code> during <code>spec.loader.exec_module()</code></td>
+    <td>The entire plugin fails to load with a clear traceback. The sys.modules pre-registration step was specifically designed to prevent this, but edge cases (circular imports, conditional imports) can still trigger it.</td>
+  </tr>
+  <tr>
+    <td>Dual-mode detection fails</td>
+    <td>Plugin has neither a <code>register()</code> function nor a <code>MemoryProvider</code> subclass (malformed plugin)</td>
+    <td><code>load_memory_provider()</code> returns <code>None</code> after both detection paths fail</td>
+    <td>Agent logs a warning identifying the plugin by name. User sees &ldquo;could not load provider X&rdquo; and can switch to a working backend via config.</td>
+  </tr>
+  <tr>
+    <td>Stale plugin.yaml metadata</td>
+    <td>Developer adds a new dependency to a backend but forgets to update <code>plugin.yaml</code> availability flags</td>
+    <td>Discovery reports the provider as &ldquo;available&rdquo; but loading fails when the missing dependency is imported</td>
+    <td>Load-time error is caught and logged. The mismatch between discovery and loading is a known trade-off of the eager-discover/lazy-load pattern. Fix: update <code>plugin.yaml</code>.</td>
+  </tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Plugin Discovery:</strong> Filesystem walk + YAML parse &mdash; O(n) in number of backend directories. Typically &lt; 10ms for 8 backends. This runs once at startup and is intentionally cheap.</li>
+  <li><strong>Dynamic Import:</strong> <code>importlib.util.spec_from_file_location()</code> + <code>exec_module()</code> &mdash; 50&ndash;200ms depending on backend complexity and SDK import time. Only runs for the active provider.</li>
+  <li><strong>Holographic Recall:</strong> Embedding computation + vector similarity search &mdash; O(d&times;n) for brute-force where d = embedding dimension, n = stored memories. Dominant cost for large memory stores.</li>
+  <li><strong>CLI Command Discovery:</strong> Imports only <code>cli.py</code> (not the full backend SDK) &mdash; keeps CLI startup under 100ms even for backends with heavy dependencies.</li>
+</ul>
+<h3>Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> Only the active backend&rsquo;s modules are loaded into memory. Holographic additionally allocates a vector index proportional to stored memories (~300 bytes per memory entry at 768 dimensions). Cloud backends (supermemory, mem0) have minimal local memory footprint.</li>
+  <li><strong>I/O:</strong> Discovery reads <code>plugin.yaml</code> files from disk (one per backend, ~100 bytes each). Holographic reads/writes its vector index file on store/recall. Cloud backends make HTTP requests per operation. <code>config.yaml</code> is read once at startup to determine the active provider.</li>
+</ul>
+</div>
+
+<!-- KEY COMPONENTS TABLE -->
+<h2 id="key-components">Key Components</h2>
+<table>
+  <tr><th>File</th><th>Role</th><th>Key Exports</th></tr>
+  <tr><td><code>plugins/__init__.py</code></td><td>Top-level plugin discovery and loading orchestrator</td><td><code>find_plugins()</code>, <code>load_plugin()</code></td></tr>
+  <tr><td><code>plugins/context_engine/__init__.py</code></td><td>Context engine plugin interface and discovery</td><td><code>discover_context_engines()</code>, <code>load_context_engine()</code></td></tr>
+  <tr><td><code>plugins/memory/__init__.py</code></td><td>Memory provider discovery, loading, and CLI bridge</td><td><code>discover_memory_providers()</code>, <code>load_memory_provider()</code>, <code>discover_plugin_cli_commands()</code></td></tr>
+  <tr><td><code>plugins/memory/holographic/__init__.py</code></td><td>Local vector store memory backend entry point</td><td><code>HolographicMemory</code> (<a href="../agent_doc/index.html" title="agent — Core Agent Engine" class="xref">MemoryProvider</a> subclass)</td></tr>
+  <tr><td><code>plugins/memory/holographic/store.py</code></td><td>Vector index persistence and CRUD operations</td><td><code>MemoryStore</code></td></tr>
+  <tr><td><code>plugins/memory/holographic/retrieval.py</code></td><td>Embedding-based similarity search and ranking</td><td><code>retrieve()</code>, cosine similarity utilities</td></tr>
+  <tr><td><code>plugins/memory/honcho/__init__.py</code></td><td>Plastic Labs dialectic user modeling backend</td><td><code>HonchoMemory</code> (MemoryProvider subclass)</td></tr>
+  <tr><td><code>plugins/memory/honcho/client.py</code></td><td>Honcho API client wrapper</td><td><code>HonchoClient</code></td></tr>
+  <tr><td><code>plugins/memory/honcho/session.py</code></td><td>Session management for dialectic modeling</td><td><code>HonchoSession</code></td></tr>
+  <tr><td><code>plugins/memory/honcho/cli.py</code></td><td>CLI subcommands for Honcho management</td><td><code>register_cli(subparser)</code></td></tr>
+  <tr><td><code>plugins/memory/supermemory/</code></td><td>Cloud-based memory API backend</td><td><code>SupermemoryProvider</code></td></tr>
+  <tr><td><code>plugins/memory/hindsight/</code></td><td>Knowledge graph memory backend</td><td><code>HindsightMemory</code></td></tr>
+  <tr><td><code>plugins/memory/byterover/</code></td><td>Byte-level retrieval memory backend</td><td><code>ByteRoverMemory</code></td></tr>
+  <tr><td><code>plugins/memory/openviking/</code></td><td>Open-source memory backend</td><td><code>OpenVikingMemory</code></td></tr>
+  <tr><td><code>plugins/memory/mem0/</code></td><td>External memory service integration</td><td><code>Mem0Memory</code></td></tr>
+  <tr><td><code>plugins/memory/retaindb/</code></td><td>Database-backed persistent memory</td><td><code>RetainDBMemory</code></td></tr>
+</table>
+
+<!-- SUB-MODULE CARDS -->
+<h2 id="sub-modules">Sub-Modules</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>&#128268; Core Plugin System</h4>
+    <p>Discovery and loading infrastructure shared by all plugin types. Handles filesystem scanning, YAML manifest parsing, importlib-based dynamic loading, and the dual register()/subclass detection pattern.</p>
+    <ul>
+      <li><code>plugins/__init__.py</code> &mdash; Top-level orchestrator</li>
+      <li><code>plugins/context_engine/__init__.py</code> &mdash; Context engine interface</li>
+      <li><code>plugins/memory/__init__.py</code> &mdash; Memory provider interface</li>
+      <li><code>_EngineCollector</code> / <code>_ProviderCollector</code> helpers</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#128142; holographic/</h4>
+    <p>Local-first vector store memory backend. Embeds memories as dense vectors and retrieves them via cosine similarity. Zero external dependencies&mdash;works offline, making it the default backend.</p>
+    <ul>
+      <li><code>holographic.py</code> &mdash; Main provider implementation</li>
+      <li><code>store.py</code> &mdash; Vector index persistence</li>
+      <li><code>retrieval.py</code> &mdash; Similarity search engine</li>
+      <li><code>plugin.yaml</code> &mdash; Metadata manifest</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#128483; honcho/</h4>
+    <p>Dialectic user modeling via Plastic Labs&rsquo; Honcho platform. Builds a dynamic model of user preferences and personality through multi-turn conversation analysis. Requires <code>HONCHO_API_KEY</code>.</p>
+    <ul>
+      <li><code>client.py</code> &mdash; Honcho API client</li>
+      <li><code>session.py</code> &mdash; Session lifecycle management</li>
+      <li><code>cli.py</code> &mdash; CLI subcommands (<code>hermes memory honcho ...</code>)</li>
+      <li><code>plugin.yaml</code> &mdash; Availability flags</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>&#9729;&#65039; Other Backends</h4>
+    <p>Six additional memory backends covering cloud APIs, knowledge graphs, byte-level retrieval, and database storage. Each follows the same <code>plugin.yaml</code> + <code>__init__.py</code> pattern.</p>
+    <ul>
+      <li><code>supermemory/</code> &mdash; Cloud-hosted memory API</li>
+      <li><code>hindsight/</code> &mdash; Knowledge graph relationships</li>
+      <li><code>byterover/</code> &mdash; Byte-level retrieval engine</li>
+      <li><code>openviking/</code> &mdash; Open-source memory backend</li>
+      <li><code>mem0/</code> &mdash; External memory service</li>
+      <li><code>retaindb/</code> &mdash; Database-backed persistence</li>
+    </ul>
+  </div>
+</div>
+
+<!-- CROSS-MODULE CONNECTION -->
+<h2 id="cross-module">How plugins Connects to the Agent Core</h2>
+<p>The plugins module sits between the agent&rsquo;s configuration system and its runtime memory operations. The config system determines <em>which</em> provider to load; the agent core consumes the loaded provider as a tool for store/recall operations.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Config as hermes_cli.config
+    participant Plugins as plugins/memory
+    participant Agent as AIAgent
+    participant Backend as Active Backend
+    Config->>Plugins: memory.provider = "holographic"
+    Plugins->>Plugins: discover_memory_providers()
+    Plugins->>Plugins: load_memory_provider("holographic")
+    Plugins-->>Agent: HolographicMemory instance
+    Agent->>Backend: store(key, value)
+    Backend-->>Agent: OK
+    Agent->>Backend: recall(query)
+    Backend-->>Agent: top-k memories
+</pre>
+</div>
+<blockquote><strong>Key insight:</strong> The plugins module owns <em>discovery and loading</em>. The agent core owns <em>when and what to memorize</em>. The active backend owns <em>how memories are stored and retrieved</em>. These three concerns are cleanly separated by the <code>MemoryProvider</code> interface.</blockquote>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for plugins</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>plugins/
+├── __init__.py                    ← Top-level plugin discovery &amp; loading
+├── context_engine/                ← Context compression backends
+│   └── __init__.py                ← discover/load context engines
+├── memory/                        ← Memory provider backends
+│   ├── __init__.py                ← discover/load memory providers, CLI bridge
+│   ├── holographic/               ← Local vector store (default)
+│   │   ├── __init__.py            ← HolographicMemory provider
+│   │   ├── holographic.py         ← Core implementation
+│   │   ├── store.py               ← Vector index persistence
+│   │   ├── retrieval.py           ← Cosine similarity search
+│   │   └── plugin.yaml            ← Metadata manifest
+│   ├── honcho/                    ← Dialectic user modeling
+│   │   ├── __init__.py            ← HonchoMemory provider
+│   │   ├── client.py              ← Honcho API client
+│   │   ├── session.py             ← Session management
+│   │   ├── cli.py                 ← CLI subcommands
+│   │   └── plugin.yaml            ← Metadata + availability flags
+│   ├── supermemory/               ← Cloud memory API
+│   │   ├── __init__.py            ← SupermemoryProvider
+│   │   └── plugin.yaml
+│   ├── hindsight/                 ← Knowledge graph memory
+│   │   ├── __init__.py            ← HindsightMemory provider
+│   │   └── plugin.yaml
+│   ├── byterover/                 ← Byte-level retrieval
+│   │   ├── __init__.py            ← ByteRoverMemory provider
+│   │   └── plugin.yaml
+│   ├── openviking/                ← Open-source memory
+│   │   ├── __init__.py            ← OpenVikingMemory provider
+│   │   └── plugin.yaml
+│   ├── mem0/                      ← External memory service
+│   │   ├── __init__.py            ← Mem0Memory provider
+│   │   └── plugin.yaml
+│   └── retaindb/                  ← Database-backed memory
+│       ├── __init__.py            ← RetainDBMemory provider
+│       └── plugin.yaml
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>plugins Wiki &mdash; Generated from source analysis &middot; rev <code>677f1227</code> &middot; 2026-04-15</p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

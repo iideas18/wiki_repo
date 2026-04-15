@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-15">
+<meta name="wiki-source" content="hermes-agent/acp_adapter">
+<meta name="wiki-source-rev" content="677f1227">
+<title>acp_adapter — Agent Communication Protocol</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="Hermes Agent — The Self-Improving AI Agent" href="../index.html">Hermes Agent</a> &rsaquo; <span>acp_adapter</span></nav>
+
+<main id="main">
+<h1>acp_adapter &mdash; <a title="agent — Core Agent Engine" href="../agent_doc/index.html">Agent</a> Communication Protocol</h1>
+<div class="hero">
+  <p class="subtitle">Agent Communication Protocol</p>
+  <p>Exposes Hermes Agent as an ACP-compliant server for interoperability. Provides HTTP/SSE endpoints, permission-based tool access, session management, and event streaming. Enables editors and external <a title="tools — Agent Tool Implementations" href="../tools_doc/index.html">tools</a> to communicate with Hermes via the standard Agent Communication Protocol.</p>
+</div>
+
+<!-- WHY THIS MODULE EXISTS -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="why-this-module-exists" style="margin-top:0;color:var(--accent);">&#127919; Why This Module Exists</h3>
+<p>Without the ACP adapter, Hermes Agent would be limited to CLI interactions and its own <a title="gateway — Multi-Platform Messaging Gateway" href="../gateway_doc/index.html">gateway</a> protocol. Every editor or IDE wanting to integrate Hermes would need to implement a bespoke communication protocol, handle session management, and bridge approval workflows. The ACP (Agent Communication Protocol) is an emerging standard that editors like Cursor and VSCode already support &mdash; by implementing it, Hermes becomes instantly compatible with any ACP-aware client. The adapter bridges the gap between Hermes' synchronous, thread-based AIAgent and the async, event-driven world of ACP. It handles session persistence (conversations survive server restarts), permission callbacks (editor UI for approving sensitive operations), tool kind classification (semantic grouping for editor display), and MCP server registration (dynamic tool addition). Without this module, users would lose their conversation history on every restart, and editors would have no way to request approval for dangerous operations like terminal commands.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the ACP adapter as a diplomatic embassy. Hermes Agent is a citizen of one country (its own protocol), and editors like Cursor are citizens of another (ACP). The embassy (acp_adapter) translates between the two languages, issues visas (sessions), handles security clearances (permissions), and maintains a record office (SessionDB) so conversations are never lost even if the embassy temporarily closes. The ambassador (HermesACPAgent) knows both protocols fluently and ensures nothing is lost in translation.</p>
+</details>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">9</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~2K</div><div class="label">Lines of Code</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="label">Tool Kinds</div></div>
+  <div class="stat-box"><div class="num">Python</div><div class="label">Language</div></div>
+</div>
+
+<!-- BADGES -->
+<p>
+  <span class="badge blue">ACP Standard</span>
+  <span class="badge green">HTTP/SSE</span>
+  <span class="badge yellow">Permission System</span>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Client["Editor / IDE"]
+    ED["Cursor / VSCode"]
+  end
+  subgraph ACPLayer["ACP Server Layer"]
+    HA["HermesACPAgent"]
+    SM["SessionManager"]
+    PM["Permissions"]
+    TK["Tool Kind Mapper"]
+    CB["Event Callbacks"]
+  end
+  subgraph HermesCore["Hermes Core"]
+    AI["AIAgent"]
+    MT["model_tools"]
+    SD["SessionDB"]
+  end
+  ED -->|"ACP JSON-RPC"| HA
+  HA --> SM
+  SM --> AI
+  SM --> SD
+  HA --> PM
+  HA --> CB
+  CB --> ED
+  AI --> MT
+  PM -->|"approval_callback"| AI
+  TK --> HA
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  A["Editor connects via stdio/TCP"] --> B["initialize()"]
+  B --> C["Negotiate protocol, detect auth"]
+  C --> D["create_session()"]
+  D --> E["New AIAgent + SessionState"]
+  E --> F["Persist to SessionDB"]
+  F --> G["message() - user prompt"]
+  G --> H["AIAgent.run() in ThreadPool"]
+  H --> I{"Tool call?"}
+  I -->|"Yes"| J["tool_progress_cb() emits ACP update"]
+  J --> K{"Needs approval?"}
+  K -->|"Yes"| L["request_permission to editor"]
+  L --> M["Editor approves/denies"]
+  M --> H
+  K -->|"No"| H
+  I -->|"No - done"| N["finish_message()"]
+  N --> O["Persist history to DB"]
+  O --> P["Editor receives result"]
+</pre>
+</div>
+
+<!-- NARRATED WALKTHROUGH -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="walkthrough" style="margin-top:0;color:var(--accent);">&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong>editor session from connection through tool execution and permission approval</strong> as it flows through the entire acp_adapter pipeline:</p>
+<ol style="line-height:2;">
+<li><strong>Connection</strong> &mdash; An editor (e.g., Cursor) spawns the Hermes ACP server process. Communication happens over stdio: stdout carries ACP JSON-RPC frames, stderr is reserved for logging to prevent frame corruption.</li>
+<li><strong>Protocol Negotiation</strong> &mdash; The editor sends <code>initialize()</code>. <code>HermesACPAgent</code> detects the active runtime provider (e.g., OpenAI, Anthropic) and returns auth methods, supported capabilities (session load, fork, model switch), and protocol version.</li>
+<li><strong>Session Creation</strong> &mdash; <code>create_session()</code> generates a UUID, creates a fresh <code>AIAgent</code> instance, wraps it in a <code>SessionState</code> dataclass, and persists it to <code>SessionDB</code> (<code>~/.hermes/state.db</code>).</li>
+<li><strong>User Message</strong> &mdash; The editor sends a <code>message()</code> with the user's prompt. The text is extracted from ACP content blocks (<code>TextContentBlock</code>, <code>ImageContentBlock</code>, etc.) via <code>_extract_text()</code>.</li>
+<li><strong>Agent Execution</strong> &mdash; <code>AIAgent.run()</code> executes in a <code>ThreadPoolExecutor</code> (4 workers) so the ACP event loop stays responsive. Callback factories (<code>make_message_cb</code>, <code>make_step_cb</code>, <code>make_thinking_cb</code>, <code>make_tool_progress_cb</code>) bridge agent events to ACP notifications.</li>
+<li><strong>Tool Execution</strong> &mdash; When the agent calls a tool, <code>get_tool_kind()</code> classifies it (read, edit, execute, fetch, think, other). The editor receives a <code>ToolCallStart</code> notification with the kind and arguments.</li>
+<li><strong>Permission Request</strong> &mdash; For sensitive operations (terminal commands, file writes), <code>make_approval_callback()</code> sends a <code>request_permission</code> to the editor with three options: Allow Once, Allow Always, or Deny. The editor shows a UI prompt to the user.</li>
+<li><strong>Permission Resolution</strong> &mdash; The callback uses <code>asyncio.run_coroutine_threadsafe()</code> to coordinate between the agent's worker thread and the ACP event loop. A 60-second timeout auto-denies if the editor doesn't respond.</li>
+<li><strong>Streaming Updates</strong> &mdash; As the agent produces output, <code>make_message_cb()</code> streams text chunks to the editor as ACP message notifications. The editor can display them progressively.</li>
+<li><strong>Completion</strong> &mdash; <code>finish_message()</code> signals the end of the agent's response. The full conversation history is persisted to <code>SessionDB</code>. If the editor reconnects later, <code>load_session()</code> restores from DB.</li>
+</ol>
+</div>
+
+<!-- KEY COMPONENTS -->
+<h2 id="key-components">Key Components</h2>
+
+<h3 id="hermes-acp-agent">HermesACPAgent</h3>
+<p>The main ACP Agent subclass that implements the full ACP protocol surface: <code>initialize()</code>, <code>create_session()</code>, <code>message()</code>, <code>fork_session()</code>, <code>load_session()</code>, and <code>set_session_model()</code>. Also exposes slash commands (<code>/help</code>, <code>/model</code>, <code>/tools</code>) as pseudo-tools parsed by the agent loop.</p>
+<pre><code class="language-python">class HermesACPAgent(acp.Agent):
+    _SLASH_COMMANDS = {
+        "help": "Show available commands",
+        "model": "Show or change current model",
+        "tools": "List available tools",
+    }
+
+    async def initialize(self, protocol_version, client_capabilities, client_info, **kwargs):
+        provider = detect_provider()
+        return InitializeResponse(
+            protocol_version=acp.PROTOCOL_VERSION,
+            agent_info=Implementation(name="hermes-agent", version=HERMES_VERSION),
+            agent_capabilities=AgentCapabilities(load_session=True, ...),
+            auth_methods=[AuthMethodAgent(id=provider, ...)] if provider else None,
+        )
+</code></pre>
+
+<h3 id="session-manager">SessionManager</h3>
+<p>Thread-safe manager for ACP sessions backed by Hermes <code>AIAgent</code> instances. Sessions are held in-memory for fast access AND persisted to the shared <code>SessionDB</code> so they survive process restarts. Supports session creation, retrieval, restoration from DB, and forking (creating a new session with copied history).</p>
+
+<h3 id="permission-system">Permission System</h3>
+<p>Bridges ACP permission requests to Hermes approval callbacks. When the agent needs to execute a sensitive operation, the callback sends three options to the editor: <code>allow_once</code>, <code>allow_always</code>, or <code>deny</code>. Uses <code>asyncio.run_coroutine_threadsafe()</code> to coordinate between the agent's synchronous worker thread and the async ACP event loop.</p>
+
+<h3 id="tool-kind-mapping">Tool Kind Mapping</h3>
+<p>Classifies Hermes tools into ACP semantic categories for editor UI display:</p>
+<table>
+  <tr><th>ACP Kind</th><th>Hermes Tools</th><th>Editor Treatment</th></tr>
+  <tr><td><code>read</code></td><td>read_file, search_files</td><td>Low-risk; auto-approve</td></tr>
+  <tr><td><code>edit</code></td><td>write_file, patch</td><td>Medium-risk; show diff</td></tr>
+  <tr><td><code>execute</code></td><td>terminal, process, browser_click</td><td>High-risk; require approval</td></tr>
+  <tr><td><code>fetch</code></td><td>web_search, web_extract, browser_navigate</td><td>Network access; log</td></tr>
+  <tr><td><code>think</code></td><td>_thinking</td><td>Internal reasoning; display as thought</td></tr>
+  <tr><td><code>other</code></td><td>All unmapped tools</td><td>Default handling</td></tr>
+</table>
+
+<h3 id="event-callbacks">Event Callbacks</h3>
+<p>Four callback factories bridge AIAgent events to ACP notifications:</p>
+<ul>
+  <li><code>make_message_cb()</code> &mdash; Streams text chunks as ACP message notifications</li>
+  <li><code>make_step_cb()</code> &mdash; Reports agent step progress (e.g., "Running tool 3 of 5")</li>
+  <li><code>make_thinking_cb()</code> &mdash; Forwards chain-of-thought reasoning to the editor</li>
+  <li><code>make_tool_progress_cb()</code> &mdash; Emits ToolCallStart and ToolCallProgress updates</li>
+</ul>
+
+<!-- DESIGN DECISIONS -->
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives Considered</th><th>Why This Approach</th></tr>
+  <tr><td>Agent execution model</td><td>ThreadPoolExecutor (4 workers)</td><td>Async AIAgent, subprocess per session</td><td>AIAgent is synchronous and uses sync tooling. Rewriting to async would be massive. Thread pool is simple and keeps ACP loop responsive.</td></tr>
+  <tr><td>Session persistence</td><td>SessionDB (SQLite)</td><td>In-memory only, Redis, file-per-session</td><td>SQLite survives restarts, is single-file, requires no external services. In-memory loses history on crash. Redis adds a dependency.</td></tr>
+  <tr><td>Communication channel</td><td>stdio (stdout for JSON-RPC, stderr for logs)</td><td>TCP socket, Unix socket, HTTP</td><td>stdio is the simplest for editor process spawning. No port conflicts, no firewall issues. Stderr separation prevents log corruption of protocol frames.</td></tr>
+  <tr><td>Permission timeout</td><td>60-second auto-deny</td><td>Infinite wait, configurable per-tool</td><td>Prevents agent from hanging indefinitely when editor is unresponsive. 60s is enough for user interaction. Deny is the safe default.</td></tr>
+  <tr><td>Lazy SessionDB init</td><td>Create DB on first session operation</td><td>Init at server startup</td><td>Allows ACP server to start even if <code>~/.hermes/state.db</code> is corrupted. Error surfaces when first needed, not at boot.</td></tr>
+  <tr><td>MCP registration</td><td>Per-session, dynamic</td><td>Global, at server startup</td><td>Different sessions may need different tool sets. Dynamic registration allows adding MCP servers after session creation without restart.</td></tr>
+</table>
+
+<!-- ALGORITHM SPOTLIGHT -->
+<h2 id="algorithm-spotlight">&#128300; Algorithm Spotlight</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="thread-async-bridge" style="margin-top:0;">Thread-to-Async Bridge Pattern</h3>
+<p><strong>The Problem:</strong> AIAgent is synchronous (blocking file I/O, subprocess calls, network requests). ACP is async (event-driven, non-blocking). Callbacks need to cross the thread/async boundary in both directions: agent thread pushing updates to ACP loop, and ACP loop sending permission responses to agent thread.</p>
+<p><strong>The Approach:</strong> Agent runs in a <code>ThreadPoolExecutor</code>. Outbound callbacks (agent to editor) use <code>asyncio.run_coroutine_threadsafe(coro, loop)</code> to schedule ACP notifications on the main event loop. Inbound responses (editor to agent) use the same mechanism with <code>future.result(timeout=60)</code> to block the agent thread until the editor responds.</p>
+<p><strong>Why This Algorithm:</strong> The alternative &mdash; rewriting AIAgent as async &mdash; would require overhauling the entire tool execution pipeline. The bridge pattern keeps both sides in their natural execution model and adds minimal overhead (one coroutine per callback invocation).</p>
+<pre class="mermaid">
+sequenceDiagram
+    participant E as Editor
+    participant L as ACP Event Loop
+    participant T as Agent Worker Thread
+    participant A as AIAgent
+    E->>L: message(prompt)
+    L->>T: submit AIAgent.run()
+    T->>A: run(prompt)
+    A->>T: tool_progress callback
+    T->>L: run_coroutine_threadsafe(notify)
+    L->>E: ToolCallStart notification
+    A->>T: approval_callback(terminal, rm -rf)
+    T->>L: run_coroutine_threadsafe(request_permission)
+    L->>E: request_permission
+    E->>L: AllowedOutcome(allow_once)
+    L->>T: future.result() returns allow_once
+    T->>A: return "once"
+    A->>T: run complete
+    T->>L: run_coroutine_threadsafe(finish_message)
+    L->>E: message complete
+</pre>
+<details>
+<summary style="cursor:pointer;font-weight:600;color:var(--accent);">Trace through an example</summary>
+<div style="margin-top:.8rem;padding:1rem;background:var(--bg);border-radius:8px;">
+<p><strong>Given:</strong> Editor sends <code>message("Delete all log files")</code>. Agent wants to run <code>rm -rf /var/log/*.log</code>.</p>
+<p><strong>Step 1:</strong> ACP loop receives the message, submits <code>AIAgent.run("Delete all log files")</code> to the thread pool.</p>
+<p><strong>Step 2:</strong> AIAgent decides to call the <code>terminal</code> tool with <code>rm -rf /var/log/*.log</code>. This triggers the approval callback.</p>
+<p><strong>Step 3:</strong> The approval callback calls <code>asyncio.run_coroutine_threadsafe(request_permission(...), loop)</code>. The agent thread blocks on <code>future.result(timeout=60)</code>.</p>
+<p><strong>Step 4:</strong> The ACP loop sends the permission request to the editor. The editor shows a dialog: "Allow terminal: rm -rf /var/log/*.log?"</p>
+<p><strong>Step 5:</strong> User clicks "Allow once". The editor sends <code>AllowedOutcome(option_id="allow_once")</code>. The future resolves, returning <code>"once"</code> to the agent thread.</p>
+<p><strong>Result:</strong> The command executes once. If the agent tries another dangerous command, a new permission request is sent. The 60-second timeout ensures the agent never hangs indefinitely.</p>
+</div>
+</details>
+</div>
+
+<!-- WHAT COULD GO WRONG -->
+<h2 id="failure-modes">&#9888;&#65039; What Could Go Wrong</h2>
+<table>
+  <tr><th>Failure Mode</th><th>Trigger</th><th>Detection</th><th>Recovery / Mitigation</th></tr>
+  <tr><td>Session restore failure</td><td>Corrupt SessionDB, schema migration</td><td><code>load_session()</code> returns error</td><td>Soft error &mdash; editor can create a new session. Server doesn't crash. DB corruption is logged.</td></tr>
+  <tr><td>Permission timeout</td><td>Editor unresponsive for 60+ seconds</td><td><code>future.result(timeout=60)</code> raises</td><td>Auto-deny. Agent skips the tool call and continues. Prevents indefinite hanging.</td></tr>
+  <tr><td>MCP registration failure</td><td>Invalid MCP server config, network error</td><td>Exception during registration</td><td>Warning logged, tool surface refreshed without new tools. Agent continues with existing capabilities.</td></tr>
+  <tr><td>Stdout corruption</td><td>Log messages mixed into JSON-RPC stream</td><td>JSON parse errors in editor</td><td>Entry point routes all logging to stderr. stdout is exclusively for ACP frames. If still corrupted, editor reconnects.</td></tr>
+  <tr><td>Thread pool exhaustion</td><td>4+ concurrent sessions all running agents</td><td>Blocked on <code>executor.submit()</code></td><td>Additional sessions queue until a worker frees. Pool size of 4 matches typical editor usage (1-2 active sessions).</td></tr>
+</table>
+
+<!-- PERFORMANCE PROFILE -->
+<h2 id="performance-profile">&#9889; Performance Profile</h2>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 id="hot-paths" style="margin-top:0;">Hot Paths</h3>
+<p>The most performance-sensitive code paths in this module:</p>
+<ul>
+  <li><strong>Callback bridge (thread to async):</strong> <code>asyncio.run_coroutine_threadsafe()</code> adds ~0.1ms overhead per call. For streaming responses with many chunks, this is the dominant overhead.</li>
+  <li><strong>Session persistence:</strong> SQLite write after each message. For long conversations, the serialized history can be 100+ KB. Writes are synchronous but fast (SQLite WAL mode).</li>
+  <li><strong>Permission round-trip:</strong> Blocking wait on <code>future.result()</code>. Latency depends entirely on user response time (0-60 seconds). Not optimizable.</li>
+</ul>
+<h3 id="resource-usage">Resource Usage</h3>
+<ul>
+  <li><strong>Memory:</strong> Each session holds an <code>AIAgent</code> instance with full conversation history. Long conversations can consume 10-50 MB per session. Sessions are evicted from memory on server restart (restored lazily from DB).</li>
+  <li><strong>Threads:</strong> 4-thread pool for agent execution. 1 main thread for ACP event loop. Total: 5 threads per server process.</li>
+  <li><strong>Disk:</strong> SessionDB grows with conversation history. Each message adds ~1-5 KB. No automatic cleanup; users manage via session deletion.</li>
+</ul>
+</div>
+
+<!-- CROSS-MODULE CONNECTION -->
+<h2 id="cross-module-connection">How acp_adapter Connects to Core Agent</h2>
+<p>The ACP adapter wraps the core <code>AIAgent</code> without modifying it. All tool execution flows through the same <code>model_tools.handle_function_call()</code> pipeline used by the CLI. The adapter adds session persistence, permission bridging, and event streaming on top.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant E as Editor
+    participant ACP as ACP Adapter
+    participant AI as AIAgent
+    participant MT as model_tools
+    E->>ACP: message(prompt)
+    ACP->>AI: run(prompt, approval_callback)
+    AI->>MT: handle_function_call(tool, args)
+    MT-->>AI: tool result
+    AI-->>ACP: response + callbacks
+    ACP-->>E: ACP notifications
+</pre>
+</div>
+<blockquote><strong>Key insight:</strong> acp_adapter owns the session lifecycle and protocol translation. AIAgent owns tool execution and conversation logic. The boundary is clean: ACP never calls tools directly, and AIAgent never knows about ACP protocol details.</blockquote>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for acp_adapter</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>acp_adapter/
+├── __init__.py                    ← Module init, public API exports
+├── server.py                      ← HermesACPAgent, initialize(), message()
+├── session.py                     ← SessionManager, SessionState, DB persistence
+├── permissions.py                 ← make_approval_callback(), permission bridging
+├── tools.py                       ← Tool kind mapping, build_tool_* functions
+├── callbacks.py                   ← make_message_cb, make_step_cb, etc.
+├── auth.py                        ← detect_provider(), has_provider()
+├── events.py                      ← ACPEvents, event streaming helpers
+└── __main__.py                    ← Entry point, stdio/stderr routing
+</code></pre>
+</details>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>acp_adapter Wiki &mdash; Generated from source analysis</p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

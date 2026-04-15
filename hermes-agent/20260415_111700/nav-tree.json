@@ -1,0 +1,51 @@
+{
+  "label": "Hermes Agent",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "acp_adapter",
+      "path": "acp_adapter/index.html",
+      "children": []
+    },
+    {
+      "label": "agent",
+      "path": "agent_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "cron",
+      "path": "cron/index.html",
+      "children": []
+    },
+    {
+      "label": "environments",
+      "path": "environments_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "gateway",
+      "path": "gateway_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "hermes_cli",
+      "path": "hermes_cli_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "plugins",
+      "path": "plugins_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "tools",
+      "path": "tools_doc/index.html",
+      "children": []
+    },
+    {
+      "label": "Search",
+      "path": "search.html",
+      "children": []
+    }
+  ]
+}
