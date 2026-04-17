@@ -91,11 +91,12 @@ Phase 7–10 — Post-processing (unchanged + new glossary build)
 - **Worklist is the contract between research and generation.** Phase 1B previously produced prose; now it produces prose *plus* a YAML worklist. Pass B iterates the worklist deterministically — one focus page per entry. No judgment calls about which topics to include.
 - **Idempotency.** Re-running Pass B only regenerates focus pages that are missing or below threshold, enabling targeted retry.
 - **Pass B is N Copilot invocations, not one.** For a project with M modules × K topics per module, Pass B runs M×K focused invocations, each scoped to exactly one focus page. This is what "small focused prompts" means concretely. Pass A and Pass C are each a single invocation because their content fits comfortably in one prompt. The orchestrator serializes Pass B invocations (no parallel Copilot calls) to keep log output readable and to bound API cost.
-- **`--legacy` single-pass mode preserved** for users who want the old behavior on tiny projects.
 
 ### 4.2 Layered Template Structure
 
-Every non-L0 template (`l1-template.html`, `l2-template.html`, `focus-template.html`) is restructured around four required `<section>` regions. The L0 hub template gets a lighter primer but keeps its existing shape.
+Every non-L0 template (`l1-template.html`, `l2-template.html`, `focus-template.html`) is restructured around four required regions. The L0 hub template gets a lighter primer but keeps its existing shape.
+
+**Important:** The snippet below is schematic. Two of the four regions — `primer` and `expert` — are rendered as `<details>` elements (see §4.3 for the full mechanism). The `core` and `deep` regions are `<section>` elements. The skeleton shows all four using `<section>` for visual compactness only; the actual templates use the element types listed in the table at the end of this section.
 
 ```html
 <main>
@@ -167,6 +168,15 @@ The **primer region is also wrapped in a `<details>`** when the template renders
 
 Wrapping the primer as `<details open>` (rather than `<section>`) makes its collapse/expand behavior declarative and CSS-reachable without JS. Under Engineer and Newcomer modes it renders as visually open (no disclosure triangle shown thanks to CSS); under Expert mode CSS removes the `open` presentation and reveals the disclosure triangle so the expert can fold it away.
 
+**Region element types (authoritative):**
+
+| Region | HTML element | Default `open`? (Engineer mode) |
+|---|---|---|
+| `primer` | `<details data-layer="primer" class="layer-primer">` | `open` |
+| `core` | `<section data-layer="core" class="layer-core">` | n/a (always visible) |
+| `deep` | `<section data-layer="deep" class="layer-deep">` containing direct-child `<section>` sub-sections | n/a (always visible) |
+| `expert` | `<details data-layer="expert" class="layer-expert">` | closed |
+
 #### Layer semantics
 
 | Layer | Audience | Default visibility (Engineer mode) | Content |
@@ -218,10 +228,11 @@ html[data-level="engineer"] [data-layer="expert"] > summary { cursor: pointer; }
 
 /* ---- Expert ---- */
 /* Primer folded, deep fully visible, expert auto-opened.
-   [data-layer="primer"] is a <details> element. JS on level-change removes
-   its `open` attribute. */
+   Fold state itself is owned by the <details>.open attribute, set by JS
+   (applyLevel in §4.3 / init script in §6.3). The CSS here only styles the
+   summary affordance; there is intentionally no visibility rule, since
+   <details> natively hides its children when not open. */
 html[data-level="expert"] [data-layer="primer"] > summary { cursor: pointer; }
-html[data-level="expert"] [data-layer="expert"] > summary { /* appears expanded */ }
 ```
 
 **JS responsibility on level change** (`resources/_reading-level.js`):
@@ -264,7 +275,19 @@ Schema:
 }
 ```
 
-**Build:** `scripts/build-glossary.py` runs in Phase 7. Scrapes all `<dt>` inside `.primer-glossary` on every generated page, deduplicates by slug (lowercased, hyphenated), emits JSON.
+**Build:** `scripts/build-glossary.py` runs in Phase 7. Scrapes all `<dt>`/`<dd>` pairs inside `.primer-glossary` on every generated page, deduplicates by slug (lowercased, hyphenated `<dt>` text), emits JSON.
+
+**Which fields are populated automatically:**
+
+| Field | Source |
+|---|---|
+| `term` | `<dt>` text content |
+| `short` | `<dd>` text content |
+| `defined_in` | Path of the first page that defined the term + `#primer` anchor |
+| `long` | **Optional.** Populated only if the research phase (Phase 1C synthesis) emits a `docs/_research/_glossary_long.yaml` with extended definitions keyed by slug. If absent, `build-glossary.py` omits the field. Consumer code tolerates absence. |
+| `see_also` | **Optional.** Same mechanism — populated from `_glossary_long.yaml` if present. |
+
+For pilot scope, only `term`, `short`, `defined_in` are guaranteed. `long` and `see_also` are a Phase-1C-optional enrichment that does not block gates.
 
 **Consume:** Each page loads `../glossary.json` (or `../../glossary.json` for L2/focus) via inline script. Terms appearing in body prose get wrapped as `<span class="gloss" data-term="…">term</span>` on first occurrence per `<section>`. Hover/tap → tooltip with `short`. Click → jump to `defined_in`.
 
@@ -353,7 +376,7 @@ Gate checks enumerated in §5.3.
 | C1 | Every L2 has its own card-grid with ≥ 3 focus children |
 | C2 | Every L2 has Annotated Code Walkthrough with real code (not pseudocode; grep for `language-` class on `<code>` inside `.code-walk`) |
 | C3 | Breadcrumbs resolve up to L1 and L0 |
-| C4 | L2 checks A2–A7 and B1 scoped to `<module>/<submod>/` tree |
+| C4 | L2 pages meet line-count minimums: **450 lines for major L2, 350 lines for small L2** (per existing skill quality bar in SKILL.md §Post-Generation Enhancement). Plus checks A3–A7 and B1 scoped to `<module>/<submod>/` tree. |
 
 **Final gate — after Phase 7–10**
 
@@ -428,16 +451,29 @@ Schema enforced by `scripts/verify/schema_worklist.json`. `worklist-validate.py`
 
 ### 6.3 Toggle State
 
-Single key `neutra-ip-level` in `localStorage`. Applied synchronously in `<head>`:
+Single key `neutra-ip-level` in `localStorage`. Applied in two stages to eliminate flash:
+
+**Stage 1 — inline script in `<head>`** runs synchronously before body parses, sets `<html data-level>`:
 
 ```html
 <script>(function(){
   var l = localStorage.getItem('neutra-ip-level') || 'engineer';
   document.documentElement.setAttribute('data-level', l);
+  // <details> open state must be set after elements exist; handled by the
+  // DOMContentLoaded listener below. Modern browsers hold paint until
+  // DOMContentLoaded resolves for the main document, so no flash in practice.
+  document.addEventListener('DOMContentLoaded', function(){
+    var primer = document.querySelector('details[data-layer="primer"]');
+    var expert = document.querySelector('details[data-layer="expert"]');
+    if (primer) primer.open = (l !== 'expert');
+    if (expert) expert.open = (l === 'expert');
+  });
 })();</script>
 ```
 
-User clicks toggle → update `localStorage` + `data-level` attribute → CSS handles the rest. No re-render.
+**Stage 2 — `_reading-level.js`** binds the toggle button; its `applyLevel(newLevel)` function (§4.3) updates `localStorage`, the `data-level` attribute, and `<details>.open` on the fly. No page reload.
+
+`<details>.open` is the single source of truth for fold state. CSS controls deep-layer visibility in newcomer mode and styles summary affordances; it never tries to set `open` (which the HTML spec does not permit from CSS).
 
 ## 7. Error Handling
 
