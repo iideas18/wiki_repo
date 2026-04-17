@@ -35,6 +35,7 @@ Additionally, the existing templates list "intro box" and "analogy" as required 
 - Manual glossary-editing UI.
 - Per-user preferences beyond level + theme.
 - Replacing Copilot CLI as the generation engine.
+- **A single-pass `--legacy` mode.** Originally considered; dropped. The entire point of this redesign is that single-pass generation fails the depth bar. Keeping a legacy escape hatch would invite drift back to the old failure mode. Tiny projects still benefit from the 3-pass pipeline (Pass B on a tiny project is simply 2–3 invocations instead of 20+). If a user truly needs the old behavior they can `git checkout` the pre-redesign skill tag.
 
 ## 3. Success Criteria
 
@@ -89,6 +90,7 @@ Phase 7–10 — Post-processing (unchanged + new glossary build)
 - **Small focused prompts outperform one large prompt.** Pass A has one job (L1 skeletons). Pass B has one job (focus pages from worklist). Pass C has one job (L2s). Agents do each better than they do "all of it at once".
 - **Worklist is the contract between research and generation.** Phase 1B previously produced prose; now it produces prose *plus* a YAML worklist. Pass B iterates the worklist deterministically — one focus page per entry. No judgment calls about which topics to include.
 - **Idempotency.** Re-running Pass B only regenerates focus pages that are missing or below threshold, enabling targeted retry.
+- **Pass B is N Copilot invocations, not one.** For a project with M modules × K topics per module, Pass B runs M×K focused invocations, each scoped to exactly one focus page. This is what "small focused prompts" means concretely. Pass A and Pass C are each a single invocation because their content fits comfortably in one prompt. The orchestrator serializes Pass B invocations (no parallel Copilot calls) to keep log output readable and to bound API cost.
 - **`--legacy` single-pass mode preserved** for users who want the old behavior on tiny projects.
 
 ### 4.2 Layered Template Structure
@@ -122,9 +124,24 @@ Every non-L0 template (`l1-template.html`, `l2-template.html`, `focus-template.h
   </section>
 
   <section data-layer="deep" class="layer-deep">
-    <!-- Existing required sections: Why This Exists, Design Decisions,
-         Narrated Walkthrough, Algorithm Spotlight, Deep-Dive card grid,
-         What Could Go Wrong, Performance Profile, etc. -->
+    <!-- Contains the existing required sections, each as a direct child
+         <section> with an <h2>. Structure is flat: the deep layer is NOT
+         one giant blob but a sequence of sibling sub-sections:
+
+         <section data-layer="deep" class="layer-deep">
+           <section id="why-this-exists"><h2>Why This Exists</h2> … </section>
+           <section id="design-decisions"><h2>Design Decisions</h2> … </section>
+           <section id="narrated-walkthrough"><h2>The Senior Engineer's Tour</h2> … </section>
+           <section id="algorithm-spotlight"><h2>Algorithm Spotlight</h2> … </section>
+           <section id="deep-dives"><h2>Deep-Dive Highlights</h2> … </section>
+           <section id="what-could-go-wrong"><h2>What Could Go Wrong</h2> … </section>
+           <section id="performance-profile"><h2>Performance Profile</h2> … </section>
+           <section id="directory-map"><h2>Directory Map</h2> … </section>
+         </section>
+
+         This flat structure is a requirement, not a suggestion: the
+         newcomer-mode CSS rule below depends on <h2> being a direct
+         grandchild of the deep layer (via <section> wrappers). -->
   </section>
 
   <details data-layer="expert" class="layer-expert">
@@ -138,6 +155,17 @@ Every non-L0 template (`l1-template.html`, `l2-template.html`, `focus-template.h
   </details>
 </main>
 ```
+
+The **primer region is also wrapped in a `<details>`** when the template renders it, using a sentinel class:
+
+```html
+<details data-layer="primer" class="layer-primer" open>
+  <summary>In Plain English — primer for newcomers</summary>
+  … primer content …
+</details>
+```
+
+Wrapping the primer as `<details open>` (rather than `<section>`) makes its collapse/expand behavior declarative and CSS-reachable without JS. Under Engineer and Newcomer modes it renders as visually open (no disclosure triangle shown thanks to CSS); under Expert mode CSS removes the `open` presentation and reveals the disclosure triangle so the expert can fold it away.
 
 #### Layer semantics
 
@@ -160,22 +188,59 @@ A persistent control next to the existing theme toggle, with three levels.
 - **Values:** `newcomer` | `engineer` (default) | `expert`
 - **Applied as** `<html data-level="…">` via synchronous inline script in `<head>` (avoids flash)
 
-CSS controls region visibility via attribute selectors:
+CSS controls region visibility via attribute selectors. The rules depend on the flat deep-layer structure defined in §4.2 (each deep-layer sub-section is a direct child `<section>` of `[data-layer="deep"]`):
 
 ```css
+/* ---- Newcomer ---- */
+/* Hide expert region entirely */
 html[data-level="newcomer"] [data-layer="expert"] { display: none; }
-html[data-level="newcomer"] [data-layer="deep"] > :not(h2) { display: none; }
+
+/* Collapse every deep sub-section body; keep the sub-section <h2> visible as a
+   clickable stub that links to engineer mode. Deep sub-sections are <section>
+   direct children; each contains its <h2> plus other content. We hide
+   everything inside except the <h2>. */
+html[data-level="newcomer"] [data-layer="deep"] > section > :not(h2) {
+  display: none;
+}
+/* Add a "switch mode to read more" hint at the end of the deep layer */
 html[data-level="newcomer"] [data-layer="deep"]::after {
-  content: "▶ Switch to Engineer mode for in-depth analysis";
+  content: "▶ Switch to Engineer mode to see in-depth analysis";
+  display: block;
+  padding: 1rem; font-style: italic; opacity: 0.75;
 }
 
-html[data-level="engineer"] [data-layer="expert"] > summary { /* collapsed */ }
+/* ---- Engineer (default) ---- */
+/* Primer open, deep fully visible, expert folded.
+   Note: [data-layer="expert"] is a <details> element. In engineer mode we
+   remove its `open` attribute via JS on level-change (see below); the CSS
+   here just ensures the summary chevron is visible. */
+html[data-level="engineer"] [data-layer="expert"] > summary { cursor: pointer; }
 
-html[data-level="expert"] [data-layer="primer"] { /* collapsed into <details> */ }
-html[data-level="expert"] [data-layer="expert"] { /* auto-expanded */ }
+/* ---- Expert ---- */
+/* Primer folded, deep fully visible, expert auto-opened.
+   [data-layer="primer"] is a <details> element. JS on level-change removes
+   its `open` attribute. */
+html[data-level="expert"] [data-layer="primer"] > summary { cursor: pointer; }
+html[data-level="expert"] [data-layer="expert"] > summary { /* appears expanded */ }
 ```
 
-On toggle, a small JS snippet updates `<html data-level>` and rewrites open/closed state of layer `<details>` elements. No page reload.
+**JS responsibility on level change** (`resources/_reading-level.js`):
+
+1. Update `localStorage.setItem('neutra-ip-level', newLevel)`.
+2. Set `document.documentElement.setAttribute('data-level', newLevel)`.
+3. Toggle the `open` attribute on the two `<details data-layer="…">` elements to match the new level:
+
+```js
+function applyLevel(level) {
+  document.documentElement.setAttribute('data-level', level);
+  var primer = document.querySelector('details[data-layer="primer"]');
+  var expert = document.querySelector('details[data-layer="expert"]');
+  if (primer) primer.open = (level !== 'expert');
+  if (expert) expert.open = (level === 'expert');
+}
+```
+
+No page reload. `<details>` state is the single source of truth for fold state; CSS handles visibility of the deep layer and the expert hiding in newcomer mode.
 
 **Progressive enhancement:** JS disabled → defaults to Engineer view, all regions visible. The `<details>` elements still work without JS.
 
@@ -250,7 +315,7 @@ Gate checks enumerated in §5.3.
 | `.github/skills/wiki-generator/resources/_shared-css.txt` | Layer visibility CSS; `.gloss`, `.reading-level-toggle`, `.primer-*` classes |
 | `.github/skills/wiki-generator/scripts/run_wiki_gen.sh` | Orchestrator: research → Pass A → Gate A → Pass B → Gate B → Pass C → Gate C → Phase 7–10 → Final |
 | `.github/skills/wiki-generator/scripts/verify.sh` | Thin dispatcher to `scripts/verify/*.py` |
-| `fix_wiki_html.py` | New rules: warn if any `data-layer` region missing, warn if toggle HTML or init scripts missing |
+| `fix_wiki_html.py` | New rules: warn if any `data-layer` region missing, warn if toggle HTML or init scripts missing. **Warnings are suppressed for pre-redesign wikis** — detected by the absence of any `neutra-ip-level` reference on the page. This keeps backward-compat noise out of post-processing output while ensuring freshly-regenerated wikis are held to the new bar. |
 
 ### 5.3 Gate Checks
 
@@ -337,6 +402,23 @@ modules:
 
 Schema enforced by `scripts/verify/schema_worklist.json`. `worklist-validate.py` runs between Phase 1 and Pass A.
 
+**Field requirements:**
+
+| Field | Required? | Notes |
+|---|---|---|
+| `version` | yes | Integer. Current: `1`. |
+| `project` | yes | String slug matching output directory name. |
+| `depth` | yes | Integer `1`, `2`, or `3` from Phase 1A depth detection. |
+| `modules` | yes | List; non-empty. |
+| `modules[].slug` | yes | Directory-safe slug. |
+| `modules[].path` | yes | Relative path to module output directory. |
+| `modules[].focus_topics` | yes | List; **between 3 and 5 entries** per module (skill quality bar). |
+| `modules[].focus_topics[].slug` | yes | Directory-safe slug. Becomes the focus page's subdir name. |
+| `modules[].focus_topics[].title` | yes | Human-readable page title. |
+| `modules[].focus_topics[].problem` | yes | 1–3 sentence problem statement; seeds the Pass B prompt. |
+| `modules[].focus_topics[].files` | yes | ≥ 1 `file:line-range` reference. Pass B prompts the agent to cite these. Gate B5 requires ≥ 3 file:line refs in the generated output, so research typically lists 3–6. |
+| `modules[].focus_topics[].alternatives` | yes | ≥ 2 short strings naming alternative approaches. Seeds Gate B6's Alternatives Comparison table. Research must identify these; Copilot does not invent them at generation time. |
+
 ### 6.2 Page → Glossary → Page
 
 1. Authors write primer glossaries inline as `<dl class="primer-glossary"><dt>Term</dt><dd>Definition</dd></dl>` on each page.
@@ -378,6 +460,7 @@ User clicks toggle → update `localStorage` + `data-level` attribute → CSS ha
 | Glossary linker | Manual: hover wrapped terms, verify tooltip + click-through; verify `<code>`/`<pre>`/`<h*>` exclusion |
 | Backward compat | Open `claude-code/`, `gem5/`, etc. unregenerated, verify no JS errors, correct rendering |
 | Theme × level interaction | Toggle both in both orders, verify no visual conflicts |
+| Automated toggle smoke test (advisory) | Headless browser (Playwright) asserting `[data-layer="deep"] > section > :not(h2)` is `display:none` in newcomer mode; `<details data-layer="expert">.open === true` in expert mode. Deferred to follow-up if this first pilot is tight on time; manual suffices initially. |
 
 Pilot validation: regenerate `minimind` (smallest repo, fastest feedback) end-to-end. If satisfactory, regenerate `hermes-agent` as the primary validation.
 
