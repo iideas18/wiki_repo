@@ -283,7 +283,7 @@ Schema:
 |---|---|
 | `term` | `<dt>` text content |
 | `short` | `<dd>` text content |
-| `defined_in` | Path of the first page that defined the term + `#primer` anchor |
+| `defined_in` | Path of the first page that defined the term + `#primer` anchor. **Path format: project-root-relative** (e.g., `tools_doc/terminal/index.html#primer`). `glossary.json` lives at the project root, so the glossary-linker resolves click-through URLs by prepending the current page's path-to-project-root (e.g., `../../` for an L2 page, `../` for an L1 page) to the stored `defined_in` value. |
 | `long` | **Optional.** Populated only if the research phase (Phase 1C synthesis) emits a `docs/_research/_glossary_long.yaml` with extended definitions keyed by slug. If absent, `build-glossary.py` omits the field. Consumer code tolerates absence. |
 | `see_also` | **Optional.** Same mechanism — populated from `_glossary_long.yaml` if present. |
 
@@ -364,7 +364,7 @@ Gate checks enumerated in §5.3.
 | B4 | Every focus page has ≥ 2 Mermaid diagrams |
 | B5 | Every focus page cites ≥ 3 file:line refs (regex `[\w./]+\.(c|cpp|h|py|ts|js|go|rs):\d+`) |
 | B6 | Every focus page has **Alternatives Comparison** table (≥ 2 alternatives) |
-| B7 | Every focus page has **Step-by-Step Mechanism Trace** with ≥ 8 `.code-walk .step` elements |
+| B7 | Every focus page has **Step-by-Step Mechanism Trace** with ≥ 8 `.code-walk .step` elements. Required HTML structure (inherited from existing skill templates, see `resources/focus-template.html`): a `<div class="code-walk">` containing ≥ 8 child `<div class="step">` elements. Each `.step` must contain at least one `<h4>` (the step title), one `<pre><code>` block (the code excerpt), and one `<p>` (the WHY explanation). Gate B7 verifies the count of `.code-walk > .step` elements and that each has all three required children. |
 | B8 | Every focus page has **Failure Recovery** section (id `failure-recovery`) |
 | B9 | No placeholder text |
 | B10 | `<meta name="wiki-focus-parent">` points at real file |
@@ -376,7 +376,7 @@ Gate checks enumerated in §5.3.
 | C1 | Every L2 has its own card-grid with ≥ 3 focus children |
 | C2 | Every L2 has Annotated Code Walkthrough with real code (not pseudocode; grep for `language-` class on `<code>` inside `.code-walk`) |
 | C3 | Breadcrumbs resolve up to L1 and L0 |
-| C4 | L2 pages meet line-count minimums: **450 lines for major L2, 350 lines for small L2** (per existing skill quality bar in SKILL.md §Post-Generation Enhancement). Plus checks A3–A7 and B1 scoped to `<module>/<submod>/` tree. |
+| C4 | L2 pages meet line-count minimums: **450 lines for major L2, 350 lines for small L2**. Classification comes from `modules[].size` in `_worklist.yaml` (§6.1). Plus checks A3–A7 and B1 scoped to `<module>/<submod>/` tree. |
 
 **Final gate — after Phase 7–10**
 
@@ -441,6 +441,7 @@ Schema enforced by `scripts/verify/schema_worklist.json`. `worklist-validate.py`
 | `modules[].focus_topics[].problem` | yes | 1–3 sentence problem statement; seeds the Pass B prompt. |
 | `modules[].focus_topics[].files` | yes | ≥ 1 `file:line-range` reference. Pass B prompts the agent to cite these. Gate B5 requires ≥ 3 file:line refs in the generated output, so research typically lists 3–6. |
 | `modules[].focus_topics[].alternatives` | yes | ≥ 2 short strings naming alternative approaches. Seeds Gate B6's Alternatives Comparison table. Research must identify these; Copilot does not invent them at generation time. |
+| `modules[].size` | yes | `major` or `small`. Classifies the module for Gate C4's line-count threshold. Criterion: `major` if the module contains ≥ 3 sub-modules OR ≥ 500 LOC across its top-level source files; otherwise `small`. Phase 1B research reports this per module based on the survey stats. |
 
 ### 6.2 Page → Glossary → Page
 
@@ -453,23 +454,31 @@ Schema enforced by `scripts/verify/schema_worklist.json`. `worklist-validate.py`
 
 Single key `neutra-ip-level` in `localStorage`. Applied in two stages to eliminate flash:
 
-**Stage 1 — inline script in `<head>`** runs synchronously before body parses, sets `<html data-level>`:
+**Stage 1 — inline script in `<head>`** runs synchronously before body parses, sets `<html data-level>`. To prevent flash of wrong fold state on expert-mode reload (the HTML spec does not guarantee browsers withhold paint until `DOMContentLoaded`), we pair the script with a CSS safety net:
 
 ```html
+<style>
+  /* Safety net: during initial load, mark document as pending-init.
+     CSS below hides primer content for expert mode until JS removes the flag. */
+  html[data-level="expert"][data-level-pending] details[data-layer="primer"] { display: none; }
+</style>
 <script>(function(){
   var l = localStorage.getItem('neutra-ip-level') || 'engineer';
-  document.documentElement.setAttribute('data-level', l);
-  // <details> open state must be set after elements exist; handled by the
-  // DOMContentLoaded listener below. Modern browsers hold paint until
-  // DOMContentLoaded resolves for the main document, so no flash in practice.
+  var root = document.documentElement;
+  root.setAttribute('data-level', l);
+  root.setAttribute('data-level-pending', '');
+  // <details> fold state must be applied once elements exist.
   document.addEventListener('DOMContentLoaded', function(){
     var primer = document.querySelector('details[data-layer="primer"]');
     var expert = document.querySelector('details[data-layer="expert"]');
     if (primer) primer.open = (l !== 'expert');
     if (expert) expert.open = (l === 'expert');
+    root.removeAttribute('data-level-pending');  // release the safety net
   });
 })();</script>
 ```
+
+The CSS safety net guarantees no-flash on expert-mode reload regardless of browser paint timing. Engineer and Newcomer modes don't need it — the template's default `<details open>` matches the desired state for those levels.
 
 **Stage 2 — `_reading-level.js`** binds the toggle button; its `applyLevel(newLevel)` function (§4.3) updates `localStorage`, the `data-level` attribute, and `<details>.open` on the fly. No page reload.
 
@@ -478,6 +487,7 @@ Single key `neutra-ip-level` in `localStorage`. Applied in two stages to elimina
 ## 7. Error Handling
 
 - **Pass fails a gate:** `run_wiki_gen.sh` exits non-zero, prints violations grouped by file with fix hints. User/agent addresses violations and re-runs the failed pass. Targeted retry with `verify.sh --stage=B --json` output can re-scope the prompt to only failing files.
+- **Retry budget:** The orchestrator supports `--max-retries N` (default `3`). After N failed attempts on the same pass, the orchestrator exits non-zero and prints the remaining violations plus a manual-intervention hint. Prevents infinite loops on pages the agent cannot fix (e.g., a focus topic with no real alternatives).
 - **`glossary.json` 404:** Glossary linker fetches, catches, silently skips wrapping. Page remains fully functional.
 - **JS disabled:** Reading-level toggle is unreachable; all regions visible (Engineer default). `<details>` elements still work as folded/unfolded via browser's native behavior.
 - **Invalid worklist:** `worklist-validate.py` fails loud before Pass A. User fixes Phase 1 output or re-runs research.
