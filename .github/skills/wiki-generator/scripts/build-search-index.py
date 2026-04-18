@@ -90,6 +90,9 @@ def build_index(docs_dir):
             # Skip search page itself
             if fname == 'search.html':
                 continue
+            # Skip overview page (navigational, not content)
+            if fname == 'overview.html':
+                continue
 
             fpath = os.path.join(root, fname)
             rel_path = os.path.relpath(fpath, docs_dir)
