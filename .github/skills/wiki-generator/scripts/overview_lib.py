@@ -110,3 +110,33 @@ def extract_preview_html(page_html: str) -> Tuple[str, bool]:
     primer = paragraphs[0]
     core_idea = "".join(paragraphs[1:3])
     return (f"{primer}\n{core_idea}".strip(), True)
+
+
+class _StatsCounter(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.diagrams = 0
+        self.refs = 0
+        self.lines = 0  # <p> + <li>
+
+    def handle_starttag(self, tag, attrs):
+        attrdict = dict(attrs)
+        if tag == "div" and "mermaid" in (attrdict.get("class") or "").split():
+            self.diagrams += 1
+        if "data-file-ref" in attrdict:
+            self.refs += 1
+        if tag in ("p", "li"):
+            self.lines += 1
+
+
+def count_stats(page_html: str) -> dict:
+    """Return exact counts for diagrams / file refs / lines as defined in
+    the spec (§5.2.4). Uses the stdlib HTML parser so malformed markup does
+    not inflate counts."""
+    counter = _StatsCounter()
+    counter.feed(page_html)
+    return {
+        "diagrams": counter.diagrams,
+        "refs": counter.refs,
+        "lines": counter.lines,
+    }

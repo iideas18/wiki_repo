@@ -78,3 +78,29 @@ def test_extract_preview_html_retrofit_banner_added_by_caller_not_extractor():
     preview, retrofit = overview_lib.extract_preview_html(UNLAYERED_PAGE)
     assert "retrofit-banner" not in preview
     assert retrofit is True
+
+
+STATS_PAGE = """
+<!doctype html><html><body>
+  <main>
+    <div class="mermaid">graph TD; A-->B;</div>
+    <p>First.</p>
+    <p>Second.</p>
+    <ul><li>item one</li><li>item two</li></ul>
+    <span data-file-ref="src/a.py:10">a.py</span>
+    <span data-file-ref="src/b.py:20">b.py</span>
+    <div class="mermaid">second diagram</div>
+  </main>
+</body></html>
+"""
+
+
+def test_count_stats_exact_counts():
+    stats = overview_lib.count_stats(STATS_PAGE)
+    assert stats == {"diagrams": 2, "refs": 2, "lines": 4}
+
+
+def test_count_stats_zero_when_empty():
+    assert overview_lib.count_stats("<html><body><main></main></body></html>") == {
+        "diagrams": 0, "refs": 0, "lines": 0,
+    }
