@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{PROJECT_NAME}} — Overview</title>
+<style>
+body { font-family: system-ui, sans-serif; margin: 0; background: #0e1116; color: #e6edf3; }
+header { padding: 2rem; border-bottom: 1px solid #30363d; }
+header h1 { margin: 0 0 .25rem; }
+.tagline { margin: 0 0 .75rem; color: #8b949e; }
+nav a { color: #58a6ff; margin-right: 1rem; text-decoration: none; }
+main { padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
+.module { margin-bottom: 2.25rem; }
+.module h2 { margin: 0 0 .25rem; border-bottom: 1px solid #30363d; padding-bottom: .25rem; }
+.module-blurb { color: #8b949e; margin: .25rem 0 .75rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: .9rem 1rem; cursor: pointer; }
+.card:hover, .card:focus { border-color: #58a6ff; outline: none; }
+.card h3 { margin: 0 0 .35rem; font-size: 1rem; }
+.card .summary { margin: 0 0 .5rem; color: #c9d1d9; font-size: .9rem; }
+.card .tags { color: #8b949e; font-size: .8rem; margin-bottom: .25rem; }
+.card .stats { color: #6e7681; font-size: .75rem; }
+dialog { border: 1px solid #30363d; border-radius: 8px; background: #0d1117; color: #e6edf3; max-width: 640px; width: 92vw; }
+dialog::backdrop { background: rgba(0,0,0,.6); }
+dialog .modal-body { padding: 1rem 1.25rem; max-height: 70vh; overflow: auto; }
+dialog footer { display: flex; justify-content: space-between; padding: .5rem 1rem; border-top: 1px solid #30363d; }
+dialog .retrofit-banner { background: #332700; color: #f2cc60; padding: .35rem .6rem; border-radius: 4px; margin-bottom: .75rem; font-size: .85rem; }
+@media (max-width: 640px) { .card-grid { grid-template-columns: 1fr; } dialog { width: 100vw; height: 100vh; max-width: none; border-radius: 0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>{{PROJECT_NAME}}</h1>
+  <p class="tagline">{{PROJECT_TAGLINE}}</p>
+  <nav><a href="index.html">Home</a></nav>
+</header>
+<main>
+{{MODULE_SECTIONS}}
+</main>
+<dialog id="preview-modal">
+  <div class="modal-body"></div>
+  <footer>
+    <a class="full-link" href="#">Read full page →</a>
+    <button class="close" type="button">Close</button>
+  </footer>
+</dialog>
+<script>
+(function () {
+  var dlg = document.getElementById('preview-modal');
+  if (typeof HTMLDialogElement === 'undefined' || !dlg.showModal) {
+    document.querySelectorAll('.card').forEach(function (c) {
+      c.addEventListener('click', function () { window.location = c.dataset.href; });
+    });
+    return;
+  }
+  var body = dlg.querySelector('.modal-body');
+  var full = dlg.querySelector('.full-link');
+  document.querySelector('main').addEventListener('click', function (ev) {
+    var card = ev.target.closest('.card');
+    if (!card) return;
+    body.innerHTML = card.dataset.previewHtml || '';
+    full.href = card.dataset.href || '#';
+    dlg.showModal();
+  });
+  document.querySelector('main').addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Enter') return;
+    var card = ev.target.closest('.card');
+    if (!card) return;
+    ev.preventDefault();
+    body.innerHTML = card.dataset.previewHtml || '';
+    full.href = card.dataset.href || '#';
+    dlg.showModal();
+  });
+  dlg.querySelector('.close').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (ev) { if (ev.target === dlg) dlg.close(); });
+})();
+</script>
+</body>
+</html>

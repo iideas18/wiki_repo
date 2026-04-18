@@ -7,6 +7,41 @@
 
 set -euo pipefail
 
+set -euo pipefail
+
+# --- Stage-D flag parsing (new) ---
+STAGE=""
+PROJECT_DIR=""
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    --stage=*) STAGE="${arg#--stage=}" ;;
+    --project=*) PROJECT_DIR="${arg#--project=}" ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
+set -- "${POSITIONAL[@]+"${POSITIONAL[@]}"}"
+
+if [[ "$STAGE" == "D" ]]; then
+  : "${PROJECT_DIR:?--project=<dir> required with --stage=D}"
+  FAIL=0
+  OV="$PROJECT_DIR/overview.html"
+  [[ -f "$OV" ]] || { echo "FAIL: overview.html missing"; exit 1; }
+  grep -q '<section class="module"' "$OV" || { echo "FAIL: no <section class=\"module\">"; FAIL=1; }
+  grep -q '<article class="card"' "$OV"   || { echo "FAIL: no <article class=\"card\">"; FAIL=1; }
+  grep -q 'id="preview-modal"' "$OV"      || { echo "FAIL: no <dialog id=\"preview-modal\">"; FAIL=1; }
+  grep -q '<script>' "$OV"                || { echo "FAIL: no inline <script>"; FAIL=1; }
+  for needle in TBD TODO FIXME Lorem ' TK ' XXX; do
+    if grep -q "$needle" "$OV"; then echo "FAIL: placeholder '$needle' present"; FAIL=1; fi
+  done
+  while read -r href; do
+    [[ -z "$href" ]] && continue
+    [[ -f "$PROJECT_DIR/$href" ]] || { echo "FAIL: broken data-href: $href"; FAIL=1; }
+  done < <(grep -oE 'data-href="[^"]+"' "$OV" | sed -E 's/data-href="([^"]+)"/\1/')
+  [[ $FAIL -eq 0 ]] && { echo "Stage D: OK"; exit 0; } || exit 1
+fi
+# --- end Stage-D ---
+
 DOCS_DIR="${1:?Usage: bash verify.sh <docs-dir>}"
 PASS=0
 FAIL=0
