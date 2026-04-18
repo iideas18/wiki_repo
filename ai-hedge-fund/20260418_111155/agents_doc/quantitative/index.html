@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-18">
+<meta name="wiki-source" content="src/agents/">
+<meta name="wiki-source-rev" content="0f6ac48">
+<title>agents quantitative — Quantitative Analysis Agents</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="AI Hedge Fund — Multi-Agent AI-Powered Trading System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="agents — AI Investor Persona Agents" href="../index.html">agents</a> &rsaquo; <span>quantitative</span></nav>
+
+<main id="main">
+<h1><a title="agents — AI Investor Persona Agents" href="../index.html">agents</a>/quantitative/ &mdash; Quantitative Analysis Agents</h1>
+<div class="hero">
+  <p class="subtitle">Data-driven analysis of fundamentals, technicals, sentiment, and valuation</p>
+  <p>Four specialized agents that analyze different quantitative dimensions of a stock. Unlike the persona agents which interpret data through a philosophical lens, these agents focus on specific analytical domains with structured methodologies and threshold-based scoring.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">5</div><div class="label">Agent Files</div></div>
+  <div class="stat-box"><div class="num">4</div><div class="label">Analysis Domains</div></div>
+  <div class="stat-box"><div class="num">~3.2k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">15+</div><div class="label">Signal Strategies</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>While the persona agents bring qualitative judgment, the quantitative agents provide systematic, data-driven analysis. The fundamentals agent examines financial statements, the technicals agent analyzes price and volume patterns, the sentiment agent gauges market mood from insider trades and news, and the valuation agent calculates intrinsic value using DCF and comparables. Together they form a comprehensive quantitative foundation that the persona agents' qualitative insights build upon.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">These four agents are like the instruments in a medical checkup. The fundamentals agent is the blood test (financial health metrics &mdash; profitability, growth, debt levels). The technicals agent is the EKG (heart rhythm patterns mapped to price and volume patterns). The sentiment agent is the patient interview ("how are you feeling?" mapped to insider trading behavior and news mood). And the valuation agent is the diagnostic assessment (here's what we think you're worth based on multiple models). Each instrument measures something different, and the doctor (<a title="backtesting portfolio — <a href="../../backtesting_doc/portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">Portfolio</a> Tracking &amp; Performance Metrics" href="../../backtesting_doc/portfolio/index.html">portfolio</a> manager) needs all of them to make a diagnosis.</p>
+</details>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>The quantitative agents use a fundamentally different approach from the persona agents. Instead of sending data to an LLM with a philosophical prompt, they compute signals algorithmically using threshold-based scoring and weighted ensemble methods. The fundamentals agent checks whether ROE exceeds 15%, the technicals agent calculates moving average crossovers, and the sentiment agent counts bullish vs. bearish insider trades. This deterministic approach makes the quantitative agents faster, cheaper (no LLM calls for most), and reproducible. The valuation agent is the exception &mdash; it uses four mathematical models (Owner Earnings, DCF with WACC, comparable multiples, and residual income) and aggregates them with configurable weights. The trade-off is less nuance than LLM-based agents, but the consistency and speed are worth it for systematic metrics.</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>Signal computation</td><td>Algorithmic threshold scoring</td><td>LLM-based interpretation</td><td>Quantitative metrics have well-defined thresholds (ROE > 15%); LLM adds latency and cost without adding value for objective measurements</td></tr>
+  <tr><td>Technical strategies</td><td>Weighted ensemble of 5 strategies</td><td>Single indicator (e.g., MACD only)</td><td>No single technical indicator is reliable; combining trend, momentum, mean-reversion, volatility, and stat-arb produces more robust signals</td></tr>
+  <tr><td>Sentiment sources</td><td>Insider trades (30%) + news (70%)</td><td>Social media, options flow</td><td>Insider trades are legally required disclosures with proven predictive value; news sentiment is available via existing API</td></tr>
+  <tr><td>Valuation models</td><td>Four-model weighted average</td><td>Single DCF model</td><td>Each model has blind spots; Owner Earnings catches FCF quality, DCF handles growth, multiples provide market context</td></tr>
+</table>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<p>The four quantitative agents run in parallel within the LangGraph fan-out phase alongside the persona agents. Each takes raw market data and produces a structured signal without LLM dependency (except valuation's WACC estimation).</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  State["AgentState"] --> FA["Fundamentals Agent"]
+  State --> TA["Technical Agent"]
+  State --> SA["Sentiment Agent"]
+  State --> VA["Valuation Agent"]
+
+  subgraph FA_inner["Fundamentals Pipeline"]
+    F1["Profitability Analysis"] --> F4["Aggregate Signal"]
+    F2["Growth Analysis"] --> F4
+    F3["Financial Health"] --> F4
+  end
+
+  subgraph TA_inner["Technicals Pipeline"]
+    T1["Trend Following 25%"] --> T5["Weighted Ensemble"]
+    T2["Mean Reversion 20%"] --> T5
+    T3["Momentum 25%"] --> T5
+    T4["Volatility 15%"] --> T5
+    T4b["Stat Arb 15%"] --> T5
+  end
+
+  subgraph SA_inner["Sentiment Pipeline"]
+    S1["Insider Trades 30%"] --> S3["Combined Signal"]
+    S2["News Sentiment 70%"] --> S3
+  end
+
+  subgraph VA_inner["Valuation Pipeline"]
+    V1["Owner Earnings"] --> V5["Weighted Average"]
+    V2["Enhanced DCF + WACC"] --> V5
+    V3["Comparable Multiples"] --> V5
+    V4["Residual Income"] --> V5
+  end
+
+  FA --> FA_inner
+  TA --> TA_inner
+  SA --> SA_inner
+  VA --> VA_inner
+
+  FA_inner --> Signals["analyst_signals"]
+  TA_inner --> Signals
+  SA_inner --> Signals
+  VA_inner --> Signals
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>fundamentals_analyst_agent</code></td><td>fundamentals.py</td><td>Main entry point: fetches financial metrics, runs profitability/growth/health analyses, aggregates into bullish/bearish/neutral signal</td></tr>
+  <tr><td><code>technical_analyst_agent</code></td><td>technicals.py</td><td>Main entry point: fetches price data, runs 5 strategy calculations, combines via weighted ensemble</td></tr>
+  <tr><td><code>sentiment_analyst_agent</code></td><td>sentiment.py</td><td>Main entry point: fetches insider trades and news, computes weighted sentiment from both sources</td></tr>
+  <tr><td><code>valuation_analyst_agent</code></td><td>valuation.py</td><td>Main entry point: fetches line items and metrics, runs 4 valuation models, aggregates with configurable weights</td></tr>
+  <tr><td><code>news_sentiment_agent</code></td><td>news_sentiment.py</td><td>Dedicated news-only sentiment analysis using NLP on company news articles</td></tr>
+  <tr><td><code>calculate_trend_signals</code></td><td>technicals.py</td><td>Computes EMA crossovers, MACD, and trend direction from price DataFrame</td></tr>
+  <tr><td><code>calculate_mean_reversion_signals</code></td><td>technicals.py</td><td>Bollinger Bands, z-score, and RSI-based mean reversion signals</td></tr>
+  <tr><td><code>calculate_momentum_signals</code></td><td>technicals.py</td><td>Rate of change, RSI momentum, and volume-weighted momentum indicators</td></tr>
+  <tr><td><code>calculate_volatility_signals</code></td><td>technicals.py</td><td>ATR, historical volatility percentile, and volatility regime detection</td></tr>
+  <tr><td><code>calculate_stat_arb_signals</code></td><td>technicals.py</td><td>Statistical arbitrage signals including Hurst exponent and half-life estimates</td></tr>
+  <tr><td><code>weighted_signal_combination</code></td><td>technicals.py</td><td>Combines 5 strategy signals using configurable weights (trend:0.25, momentum:0.25, etc.)</td></tr>
+  <tr><td><code>calculate_owner_earnings_value</code></td><td>valuation.py</td><td>Buffett-style owner earnings: net income + D&amp;A - capex - working capital change, discounted</td></tr>
+  <tr><td><code>calculate_wacc</code></td><td>valuation.py</td><td>Weighted average cost of capital from market cap, debt, interest coverage, and risk-free rate</td></tr>
+  <tr><td><code>safe_float</code></td><td>technicals.py</td><td>Safely converts pandas/numpy values to float, handling NaN and overflow gracefully</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>dict</td><td><code>signals</code></td><td>List of per-aspect signals ("bullish"/"bearish"/"neutral") accumulated during fundamentals analysis</td></tr>
+  <tr><td>dict</td><td><code>reasoning</code></td><td>Structured reasoning dict with sub-keys for each analysis dimension (profitability_signal, growth_signal, etc.)</td></tr>
+  <tr><td>dict</td><td><code>strategy_weights</code></td><td>Technicals weighting: <code>{trend: 0.25, mean_reversion: 0.20, momentum: 0.25, volatility: 0.15, stat_arb: 0.15}</code></td></tr>
+  <tr><td>DataFrame</td><td><code>prices_df</code></td><td>Pandas DataFrame of OHLCV price data, converted from API response via <code>prices_to_df()</code></td></tr>
+  <tr><td>dict</td><td><code>valuation_analysis</code></td><td>Per-ticker dict with owner_earnings, dcf, multiples, and residual_income sub-model results</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td>Financial API</td><td><code>get_financial_metrics()</code></td><td>Fundamentals and valuation agents fetch TTM metrics (ROE, margins, growth rates, ratios)</td></tr>
+  <tr><td>&rarr;</td><td><a href="../../core_doc/data-tools/index.html" title="core data-tools &mdash; Data Models, API Tools &amp; LLM Integration" class="xref">Price</a> API</td><td><code>get_prices()</code> + <code>prices_to_df()</code></td><td>Technicals agent fetches historical OHLCV data and converts to pandas DataFrame</td></tr>
+  <tr><td>&rarr;</td><td>News API</td><td><code>get_company_news()</code></td><td>Sentiment agent fetches up to 100 recent news articles with pre-computed sentiment labels</td></tr>
+  <tr><td>&rarr;</td><td>Insider API</td><td><code>get_insider_trades()</code></td><td>Sentiment agent fetches up to 1000 insider trade records to detect buying/selling patterns</td></tr>
+  <tr><td>&rarr;</td><td>Line Items API</td><td><code>search_line_items()</code></td><td>Valuation agent fetches 12 specific line items (FCF, net income, D&amp;A, capex, working capital, debt, etc.)</td></tr>
+  <tr><td>&larr;</td><td>LangGraph State</td><td><code>state["data"]["analyst_signals"]</code></td><td>All four agents write standardized <code>{signal, confidence, reasoning}</code> dicts to shared state</td></tr>
+  <tr><td>&rarr;</td><td>NumPy/Pandas</td><td><code>np.where()</code>, <code>pd.Series()</code></td><td>Technicals and sentiment agents use vectorized operations for signal computation</td></tr>
+  <tr><td>&rarr;</td><td>Progress Tracker</td><td><code>progress.update_status()</code></td><td>Each agent reports step-by-step progress (fetching data, analyzing, combining signals)</td></tr>
+</table>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>profitability thresholds</code></td><td>ROE &gt; 15%, Net Margin &gt; 20%, Op Margin &gt; 15%</td><td>Fundamentals profitability scoring thresholds; 2/3 triggers bullish</td></tr>
+  <tr><td><code>growth thresholds</code></td><td>Revenue &gt; 10%, Earnings &gt; 10%, Book Value &gt; 10%</td><td>Fundamentals growth scoring; same 2/3 trigger logic</td></tr>
+  <tr><td><code>health thresholds</code></td><td>Current Ratio &gt; 1.5, D/E &lt; 0.5, FCF &gt; 0.8*EPS</td><td>Financial health indicators for fundamentals agent</td></tr>
+  <tr><td><code>strategy_weights</code></td><td>trend:0.25, mean_rev:0.20, momentum:0.25, vol:0.15, stat:0.15</td><td>Technicals weighted ensemble; trend and momentum weighted highest</td></tr>
+  <tr><td><code>insider_weight / news_weight</code></td><td>0.3 / 0.7</td><td>Sentiment weighting between insider trades and news; news weighted higher due to volume</td></tr>
+  <tr><td><code>valuation limit</code></td><td>8 periods</td><td>Number of historical TTM periods for valuation models</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for quantitative agents</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/agents/
+├── fundamentals.py          ← Financial statement analysis (profitability, growth, health)
+├── technicals.py            ← Price/volume technical analysis (5-strategy ensemble)
+├── sentiment.py             ← Market sentiment from insider trades + news
+├── valuation.py             ← Intrinsic value models (DCF, owner earnings, multiples)
+└── news_sentiment.py        ← Dedicated news-only sentiment via NLP
+</code></pre>
+</details>
+
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The fundamentals agent demonstrates the threshold-based scoring approach used by quantitative agents. Unlike persona agents that rely on LLM reasoning, this agent deterministically scores each financial dimension.</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">fundamentals_analyst_agent &mdash; Threshold-Based Analysis</h4>
+<pre><code class="language-python">def fundamentals_analyst_agent(state: AgentState, agent_id: str = "fundamentals_analyst_agent"):
+    """Analyzes fundamental data and generates trading signals for multiple tickers."""
+    data = state["data"]
+    end_date = data["end_date"]
+    tickers = data["tickers"]
+    api_key = get_api_key_from_state(state, "FINANCIAL_DATASETS_API_KEY")
+    fundamental_analysis = {}
+
+    for ticker in tickers:
+        financial_metrics = get_financial_metrics(
+            ticker=ticker, end_date=end_date, period="ttm", limit=10, api_key=api_key,
+        )
+        if not financial_metrics:
+            continue
+
+        metrics = financial_metrics[0]  # Most recent period
+        signals = []
+        reasoning = {}
+
+        # 1. Profitability Analysis
+        return_on_equity = metrics.return_on_equity
+        net_margin = metrics.net_margin
+        operating_margin = metrics.operating_margin
+
+        thresholds = [
+            (return_on_equity, 0.15),   # Strong ROE above 15%
+            (net_margin, 0.20),          # Healthy profit margins
+            (operating_margin, 0.15),    # Strong operating efficiency
+        ]
+        profitability_score = sum(
+            metric is not None and metric > threshold
+            for metric, threshold in thresholds
+        )
+
+        signals.append(
+            "bullish" if profitability_score >= 2
+            else "bearish" if profitability_score == 0
+            else "neutral"
+        )
+
+        # 2. Growth Analysis
+        revenue_growth = metrics.revenue_growth
+        earnings_growth = metrics.earnings_growth
+        book_value_growth = metrics.book_value_growth
+
+        thresholds = [
+            (revenue_growth, 0.10),    # 10% revenue growth
+            (earnings_growth, 0.10),   # 10% earnings growth
+            (book_value_growth, 0.10), # 10% book value growth
+        ]
+        growth_score = sum(
+            metric is not None and metric > threshold
+            for metric, threshold in thresholds
+        )
+
+        # 3. Financial Health
+        current_ratio = metrics.current_ratio
+        debt_to_equity = metrics.debt_to_equity
+        health_score = 0
+        if current_ratio and current_ratio > 1.5:
+            health_score += 1
+        if debt_to_equity and debt_to_equity < 0.5:
+            health_score += 1</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>Line 10-12:</strong> Fetches TTM metrics with <code>limit=10</code> periods. The agent only uses <code>financial_metrics[0]</code> (most recent), but the API call pattern mirrors persona agents for consistency.</li>
+  <li><strong>Line 13-14:</strong> Early exit on missing data &mdash; if the API returns nothing, the ticker is silently skipped. No fallback or default signal is emitted.</li>
+  <li><strong>Line 15:</strong> <code>metrics = financial_metrics[0]</code> picks only the most recent TTM snapshot, discarding historical data. This is a key design difference from persona agents (e.g., Buffett uses all 10 periods for trend analysis).</li>
+  <li><strong>Lines 24-31:</strong> The threshold pattern: each metric is compared against a hard-coded threshold using a list comprehension. The <code>metric is not None</code> guard prevents <code>TypeError</code> when the API returns null values. Scoring is binary: meet threshold = 1 point, miss = 0.</li>
+  <li><strong>Lines 33-37:</strong> Signal mapping uses a 2/3 majority rule: 2+ out of 3 metrics passing = bullish, 0 passing = bearish, otherwise neutral. This is simpler than the persona agents' LLM-based scoring but highly reproducible.</li>
+  <li><strong>Lines 54-56:</strong> Health scoring uses different threshold types &mdash; current ratio must be <em>above</em> 1.5 (liquidity) while D/E must be <em>below</em> 0.5 (low leverage). The asymmetry shows domain knowledge encoded as rules.</li>
+</ul>
+</div>
+</div>
+
+<h3 id="technicals-walkthrough">Technical Agent &mdash; Weighted Ensemble</h3>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">Weighted Signal Combination</h4>
+<pre><code class="language-python"># Five independent strategies, each producing its own signal
+strategy_weights = {
+    "trend": 0.25,          # EMA crossovers, MACD
+    "mean_reversion": 0.20, # Bollinger Bands, z-score
+    "momentum": 0.25,       # RSI, rate of change
+    "volatility": 0.15,     # ATR, vol regime
+    "stat_arb": 0.15,       # Hurst exponent, half-life
+}
+
+# Each strategy returns {signal, confidence, metrics}
+combined_signal = weighted_signal_combination(
+    {
+        "trend": trend_signals,
+        "mean_reversion": mean_reversion_signals,
+        "momentum": momentum_signals,
+        "volatility": volatility_signals,
+        "stat_arb": stat_arb_signals,
+    },
+    strategy_weights,
+)</code></pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>How the four quantitative agents process data from different sources and converge on signal output:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant S as AgentState
+  participant F as Fundamentals
+  participant T as Technicals
+  participant Se as Sentiment
+  participant V as Valuation
+  participant API as Financial APIs
+  participant Out as analyst_signals
+
+  par Parallel Execution
+    S->>F: tickers, end_date
+    F->>API: get_financial_metrics()
+    API-->>F: metrics (ROE, margins, ratios)
+    F->>F: Score profitability, growth, health
+    F->>Out: signal + confidence + reasoning
+  and
+    S->>T: tickers, start_date, end_date
+    T->>API: get_prices()
+    API-->>T: OHLCV DataFrame
+    T->>T: 5 strategies weighted ensemble
+    T->>Out: signal + confidence + reasoning
+  and
+    S->>Se: tickers, end_date
+    Se->>API: get_insider_trades() + get_company_news()
+    API-->>Se: trades + news articles
+    Se->>Se: Weighted count (30/70 split)
+    Se->>Out: signal + confidence + reasoning
+  and
+    S->>V: tickers, end_date
+    V->>API: search_line_items() + get_financial_metrics()
+    API-->>V: line items + metrics
+    V->>V: 4 valuation models + WACC
+    V->>Out: signal + confidence + reasoning
+  end
+</pre>
+</div>
+
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>No financial metrics returned</td><td>Fundamentals agent skips the ticker entirely (<code>continue</code>), no signal emitted</td><td>fundamentals.py:32-34</td><td>&#128308; High</td></tr>
+  <tr><td>No price data for technicals</td><td>Agent skips ticker; progress shows "Failed: No price data found"</td><td>technicals.py:63-65</td><td>&#128308; High</td></tr>
+  <tr><td>NaN values in price DataFrame</td><td><code>safe_float()</code> returns <code>0.0</code> default; prevents downstream math errors</td><td>technicals.py:15-31</td><td>&#128993; Medium</td></tr>
+  <tr><td>Zero insider trades</td><td>Empty <code>transaction_shares</code> Series; <code>insider_signals</code> is empty list, weight goes entirely to news</td><td>sentiment.py:35-36</td><td>&#128994; Low</td></tr>
+  <tr><td>Working capital is None</td><td>Valuation agent defaults <code>wc_change = 0</code>; owner earnings calculation proceeds without WC adjustment</td><td>valuation.py:78-81</td><td>&#128993; Medium</td></tr>
+  <tr><td>Fewer than 2 line items</td><td>Valuation agent skips ticker; cannot compute period-over-period changes</td><td>valuation.py:69-71</td><td>&#128308; High</td></tr>
+</table>
+
+<div class="footer"><a title="agents — AI Investor Persona Agents" href="../index.html">&larr; Back to agents Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

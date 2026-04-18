@@ -1,0 +1,85 @@
+{
+  "label": "AI Hedge Fund",
+  "path": "index.html",
+  "children": [
+    {
+      "label": "agents",
+      "path": "agents_doc/index.html",
+      "children": [
+        {
+          "label": "agents investor-personas",
+          "path": "agents_doc/investor-personas/index.html",
+          "children": []
+        },
+        {
+          "label": "agents management",
+          "path": "agents_doc/management/index.html",
+          "children": []
+        },
+        {
+          "label": "agents quantitative",
+          "path": "agents_doc/quantitative/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "backtesting",
+      "path": "backtesting_doc/index.html",
+      "children": [
+        {
+          "label": "backtesting engine",
+          "path": "backtesting_doc/engine/index.html",
+          "children": []
+        },
+        {
+          "label": "backtesting portfolio",
+          "path": "backtesting_doc/portfolio/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "core",
+      "path": "core_doc/index.html",
+      "children": [
+        {
+          "label": "core data-tools",
+          "path": "core_doc/data-tools/index.html",
+          "children": []
+        },
+        {
+          "label": "core graph",
+          "path": "core_doc/graph/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "v2",
+      "path": "v2/index.html",
+      "children": []
+    },
+    {
+      "label": "webapp",
+      "path": "webapp_doc/index.html",
+      "children": [
+        {
+          "label": "webapp backend",
+          "path": "webapp_doc/backend/index.html",
+          "children": []
+        },
+        {
+          "label": "webapp frontend",
+          "path": "webapp_doc/frontend/index.html",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "Search",
+      "path": "search.html",
+      "children": []
+    }
+  ]
+}
