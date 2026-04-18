@@ -36,11 +36,27 @@ def _active_version_dir(project: Path) -> Path | None:
     if not vj.is_file():
         return None
     data = json.loads(vj.read_text(encoding="utf-8"))
-    current = data.get("current")
-    if not current:
-        return None
-    vdir = project / current
-    return vdir if vdir.is_dir() else None
+    if isinstance(data, list):
+        if not data:
+            return None
+        latest = next((e for e in data if isinstance(e, dict) and e.get("latest")), None)
+        if latest is None:
+            entries = [e for e in data if isinstance(e, dict) and e.get("timestamp")]
+            if not entries:
+                return None
+            latest = max(entries, key=lambda e: str(e.get("timestamp", "")))
+        ts = latest.get("timestamp")
+        if not ts:
+            return None
+        vdir = project / ts
+        return vdir if vdir.is_dir() else None
+    if isinstance(data, dict):
+        current = data.get("current")
+        if not current:
+            return None
+        vdir = project / current
+        return vdir if vdir.is_dir() else None
+    return None
 
 
 def run_overview_pass(*, wiki_root: Path, worklist: dict,

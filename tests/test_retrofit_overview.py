@@ -12,7 +12,9 @@ import retrofit_overview  # noqa: E402
 def _make_project(tmp_path: Path, slug: str) -> Path:
     proj = tmp_path / slug
     proj.mkdir()
-    (proj / "versions.json").write_text(json.dumps({"current": "v1"}), encoding="utf-8")
+    (proj / "versions.json").write_text(
+        json.dumps([{"timestamp": "v1", "latest": True}]), encoding="utf-8"
+    )
     v1 = proj / "v1"
     v1.mkdir()
     (v1 / "index.html").write_text(
