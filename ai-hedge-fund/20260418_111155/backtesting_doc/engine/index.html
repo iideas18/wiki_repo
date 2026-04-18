@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-18">
+<meta name="wiki-source" content="src/backtesting/">
+<meta name="wiki-source-rev" content="0f6ac48">
+<title>backtesting engine — Simulation Engine &amp; Controller</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="AI Hedge Fund — Multi-Agent AI-Powered Trading System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="backtesting — Historical Backtesting Engine" href="../index.html">backtesting</a> &rsaquo; <span>engine</span></nav>
+
+<main id="main">
+<h1><a title="backtesting — Historical Backtesting Engine" href="../index.html">backtesting</a>/engine/ &mdash; Simulation Engine &amp; Controller</h1>
+<div class="hero">
+  <p class="subtitle">Orchestrates day-by-day historical simulation with the full agent pipeline</p>
+  <p>The <code>BacktestEngine</code> orchestrates the full backtest run &mdash; date range iteration, agent invocation, trade execution, and metric aggregation. The <code>AgentController</code> normalizes agent I/O for each simulation step. The <code>TradeExecutor</code> translates <a title="backtesting portfolio — <a href="../portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">Portfolio</a> Tracking &amp; Performance Metrics" href="../portfolio/index.html">portfolio</a>-manager decisions (buy/sell/short/cover) into actual position changes. Together they create a realistic historical simulation with no look-ahead bias.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">3</div><div class="label">Classes</div></div>
+  <div class="stat-box"><div class="num">4</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~0.5 k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">Actions</div></div>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The engine is the <a title="core — Graph, Data &amp; LLM Infrastructure" href="../../core_doc/index.html">core</a> loop of the backtesting system. It iterates through each trading day in a historical range, running the complete LangGraph agent pipeline as if it were live &mdash; <a title="agents — AI Investor Persona Agents" href="../../agents_doc/index.html">agents</a> can only see data up to that day, preventing future-data leakage. The controller manages agent invocation and output normalization, the engine manages the day loop (fetch prices, call agents, execute trades, compute value), and the trader translates decisions into portfolio changes. This three-layer separation keeps each concern clean, testable, and independently replaceable.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a time machine for trading. The engine "travels" to each historical date, runs the AI agents as if they were making real-time decisions, then "travels" forward to the next business day. The <code>BacktestEngine</code> is the time machine itself &mdash; it transports you to each date, sets the scene (fetches prices, prepares the portfolio snapshot), and records what happened. The <code>AgentController</code> is the machine operator &mdash; it programs the destination parameters (which tickers, which analysts, which date range) and ensures the crew follows protocol. The <code>TradeExecutor</code> is the crew member who actually pulls the trading lever at each stop, converting abstract decisions ("buy 50 shares of AAPL") into concrete portfolio mutations.</p>
+</details>
+</div>
+
+<!-- DESIGN RATIONALE -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>The engine follows a <strong>pipeline-of-components</strong> pattern where each class owns exactly one responsibility. The <code>BacktestEngine</code> could have been a single monolithic class that fetches data, calls agents, executes trades, and computes metrics all in one loop body. Instead, it delegates to specialized components &mdash; <code>AgentController</code> for agent I/O normalization, <code>TradeExecutor</code> for position mutations, <code>PerformanceMetricsCalculator</code> for analytics, and <code>OutputBuilder</code> for display. This decomposition was driven by testability: each component can be unit-tested in isolation with mock inputs. The trade-off is more indirection (you must trace across 4+ files to understand one day's flow), but this is acceptable because the flow is strictly linear &mdash; no callbacks, no branching pipelines.</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>Loop granularity</td><td>Day-by-day iteration with <code>pd.date_range(freq="B")</code></td><td>Event-driven / tick-level</td><td>Agent pipeline is expensive (LLM calls); daily resolution matches typical hedge fund rebalancing frequency</td></tr>
+  <tr><td>Data prefetch</td><td>Bulk prefetch all tickers before loop</td><td>Lazy per-day fetching</td><td>API calls are cached; prefetching warms the cache so the loop body never blocks on network I/O</td></tr>
+  <tr><td>Agent normalization</td><td>Dedicated <code>AgentController</code> class</td><td>Inline normalization in engine loop</td><td>Agents can return inconsistent outputs (missing tickers, string quantities); a dedicated normalizer keeps the engine loop clean</td></tr>
+  <tr><td>Trade execution model</td><td>Synchronous, sequential per-ticker</td><td>Batch / atomic multi-ticker execution</td><td>Simulates real-world order-by-order execution; partial fills are handled naturally via cash checks</td></tr>
+</table>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  CLI["cli.py -- CLI Entry Point"] --> Engine["BacktestEngine -- Day Loop Orchestrator"]
+  Engine --> Prefetch["_prefetch_data -- Warm API Cache"]
+  Engine --> DateLoop["pd.date_range -- Business Day Iterator"]
+  DateLoop --> PriceFetch["get_price_data -- Current Day Prices"]
+  PriceFetch --> Controller["AgentController.run_agent -- Invoke and Normalize Agent"]
+  Controller --> AgentFn["agent callable -- LangGraph Pipeline"]
+  AgentFn --> Controller
+  Controller --> Executor["TradeExecutor.execute_trade -- Position Mutations"]
+  Executor --> Portfolio["Portfolio -- State Manager"]
+  Portfolio --> Valuation["calculate_portfolio_value -- Daily NAV"]
+  Valuation --> Metrics["PerformanceMetricsCalculator -- Sharpe, Drawdown"]
+  Valuation --> Output["OutputBuilder -- Table Rows and Display"]
+  Metrics --> Engine
+</pre>
+</div>
+
+<!-- DATA FLOW DIAGRAM -->
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant CLI as cli.py
+  participant Eng as BacktestEngine
+  participant AC as AgentController
+  participant Agent as LangGraph Agent
+  participant TE as TradeExecutor
+  participant PF as Portfolio
+  participant Val as Valuation
+  participant Perf as MetricsCalc
+
+  CLI->>Eng: run_backtest()
+  Eng->>Eng: _prefetch_data() for all tickers + SPY
+  loop Each business day
+    Eng->>Eng: Fetch current_prices via get_price_data
+    Eng->>AC: run_agent(agent, tickers, dates, portfolio)
+    AC->>Agent: agent(tickers, start, end, snapshot)
+    Agent-->>AC: AgentOutput (decisions + signals)
+    AC-->>Eng: Normalized AgentOutput
+    loop Each ticker
+      Eng->>TE: execute_trade(ticker, action, qty, price, portfolio)
+      TE->>PF: apply_long_buy / apply_long_sell / apply_short_open / apply_short_cover
+      PF-->>TE: executed quantity
+    end
+    Eng->>Val: calculate_portfolio_value(portfolio, prices)
+    Val-->>Eng: total_value
+    Eng->>Perf: compute_metrics(portfolio_values)
+    Perf-->>Eng: PerformanceMetrics
+  end
+</pre>
+</div>
+
+<!-- KEY CLASSES TABLE -->
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>BacktestEngine</code></td><td>engine.py</td><td>Main orchestrator: initializes components, runs the day-by-day loop, aggregates results</td></tr>
+  <tr><td><code>BacktestEngine.__init__</code></td><td>engine.py</td><td>Accepts agent callable, tickers, dates, capital; creates Portfolio, TradeExecutor, AgentController, MetricsCalculator, <a href="../portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">OutputBuilder</a>, <a href="../portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">BenchmarkCalculator</a></td></tr>
+  <tr><td><code>BacktestEngine.run_backtest</code></td><td>engine.py</td><td>Core loop: prefetches data, iterates business days, calls agent, executes trades, computes value and metrics</td></tr>
+  <tr><td><code>BacktestEngine._prefetch_data</code></td><td>engine.py</td><td>Warms API cache for all tickers (prices, financials, insider trades, news) and SPY benchmark</td></tr>
+  <tr><td><code>BacktestEngine.get_portfolio_values</code></td><td>engine.py</td><td>Returns the historical equity curve as list of <code>PortfolioValuePoint</code></td></tr>
+  <tr><td><code>AgentController</code></td><td>controller.py</td><td>Invokes the trading agent and normalizes its output into consistent <code>AgentDecisions</code></td></tr>
+  <tr><td><code>AgentController.run_agent</code></td><td>controller.py</td><td>Converts Portfolio to snapshot, calls agent, normalizes decisions (coerces action to <code>Action</code> enum, quantity to float, fills missing tickers with hold/0)</td></tr>
+  <tr><td><code>TradeExecutor</code></td><td>trader.py</td><td>Stateless trade dispatcher &mdash; routes action to the correct Portfolio method</td></tr>
+  <tr><td><code>TradeExecutor.execute_trade</code></td><td>trader.py</td><td>Dispatches buy/sell/short/cover to Portfolio; returns 0 for hold or invalid actions</td></tr>
+  <tr><td><code>Action</code></td><td>types.py</td><td>Enum with values: buy, sell, short, cover, hold &mdash; used for input validation</td></tr>
+  <tr><td><code>AgentOutput</code></td><td>types.py</td><td>TypedDict with <code>decisions</code> (per-ticker action+quantity) and <code>analyst_signals</code></td></tr>
+  <tr><td><code>PortfolioValuePoint</code></td><td>types.py</td><td>TypedDict for a single equity-curve data point (date, value, exposures)</td></tr>
+  <tr><td><code>PerformanceMetrics</code></td><td>types.py</td><td>TypedDict for computed metrics: sharpe, sortino, max drawdown, exposures</td></tr>
+  <tr><td><code>main</code></td><td>cli.py</td><td>CLI entry point: parses args, interactive prompts for analysts/model, constructs and runs <code>BacktestEngine</code></td></tr>
+</table>
+
+<!-- DATA STRUCTURES -->
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>Enum</td><td><code>Action</code></td><td>5-value string enum: <code>buy</code>, <code>sell</code>, <code>short</code>, <code>cover</code>, <code>hold</code></td></tr>
+  <tr><td>Literal</td><td><code>ActionLiteral</code></td><td>Type alias for action string literals &mdash; backward-compatible with pre-enum code</td></tr>
+  <tr><td>TypedDict</td><td><code>AgentDecision</code></td><td>Per-ticker decision: <code>{action: ActionLiteral, quantity: float}</code></td></tr>
+  <tr><td>Dict</td><td><code>AgentDecisions</code></td><td>Mapping of ticker to <code>AgentDecision</code></td></tr>
+  <tr><td>TypedDict</td><td><code>AgentOutput</code></td><td>Complete agent response: <code>{decisions, analyst_signals}</code></td></tr>
+  <tr><td>TypedDict</td><td><code>PortfolioValuePoint</code></td><td>Daily snapshot: Date, Portfolio Value, Long/Short/Gross/Net Exposure, L/S Ratio</td></tr>
+  <tr><td>TypedDict</td><td><code>PerformanceMetrics</code></td><td>Aggregated metrics: sharpe_ratio, sortino_ratio, max_drawdown, exposures</td></tr>
+  <tr><td>TypedDict</td><td><code>PortfolioSnapshot</code></td><td>Full portfolio state passed to agents: cash, margin, positions, realized gains</td></tr>
+</table>
+
+<!-- INTERACTIONS -->
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td>Portfolio</td><td><code>Portfolio.get_snapshot()</code></td><td>AgentController obtains a serializable snapshot to pass to the agent callable</td></tr>
+  <tr><td>&rarr;</td><td>Portfolio</td><td><code>Portfolio.apply_long_buy()</code> etc.</td><td>TradeExecutor dispatches trade actions to mutate portfolio state</td></tr>
+  <tr><td>&rarr;</td><td>Valuation</td><td><code>calculate_portfolio_value()</code></td><td>Engine computes total NAV after each day's trades</td></tr>
+  <tr><td>&rarr;</td><td>Valuation</td><td><code>compute_exposures()</code></td><td>Engine records long/short/gross/net exposure for each day</td></tr>
+  <tr><td>&rarr;</td><td>MetricsCalculator</td><td><code>compute_metrics()</code></td><td>Engine updates performance metrics when 3+ data points exist</td></tr>
+  <tr><td>&rarr;</td><td>OutputBuilder</td><td><code>build_day_rows()</code></td><td>Engine generates display rows for each day's results</td></tr>
+  <tr><td>&rarr;</td><td>BenchmarkCalculator</td><td><code>get_return_pct()</code></td><td>Engine fetches SPY buy-and-hold return for comparison</td></tr>
+  <tr><td>&rarr;</td><td>API layer</td><td><code>get_prices()</code>, <code>get_price_data()</code></td><td>Engine and prefetch fetch historical price data via the tools API</td></tr>
+  <tr><td>&larr;</td><td>cli.py</td><td><code>BacktestEngine()</code> constructor</td><td>CLI constructs engine with parsed args (tickers, dates, model, analysts)</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>initial_capital</code></td><td>100000</td><td>Starting cash for the simulated portfolio</td></tr>
+  <tr><td><code>margin_requirement</code></td><td>0.0</td><td>Margin ratio for short positions (0 = no margin required)</td></tr>
+  <tr><td><code>start_date</code></td><td>1 month ago</td><td>First date of simulation (YYYY-MM-DD)</td></tr>
+  <tr><td><code>end_date</code></td><td>today</td><td>Last date of simulation (YYYY-MM-DD)</td></tr>
+  <tr><td><code>tickers</code></td><td>(required)</td><td>Comma-separated list of stock symbols to trade</td></tr>
+  <tr><td><code>selected_analysts</code></td><td>interactive</td><td>Which analyst agents to include in the pipeline</td></tr>
+  <tr><td><code>model_name</code> / <code>model_provider</code></td><td>interactive</td><td>LLM model for agent inference (supports OpenAI, Anthropic, Ollama)</td></tr>
+  <tr><td><code>freq="B"</code></td><td>Business days</td><td>Date range frequency; hardcoded to business days (no weekends/holidays)</td></tr>
+</table>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for engine</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>backtesting/
+├── engine.py              ← BacktestEngine: day-loop orchestrator
+├── controller.py          ← AgentController: agent invocation + output normalization
+├── trader.py              ← TradeExecutor: action dispatch to Portfolio
+├── types.py               ← Action enum, TypedDicts (AgentOutput, PerformanceMetrics, etc.)
+└── cli.py                 ← CLI entry point: arg parsing, interactive prompts, engine launch
+</code></pre>
+</details>
+
+<!-- ANNOTATED CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The most important code in this sub-module &mdash; the core simulation loop inside <code>BacktestEngine.run_backtest()</code>:</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">BacktestEngine.run_backtest() &mdash; The Day Loop</h4>
+<pre><code class="language-python">def run_backtest(self) -> PerformanceMetrics:
+    self._prefetch_data()                                          # [1]
+
+    dates = pd.date_range(self._start_date, self._end_date, freq="B")  # [2]
+    if len(dates) > 0:
+        self._portfolio_values = [
+            {"Date": dates[0], "Portfolio Value": self._initial_capital}  # [3]
+        ]
+
+    for current_date in dates:                                     # [4]
+        lookback_start = (current_date - relativedelta(months=1)).strftime("%Y-%m-%d")
+        current_date_str = current_date.strftime("%Y-%m-%d")
+        previous_date_str = (current_date - relativedelta(days=1)).strftime("%Y-%m-%d")
+
+        # Fetch current prices for all tickers
+        current_prices: Dict[str, float] = {}
+        missing_data = False
+        for ticker in self._tickers:
+            try:
+                price_data = get_price_data(ticker, previous_date_str, current_date_str)
+                if price_data.empty:
+                    missing_data = True; break
+                current_prices[ticker] = float(price_data.iloc[-1]["close"])  # [5]
+            except Exception:
+                missing_data = True; break
+        if missing_data:
+            continue                                               # [6]
+
+        agent_output = self._agent_controller.run_agent(           # [7]
+            self._agent, tickers=self._tickers,
+            start_date=lookback_start, end_date=current_date_str,
+            portfolio=self._portfolio, ...)
+
+        for ticker in self._tickers:                               # [8]
+            d = agent_output["decisions"].get(ticker, {"action": "hold", "quantity": 0})
+            executed_qty = self._executor.execute_trade(
+                ticker, d["action"], d["quantity"], current_prices[ticker], self._portfolio)
+
+        total_value = calculate_portfolio_value(self._portfolio, current_prices)  # [9]
+
+        if len(self._portfolio_values) > 3:                        # [10]
+            computed = self._perf.compute_metrics(self._portfolio_values)
+            if computed:
+                self._performance_metrics.update(computed)
+
+    return self._performance_metrics</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>[1] Prefetch:</strong> Warms the API cache for all tickers and SPY. Without this, every day in the loop would trigger network requests, making the backtest orders of magnitude slower.</li>
+  <li><strong>[2] Business-day range:</strong> <code>freq="B"</code> skips weekends and generates only trading days. This ensures the simulation never tries to trade on non-market days.</li>
+  <li><strong>[3] Initial equity point:</strong> Seeds the equity curve with starting capital at day 0. Required so that return calculations have a baseline reference point.</li>
+  <li><strong>[4] Day loop:</strong> Each iteration represents one simulated trading day. The lookback window is 1 month &mdash; agents see only this window of historical data to avoid look-ahead bias.</li>
+  <li><strong>[5] Close price:</strong> Uses <code>iloc[-1]["close"]</code> to get the most recent closing price. The query range is <code>[previous_day, current_day]</code> to handle weekends/holidays gracefully.</li>
+  <li><strong>[6] Skip missing data:</strong> If any ticker lacks price data for this day, the entire day is skipped rather than trading with partial information. This prevents mismatched position valuations.</li>
+  <li><strong>[7] Agent invocation:</strong> The controller normalizes agent output &mdash; coercing actions to the <code>Action</code> enum, quantities to floats, and filling missing tickers with hold/0.</li>
+  <li><strong>[8] Trade execution:</strong> Each ticker is executed sequentially. The executor dispatches to the correct Portfolio method (buy/sell/short/cover) and returns the actual executed quantity (may be less than requested if insufficient cash).</li>
+  <li><strong>[9] Valuation:</strong> After all trades, the portfolio's total value is computed: cash + long positions - short positions. This is appended to the equity curve.</li>
+  <li><strong>[10] Metrics gate:</strong> Performance metrics are only computed when 3+ data points exist. Computing Sharpe or Sortino with fewer points would produce meaningless results.</li>
+</ul>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>Missing price data for a ticker</td><td>Entire day is skipped (<code>continue</code>); no trades executed</td><td><code>engine.py:run_backtest</code> L116-130</td><td>&#128993; Medium &mdash; could skip many days for illiquid stocks</td></tr>
+  <tr><td>Agent returns unknown action string</td><td>AgentController coerces to <code>Action.HOLD</code>; TradeExecutor returns 0</td><td><code>controller.py:run_agent</code> L56-57</td><td>&#128994; Low</td></tr>
+  <tr><td>Agent returns negative or None quantity</td><td>Coerced to 0.0; no trade executed</td><td><code>controller.py:run_agent</code> L50-53, <code>trader.py:execute_trade</code> L18-19</td><td>&#128994; Low</td></tr>
+  <tr><td>Insufficient cash for buy order</td><td>Portfolio buys max affordable quantity (partial fill)</td><td><code>portfolio.py:apply_long_buy</code> L99-111</td><td>&#128993; Medium &mdash; silent partial fills may surprise users</td></tr>
+  <tr><td>Empty date range (start == end)</td><td>Loop body never executes; returns default empty metrics</td><td><code>engine.py:run_backtest</code> L99-105</td><td>&#128994; Low</td></tr>
+  <tr><td>lookback_start equals current_date</td><td>Day is skipped to avoid zero-length lookback window</td><td><code>engine.py:run_backtest</code> L111-112</td><td>&#128994; Low</td></tr>
+</table>
+
+<!-- CODE EXAMPLES -->
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Launching a Backtest from CLI</h3>
+<pre><code class="language-python"># Construct and run the engine programmatically
+from src.backtesting.engine import BacktestEngine
+from src.main import run_hedge_fund
+
+engine = BacktestEngine(
+    agent=run_hedge_fund,
+    tickers=["AAPL", "GOOGL", "MSFT"],
+    start_date="2025-01-01",
+    end_date="2025-06-01",
+    initial_capital=100000,
+    model_name="gpt-4o",
+    model_provider="OpenAI",
+    selected_analysts=["technical_analyst", "fundamentals_analyst"],
+    initial_margin_requirement=0.5,
+)
+
+metrics = engine.run_backtest()
+print(f"Sharpe: {metrics.get('sharpe_ratio', 'N/A')}")
+print(f"Max DD: {metrics.get('max_drawdown', 'N/A')}%")
+
+# Access the full equity curve
+values = engine.get_portfolio_values()
+for point in values[-3:]:
+    print(f"{point['Date']}: ${point['Portfolio Value']:,.2f}")
+</code></pre>
+
+<h3>Example: TradeExecutor Dispatch</h3>
+<pre><code class="language-python">from src.backtesting.trader import TradeExecutor
+from src.backtesting.portfolio import Portfolio
+
+portfolio = Portfolio(tickers=["AAPL"], initial_cash=50000, margin_requirement=0.5)
+executor = TradeExecutor()
+
+# Buy 100 shares at $150
+bought = executor.execute_trade("AAPL", "buy", 100, 150.0, portfolio)
+# bought = 100 (cash: 50000 - 15000 = 35000)
+
+# Try to short 200 shares at $150 — margin limits apply
+shorted = executor.execute_trade("AAPL", "short", 200, 150.0, portfolio)
+# margin_required = 200 * 150 * 0.5 = 15000
+# available_cash = 35000 - 0 = 35000 (enough for full order)
+
+# Hold action returns 0 with no side effects
+held = executor.execute_trade("AAPL", "hold", 50, 150.0, portfolio)
+# held = 0
+</code></pre>
+
+<h3>Example: AgentController Normalization</h3>
+<pre><code class="language-python"># The controller ensures every ticker has a valid decision,
+# even if the agent omits some or returns malformed data
+controller = AgentController()
+raw_output = agent(tickers=["AAPL", "TSLA"], ...)
+# raw_output might be: {"decisions": {"AAPL": {"action": "buy", "quantity": "50"}}}
+# Note: TSLA is missing, quantity is a string
+
+normalized = controller.run_agent(agent, tickers=["AAPL", "TSLA"], ...)
+# normalized["decisions"]["AAPL"] = {"action": "buy", "quantity": 50.0}
+# normalized["decisions"]["TSLA"] = {"action": "hold", "quantity": 0.0}
+</code></pre>
+
+<!-- FOOTER -->
+<div class="footer"><a title="backtesting — Historical Backtesting Engine" href="../index.html">&larr; Back to backtesting Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

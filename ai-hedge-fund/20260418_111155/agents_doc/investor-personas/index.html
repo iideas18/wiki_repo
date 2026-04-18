@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-18">
+<meta name="wiki-source" content="src/agents/">
+<meta name="wiki-source-rev" content="0f6ac48">
+<title>agents investor-personas — Famous Investor AI Personas</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="AI Hedge Fund — Multi-Agent AI-Powered Trading System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="agents — AI Investor Persona Agents" href="../index.html">agents</a> &rsaquo; <span>investor-personas</span></nav>
+
+<main id="main">
+<h1><a title="agents — AI Investor Persona Agents" href="../index.html">agents</a>/investor-personas/ &mdash; Famous Investor AI Personas</h1>
+<div class="hero">
+  <p class="subtitle">13 AI agents each embodying a legendary investor's philosophy</p>
+  <p>From Warren Buffett's value investing to Nassim Taleb's tail-risk analysis, each agent analyzes stocks through its persona's unique philosophical lens. All follow the same interface but with radically different system prompts and analysis priorities.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">13</div><div class="label">Investor Personas</div></div>
+  <div class="stat-box"><div class="num">13</div><div class="label">Python Files</div></div>
+  <div class="stat-box"><div class="num">~6.5k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">Signal Types</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>These 13 agents are the creative heart of the system. Each encodes decades of a real investor's published philosophy, books, and interview quotes into an LLM system prompt. The agent then uses this persona to interpret financial data &mdash; the same P/E ratio that excites a growth investor like Cathie Wood might horrify a value investor like Ben Graham. This diversity of perspective is the <a title="core — Graph, Data &amp; LLM Infrastructure" href="../../core_doc/index.html">core</a> insight: no single philosophy works in all markets.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine a book club where each member reads the same novel but interprets it through their professional lens. A psychologist focuses on character motivations (Buffett analyzes <a title="agents management — Risk &amp; <a href="../../backtesting_doc/portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">Portfolio</a> Management" href="../management/index.html">management</a> quality), a statistician tracks plot patterns (the technical analyst tracks price patterns), and a critic evaluates literary technique (Graham evaluates balance sheet quality). Same data, radically different interpretations &mdash; and the discussion between them produces richer understanding than any single perspective.</p>
+</details>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>The persona-agent pattern encodes domain expertise as natural-language system prompts rather than hard-coded rules. Each agent follows an identical structural contract &mdash; <code>(state: AgentState) &rarr; {signal, confidence, reasoning}</code> &mdash; but swaps in a different philosophical framework via its prompt. This design was chosen over a single agent with a "style" parameter because each investor's logic requires different sub-analyses: Buffett needs moat analysis while Taleb needs tail-risk metrics. Separating agents also allows LangGraph to run them in parallel across the fan-out phase, maximizing throughput. The trade-off is code duplication across agents, but the domain separation makes each agent independently testable and modifiable.</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>Agent granularity</td><td>One file per persona</td><td>Single agent with style config</td><td>Each persona needs unique sub-analyses (moat vs. tail-risk vs. disruption) that cannot be parameterized cleanly</td></tr>
+  <tr><td>Signal format</td><td>Pydantic model with Literal types</td><td>Free-form string output</td><td>Structured output ensures downstream consumers (risk manager, <a title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" href="../../backtesting_doc/portfolio/index.html">portfolio</a> manager) can reliably parse signals</td></tr>
+  <tr><td>LLM integration</td><td>Prompt-based persona + structured output</td><td>Fine-tuned models per investor</td><td>System prompts are cheaper to iterate, require no training data, and can be updated without retraining</td></tr>
+  <tr><td>Data fetching</td><td>Agent fetches its own data</td><td>Shared data layer pre-fetches all</td><td>Each persona needs different data (Burry wants insider trades; Taleb wants price volatility) so pre-fetching everything wastes API calls</td></tr>
+</table>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<p>All 13 investor persona agents follow the same four-stage pipeline pattern. The LangGraph orchestrator fans out to all agents in parallel, each independently fetching data, building analysis, calling the LLM, and emitting a structured signal.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph FanOut["LangGraph Fan-Out (parallel)"]
+    WB["warren_buffett_agent"]
+    BG["ben_graham_agent"]
+    CW["cathie_wood_agent"]
+    MB["michael_burry_agent"]
+    NT["nassim_taleb_agent"]
+    CM["charlie_munger_agent"]
+    BA["bill_ackman_agent"]
+    PL["peter_lynch_agent"]
+    PF["phil_fisher_agent"]
+    SD["stanley_druckenmiller_agent"]
+    AD["aswath_damodaran_agent"]
+    RJ["rakesh_jhunjhunwala_agent"]
+    MP["mohnish_pabrai_agent"]
+  end
+  State["AgentState with tickers"] --> FanOut
+  FanOut --> Signals["analyst_signals dict"]
+  Signals --> RM["Risk Manager"]
+</pre>
+</div>
+
+<h3 id="agent-pipeline">Per-Agent Internal Pipeline</h3>
+<p>Each persona agent internally follows this four-step pattern, regardless of which investor it embodies:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  A["1. Fetch Data"] --> B["2. Run Sub-Analyses"]
+  B --> C["3. Build LLM Prompt"]
+  C --> D["4. Parse Signal Output"]
+  A -.- A1["get_financial_metrics\nget_market_cap\nsearch_line_items"]
+  B -.- B1["analyze_fundamentals\nanalyze_moat\nanalyze_consistency\netc."]
+  C -.- C1["System prompt encodes\ninvestor philosophy"]
+  D -.- D1["Pydantic model:\nsignal + confidence\n+ reasoning"]
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Investing Style &amp; Focus</th></tr>
+  <tr><td><code>warren_buffett_agent</code></td><td>warren_buffett.py</td><td>Value investing: moat analysis, management quality, intrinsic value vs. market price, margin of safety</td></tr>
+  <tr><td><code>ben_graham_agent</code></td><td>ben_graham.py</td><td>Classic value investing: earnings stability, financial strength, Graham Number, net-net valuation</td></tr>
+  <tr><td><code>cathie_wood_agent</code></td><td>cathie_wood.py</td><td>Disruptive innovation: breakthrough tech, rapid adoption curves, massive TAM, R&amp;D intensity</td></tr>
+  <tr><td><code>michael_burry_agent</code></td><td>michael_burry.py</td><td>Deep-value contrarian: insider trades, news sentiment, free cash flow, short opportunities</td></tr>
+  <tr><td><code>nassim_taleb_agent</code></td><td>nassim_taleb.py</td><td>Antifragility and tail risk: price volatility, barbell strategy, convexity, fat-tail distributions</td></tr>
+  <tr><td><code>charlie_munger_agent</code></td><td>charlie_munger.py</td><td>Rational thinking: quality businesses, competitive advantages, mental models, long-term compounding</td></tr>
+  <tr><td><code>bill_ackman_agent</code></td><td>bill_ackman.py</td><td>Activist investing: management influence, value unlock, strategic activism, contrarian positions</td></tr>
+  <tr><td><code>peter_lynch_agent</code></td><td>peter_lynch.py</td><td>Growth at reasonable price: PEG ratio, "buy what you know", understandable businesses, 10-baggers</td></tr>
+  <tr><td><code>phil_fisher_agent</code></td><td>phil_fisher.py</td><td>Scuttlebutt research: strong management, innovative products, long-term growth, qualitative analysis</td></tr>
+  <tr><td><code>stanley_druckenmiller_agent</code></td><td>stanley_druckenmiller.py</td><td>Macro investing: macroeconomic trends, currency/commodity bets, top-down analysis, large positions</td></tr>
+  <tr><td><code>aswath_damodaran_agent</code></td><td>aswath_damodaran.py</td><td>Valuation dean: intrinsic value modeling, rigorous DCF, financial metrics, academic rigor</td></tr>
+  <tr><td><code>rakesh_jhunjhunwala_agent</code></td><td>rakesh_jhunjhunwala.py</td><td>Emerging markets: macroeconomic insights, high-growth sectors, domestic opportunities, the Big Bull</td></tr>
+  <tr><td><code>mohnish_pabrai_agent</code></td><td>mohnish_pabrai.py</td><td>Dhandho investing: low risk high uncertainty, copycat strategy, margin of safety, concentrated bets</td></tr>
+  <tr><td><code>growth_analyst_agent</code></td><td>growth_agent.py</td><td>Growth analysis: revenue acceleration, earnings momentum, valuation multiples, growth trajectory</td></tr>
+</table>
+
+<h3 id="signal-contract">Common Signal Contract</h3>
+<p>Every persona agent, regardless of which investor it embodies, must produce output conforming to this contract. The signal is always one of three values, confidence is always 0-100, and reasoning is free-form text explaining the investment thesis. This uniformity is what allows the risk manager and portfolio manager to treat all 13 agents identically.</p>
+<pre><code class="language-python">class InvestorSignal(BaseModel):
+    signal: Literal["bullish", "bearish", "neutral"]
+    confidence: int = Field(description="Confidence level 0-100")
+    reasoning: str = Field(description="Investment thesis reasoning")
+</code></pre>
+
+<h3 id="sub-analysis-pattern">Sub-Analysis Scoring Pattern</h3>
+<p>Each persona agent runs multiple domain-specific sub-analyses. While the exact analyses differ (Buffett runs 7, Graham runs 3, Taleb runs 4+), they all follow the same scoring pattern: each sub-analysis returns a dict with a <code>score</code> key and domain-specific details. Scores are aggregated, normalized against <code>max_possible_score</code>, and then passed to the LLM for final interpretation through the persona's philosophical lens.</p>
+
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>Pydantic</td><td><code>WarrenBuffettSignal</code></td><td>Output schema: <code>signal</code> (bullish/bearish/neutral), <code>confidence</code> (0-100 int), <code>reasoning</code> (str)</td></tr>
+  <tr><td>Pydantic</td><td><code>BenGrahamSignal</code></td><td>Output schema: <code>signal</code> (Literal), <code>confidence</code> (float), <code>reasoning</code> (str)</td></tr>
+  <tr><td>Pydantic</td><td><code>CathieWoodSignal</code></td><td>Output schema: same three fields, tailored for disruptive innovation analysis</td></tr>
+  <tr><td>Pydantic</td><td><code>MichaelBurrySignal</code></td><td>Output schema with <code>confidence</code> as float 0-100 for deep-value contrarian signals</td></tr>
+  <tr><td>Pydantic</td><td><code>NassimTalebSignal</code></td><td>Output schema: <code>confidence</code> as int Field(0-100) for tail-risk analysis</td></tr>
+  <tr><td>TypedDict</td><td><code>AgentState</code></td><td>Shared LangGraph state containing <code>data</code>, <code>metadata</code>, <code>messages</code>, and <code>analyst_signals</code></td></tr>
+  <tr><td>dict</td><td><code>analysis_data</code></td><td>Per-ticker dict aggregating sub-analysis scores (fundamental, moat, consistency, etc.)</td></tr>
+  <tr><td>dict</td><td><code>ANALYST_CONFIG</code></td><td>Registry mapping agent keys to display names, descriptions, investing styles, and agent functions</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&rarr;</td><td>Financial API</td><td><code>get_financial_metrics()</code></td><td>Fetches TTM/annual financial metrics for each ticker via the Financial Datasets API</td></tr>
+  <tr><td>&rarr;</td><td>Financial API</td><td><code>search_line_items()</code></td><td>Retrieves specific accounting line items (revenue, FCF, net income, etc.) with period/limit controls</td></tr>
+  <tr><td>&rarr;</td><td>Financial API</td><td><code>get_market_cap()</code></td><td>Gets current market capitalization for margin-of-safety calculations</td></tr>
+  <tr><td>&rarr;</td><td>LLM Service</td><td><code>call_llm()</code></td><td>Sends structured prompt to LLM with persona system prompt; returns parsed Pydantic signal</td></tr>
+  <tr><td>&rarr;</td><td>News/Insider API</td><td><code>get_insider_trades()</code>, <code>get_company_news()</code></td><td>Used by Burry and Taleb agents for contrarian and sentiment signals</td></tr>
+  <tr><td>&rarr;</td><td><a href="../../core_doc/data-tools/index.html" title="core data-tools &mdash; Data Models, API Tools &amp; LLM Integration" class="xref">Price</a> API</td><td><code>get_prices()</code>, <code>prices_to_df()</code></td><td>Used by Taleb agent for volatility and tail-risk analysis on price data</td></tr>
+  <tr><td>&larr;</td><td>LangGraph State</td><td><code>state["data"]["analyst_signals"]</code></td><td>Each agent writes its signal dict to the shared state for downstream consumption</td></tr>
+  <tr><td>&larr;</td><td>Progress Tracker</td><td><code>progress.update_status()</code></td><td>Reports step-by-step progress to the UI for real-time status updates</td></tr>
+</table>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>period</code></td><td>"ttm" or "annual"</td><td>Financial data period; Buffett uses TTM, Graham uses annual for stability analysis</td></tr>
+  <tr><td><code>limit</code></td><td>5-10</td><td>Number of historical periods to fetch; more periods enable trend analysis</td></tr>
+  <tr><td><code>agent_id</code></td><td>"{name}_agent"</td><td>Unique identifier for progress tracking and signal storage in state</td></tr>
+  <tr><td><code>show_reasoning</code></td><td>metadata flag</td><td>When true, calls <code>show_agent_reasoning()</code> to display analysis to the user</td></tr>
+  <tr><td><code>FINANCIAL_DATASETS_API_KEY</code></td><td>from state</td><td>API key for the Financial Datasets service, extracted from agent state</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for investor-personas</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/agents/
+├── warren_buffett.py            ← The Oracle of Omaha: moat, management, intrinsic value
+├── ben_graham.py                ← Father of Value Investing: earnings stability, Graham Number
+├── cathie_wood.py               ← Queen of Growth: disruptive innovation, TAM analysis
+├── michael_burry.py             ← The Big Short: deep-value contrarian, insider trades
+├── nassim_taleb.py              ← Black Swan: antifragility, tail risk, convexity
+├── charlie_munger.py            ← Rational Thinker: quality businesses, mental models
+├── bill_ackman.py               ← Activist Investor: strategic activism, value unlock
+├── peter_lynch.py               ← 10-Bagger Hunter: PEG ratio, buy what you know
+├── phil_fisher.py               ← Scuttlebutt Investor: management quality, innovation
+├── stanley_druckenmiller.py     ← Macro Investor: macro trends, large directional bets
+├── aswath_damodaran.py          ← Dean of Valuation: rigorous DCF, intrinsic value
+├── rakesh_jhunjhunwala.py       ← Big Bull of India: emerging markets, growth sectors
+├── mohnish_pabrai.py            ← Dhandho Investor: low risk high uncertainty, concentrated
+└── growth_agent.py              ← Growth Analyst: revenue/earnings acceleration
+</code></pre>
+</details>
+
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The most important code in this sub-module: Warren Buffett's core agent function, which exemplifies the pattern all 13 persona agents follow.</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">warren_buffett_agent &mdash; Core Analysis Pipeline</h4>
+<pre><code class="language-python">def warren_buffett_agent(state: AgentState, agent_id: str = "warren_buffett_agent"):
+    """Analyzes stocks using Buffett's principles and LLM reasoning."""
+    data = state["data"]
+    end_date = data["end_date"]
+    tickers = data["tickers"]
+    api_key = get_api_key_from_state(state, "FINANCIAL_DATASETS_API_KEY")
+    analysis_data = {}
+    buffett_analysis = {}
+
+    for ticker in tickers:
+        # Step 1: Fetch raw financial data
+        progress.update_status(agent_id, ticker, "Fetching financial metrics")
+        metrics = get_financial_metrics(ticker, end_date, period="ttm", limit=10, api_key=api_key)
+
+        # Step 2: Run Buffett-specific sub-analyses
+        fundamental_analysis = analyze_fundamentals(metrics)
+        consistency_analysis = analyze_consistency(financial_line_items)
+        moat_analysis = analyze_moat(metrics)
+        pricing_power_analysis = analyze_pricing_power(financial_line_items, metrics)
+        book_value_analysis = analyze_book_value_growth(financial_line_items)
+        mgmt_analysis = analyze_management_quality(financial_line_items)
+        intrinsic_value_analysis = calculate_intrinsic_value(financial_line_items)
+
+        # Step 3: Aggregate sub-analysis scores
+        total_score = (
+            fundamental_analysis["score"] +
+            consistency_analysis["score"] +
+            moat_analysis["score"] +
+            mgmt_analysis["score"] +
+            pricing_power_analysis["score"] +
+            book_value_analysis["score"]
+        )
+
+        # Step 4: Calculate margin of safety (Buffett's key metric)
+        margin_of_safety = None
+        intrinsic_value = intrinsic_value_analysis["intrinsic_value"]
+        if intrinsic_value and market_cap:
+            margin_of_safety = (intrinsic_value - market_cap) / market_cap
+
+        # Step 5: Send to LLM with Buffett persona prompt
+        buffett_output = generate_buffett_output(
+            ticker=ticker, analysis_data=analysis_data[ticker],
+            state=state, agent_id=agent_id,
+        )
+
+        # Step 6: Store in standard signal format
+        buffett_analysis[ticker] = {
+            "signal": buffett_output.signal,
+            "confidence": buffett_output.confidence,
+            "reasoning": buffett_output.reasoning,
+        }
+
+    # Write signals to shared state
+    state["data"]["analyst_signals"][agent_id] = buffett_analysis</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>Line 1-2:</strong> Standard signature &mdash; every persona agent takes <code>AgentState</code> and a default <code>agent_id</code>. The ID is used as the key in <code>analyst_signals</code> so downstream consumers know which persona produced which signal.</li>
+  <li><strong>Line 6:</strong> API key extraction from state allows different API keys per run (multi-tenant), rather than relying on environment variables.</li>
+  <li><strong>Lines 12-13:</strong> Buffett uses TTM (trailing twelve months) with 10 periods &mdash; he cares about recent performance trends, not just the latest quarter.</li>
+  <li><strong>Lines 16-22:</strong> The six sub-analyses are Buffett-specific. Other agents have entirely different analyses (Taleb has <code>analyze_tail_risk</code>, Cathie Wood has <code>analyze_disruptive_potential</code>). This is why each persona needs its own file.</li>
+  <li><strong>Lines 30-32:</strong> Margin of safety &mdash; Buffett's most famous concept. He only buys when intrinsic value exceeds market price by a significant margin. This raw metric is passed to the LLM for interpretation.</li>
+  <li><strong>Lines 35-38:</strong> The LLM call is where the persona really lives. <code>generate_buffett_output</code> wraps the analysis data in a system prompt that channels Buffett's voice and priorities.</li>
+  <li><strong>Lines 41-44:</strong> Output is normalized to the standard <code>{signal, confidence, reasoning}</code> format that the risk manager and portfolio manager expect from all agents.</li>
+</ul>
+</div>
+</div>
+
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>Missing financial metrics</td><td>Sub-analysis functions return zero scores; LLM receives incomplete data and may produce low-confidence signals</td><td>All agents: metrics fetch check</td><td>&#128308; High</td></tr>
+  <tr><td>API key not in state</td><td><code>get_api_key_from_state()</code> raises or returns None, causing all data fetches to fail for the agent</td><td>Agent entry: line 6</td><td>&#128308; High</td></tr>
+  <tr><td>Market cap is None</td><td>Margin of safety is set to <code>None</code> and intrinsic value comparison is skipped</td><td>warren_buffett.py:103-106</td><td>&#128993; Medium</td></tr>
+  <tr><td>LLM returns malformed output</td><td>Pydantic validation fails; the agent does not produce a signal for that ticker</td><td>generate_*_output functions</td><td>&#128993; Medium</td></tr>
+  <tr><td>No insider trades available</td><td>Burry and Taleb agents get empty lists; sentiment analysis produces neutral signals</td><td>michael_burry.py:70, nassim_taleb.py:76</td><td>&#128994; Low</td></tr>
+  <tr><td>Empty tickers list</td><td>The for-loop body never executes; agent returns empty analysis dict</td><td>All agents: for ticker in tickers</td><td>&#128994; Low</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Ben Graham's Score-Based Signal Mapping</h3>
+<p>Graham's agent demonstrates the simpler scoring approach where scores directly map to signals without an LLM call for the initial assessment, though the LLM refines the final output:</p>
+<pre><code class="language-python"># Aggregate scoring from three sub-analyses
+total_score = (
+    earnings_analysis["score"] +
+    strength_analysis["score"] +
+    valuation_analysis["score"]
+)
+max_possible_score = 15  # 5 per analysis
+
+# Direct score-to-signal mapping (deterministic)
+if total_score >= 0.7 * max_possible_score:     # >= 10.5
+    signal = "bullish"
+elif total_score <= 0.3 * max_possible_score:    # <= 4.5
+    signal = "bearish"
+else:
+    signal = "neutral"
+</code></pre>
+
+<h3>Example: Cathie Wood's Disruptive Innovation Focus</h3>
+<p>Note how Cathie Wood's agent fetches R&amp;D and capex data that most other agents don't need &mdash; her analysis is uniquely focused on innovation spending:</p>
+<pre><code class="language-python">financial_line_items = search_line_items(
+    ticker,
+    [
+        "revenue", "gross_margin", "operating_margin",
+        "research_and_development",   # Unique to Cathie Wood
+        "capital_expenditure",         # Innovation investment proxy
+        "operating_expense",           # R&D as % of opex
+    ],
+    end_date, period="annual", limit=5, api_key=api_key,
+)
+</code></pre>
+
+<h2 id="flow">Data Flow</h2>
+<p>How a single ticker flows through one persona agent from state input to signal output:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant S as AgentState
+  participant A as Persona Agent
+  participant API as Financial API
+  participant LLM as LLM Service
+  participant Out as analyst_signals
+
+  S->>A: tickers, end_date, api_key
+  loop For each ticker
+    A->>API: get_financial_metrics(ticker)
+    API-->>A: metrics list
+    A->>API: search_line_items(ticker)
+    API-->>A: line items
+    A->>API: get_market_cap(ticker)
+    API-->>A: market cap
+    A->>A: Run sub-analyses (moat, fundamentals, etc.)
+    A->>LLM: Persona prompt + analysis_data
+    LLM-->>A: WarrenBuffettSignal(signal, confidence, reasoning)
+  end
+  A->>Out: analyst_signals[agent_id] = analysis
+</pre>
+</div>
+
+<div class="footer"><a title="agents — AI Investor Persona Agents" href="../index.html">&larr; Back to agents Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

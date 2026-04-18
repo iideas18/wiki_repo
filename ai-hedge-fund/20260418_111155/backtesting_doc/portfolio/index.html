@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-18">
+<meta name="wiki-source" content="src/backtesting/">
+<meta name="wiki-source-rev" content="0f6ac48">
+<title>backtesting portfolio — Portfolio Tracking &amp; Performance Metrics</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="AI Hedge Fund — Multi-Agent AI-Powered Trading System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="backtesting — Historical Backtesting Engine" href="../index.html">backtesting</a> &rsaquo; <span>portfolio</span></nav>
+
+<main id="main">
+<h1><a title="backtesting — Historical Backtesting Engine" href="../index.html">backtesting</a>/portfolio/ &mdash; Portfolio Tracking &amp; Performance Metrics</h1>
+<div class="hero">
+  <p class="subtitle">Position <a title="agents management — Risk &amp; Portfolio Management" href="../../agents_doc/management/index.html">management</a>, P&amp;L calculation, and performance analytics</p>
+  <p>Tracks portfolio state across the backtest &mdash; cash, long/short positions, margin, and cost basis. Calculates comprehensive performance metrics (Sharpe ratio, Sortino ratio, maximum drawdown). Compares against benchmarks (S&amp;P 500 via SPY). Generates formatted output reports with per-ticker and summary rows.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">5</div><div class="label">Modules</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~0.5 k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">7</div><div class="label">Metrics</div></div>
+</div>
+
+<!-- WHAT & WHY INTRO BOX -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>Without portfolio tracking and metrics, a backtest is just a list of decisions with no way to evaluate quality. This sub-module maintains the financial state of the simulated portfolio &mdash; tracking every position, cost basis, margin requirement, and realized/unrealized gain. The metrics module then analyzes this history using industry-standard measures. The Sharpe ratio tells you risk-adjusted return, maximum drawdown tells you worst-case loss, Sortino ratio penalizes only downside volatility, and benchmark comparison tells you whether the AI strategy beat simple index investing.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a sports team's season statistics tracker. The <code>Portfolio</code> class is the scoreboard &mdash; it shows the current score, who's on the field (positions), and how much time-out budget remains (cash and margin). The <code>PerformanceMetricsCalculator</code> is the analytics department &mdash; it computes win rate, points per game, and strength-of-schedule adjusted rankings (Sharpe, Sortino, drawdown). The <code>BenchmarkCalculator</code> is the league standings &mdash; it answers "are we doing better than average?" by comparing against the S&amp;P 500. The <code>OutputBuilder</code> is the press release team &mdash; it formats all this data into tables that stakeholders can quickly scan. Without the analytics department, you'd know who won individual games but not whether the team is actually good.</p>
+</details>
+</div>
+
+<!-- DESIGN RATIONALE -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>The portfolio sub-module follows an <strong>encapsulated-state + pure-functions</strong> pattern. The <code>Portfolio</code> class is the only mutable component &mdash; it owns all position state and provides atomic mutation methods (<code>apply_long_buy</code>, <code>apply_short_cover</code>, etc.) that enforce invariants (can't sell more shares than held, can't spend more cash than available). Everything else is a pure function or a stateless calculator: <code>calculate_portfolio_value</code> takes a portfolio and prices, returns a number; <code>compute_metrics</code> takes value history, returns metrics. This separation makes the financial math easy to unit-test without mocking any state. The <code>MappingProxyType</code> wrapper on <code>get_positions()</code> prevents callers from accidentally mutating internal state &mdash; mutations must go through the <code>apply_*</code> methods.</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>State encapsulation</td><td>Private <code>_portfolio</code> dict with accessor methods</td><td>Public dict</td><td>Prevents external code from bypassing cost-basis or margin tracking invariants</td></tr>
+  <tr><td>Read-only views</td><td><code>MappingProxyType</code> on positions/gains</td><td>Deep-copy on every read</td><td>Zero-copy for reads; <code>MappingProxyType</code> raises <code>TypeError</code> on mutation attempts without copy overhead</td></tr>
+  <tr><td>Partial fills</td><td>Auto-downsize to affordable quantity</td><td>Reject-or-fill-all</td><td>Matches real broker behavior; ensures the backtest doesn't stall when the agent over-requests</td></tr>
+  <tr><td>Metrics as pure functions</td><td>Stateless <code>compute_metrics(values)</code></td><td>Metrics accumulated inside Portfolio</td><td>Portfolio owns position state; metrics are a separate concern &mdash; portfolio shouldn't know about Sharpe ratios</td></tr>
+</table>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  Engine["BacktestEngine"] --> Portfolio["Portfolio -- Mutable State"]
+  Engine --> Valuation["valuation.py -- NAV and Exposures"]
+  Engine --> Metrics["PerformanceMetricsCalculator -- Sharpe, Sortino, Drawdown"]
+  Engine --> Benchmark["BenchmarkCalculator -- SPY Comparison"]
+  Engine --> Output["OutputBuilder -- Table Formatting"]
+
+  Portfolio --> |get_snapshot| Engine
+  Portfolio --> |apply_long_buy, apply_long_sell| Portfolio
+  Portfolio --> |apply_short_open, apply_short_cover| Portfolio
+
+  Valuation --> |calculate_portfolio_value| Engine
+  Valuation --> |compute_exposures| Engine
+  Valuation --> |compute_portfolio_summary| Output
+
+  Metrics --> |compute_metrics| Engine
+  Benchmark --> |get_return_pct| Output
+  Output --> |build_day_rows| Engine
+  Output --> |print_rows| Display["Terminal Output"]
+</pre>
+</div>
+
+<!-- DATA FLOW: Portfolio State Mutations -->
+<h2 id="data-flow">Data Flow: Position Lifecycle</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> NoPosition: Portfolio initialized
+  NoPosition --> LongPosition: apply_long_buy(ticker, qty, price)
+  LongPosition --> LongPosition: apply_long_buy (add to position)
+  LongPosition --> NoPosition: apply_long_sell (sell all)
+  LongPosition --> ReducedLong: apply_long_sell (partial)
+  ReducedLong --> NoPosition: apply_long_sell (remaining)
+  ReducedLong --> LongPosition: apply_long_buy (add back)
+  NoPosition --> ShortPosition: apply_short_open(ticker, qty, price)
+  ShortPosition --> ShortPosition: apply_short_open (add to short)
+  ShortPosition --> NoPosition: apply_short_cover (cover all)
+  ShortPosition --> ReducedShort: apply_short_cover (partial)
+  ReducedShort --> NoPosition: apply_short_cover (remaining)
+  ReducedShort --> ShortPosition: apply_short_open (add back)
+</pre>
+</div>
+
+<!-- METRICS CALCULATION FLOW -->
+<h2 id="metrics-flow">Metrics Calculation Pipeline</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  Values["portfolio_values list"] --> DF["pd.DataFrame"]
+  DF --> Returns["Daily Return = pct_change"]
+  Returns --> Excess["excess = return - daily_rf"]
+  Excess --> Sharpe["Sharpe = sqrt(252) * mean(excess) / std(excess)"]
+  Excess --> Downside["downside = min(excess, 0)"]
+  Downside --> Sortino["Sortino = sqrt(252) * mean(excess) / sqrt(mean(downside^2))"]
+  DF --> CumMax["cummax of Portfolio Value"]
+  CumMax --> Drawdown["drawdown = (value - cummax) / cummax"]
+  Drawdown --> MaxDD["max_drawdown = min(drawdown) * 100"]
+</pre>
+</div>
+
+<!-- KEY CLASSES TABLE -->
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>Portfolio</code></td><td>portfolio.py</td><td>Encapsulates portfolio state: cash, positions (long/short per ticker), margin, realized gains</td></tr>
+  <tr><td><code>Portfolio.__init__</code></td><td>portfolio.py</td><td>Initializes all tickers with zero positions, sets initial cash and margin requirement</td></tr>
+  <tr><td><code>Portfolio.get_snapshot</code></td><td>portfolio.py</td><td>Returns a deep-copied <code>PortfolioSnapshot</code> dict safe to pass to external callers</td></tr>
+  <tr><td><code>Portfolio.apply_long_buy</code></td><td>portfolio.py</td><td>Buy shares: deducts cash, updates position count, recalculates weighted-average cost basis. Auto-downsizes if insufficient cash.</td></tr>
+  <tr><td><code>Portfolio.apply_long_sell</code></td><td>portfolio.py</td><td>Sell long shares: calculates realized gain = (price - cost_basis) * qty, credits cash, reduces position</td></tr>
+  <tr><td><code>Portfolio.apply_short_open</code></td><td>portfolio.py</td><td>Open short: receives sale proceeds, reserves margin, updates short cost basis. Auto-downsizes if insufficient margin.</td></tr>
+  <tr><td><code>Portfolio.apply_short_cover</code></td><td>portfolio.py</td><td>Cover short: pays cover cost, releases proportional margin, calculates realized gain = (short_cost_basis - price) * qty</td></tr>
+  <tr><td><code>PerformanceMetricsCalculator</code></td><td>metrics.py</td><td>Stateless calculator for Sharpe ratio, Sortino ratio, and max drawdown from an equity curve</td></tr>
+  <tr><td><code>PerformanceMetricsCalculator.compute_metrics</code></td><td>metrics.py</td><td><a title="core — Graph, Data &amp; LLM Infrastructure" href="../../core_doc/index.html">Core</a> calculation: converts value points to <a href="../../agents_doc/quantitative/index.html" title="agents quantitative — Quantitative Analysis Agents" class="xref">DataFrame</a>, computes daily returns, excess returns, risk ratios</td></tr>
+  <tr><td><code>calculate_portfolio_value</code></td><td>valuation.py</td><td>Pure function: NAV = cash + sum(long * price) - sum(short * price)</td></tr>
+  <tr><td><code>compute_exposures</code></td><td>valuation.py</td><td>Pure function: computes long/short/gross/net exposure and L/S ratio</td></tr>
+  <tr><td><code>compute_portfolio_summary</code></td><td>valuation.py</td><td>Pure function: assembles summary row data (return %, cash balance, position value, metrics)</td></tr>
+  <tr><td><code>BenchmarkCalculator</code></td><td>benchmarks.py</td><td>Computes buy-and-hold return for a benchmark ticker (SPY) over the backtest period</td></tr>
+  <tr><td><code>BenchmarkCalculator.get_return_pct</code></td><td>benchmarks.py</td><td>Returns (last_close / first_close - 1) * 100, or None if data unavailable</td></tr>
+  <tr><td><code>OutputBuilder</code></td><td>output.py</td><td>Builds tabular display rows for each trading day and prints them via display utilities</td></tr>
+  <tr><td><code>OutputBuilder.build_day_rows</code></td><td>output.py</td><td>Generates per-ticker rows (action, qty, price, position value) and a summary row (total value, return, metrics)</td></tr>
+</table>
+
+<!-- DATA STRUCTURES -->
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>TypedDict</td><td><code>PositionState</code></td><td>Per-ticker state: <code>long</code>, <code>short</code> (share counts), <code>long_cost_basis</code>, <code>short_cost_basis</code> (avg price), <code>short_margin_used</code></td></tr>
+  <tr><td>TypedDict</td><td><code>TickerRealizedGains</code></td><td>Per-ticker realized P&amp;L split by side: <code>{long: float, short: float}</code></td></tr>
+  <tr><td>TypedDict</td><td><code>PortfolioSnapshot</code></td><td>Full state dump: <code>cash</code>, <code>margin_used</code>, <code>margin_requirement</code>, <code>positions</code>, <code>realized_gains</code></td></tr>
+  <tr><td>TypedDict</td><td><code>PerformanceMetrics</code></td><td>Computed analytics: <code>sharpe_ratio</code>, <code>sortino_ratio</code>, <code>max_drawdown</code>, <code>max_drawdown_date</code>, exposure fields</td></tr>
+  <tr><td>TypedDict</td><td><code>PortfolioValuePoint</code></td><td>Daily data point: Date, Portfolio Value, Long/Short/Gross/Net Exposure, L/S Ratio</td></tr>
+  <tr><td>Dict</td><td>Exposures return</td><td><code>compute_exposures</code> returns: Long Exposure, Short Exposure, Gross Exposure, Net Exposure, Long/Short Ratio</td></tr>
+  <tr><td>Dict</td><td>Summary return</td><td><code>compute_portfolio_summary</code> returns: total_value, return_pct, cash_balance, total_position_value, sharpe, sortino, max_drawdown</td></tr>
+</table>
+
+<!-- INTERACTIONS -->
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&larr;</td><td><a href="../engine/index.html" title="backtesting engine — Simulation Engine &amp; Controller" class="xref">TradeExecutor</a></td><td><code>apply_long_buy()</code>, <code>apply_long_sell()</code>, <code>apply_short_open()</code>, <code>apply_short_cover()</code></td><td>Executor calls mutation methods to change position state</td></tr>
+  <tr><td>&rarr;</td><td><a href="../engine/index.html" title="backtesting engine — Simulation Engine &amp; Controller" class="xref">AgentController</a></td><td><code>get_snapshot()</code></td><td>Portfolio provides a read-only copy of state for agent input</td></tr>
+  <tr><td>&rarr;</td><td>valuation.py</td><td><code>get_cash()</code>, <code>get_positions()</code></td><td>Valuation functions read state to compute NAV and exposures</td></tr>
+  <tr><td>&rarr;</td><td>OutputBuilder</td><td><code>get_positions()</code></td><td>Output reads positions to format per-ticker rows</td></tr>
+  <tr><td>&larr;</td><td><a href="../engine/index.html" title="backtesting engine — Simulation Engine &amp; Controller" class="xref">BacktestEngine</a></td><td><code>PerformanceMetricsCalculator.compute_metrics()</code></td><td><a title="backtesting engine — Simulation Engine &amp; Controller" href="../engine/index.html">Engine</a> passes equity curve; calculator returns metrics dict</td></tr>
+  <tr><td>&rarr;</td><td>API layer</td><td><code>get_price_data()</code></td><td>BenchmarkCalculator fetches SPY price data for return comparison</td></tr>
+  <tr><td>&rarr;</td><td>Display utils</td><td><code>format_backtest_row()</code>, <code>print_backtest_results()</code></td><td>OutputBuilder delegates terminal formatting to shared utilities</td></tr>
+  <tr><td>&larr;</td><td>BacktestEngine</td><td><code>OutputBuilder.build_day_rows()</code></td><td>Engine passes daily data; builder returns formatted row lists</td></tr>
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>initial_cash</code></td><td>100000</td><td>Starting cash balance for the portfolio</td></tr>
+  <tr><td><code>margin_requirement</code></td><td>0.0</td><td>Fraction of short proceeds reserved as margin (0.5 = 50%)</td></tr>
+  <tr><td><code>annual_trading_days</code></td><td>252</td><td>Used to annualize Sharpe and Sortino ratios</td></tr>
+  <tr><td><code>annual_rf_rate</code></td><td>0.0434</td><td>Risk-free rate for excess return calculation (4.34% default)</td></tr>
+</table>
+
+<!-- DIRECTORY MAP -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for portfolio</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>backtesting/
+├── portfolio.py            ← Portfolio class: mutable state, position tracking, cost basis
+├── metrics.py              ← PerformanceMetricsCalculator: Sharpe, Sortino, max drawdown
+├── valuation.py            ← Pure functions: NAV, exposures, portfolio summary
+├── benchmarks.py           ← BenchmarkCalculator: SPY buy-and-hold comparison
+├── output.py               ← OutputBuilder: daily row formatting and terminal display
+└── types.py                ← TypedDicts: PositionState, PortfolioSnapshot, PerformanceMetrics
+</code></pre>
+</details>
+
+<!-- ANNOTATED CODE WALKTHROUGH -->
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The most critical financial logic in this sub-module &mdash; the Sharpe ratio calculation and long-buy with cost-basis tracking:</p>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">PerformanceMetricsCalculator.compute_metrics() &mdash; Risk-Adjusted Returns</h4>
+<pre><code class="language-python">def compute_metrics(self, values: Sequence[PortfolioValuePoint]) -> PerformanceMetrics:
+    import pandas as pd
+    import numpy as np
+
+    if not values:                                                  # [1]
+        return {"sharpe_ratio": None, "sortino_ratio": None, "max_drawdown": None}
+
+    df = pd.DataFrame(values)
+    df = df.set_index("Date")
+    df["Daily Return"] = df["Portfolio Value"].pct_change()         # [2]
+    clean_returns = df["Daily Return"].dropna()
+    if len(clean_returns) < 2:                                      # [3]
+        return {"sharpe_ratio": None, "sortino_ratio": None, "max_drawdown": None}
+
+    daily_rf = self.annual_rf_rate / self.annual_trading_days       # [4]
+    excess = clean_returns - daily_rf                               # [5]
+    mean_excess = excess.mean()
+    std_excess = excess.std()
+
+    if std_excess > 1e-12:                                          # [6]
+        sharpe = float(np.sqrt(self.annual_trading_days) * (mean_excess / std_excess))
+    else:
+        sharpe = 0.0
+
+    downside_diff = np.minimum(excess, 0)                           # [7]
+    downside_dev = float(np.sqrt(np.mean(downside_diff**2)))
+    if downside_dev > 1e-12:
+        sortino = float(np.sqrt(self.annual_trading_days) * (mean_excess / downside_dev))
+    else:
+        sortino = float("inf") if mean_excess > 0 else 0.0         # [8]
+
+    rolling_max = df["Portfolio Value"].cummax()                    # [9]
+    drawdown = (df["Portfolio Value"] - rolling_max) / rolling_max
+    max_drawdown = float(drawdown.min() * 100.0)                   # [10]</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>[1] Guard clause:</strong> Returns None metrics for empty input &mdash; prevents index errors downstream.</li>
+  <li><strong>[2] Daily returns:</strong> <code>pct_change()</code> computes (V[t] - V[t-1]) / V[t-1]. The first row is NaN (no previous value), which is dropped.</li>
+  <li><strong>[3] Minimum data check:</strong> At least 2 clean returns needed for standard deviation. With 0 or 1 points, std is undefined.</li>
+  <li><strong>[4] Daily risk-free rate:</strong> Annualized rate (4.34%) divided by 252 trading days. This is the daily "free money" baseline.</li>
+  <li><strong>[5] Excess returns:</strong> Subtracting risk-free rate answers "how much did we beat a treasury bill by?" each day.</li>
+  <li><strong>[6] Epsilon guard:</strong> If std_excess is nearly zero (flat line portfolio), division would explode. Returns 0 instead of infinity.</li>
+  <li><strong>[7] Downside deviation:</strong> <code>np.minimum(excess, 0)</code> keeps only negative excess returns. Sortino only penalizes downside volatility, unlike Sharpe which penalizes all volatility.</li>
+  <li><strong>[8] Infinite Sortino:</strong> If there are no down days but positive mean return, Sortino is infinite &mdash; all returns exceeded the risk-free rate.</li>
+  <li><strong>[9] Rolling maximum:</strong> <code>cummax()</code> tracks the highest portfolio value seen so far. Drawdown is measured from this peak.</li>
+  <li><strong>[10] Max drawdown:</strong> The worst peak-to-trough decline as a percentage. -5.2 means the portfolio fell 5.2% from its peak at the worst point.</li>
+</ul>
+</div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">Portfolio.apply_long_buy() &mdash; Weighted-Average Cost Basis</h4>
+<pre><code class="language-python">def apply_long_buy(self, ticker: str, quantity: int, price: float) -> int:
+    if quantity <= 0:
+        return 0
+    position = self._portfolio["positions"][ticker]
+    cost = quantity * price
+
+    if cost <= self._portfolio["cash"]:                            # [A]
+        old_shares = position["long"]
+        old_cost_basis = position["long_cost_basis"]
+        total_shares = old_shares + quantity
+        if total_shares > 0:
+            total_old_cost = old_cost_basis * old_shares           # [B]
+            total_new_cost = cost
+            position["long_cost_basis"] = (total_old_cost + total_new_cost) / total_shares  # [C]
+        position["long"] = old_shares + quantity
+        self._portfolio["cash"] -= cost
+        return quantity
+
+    max_quantity = int(self._portfolio["cash"] / price)            # [D]
+    if max_quantity > 0:
+        # ... same cost-basis logic for partial fill ...
+        return max_quantity
+    return 0</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>[A] Cash check:</strong> If the full order is affordable, execute in full. Otherwise fall through to partial fill logic.</li>
+  <li><strong>[B] Old total cost:</strong> <code>old_cost_basis * old_shares</code> reconstructs the total dollars invested in existing shares. This is needed for weighted averaging.</li>
+  <li><strong>[C] Weighted-average cost basis:</strong> New basis = (old investment + new investment) / total shares. This correctly handles adding 100 shares at $50 to 200 shares bought at $40 &rarr; basis = (200*40 + 100*50) / 300 = $43.33.</li>
+  <li><strong>[D] Partial fill:</strong> Integer division gives the max whole shares affordable. Remaining cash stays available for other tickers. This mirrors real-broker behavior where you can't buy fractional shares.</li>
+</ul>
+</div>
+</div>
+
+<!-- EDGE CASES -->
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>Sell more shares than held</td><td>Capped to current position size via <code>min(quantity, position["long"])</code></td><td><code>portfolio.py:apply_long_sell</code> L116</td><td>&#128994; Low</td></tr>
+  <tr><td>Short with zero margin requirement</td><td>Margin required = 0; proceeds go directly to cash; no margin reserved</td><td><code>portfolio.py:apply_short_open</code> L134-136</td><td>&#128993; Medium &mdash; unrealistic, allows unlimited shorting</td></tr>
+  <tr><td>Cover more shorts than open</td><td>Capped to current short position via <code>min(quantity, position["short"])</code></td><td><code>portfolio.py:apply_short_cover</code> L173</td><td>&#128994; Low</td></tr>
+  <tr><td>Flat portfolio (all returns zero)</td><td>Sharpe returns 0.0 (std_excess &lt; 1e-12 guard), Sortino returns 0.0</td><td><code>metrics.py:compute_metrics</code> L44-45</td><td>&#128994; Low</td></tr>
+  <tr><td>All positive excess returns (no down days)</td><td>Sortino returns <code>inf</code> since downside deviation is zero</td><td><code>metrics.py:compute_metrics</code> L55</td><td>&#128993; Medium &mdash; <code>inf</code> may need special handling in output</td></tr>
+  <tr><td>SPY price data unavailable</td><td>BenchmarkCalculator returns <code>None</code>; output row shows no benchmark comparison</td><td><code>benchmarks.py:get_return_pct</code> L15-17</td><td>&#128994; Low</td></tr>
+  <tr><td>Zero-price ticker</td><td>Division by zero in <code>int(cash / price)</code>; guarded with <code>if price > 0</code></td><td><code>portfolio.py:apply_long_buy</code> L99</td><td>&#128994; Low</td></tr>
+</table>
+
+<!-- CODE EXAMPLES -->
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Portfolio Lifecycle</h3>
+<pre><code class="language-python">from src.backtesting.portfolio import Portfolio
+from src.backtesting.valuation import calculate_portfolio_value, compute_exposures
+
+# Initialize with $100k and 2 tickers
+portfolio = Portfolio(
+    tickers=["AAPL", "TSLA"],
+    initial_cash=100000.0,
+    margin_requirement=0.5,
+)
+
+# Buy 100 shares of AAPL at $150
+executed = portfolio.apply_long_buy("AAPL", 100, 150.0)
+# executed = 100, cash now = $85,000
+
+# Price rises to $160 — check NAV
+prices = {"AAPL": 160.0, "TSLA": 250.0}
+nav = calculate_portfolio_value(portfolio, prices)
+# nav = 85000 + (100 * 160) = $101,000
+
+# Sell 50 shares — realize gain
+sold = portfolio.apply_long_sell("AAPL", 50, 160.0)
+# realized_gain = (160 - 150) * 50 = $500
+
+# Check exposures
+exp = compute_exposures(portfolio, prices)
+# Long Exposure = 50 * 160 = $8,000
+# Short Exposure = $0
+</code></pre>
+
+<h3>Example: Computing Metrics from Equity Curve</h3>
+<pre><code class="language-python">from src.backtesting.metrics import PerformanceMetricsCalculator
+from datetime import datetime
+
+calc = PerformanceMetricsCalculator(annual_trading_days=252, annual_rf_rate=0.0434)
+
+values = [
+    {"Date": datetime(2025, 1, 2), "Portfolio Value": 100000},
+    {"Date": datetime(2025, 1, 3), "Portfolio Value": 100500},
+    {"Date": datetime(2025, 1, 6), "Portfolio Value": 99800},
+    {"Date": datetime(2025, 1, 7), "Portfolio Value": 101200},
+    {"Date": datetime(2025, 1, 8), "Portfolio Value": 102000},
+]
+
+metrics = calc.compute_metrics(values)
+print(f"Sharpe Ratio: {metrics['sharpe_ratio']:.2f}")
+print(f"Sortino Ratio: {metrics['sortino_ratio']:.2f}")
+print(f"Max Drawdown: {metrics['max_drawdown']:.2f}%")
+</code></pre>
+
+<!-- FOOTER -->
+<div class="footer"><a title="backtesting — Historical Backtesting Engine" href="../index.html">&larr; Back to backtesting Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

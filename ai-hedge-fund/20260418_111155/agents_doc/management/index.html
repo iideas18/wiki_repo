@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-18">
+<meta name="wiki-source" content="src/agents/">
+<meta name="wiki-source-rev" content="0f6ac48">
+<title>agents management — Risk &amp; Portfolio Management</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a title="AI Hedge Fund — Multi-Agent AI-Powered Trading System" href="../../index.html">AI Hedge Fund</a> &rsaquo; <a title="agents — AI Investor Persona Agents" href="../index.html">agents</a> &rsaquo; <span>management</span></nav>
+
+<main id="main">
+<h1><a title="agents — AI Investor Persona Agents" href="../index.html">agents</a>/management/ &mdash; Risk &amp; <a title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" href="../../backtesting_doc/portfolio/index.html">Portfolio</a> Management</h1>
+<div class="hero">
+  <p class="subtitle">Signal aggregation, risk assessment, and final trading decisions</p>
+  <p>The risk manager evaluates aggregate risk from all analyst signals and sets position limits. The portfolio manager makes final trading decisions (buy/sell/hold) with specific quantities, synthesizing all upstream analysis into executable orders.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">2</div><div class="label">Agent Files</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">Actions</div></div>
+  <div class="stat-box"><div class="num">~1.8k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">19</div><div class="label">Upstream Signals</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>These two agents are the "decision makers" in the fan-in phase of the pipeline. After 19 analyst agents independently produce signals, someone needs to synthesize them. The risk manager acts as a safety check &mdash; evaluating overall exposure, correlation risk, and position sizing. The portfolio manager then makes final decisions considering available capital, existing positions, and the risk manager's limits. This two-stage decision process (risk first, then portfolio) prevents the system from taking on excessive risk even when all analysts are bullish.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a restaurant kitchen. The risk manager is the health inspector &mdash; they don't cook, but they set limits (temperature requirements, freshness standards, capacity limits). The portfolio manager is the head chef who creates the final menu (trading decisions) working within the inspector's constraints. The health inspector reviews conditions first and says "you can serve at most 50 covers tonight given your refrigeration capacity." Then the head chef decides which dishes to prepare, how many of each, considering both the inspector's limits and the available ingredients (capital). Neither can do the other's job, and the order matters: risk limits must be set before trading decisions are made.</p>
+</details>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>The two-stage architecture (risk manager then portfolio manager) reflects institutional trading practice where risk management is independent of trading decisions. The risk manager is purely algorithmic &mdash; it computes volatility-adjusted position limits using price data, correlation matrices, and portfolio exposure without any LLM calls. This ensures risk limits are deterministic and not subject to LLM hallucination. The portfolio manager, by contrast, uses an LLM to synthesize the qualitative reasoning from all analyst signals into coherent trading decisions. This hybrid approach gives the system the creativity of LLM reasoning for decision-making while keeping risk controls mathematically rigorous. The <code>compute_allowed_actions</code> function adds a second deterministic layer: even if the LLM suggests buying 1000 shares, the function clamps it to the risk-manager-approved maximum.</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+  <tr><td>Risk computation</td><td>Algorithmic (no LLM)</td><td>LLM-based risk assessment</td><td>Risk limits must be deterministic and reproducible; LLM hallucination on position sizes could be catastrophic</td></tr>
+  <tr><td><a href="../../backtesting_doc/portfolio/index.html" title="backtesting portfolio — Portfolio Tracking &amp; Performance Metrics" class="xref">Portfolio</a> decisions</td><td>LLM with structured output</td><td>Rule-based signal aggregation</td><td>Synthesizing 19 qualitative signals with reasoning requires the nuance that only an LLM provides</td></tr>
+  <tr><td>Two-stage pipeline</td><td>Risk first, then portfolio</td><td>Single combined agent</td><td>Separation of concerns: risk manager cannot be overridden by bullish consensus; mirrors institutional practice</td></tr>
+  <tr><td>Position clamping</td><td>Deterministic <code>compute_allowed_actions</code></td><td>Trust LLM output directly</td><td>Defense-in-depth: even if LLM suggests excessive quantity, hard math clamps it to risk limits</td></tr>
+</table>
+</div>
+
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<h2 id="architecture">Architecture</h2>
+<p>The management agents sit at the fan-in convergence point. Risk management runs first to set limits, then the portfolio manager uses those limits along with all analyst signals to produce final trading decisions.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph FanOut["Fan-Out: 19 Analyst Agents (parallel)"]
+    P1["Persona Agents x13"]
+    Q1["Quantitative Agents x5"]
+    NS["News Sentiment"]
+  end
+
+  FanOut --> AS["analyst_signals dict"]
+  AS --> RM["Risk Manager"]
+
+  subgraph RM_inner["Risk Manager Pipeline"]
+    R1["Fetch prices for all tickers"]
+    R2["Calculate volatility metrics"]
+    R3["Build correlation matrix"]
+    R4["Compute portfolio exposure"]
+    R5["Set position limits per ticker"]
+    R1 --> R2 --> R3 --> R4 --> R5
+  end
+
+  RM --> RM_inner
+  RM_inner --> RO["risk limits + current prices"]
+  RO --> PM["Portfolio Manager"]
+
+  subgraph PM_inner["Portfolio Manager Pipeline"]
+    P2["Compress analyst signals"]
+    P3["Compute allowed actions"]
+    P4["LLM: synthesize decisions"]
+    P5["Emit buy/sell/hold orders"]
+    P2 --> P3 --> P4 --> P5
+  end
+
+  PM --> PM_inner
+  PM_inner --> Orders["Final Trading Decisions"]
+</pre>
+</div>
+
+<h2 id="key-classes">Key Classes &amp; Functions</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>risk_management_agent</code></td><td>risk_manager.py</td><td>Main entry: fetches prices, calculates volatility, builds correlation matrix, sets position limits per ticker</td></tr>
+  <tr><td><code>portfolio_management_agent</code></td><td>portfolio_manager.py</td><td>Main entry: compresses analyst signals, computes allowed actions, calls LLM for final trading decisions</td></tr>
+  <tr><td><code>PortfolioDecision</code></td><td>portfolio_manager.py</td><td>Pydantic model: <code>action</code> (buy/sell/short/cover/hold), <code>quantity</code> (int), <code>confidence</code> (0-100), <code>reasoning</code></td></tr>
+  <tr><td><code>PortfolioManagerOutput</code></td><td>portfolio_manager.py</td><td>Pydantic model: wraps <code>dict[str, PortfolioDecision]</code> mapping tickers to decisions</td></tr>
+  <tr><td><code>compute_allowed_actions</code></td><td>portfolio_manager.py</td><td>Deterministic position clamping: calculates max buy/sell/short/cover quantities from risk limits, cash, and existing positions</td></tr>
+  <tr><td><code>calculate_volatility_metrics</code></td><td>risk_manager.py</td><td>Computes daily and annualized volatility, volatility percentile from price <a href="../quantitative/index.html" title="agents quantitative — Quantitative Analysis Agents" class="xref">DataFrame</a></td></tr>
+  <tr><td><code>generate_trading_decision</code></td><td>portfolio_manager.py</td><td>Builds LLM prompt with compressed signals, position limits, and portfolio state; returns <code>PortfolioManagerOutput</code></td></tr>
+  <tr><td><code>show_agent_reasoning</code></td><td>(imported from state)</td><td>Displays formatted reasoning to user when <code>show_reasoning</code> metadata flag is true</td></tr>
+  <tr><td><code>get_api_key_from_state</code></td><td>(imported from utils)</td><td>Extracts API key from state to allow multi-tenant operation</td></tr>
+  <tr><td><code>call_llm</code></td><td>(imported from utils)</td><td>Sends prompt to configured LLM with structured output parsing via Pydantic model</td></tr>
+</table>
+
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+  <tr><td>Pydantic</td><td><code>PortfolioDecision</code></td><td>Single ticker decision: <code>action</code> (Literal["buy","sell","short","cover","hold"]), <code>quantity</code> (int), <code>confidence</code> (0-100), <code>reasoning</code> (str)</td></tr>
+  <tr><td>Pydantic</td><td><code>PortfolioManagerOutput</code></td><td>Container: <code>decisions: dict[str, PortfolioDecision]</code> mapping each ticker to its trading decision</td></tr>
+  <tr><td>dict</td><td><code>risk_analysis</code></td><td>Per-ticker risk data: <code>remaining_position_limit</code>, <code>current_price</code>, <code>reasoning</code> with volatility details</td></tr>
+  <tr><td>dict</td><td><code>volatility_data</code></td><td>Per-ticker: <code>daily_volatility</code>, <code>annualized_volatility</code>, <code>volatility_percentile</code>, <code>data_points</code></td></tr>
+  <tr><td>DataFrame</td><td><code>correlation_matrix</code></td><td>Pandas correlation matrix of daily returns across all active tickers; used for portfolio-level risk</td></tr>
+  <tr><td>dict</td><td><code>signals_by_ticker</code></td><td>Compressed analyst signals: <code>{agent_name: {sig: "bullish", conf: 85}}</code> per ticker, excluding risk manager</td></tr>
+  <tr><td>dict</td><td><code>allowed</code></td><td>Per-ticker allowed actions: max quantities for buy, sell, short, cover based on cash, positions, and risk limits</td></tr>
+</table>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+  <tr><td>&larr;</td><td>All 19 Analysts</td><td><code>state["data"]["analyst_signals"]</code></td><td>Risk manager and portfolio manager read all upstream signals from shared state</td></tr>
+  <tr><td>&rarr;</td><td><a href="../../core_doc/data-tools/index.html" title="core data-tools &mdash; Data Models, API Tools &amp; LLM Integration" class="xref">Price</a> API</td><td><code>get_prices()</code></td><td>Risk manager fetches prices for all tickers (current + existing positions) for volatility calculation</td></tr>
+  <tr><td>&rarr;</td><td>LLM Service</td><td><code>call_llm()</code></td><td>Portfolio manager sends compressed signals + constraints to LLM for decision synthesis</td></tr>
+  <tr><td>&rarr;</td><td>Portfolio State</td><td><code>state["data"]["portfolio"]</code></td><td>Both agents read current positions, cash, equity, margin from portfolio state</td></tr>
+  <tr><td>&rarr;</td><td>LangGraph State</td><td><code>state["data"]["current_prices"]</code></td><td>Portfolio manager writes current prices to state for downstream consumption</td></tr>
+  <tr><td>&rarr;</td><td>Execution Layer</td><td><code>PortfolioManagerOutput</code></td><td>Final decisions returned as structured message for order execution</td></tr>
+  <tr><td>&rarr;</td><td>Progress Tracker</td><td><code>progress.update_status()</code></td><td>Both agents report step-by-step progress to UI</td></tr>
+</table>
+
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>default daily_volatility</code></td><td>0.05 (5%)</td><td>Fallback volatility when no price data available; conservative high-risk assumption</td></tr>
+  <tr><td><code>volatility_percentile fallback</code></td><td>100</td><td>When no data, assume worst-case volatility percentile to minimize position sizing</td></tr>
+  <tr><td><code>margin_requirement</code></td><td>0.5 (50%)</td><td>Portfolio margin requirement for short positions; from portfolio state</td></tr>
+  <tr><td><code>min correlation data points</code></td><td>5 rows, 2 tickers</td><td>Minimum data needed to compute a meaningful correlation matrix</td></tr>
+  <tr><td><code>risk_manager_id pattern</code></td><td>"risk_management_agent" or "_suffix"</td><td>Portfolio manager dynamically finds its paired risk manager by matching ID suffix</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for management agents</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>src/agents/
+├── risk_manager.py              ← Volatility-adjusted position sizing and risk limits
+└── portfolio_manager.py         ← Final trading decisions via LLM synthesis
+</code></pre>
+</details>
+
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The portfolio manager's decision-making logic is the final stage of the entire pipeline. It synthesizes all upstream analysis into concrete buy/sell/hold orders.</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">portfolio_management_agent &mdash; Decision Synthesis</h4>
+<pre><code class="language-python">def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_manager"):
+    """Makes final trading decisions and generates orders for multiple tickers"""
+    portfolio = state["data"]["portfolio"]
+    analyst_signals = state["data"]["analyst_signals"]
+    tickers = state["data"]["tickers"]
+
+    position_limits = {}
+    current_prices = {}
+    max_shares = {}
+    signals_by_ticker = {}
+
+    for ticker in tickers:
+        # Find the paired risk manager by matching ID suffix
+        if agent_id.startswith("portfolio_manager_"):
+            suffix = agent_id.split('_')[-1]
+            risk_manager_id = f"risk_management_agent_{suffix}"
+        else:
+            risk_manager_id = "risk_management_agent"
+
+        # Extract risk limits set by the risk manager
+        risk_data = analyst_signals.get(risk_manager_id, {}).get(ticker, {})
+        position_limits[ticker] = risk_data.get("remaining_position_limit", 0.0)
+        current_prices[ticker] = float(risk_data.get("current_price", 0.0))
+
+        # Calculate maximum shares allowed
+        if current_prices[ticker] > 0:
+            max_shares[ticker] = int(position_limits[ticker] // current_prices[ticker])
+        else:
+            max_shares[ticker] = 0
+
+        # Compress analyst signals to {sig, conf} for LLM prompt efficiency
+        ticker_signals = {}
+        for agent, signals in analyst_signals.items():
+            if not agent.startswith("risk_management_agent") and ticker in signals:
+                sig = signals[ticker].get("signal")
+                conf = signals[ticker].get("confidence")
+                if sig is not None and conf is not None:
+                    ticker_signals[agent] = {"sig": sig, "conf": conf}
+        signals_by_ticker[ticker] = ticker_signals
+
+    # Generate final trading decisions via LLM
+    result = generate_trading_decision(
+        tickers=tickers,
+        signals_by_ticker=signals_by_ticker,
+        current_prices=current_prices,
+        max_shares=max_shares,
+        portfolio=portfolio,
+        agent_id=agent_id,
+        state=state,
+    )</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>Lines 3-5:</strong> The portfolio manager reads three things from state: the current portfolio (cash, positions, margin), all analyst signals (the output of 19 agents), and the tickers to trade. It's the only agent that reads <em>all</em> other agents' output.</li>
+  <li><strong>Lines 13-18:</strong> Dynamic risk manager pairing &mdash; supports multi-portfolio mode where <code>portfolio_manager_1</code> pairs with <code>risk_management_agent_1</code>. This allows running multiple independent portfolios in the same LangGraph execution.</li>
+  <li><strong>Lines 21-23:</strong> Risk data extraction &mdash; the risk manager's output is consumed as just another signal in <code>analyst_signals</code>, but it contains special fields (<code>remaining_position_limit</code>, <code>current_price</code>) that other agents don't have.</li>
+  <li><strong>Lines 26-29:</strong> <code>max_shares</code> is a hard ceiling computed by integer division of the dollar limit by the share price. The <code>int()</code> cast floors the result, preventing fractional share orders.</li>
+  <li><strong>Lines 32-38:</strong> Signal compression is crucial for LLM prompt efficiency. Instead of sending full reasoning from all 19 agents (which would exceed context limits), each signal is compressed to just <code>{sig, conf}</code>. The risk manager is explicitly excluded because its output is used for limits, not as a trading signal.</li>
+  <li><strong>Lines 41-49:</strong> The LLM call receives everything needed for a decision: signals from all analysts, current prices, hard limits from risk management, and current portfolio state. The LLM synthesizes this into <code>PortfolioManagerOutput</code>.</li>
+</ul>
+</div>
+</div>
+
+<h3 id="risk-walkthrough">Risk Manager &mdash; Volatility-Adjusted Limits</h3>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">Correlation-Aware Risk Computation</h4>
+<pre><code class="language-python"># Build correlation matrix across all active tickers
+correlation_matrix = None
+if len(returns_by_ticker) >= 2:
+    try:
+        returns_df = pd.DataFrame(returns_by_ticker).dropna(how="any")
+        if returns_df.shape[1] >= 2 and returns_df.shape[0] >= 5:
+            correlation_matrix = returns_df.corr()
+    except Exception:
+        correlation_matrix = None
+
+# Calculate total portfolio value (Net Liquidation Value)
+total_portfolio_value = portfolio.get("cash", 0.0)
+for ticker, position in portfolio.get("positions", {}).items():
+    if ticker in current_prices:
+        total_portfolio_value += position.get("long", 0) * current_prices[ticker]
+        total_portfolio_value -= position.get("short", 0) * current_prices[ticker]</code></pre>
+<p style="margin-top:.8rem;">The correlation matrix is key to portfolio-level risk: if two tickers are highly correlated (e.g., AAPL and MSFT), the risk manager reduces position limits for both to avoid concentrated sector exposure. The net liquidation value calculation accounts for both long and short positions at current market prices.</p>
+</div>
+
+<h3 id="allowed-actions">Deterministic Action Clamping</h3>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">compute_allowed_actions &mdash; Defense in Depth</h4>
+<pre><code class="language-python">def compute_allowed_actions(
+    tickers: list[str],
+    current_prices: dict[str, float],
+    max_shares: dict[str, int],
+    portfolio: dict[str, float],
+) -> dict[str, dict[str, int]]:
+    """Compute allowed actions and max quantities for each ticker deterministically."""
+    allowed = {}
+    cash = float(portfolio.get("cash", 0.0))
+    positions = portfolio.get("positions", {}) or {}
+    margin_requirement = float(portfolio.get("margin_requirement", 0.5))
+    margin_used = float(portfolio.get("margin_used", 0.0))
+    equity = float(portfolio.get("equity", cash))
+
+    for ticker in tickers:
+        price = float(current_prices.get(ticker, 0.0))
+        pos = positions.get(ticker, {"long": 0, "short": 0})
+        long_shares = int(pos.get("long", 0) or 0)
+        short_shares = int(pos.get("short", 0) or 0)
+        max_qty = int(max_shares.get(ticker, 0) or 0)
+        # ... clamp buy/sell/short/cover to max_qty and available resources</code></pre>
+<p style="margin-top:.8rem;">This function provides the critical safety net. Even if the LLM hallucinates a quantity of 10,000 shares, <code>compute_allowed_actions</code> clamps it to <code>max_qty</code> (from risk manager) and available cash. It also ensures you can't sell more shares than you own, or cover more shorts than you have open.</p>
+</div>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Multi-Portfolio Risk Manager Pairing</h3>
+<pre><code class="language-python"># When running multiple portfolios in parallel, each portfolio manager
+# dynamically finds its paired risk manager by matching the ID suffix.
+# portfolio_manager_aggressive -> risk_management_agent_aggressive
+# portfolio_manager_conservative -> risk_management_agent_conservative
+
+if agent_id.startswith("portfolio_manager_"):
+    suffix = agent_id.split('_')[-1]
+    risk_manager_id = f"risk_management_agent_{suffix}"
+else:
+    risk_manager_id = "risk_management_agent"  # Default for CLI mode
+</code></pre>
+
+<h2 id="data-flow">Data Flow</h2>
+<p>The complete fan-in flow from analyst signals through risk management to final trading decisions:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+  participant AS as analyst_signals (19 agents)
+  participant RM as Risk Manager
+  participant API as Price API
+  participant PM as Portfolio Manager
+  participant LLM as LLM Service
+  participant Out as Trading Orders
+
+  AS->>RM: All analyst signals
+  RM->>API: get_prices() for all tickers
+  API-->>RM: OHLCV price data
+  RM->>RM: Calculate volatility per ticker
+  RM->>RM: Build correlation matrix
+  RM->>RM: Compute Net Liquidation Value
+  RM->>RM: Set position limits
+  RM->>AS: Write risk limits to analyst_signals
+
+  AS->>PM: All signals + risk limits
+  PM->>PM: Extract risk limits per ticker
+  PM->>PM: Compress signals to {sig, conf}
+  PM->>PM: compute_allowed_actions()
+  PM->>LLM: Prompt with signals + limits + portfolio
+  LLM-->>PM: PortfolioManagerOutput
+  PM->>Out: {ticker: {action, quantity, confidence, reasoning}}
+</pre>
+</div>
+
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+  <tr><td>No price data for a ticker</td><td>Risk manager sets <code>remaining_position_limit = 0</code> and default high volatility (5% daily), effectively blocking trading</td><td>risk_manager.py:39-44, 109-118</td><td>&#128308; High</td></tr>
+  <tr><td>Current price is zero</td><td><code>max_shares</code> set to 0; portfolio manager cannot buy/sell that ticker regardless of signals</td><td>portfolio_manager.py:51-54</td><td>&#128308; High</td></tr>
+  <tr><td>Risk manager not found in signals</td><td><code>analyst_signals.get(risk_manager_id, {}).get(ticker, {})</code> returns empty dict; position limit defaults to 0.0</td><td>portfolio_manager.py:46-47</td><td>&#128308; High</td></tr>
+  <tr><td>Fewer than 2 tickers for correlation</td><td>Correlation matrix is <code>None</code>; risk manager falls back to per-ticker volatility only, no cross-ticker adjustment</td><td>risk_manager.py:79-85</td><td>&#128993; Medium</td></tr>
+  <tr><td>LLM suggests quantity exceeding limit</td><td><code>compute_allowed_actions</code> clamps to <code>max_qty</code>; the LLM's suggestion is overridden deterministically</td><td>portfolio_manager.py:96-120</td><td>&#128994; Low (mitigated)</td></tr>
+  <tr><td>All analysts signal bullish</td><td>Risk limits still apply; even unanimous bullishness can't override volatility-based position caps</td><td>risk_manager.py (position limit calc)</td><td>&#128994; Low (by design)</td></tr>
+</table>
+
+<div class="footer"><a title="agents — AI Investor Persona Agents" href="../index.html">&larr; Back to agents Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

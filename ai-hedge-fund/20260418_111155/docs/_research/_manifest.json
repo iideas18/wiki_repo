@@ -1,0 +1,8 @@
+{
+  "source_sha": "0f6ac48",
+  "source_file_count": 235,
+  "cache_date": "2026-04-18T11:12:00Z",
+  "modules": ["agents", "backtesting", "core", "webapp", "v2"],
+  "depth": 3,
+  "primary_language": "python"
+}
