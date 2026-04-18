@@ -140,3 +140,24 @@ def count_stats(page_html: str) -> dict:
         "refs": counter.refs,
         "lines": counter.lines,
     }
+
+
+TRUNCATION_NOTE = "<p><em>Preview truncated — see full page.</em></p>"
+
+
+def truncate_preview(preview_html: str, max_bytes: int = 65536) -> str:
+    """Truncate preview HTML to ``max_bytes`` when measured as UTF-8, cutting
+    at the last ``</p>`` boundary before the limit and appending
+    ``TRUNCATION_NOTE``. Returns the input unchanged when it already fits."""
+    as_bytes = preview_html.encode("utf-8")
+    if len(as_bytes) <= max_bytes:
+        return preview_html
+
+    # Find the last </p> that fits before max_bytes.
+    cutoff = preview_html.rfind("</p>", 0, max_bytes)
+    if cutoff == -1:
+        # No paragraph boundary — hard cut at max_bytes (on a character boundary).
+        head = as_bytes[:max_bytes].decode("utf-8", errors="ignore")
+    else:
+        head = preview_html[: cutoff + len("</p>")]
+    return head + TRUNCATION_NOTE

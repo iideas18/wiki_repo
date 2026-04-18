@@ -104,3 +104,27 @@ def test_count_stats_zero_when_empty():
     assert overview_lib.count_stats("<html><body><main></main></body></html>") == {
         "diagrams": 0, "refs": 0, "lines": 0,
     }
+
+
+TRUNCATION_NOTE = "<p><em>Preview truncated — see full page.</em></p>"
+
+
+def test_truncate_preview_noop_below_limit():
+    small = "<p>Small.</p>"
+    assert overview_lib.truncate_preview(small, max_bytes=1024) == small
+
+
+def test_truncate_preview_truncates_and_appends_notice():
+    big = "<p>" + ("A" * 70000) + "</p>"
+    out = overview_lib.truncate_preview(big, max_bytes=65536)
+    assert out.endswith(TRUNCATION_NOTE)
+    assert len(out.encode("utf-8")) <= 65536 + len(TRUNCATION_NOTE.encode("utf-8")) + 16
+
+
+def test_truncate_preview_prefers_paragraph_boundary():
+    p = "<p>" + ("B" * 40000) + "</p>"
+    big = p + p  # two 40k paragraphs → >65536 total
+    out = overview_lib.truncate_preview(big, max_bytes=65536)
+    # We should keep one full <p>...</p> and drop the rest, then append notice.
+    assert out.count("<p>") == 2  # one kept + notice <p>
+    assert out.endswith(TRUNCATION_NOTE)
