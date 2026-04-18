@@ -162,3 +162,27 @@ def test_inject_nav_link_creates_nav_if_missing():
 def test_inject_nav_link_respects_relative_prefix():
     out, _ = overview_lib.inject_nav_link(NAV_HTML_WITH, "../overview.html", "Overview")
     assert 'href="../overview.html"' in out
+
+
+FIXTURE_WIKI = REPO_ROOT / "tests" / "fixtures" / "overview" / "pre-layered-wiki"
+
+
+def test_discover_worklist_groups_by_module_dir():
+    worklist = overview_lib.discover_worklist(FIXTURE_WIKI)
+    # Two modules, three focus pages total.
+    assert sorted(worklist.keys()) == ["mod-alpha", "mod-beta"]
+    alpha = worklist["mod-alpha"]
+    assert len(alpha) == 2
+    titles = {e["title"] for e in alpha}
+    assert titles == {"Alpha Focus One", "Alpha Focus Two"}
+    # Hrefs are relative to the wiki root.
+    hrefs = {e["href"] for e in alpha}
+    assert "mod-alpha/focus-one/index.html" in hrefs
+
+
+def test_discover_worklist_empty_when_no_hub():
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        (tmp_path / "index.html").write_text("<html><body><p>no hub</p></body></html>")
+        assert overview_lib.discover_worklist(tmp_path) == {}

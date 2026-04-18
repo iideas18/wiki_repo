@@ -19,6 +19,7 @@ def escape_for_attribute(inner_html: str) -> str:
 
 import re
 from html.parser import HTMLParser
+from pathlib import Path
 from typing import Tuple
 
 
@@ -195,3 +196,41 @@ def inject_nav_link(page_html: str, href: str, label: str) -> Tuple[str, bool]:
 
     # No <body> — prepend a nav; still produces valid-enough HTML fragments.
     return f"<nav>{new_anchor}</nav>" + page_html, True
+
+
+_ANCHOR_RE = re.compile(r'<a\s+[^>]*href="([^"]+)"[^>]*>([^<]+)</a>', re.IGNORECASE)
+_H1_RE = re.compile(r"<h1\b[^>]*>(.*?)</h1>", re.IGNORECASE | re.DOTALL)
+
+
+def _parse_title(page_html: str, fallback: str) -> str:
+    m = _H1_RE.search(page_html)
+    if m:
+        return re.sub(r"\s+", " ", m.group(1)).strip()
+    return fallback
+
+
+def discover_worklist(wiki_root: Path) -> dict:
+    """Scan ``wiki_root/index.html`` for focus-page hrefs, group them by the
+    first path segment (module directory), and return
+    ``{module_slug: [{"title", "href"}, ...]}``.
+
+    Used by retrofit mode where ``_worklist.yaml`` does not exist.
+    """
+    index_path = Path(wiki_root) / "index.html"
+    if not index_path.is_file():
+        return {}
+    html_text = index_path.read_text(encoding="utf-8", errors="replace")
+    result: dict[str, list[dict]] = {}
+    for href, label in _ANCHOR_RE.findall(html_text):
+        # Focus pages always look like <module>/<slug>/index.html (two path segments + index).
+        parts = href.split("/")
+        if len(parts) < 3 or not parts[-1].endswith("index.html"):
+            continue
+        module = parts[0]
+        focus_page = Path(wiki_root) / href
+        if not focus_page.is_file():
+            continue
+        focus_html = focus_page.read_text(encoding="utf-8", errors="replace")
+        entry = {"title": _parse_title(focus_html, label.strip()), "href": href}
+        result.setdefault(module, []).append(entry)
+    return result
