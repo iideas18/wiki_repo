@@ -128,3 +128,37 @@ def test_truncate_preview_prefers_paragraph_boundary():
     # We should keep one full <p>...</p> and drop the rest, then append notice.
     assert out.count("<p>") == 2  # one kept + notice <p>
     assert out.endswith(TRUNCATION_NOTE)
+
+
+NAV_HTML_WITH = """<!doctype html><html><body>
+<nav><a href="index.html">Home</a></nav>
+<main>body</main></body></html>"""
+
+NAV_HTML_WITHOUT_NAV = """<!doctype html><html><body>
+<main>body</main></body></html>"""
+
+
+def test_inject_nav_link_inserts_when_missing():
+    out, changed = overview_lib.inject_nav_link(NAV_HTML_WITH, "overview.html", "Overview")
+    assert changed is True
+    assert 'href="overview.html"' in out
+    assert ">Overview</a>" in out
+
+
+def test_inject_nav_link_is_idempotent():
+    once, _ = overview_lib.inject_nav_link(NAV_HTML_WITH, "overview.html", "Overview")
+    twice, changed = overview_lib.inject_nav_link(once, "overview.html", "Overview")
+    assert changed is False
+    assert once == twice
+
+
+def test_inject_nav_link_creates_nav_if_missing():
+    out, changed = overview_lib.inject_nav_link(NAV_HTML_WITHOUT_NAV, "overview.html", "Overview")
+    assert changed is True
+    assert "<nav>" in out
+    assert 'href="overview.html"' in out
+
+
+def test_inject_nav_link_respects_relative_prefix():
+    out, _ = overview_lib.inject_nav_link(NAV_HTML_WITH, "../overview.html", "Overview")
+    assert 'href="../overview.html"' in out

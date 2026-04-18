@@ -161,3 +161,37 @@ def truncate_preview(preview_html: str, max_bytes: int = 65536) -> str:
     else:
         head = preview_html[: cutoff + len("</p>")]
     return head + TRUNCATION_NOTE
+
+
+_NAV_OPEN_RE = re.compile(r"<nav\b[^>]*>", re.IGNORECASE)
+_NAV_CLOSE_RE = re.compile(r"</nav>", re.IGNORECASE)
+_BODY_OPEN_RE = re.compile(r"<body\b[^>]*>", re.IGNORECASE)
+
+
+def inject_nav_link(page_html: str, href: str, label: str) -> Tuple[str, bool]:
+    """Ensure a ``<a href="{href}">{label}</a>`` link exists inside the top
+    ``<nav>``. Creates a ``<nav>`` directly after ``<body>`` if none exists.
+
+    Returns ``(new_html, changed)``. ``changed`` is False when the link is
+    already present (idempotent).
+    """
+    link_marker = f'href="{href}"'
+    if link_marker in page_html:
+        return page_html, False
+
+    new_anchor = f'<a href="{href}">{label}</a>'
+
+    nav_close = _NAV_CLOSE_RE.search(page_html)
+    nav_open = _NAV_OPEN_RE.search(page_html)
+    if nav_open and nav_close and nav_close.start() > nav_open.start():
+        insert_at = nav_close.start()
+        return page_html[:insert_at] + new_anchor + page_html[insert_at:], True
+
+    body_open = _BODY_OPEN_RE.search(page_html)
+    if body_open:
+        insert_at = body_open.end()
+        new_nav = f"<nav>{new_anchor}</nav>"
+        return page_html[:insert_at] + new_nav + page_html[insert_at:], True
+
+    # No <body> — prepend a nav; still produces valid-enough HTML fragments.
+    return f"<nav>{new_anchor}</nav>" + page_html, True
