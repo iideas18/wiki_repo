@@ -177,6 +177,8 @@ fi
 
 # === Pre-flight checks ===
 SCRIPTS_DIR="$SKILL_REPO/.github/skills/wiki-generator/scripts"
+SKILL_SCRIPTS="$SCRIPTS_DIR"
+SKILL_RESOURCES="$SKILL_REPO/.github/skills/wiki-generator/resources"
 
 if [ ! -d "$SKILL_REPO/.github/skills/wiki-generator" ]; then
   echo "[ERROR] wiki-generator skill not found at $SKILL_REPO" >&2
@@ -339,6 +341,27 @@ fi
 if [ $EXIT_CODE -eq 0 ]; then
   PAGE_COUNT=$(find "$OUTPUT_DIR" -name '*.html' 2>/dev/null | wc -l)
   echo "[OK] Wiki generated: $OUTPUT_DIR ($PAGE_COUNT pages)"
+
+  # --- Overview Pass (Gate D) ---
+  if [[ -f "$OUTPUT_DIR/docs/_research/_worklist.yaml" ]]; then
+    echo "[overview] Running Overview Pass…"
+    python3 "$SKILL_SCRIPTS/yaml_to_worklist_json.py" \
+      "$OUTPUT_DIR/docs/_research/_worklist.yaml" > "$OUTPUT_DIR/_worklist.json"
+    python3 "$SKILL_SCRIPTS/overview_pass.py" \
+      --wiki-root "$OUTPUT_DIR" \
+      --worklist-json "$OUTPUT_DIR/_worklist.json" \
+      --project-name "$PROJECT_NAME" \
+      --project-tagline "${PROJECT_TAGLINE:-}" \
+      --prompt-template "$SKILL_RESOURCES/overview_pass.md" \
+      --html-template "$SKILL_RESOURCES/overview-template.html"
+    rm -f "$OUTPUT_DIR/_worklist.json"
+    bash "$SKILL_SCRIPTS/verify.sh" --stage=D --project="$OUTPUT_DIR" \
+      || { echo "Gate D failed"; exit 1; }
+    python3 "$SKILL_SCRIPTS/inject_overview_link.py" "$OUTPUT_DIR"
+  else
+    echo "[overview] No _worklist.yaml — skipping Overview Pass (project not eligible)"
+  fi
+  # --- end Overview Pass ---
 
   # === Post-generation: update versions, switcher, and hub index ===
   GEN_VERSIONS="${OUTPUT_BASE}/generate_versions.py"
