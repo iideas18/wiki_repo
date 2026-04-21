@@ -18,6 +18,7 @@ Usage:
     python3 fix_wiki_html.py --check               # dry-run: report only
 """
 
+import argparse
 import re
 import os
 import sys
@@ -685,14 +686,21 @@ def scan_issues(path: Path, text: str) -> list[str]:
     return issues
 
 
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("-")]
-    check_only = "--check" in sys.argv
+def _parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Fix common generated wiki HTML issues.")
+    parser.add_argument("projects", nargs="*", help="Specific project slugs or paths")
+    parser.add_argument("--check", action="store_true", help="Report issues without modifying files")
+    parser.add_argument("--root", choices=("public", "internal"), default="public", help="Select which content root to scan")
+    return parser.parse_args(argv)
 
-    if args:
-        targets = [resolve_project_dir(a) for a in args]
+
+def main(argv: list[str] | None = None) -> int:
+    opts = _parse_args(sys.argv[1:] if argv is None else argv)
+
+    if opts.projects:
+        targets = [resolve_project_dir(a, root_name=opts.root) for a in opts.projects]
     else:
-        targets = iter_project_dirs()
+        targets = iter_project_dirs(root_name=opts.root)
 
     total_fixed = 0
     total_issues_before = 0
@@ -710,7 +718,7 @@ def main():
             issues_before = scan_issues(hf, text)
             total_issues_before += len(issues_before)
 
-            if check_only:
+            if opts.check:
                 for issue in issues_before:
                     print(f"  [ISSUE] {issue}")
                 continue
@@ -733,13 +741,14 @@ def main():
                 total_issues_after += len(issues_before)
 
     print()
-    if check_only:
+    if opts.check:
         print(f"Issues found: {total_issues_before}")
     else:
         print(f"Files modified: {total_fixed}")
         print(f"Issues before: {total_issues_before}")
         print(f"Issues after:  {total_issues_after}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

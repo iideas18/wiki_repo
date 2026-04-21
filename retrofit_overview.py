@@ -22,7 +22,7 @@ import overview_lib  # noqa: E402
 import overview_pass  # noqa: E402
 
 
-def _iter_project_dirs(explicit: list[str]) -> list[Path]:
+def _iter_project_dirs(explicit: list[str], root_name: str) -> list[Path]:
     if explicit:
         resolved = []
         for project in explicit:
@@ -30,9 +30,9 @@ def _iter_project_dirs(explicit: list[str]) -> list[Path]:
             if candidate.exists():
                 resolved.append(candidate.resolve())
             else:
-                resolved.append(resolve_project_dir(project))
+                resolved.append(resolve_project_dir(project, root_name=root_name))
         return resolved
-    return iter_project_dirs()
+    return iter_project_dirs(root_name=root_name)
 
 
 def _active_version_dir(project: Path) -> Path | None:
@@ -137,9 +137,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--force", action="store_true")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--confirm-each", action="store_true")
+    p.add_argument("--root", choices=("public", "internal"), default="public")
     args = p.parse_args((argv or sys.argv)[1:])
 
-    projects = _iter_project_dirs(args.projects)
+    projects = _iter_project_dirs(args.projects, args.root)
     if not projects:
         print("No projects found.", file=sys.stderr)
         return 1

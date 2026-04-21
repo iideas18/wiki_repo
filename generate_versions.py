@@ -10,6 +10,7 @@ Usage:
     python3 generate_versions.py --list           # dry-run: print detected versions
 """
 
+import argparse
 import json
 import re
 import sys
@@ -89,25 +90,32 @@ def generate_for_project(project_dir: Path, list_only: bool = False) -> list[dic
     return versions
 
 
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("-")]
-    list_only = "--list" in sys.argv
+def _parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate versions.json manifests for wiki projects.")
+    parser.add_argument("projects", nargs="*", help="Specific project slugs or paths")
+    parser.add_argument("--list", action="store_true", help="Print versions without writing files")
+    parser.add_argument("--root", choices=("public", "internal"), default="public", help="Select which content root to scan")
+    return parser.parse_args(argv)
 
-    if args:
-        dirs = [resolve_project_dir(name) for name in args]
+
+def main(argv: list[str] | None = None) -> int:
+    opts = _parse_args(sys.argv[1:] if argv is None else argv)
+
+    if opts.projects:
+        dirs = [resolve_project_dir(name, root_name=opts.root) for name in opts.projects]
     else:
-        dirs = iter_project_dirs()
+        dirs = iter_project_dirs(root_name=opts.root)
 
     total = 0
     for d in dirs:
         if not d.is_dir():
             continue
-        versions = generate_for_project(d, list_only=list_only)
+        versions = generate_for_project(d, list_only=opts.list)
         if not versions:
             continue
         total += 1
         name = d.name
-        if list_only:
+        if opts.list:
             print(f"{name}:")
             for v in versions:
                 tag = " (latest)" if v["latest"] else ""
@@ -116,9 +124,10 @@ def main():
         else:
             print(f"  {repo_relative(d / 'versions.json')}  ({len(versions)} version(s))")
 
-    if not list_only:
+    if not opts.list:
         print(f"Generated versions.json for {total} project(s).")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

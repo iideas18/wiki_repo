@@ -11,6 +11,7 @@ Usage:
     python3 inject_version_switcher.py --check        # dry-run: report only
 """
 
+import argparse
 import json
 import re
 import sys
@@ -138,25 +139,33 @@ def process_project(project_dir: Path, dry_run: bool = False) -> int:
     return count
 
 
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("-")]
-    dry_run = "--check" in sys.argv
+def _parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Inject version-switcher snippets into wiki project pages.")
+    parser.add_argument("projects", nargs="*", help="Specific project slugs or paths")
+    parser.add_argument("--check", action="store_true", help="Report what would change without writing files")
+    parser.add_argument("--root", choices=("public", "internal"), default="public", help="Select which content root to scan")
+    return parser.parse_args(argv)
 
-    if args:
-        dirs = [resolve_project_dir(name) for name in args]
+
+def main(argv: list[str] | None = None) -> int:
+    opts = _parse_args(sys.argv[1:] if argv is None else argv)
+
+    if opts.projects:
+        dirs = [resolve_project_dir(name, root_name=opts.root) for name in opts.projects]
     else:
-        dirs = iter_project_dirs()
+        dirs = iter_project_dirs(root_name=opts.root)
 
     total = 0
     for d in dirs:
         if not d.is_dir():
             continue
-        n = process_project(d, dry_run=dry_run)
+        n = process_project(d, dry_run=opts.check)
         total += n
 
-    action = "Would inject into" if dry_run else "Injected version switcher into"
+    action = "Would inject into" if opts.check else "Injected version switcher into"
     print(f"{action} {total} file(s).")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
