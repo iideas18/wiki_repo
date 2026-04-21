@@ -23,8 +23,40 @@ import os
 import sys
 from pathlib import Path
 
-WIKI_DIR = Path(__file__).resolve().parent
+from internal_wiki_paths import REPO_ROOT, iter_project_dirs, resolve_project_dir
+
+WIKI_DIR = REPO_ROOT
 REQUIRED_THEME_KEY = "neutra-ip-theme"
+
+OVERLAY_CLICK_HANDLER_RE = re.compile(
+    r"(?P<target>\b\w+)\.addEventListener\(\s*['\"]click['\"]\s*,\s*function\s*\(\s*(?P<event>\w+)?\s*\)\s*\{(?P<body>.*?)\}\s*\)\s*;?",
+    re.DOTALL,
+)
+
+
+def _overlay_click_handler_needs_target_guard(target: str, event_name: str, body: str) -> bool:
+    """Return True when a self-closing overlay click handler lacks an e.target guard."""
+    if not re.search(
+        rf"\b{re.escape(target)}\.classList\.remove\(\s*['\"](?:active|show)['\"]\s*\)",
+        body,
+    ):
+        return False
+
+    guarded_patterns = (
+        rf"\b{re.escape(event_name)}\.target\s*===?\s*{re.escape(target)}\b",
+        rf"\bif\s*\(\s*{re.escape(event_name)}\.target\s*!==?\s*{re.escape(target)}\s*\)\s*return\b",
+    )
+    return not any(re.search(pattern, body) for pattern in guarded_patterns)
+
+
+def _has_unguarded_overlay_click_handler(text: str) -> bool:
+    for match in OVERLAY_CLICK_HANDLER_RE.finditer(text):
+        target = match.group("target")
+        event_name = match.group("event") or "e"
+        body = match.group("body")
+        if _overlay_click_handler_needs_target_guard(target, event_name, body):
+            return True
+    return False
 
 
 class FileFixer:
@@ -376,18 +408,21 @@ class FileFixer:
         Without the check, clicking *inside* the zoomed diagram (on the SVG)
         bubbles up and closes the overlay immediately.
         """
-        pattern_a = re.compile(
-            r"((\w+)\.addEventListener\(\s*'click'\s*,\s*function\s*\(\s*\)\s*\{\s*)"
-            r"(\2\.classList\.remove\(\s*'(?:active|show)'\s*\)\s*;?\s*)"
-            r"(\}\s*\))"
-        )
-        def _repl_a(m):
+        def _repl(match):
+            target = match.group("target")
+            event_name = match.group("event") or "e"
+            body = match.group("body")
+            if not _overlay_click_handler_needs_target_guard(target, event_name, body):
+                return match.group(0)
+
+            body = body.strip()
             return (
-                f"{m.group(2)}.addEventListener('click',function(e){{"
-                f"if(e.target==={m.group(2)}){m.group(3)}"
-                f"}})"
+                f"{target}.addEventListener('click', function ({event_name}) {{ "
+                f"if ({event_name}.target === {target}) {{ {body} }} "
+                f"}});"
             )
-        new_text = pattern_a.sub(_repl_a, self.text)
+
+        new_text = OVERLAY_CLICK_HANDLER_RE.sub(_repl, self.text)
         if new_text != self.text:
             self.text = new_text
             self._log("fix overlay click propagation (add e.target check)")
@@ -589,11 +624,7 @@ def scan_issues(path: Path, text: str) -> list[str]:
             issues.append(f"{rel}: wrong theme key: {set(theme_keys)}")
 
     # Check for overlay click handler missing e.target guard
-    if re.search(
-        r"\w+\.addEventListener\(\s*'click'\s*,\s*function\s*\(\s*\)\s*\{"
-        r"\s*\w+\.classList\.remove\(\s*'(?:active|show)'\s*\)",
-        text,
-    ):
+    if _has_unguarded_overlay_click_handler(text):
         issues.append(f"{rel}: overlay click handler missing e.target check")
 
     # Check for mermaid.run / mermaid.render without try-catch
@@ -659,12 +690,9 @@ def main():
     check_only = "--check" in sys.argv
 
     if args:
-        targets = [WIKI_DIR / a for a in args]
+        targets = [resolve_project_dir(a) for a in args]
     else:
-        targets = sorted(
-            d for d in WIKI_DIR.iterdir()
-            if d.is_dir() and not d.name.startswith(".")
-        )
+        targets = iter_project_dirs()
 
     total_fixed = 0
     total_issues_before = 0

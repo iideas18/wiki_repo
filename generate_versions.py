@@ -16,7 +16,8 @@ import sys
 import glob
 from pathlib import Path
 
-WIKI_DIR = Path(__file__).resolve().parent
+from internal_wiki_paths import iter_project_dirs, repo_relative, resolve_project_dir
+
 TIMESTAMP_RE = re.compile(r"^\d{8}_\d{6}$")
 
 
@@ -93,12 +94,9 @@ def main():
     list_only = "--list" in sys.argv
 
     if args:
-        dirs = [WIKI_DIR / name for name in args]
+        dirs = [resolve_project_dir(name) for name in args]
     else:
-        dirs = sorted(
-            d for d in WIKI_DIR.iterdir()
-            if d.is_dir() and not d.name.startswith(".")
-        )
+        dirs = iter_project_dirs()
 
     total = 0
     for d in dirs:
@@ -116,7 +114,7 @@ def main():
                 rev = f" ({v['rev'][:7]})" if v["rev"] else ""
                 print(f"  {v['timestamp']}  {v['date']}{rev}  {v['pages']} pages{tag}")
         else:
-            print(f"  {name}/versions.json  ({len(versions)} version(s))")
+            print(f"  {repo_relative(d / 'versions.json')}  ({len(versions)} version(s))")
 
     if not list_only:
         print(f"Generated versions.json for {total} project(s).")

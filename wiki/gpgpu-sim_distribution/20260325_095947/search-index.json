@@ -1,0 +1,263 @@
+[
+  {
+    "title": "AccelWattch CACTI — Cache Area, Timing & Power Modeling",
+    "path": "accelwattch_doc/cacti/index.html",
+    "excerpt": "AccelWattch CACTI — Cache Area, Timing & Power Modeling Skip to content ☾ ⇧ GPGPU-Sim › AccelWattch › CACTI CACTI — Cache Area, Timing & Power Modeling Analytical model for SRAM/DRAM/CAM access time, cycle time, area, and power CACTI (HP Labs) exhaustively searches the cache partition design space—varying word-line divisions, bit-line divisions, mux degrees, and wire types—to find Pareto-optimal configurations for any given cache geometry and technology node. 15+ Classes 41 Source Files ~18.8 k…",
+    "headings": [
+      "📚 What is CACTI & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Data Flow — Cache Parameter Search",
+      "Key Classes",
+      "Data Structures",
+      "Interactions with AccelWattch",
+      "Configuration Knobs",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example 1: Calling CACTI from AccelWattch",
+      "Example 2: Multi-threaded Partition Search (solve)",
+      "Example 3: Wire Delay with Repeater Optimization"
+    ]
+  },
+  {
+    "title": "AccelWattch — GPU Power Modeling Framework",
+    "path": "accelwattch_doc/index.html",
+    "excerpt": "AccelWattch — GPU Power Modeling Framework Skip to content ☾ ⇧ GPGPU-Sim › AccelWattch AccelWattch — GPU Power Modeling Framework GPU Power Modeling Framework AccelWattch is the architectural power modeling component of GPGPU-Sim. Built on McPAT and CACTI, it estimates dynamic power, leakage power, and area for every major on-chip structure — cores, caches, register files, execution units, NoC, memory controllers, and I/O — by combining activity counters from cycle-level simulation with…",
+    "headings": [
+      "💡 What is AccelWattch?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Sub-Modules & Logical Groupings",
+      "Directory Map",
+      "Configuration Knobs",
+      "Code Snippets",
+      "Integration API — gpgpu_sim_wrapper",
+      "Component Hierarchy — Processor",
+      "CACTI Array Bridge — ArrayST"
+    ]
+  },
+  {
+    "title": "Core Infrastructure — Hardware Abstraction & Simulation Entry Point",
+    "path": "core_doc/index.html",
+    "excerpt": "Core Infrastructure — Hardware Abstraction & Simulation Entry Point Skip to content ☾ ⇧ GPGPU-Sim › Core Infrastructure Core Infrastructure — Hardware Abstraction & Simulation Entry Point Hardware Abstraction & Simulation Entry Point The foundational layer of GPGPU-Sim: hardware abstraction types (warps, instructions, memory accesses), the simulation entry point and threading model, CUDA stream management, configuration parsing, and debug/trace infrastructure. Every other module in the…",
+    "headings": [
+      "💡 What Is This Module?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step: Tracing a Kernel Launch from API Call to Execution",
+      "Key Components",
+      "Deep Dives",
+      "Directory Map",
+      "Configuration Knobs",
+      "Code Examples",
+      "Concurrent Simulation Main Loop",
+      "Memory Coalescing — Transaction Reduction",
+      "Stream Operation Dispatch",
+      "Glossary"
+    ]
+  },
+  {
+    "title": "cuda-sim — PTX Functional Simulation Engine",
+    "path": "cuda_sim_doc/index.html",
+    "excerpt": "cuda-sim — PTX Functional Simulation Engine Skip to content ☾ ⇧ GPGPU-Sim › cuda-sim cuda-sim — PTX Functional Simulation Engine PTX Functional Simulation Engine The cuda-sim module is the functional simulation core of GPGPU-Sim. It parses PTX/PTXPlus assembly into an internal IR, decodes 150+ instruction opcodes, and executes them per-thread inside warps and CTAs — modelling all CUDA memory spaces (global, shared, local, constant, texture). It provides the ground-truth architectural state that…",
+    "headings": [
+      "What Is cuda-sim?",
+      "Architecture",
+      "Data Flow",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Components",
+      "Deep-Dive Topics",
+      "Directory Map",
+      "Configuration Knobs",
+      "Environment Variables",
+      "Code Snippets",
+      "Macro-Generated Instruction Dispatch",
+      "Per-Thread Instruction Execution Entry",
+      "Sparse Paged Memory Model"
+    ]
+  },
+  {
+    "title": "cuobjdump_to_ptxplus — CUDA Binary Disassembly Tool",
+    "path": "cuobjdump_to_ptxplus/index.html",
+    "excerpt": "cuobjdump_to_ptxplus — CUDA Binary Disassembly Tool Skip to content ☾ ⇧ GPGPU-Sim › cuobjdump_to_ptxplus cuobjdump_to_ptxplus — CUDA Binary Disassembly Tool PTX + ELF + SASS → PTXPlus Binary Translation Converts NVIDIA cuobjdump output (PTX, ELF sections, and SASS disassembly) into PTXPlus format — an extended PTX that preserves native SASS instruction scheduling. This enables GPGPU-Sim to model the GPU's native ISA more accurately than pure PTX simulation. 14 Source Files Lex/Yacc Parser Tech…",
+    "headings": [
+      "💡 What is cuobjdump_to_ptxplus?",
+      "Architecture",
+      "Translation Pipeline",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Structures",
+      "Key Functions",
+      "Lex/Yacc Grammar Structure",
+      "Module Interactions",
+      "Code Snippets",
+      "Usage",
+      "Directory Map",
+      "Glossary"
+    ]
+  },
+  {
+    "title": "gpgpu-sim — GPU Timing Simulation Engine",
+    "path": "gpgpu_sim_doc/index.html",
+    "excerpt": "gpgpu-sim — GPU Timing Simulation Engine Skip to content ☾ ⇧ GPGPU-Sim › gpgpu-sim gpgpu-sim — GPU Timing Simulation Engine GPU Timing Simulation Engine The performance-simulation core of GPGPU-Sim. Models a complete NVIDIA-style GPU micro-architecture at the cycle level — shader-core pipelines, L1/L2 cache hierarchy, on-chip interconnect, and DDR DRAM controllers — to produce detailed performance and power statistics for architectural research. 46 Files 25.5k Lines of Code 18+ Classes C++…",
+    "headings": [
+      "What Is This?",
+      "Architecture",
+      "Data Flow — Memory Request Lifecycle",
+      "Step-by-Step Walkthrough",
+      "🚶 Tracing a Memory Load Instruction",
+      "Key Components",
+      "Deep-Dive Topics",
+      "Directory Map",
+      "Configuration Knobs",
+      "Code Examples",
+      "Top-Level Simulator Class",
+      "Scoreboard — Register Dependency Tracking",
+      "DRAM Controller Interface",
+      "Clock Domains",
+      "Glossary",
+      "Module Interactions"
+    ]
+  },
+  {
+    "title": "GPGPU-Sim — Cycle-Level GPU Simulator",
+    "path": "index.html",
+    "excerpt": "GPGPU-Sim — Cycle-Level GPU Simulator Skip to content ☾ ⇧ GPGPU-Sim Cycle-Level GPU Simulator for CUDA & OpenCL Workloads GPGPU-Sim is a detailed, cycle-level simulator that models contemporary graphics processing units (GPUs) running compute workloads written in CUDA or OpenCL. It includes an interconnection network simulator (BookSim-based InterSim2), a configurable power model (AccelWattch/McPAT), and a performance visualization tool (AerialVision). GPGPU-Sim has been rigorously validated…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "System Architecture",
+      "gpgpu-sim",
+      "cuda-sim",
+      "Core Infrastructure",
+      "InterSim2",
+      "AccelWattch",
+      "libcuda",
+      "libopencl",
+      "cuobjdump_to_ptxplus",
+      "AerialVision",
+      "Navigation Guide",
+      "How the Modules Connect — A Memory Request Journey",
+      "Directory Map",
+      "Build & Tech Stack"
+    ]
+  },
+  {
+    "title": "InterSim2 Allocators — Switch & VC Allocation Algorithms",
+    "path": "intersim2_doc/allocators/index.html",
+    "excerpt": "InterSim2 Allocators — Switch & VC Allocation Algorithms Skip to content ☾ ⇧ GPGPU-Sim › InterSim2 › Allocators InterSim2/allocators/ — Switch & VC Allocation Algorithms Allocators — Switch & VC Allocation Algorithms Resolves contention when multiple input VCs compete for the same output port or output VC during the switch-allocation (SA) and VC-allocation (VA) stages of the router pipeline. 12 Classes 20 Files ~2.5 k Lines 7 Algorithms 📚 What is this & why does it exist? Inside every router on…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Allocation Flow",
+      "Key Classes",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: Allocator Factory & Usage in IQRouter",
+      "Example: iSLIP Grant-Accept Loop"
+    ]
+  },
+  {
+    "title": "InterSim2 Arbiters — Contention Resolution Mechanisms",
+    "path": "intersim2_doc/arbiters/index.html",
+    "excerpt": "InterSim2 Arbiters — Contention Resolution Mechanisms Skip to content ☾ ⇧ GPGPU-Sim › InterSim2 › Arbiters InterSim2/arbiters/ — Contention Resolution Mechanisms Arbiters — Contention Resolution Mechanisms Low-level building blocks that select exactly one winner from a set of competing requests on a single shared resource. Used by separable allocators and event-driven routers. 5 Classes 10 Files ~1.2 k Lines 4 Strategies 📚 What is this & why does it exist? When several inputs compete for a…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "Architecture",
+      "Arbitration Flow",
+      "Key Classes",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: RoundRobinArbiter Arbitrate Logic",
+      "Example: MatrixArbiter Priority Update"
+    ]
+  },
+  {
+    "title": "InterSim2 — Interconnection Network Simulator",
+    "path": "intersim2_doc/index.html",
+    "excerpt": "InterSim2 — Interconnection Network Simulator Skip to content ☾ ⇧ GPGPU-Sim › InterSim2 InterSim2 — Interconnection Network Simulator Cycle-Accurate On-Chip Network Simulation for GPGPU-Sim InterSim2 is a cycle-accurate interconnection network (NoC) simulator integrated into GPGPU-Sim, based on Stanford’s BookSim 2.0. It models flit-level routing, virtual-channel flow control, switch allocation, and crossbar traversal across configurable topologies — connecting shader cores to memory partitions…",
+    "headings": [
+      "💡 Think of it like a Highway System",
+      "Architecture",
+      "Data Flow — Flit Lifecycle",
+      "🚶 Step-by-Step: Tracing a Flit Through the Network",
+      "Key Components",
+      "Sub-Modules",
+      "Directory Map",
+      "Configuration Knobs",
+      "Code Highlights",
+      "Flit — The Fundamental Data Unit",
+      "VC State Machine",
+      "InterconnectInterface — GPGPU-Sim Bridge",
+      "How InterSim2 Connects to GPGPU-Sim Core"
+    ]
+  },
+  {
+    "title": "InterSim2 Routers — Packet Switching & Forwarding",
+    "path": "intersim2_doc/routers/index.html",
+    "excerpt": "InterSim2 Routers — Packet Switching & Forwarding Skip to content ☾ ⇧ GPGPU-Sim › InterSim2 › Routers InterSim2/routers/ — Packet Switching & Forwarding Routers — Packet Switching & Forwarding Implements the router pipeline models — the heart of the NoC. Each router reads input flits, computes routes, allocates VCs and switch bandwidth, traverses the crossbar, and sends flits on output channels. 4 Classes 8 Files ~4.5 k Lines 5 Pipeline Stages 📚 What is this & why does it exist? Every node in…",
+    "headings": [
+      "📚 What is this & why does it exist?",
+      "Contents",
+      "IQRouter Pipeline Architecture",
+      "Class Hierarchy",
+      "Key Classes",
+      "Data Structures",
+      "Interactions",
+      "Configuration",
+      "Directory Map",
+      "Deep-Dive Highlights",
+      "Code Examples",
+      "Example: IQRouter Pipeline Evaluate Cycle",
+      "Example: Router Factory"
+    ]
+  },
+  {
+    "title": "libcuda — CUDA Runtime API Interception",
+    "path": "libcuda/index.html",
+    "excerpt": "libcuda — CUDA Runtime API Interception Skip to content ☾ ⇧ GPGPU-Sim › libcuda libcuda — CUDA Runtime API Interception CUDA Runtime API Interception Layer Implements libcudart.so as a drop-in replacement for the NVIDIA CUDA runtime. Every CUDA API call from the application is intercepted and redirected into the GPGPU-Sim cycle-level simulator — memory allocation, data transfer, kernel launch, and synchronisation all run on the simulated GPU. 7 Source Files CUDA API Layer 80+ Functions…",
+    "headings": [
+      "💡 What is libcuda?",
+      "Architecture",
+      "Data Flow — Kernel Launch Path",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Structures",
+      "Key API Functions",
+      "Module Interactions",
+      "Configuration & Environment Variables",
+      "Code Snippets",
+      "Directory Map",
+      "Glossary"
+    ]
+  },
+  {
+    "title": "libopencl — OpenCL Runtime API",
+    "path": "libopencl/index.html",
+    "excerpt": "libopencl — OpenCL Runtime API Skip to content ☾ ⇧ GPGPU-Sim › libopencl libopencl — OpenCL Runtime API OpenCL 1.x Runtime API Translation Layer Implements libOpenCL.so as a drop-in replacement for the NVIDIA OpenCL driver. OpenCL calls are translated into the same GPGPU-Sim simulator infrastructure used by CUDA — OpenCL source is compiled to PTX via nvopencl_wrapper , then loaded into the simulator's PTX parser for cycle-accurate execution. 2 Source Files OpenCL API Layer 30+ Functions C++…",
+    "headings": [
+      "💡 What is libopencl?",
+      "Architecture",
+      "Data Flow — OpenCL Kernel Execution",
+      "OpenCL → CUDA Concept Mapping",
+      "🚶 Step-by-Step Narrated Walkthrough",
+      "Key Classes & Structures",
+      "Key API Functions",
+      "Module Interactions",
+      "Configuration & Environment Variables",
+      "Code Snippets",
+      "Directory Map",
+      "Glossary"
+    ]
+  }
+]

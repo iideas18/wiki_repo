@@ -18,7 +18,10 @@ import subprocess
 from pathlib import Path
 from datetime import date
 
-WIKI_DIR = Path(__file__).resolve().parent
+from internal_wiki_paths import HUB_INDEX, REPO_ROOT, iter_project_dirs, repo_relative, resolve_project_dir
+
+CARD_GRID_RE = re.compile(r'(<div class="card-grid">\n)(.*?)(</div>\n\n<h2 id="about">)', re.DOTALL)
+CARD_RE = re.compile(r'<a class="card" href="[^"]+">.*?</a>', re.DOTALL)
 
 # ── Icons: map keywords in title to emoji HTML entities ──────────────
 ICON_MAP = [
@@ -116,6 +119,67 @@ def detect_tags(index_path: Path) -> list[tuple[str, str]]:
     return tags[:4]
 
 
+def extract_project_slug_from_href(href: str) -> str | None:
+    """Extract the project slug from either legacy or wiki-prefixed hub hrefs."""
+    parts = [part for part in href.split("/") if part]
+    if not parts:
+        return None
+    if parts[0] == "wiki":
+        return parts[1] if len(parts) > 1 else None
+    return parts[0]
+
+
+def extract_existing_project_slugs(content: str) -> set[str]:
+    slugs = set()
+    hrefs = re.findall(r'<a class="card" href="([^"]+)"', content)
+    for href in hrefs:
+        slug = extract_project_slug_from_href(href)
+        if slug:
+            slugs.add(slug)
+    return slugs
+
+
+def _card_href(card_html: str) -> str:
+    match = re.search(r'<a class="card" href="([^"]+)"', card_html)
+    return match.group(1) if match else ""
+
+
+def _prefer_card(existing_card: str, candidate_card: str) -> str:
+    existing_href = _card_href(existing_card)
+    candidate_href = _card_href(candidate_card)
+    if candidate_href.startswith("wiki/") and not existing_href.startswith("wiki/"):
+        return candidate_card
+    return existing_card
+
+
+def dedupe_card_grid(content: str) -> str:
+    """Collapse duplicate cards so each project slug appears once in the grid."""
+    match = CARD_GRID_RE.search(content)
+    if not match:
+        return content
+
+    prefix, body, suffix = match.groups()
+    cards = CARD_RE.findall(body)
+    if not cards:
+        return content
+
+    chosen_cards: dict[str, str] = {}
+    order: list[str] = []
+    for card in cards:
+        slug = extract_project_slug_from_href(_card_href(card))
+        if not slug:
+            continue
+        if slug not in chosen_cards:
+            chosen_cards[slug] = card
+            order.append(slug)
+            continue
+        chosen_cards[slug] = _prefer_card(chosen_cards[slug], card)
+
+    rebuilt_body = "\n\n".join(chosen_cards[slug] for slug in order)
+    rebuilt = prefix + rebuilt_body + "\n" + suffix
+    return content[:match.start()] + rebuilt + content[match.end():]
+
+
 def resolve_wiki_index(entry: Path) -> Path | None:
     """Given a top-level directory, find its wiki index.html.
 
@@ -148,7 +212,7 @@ def build_project(index_path: Path) -> dict | None:
     if not meta:
         return None
 
-    rel = index_path.relative_to(WIKI_DIR).as_posix()
+    rel = repo_relative(index_path)
     page_count = len(glob.glob(str(index_path.parent / "**/*.html"), recursive=True))
     tags = detect_tags(index_path)
 
@@ -163,15 +227,13 @@ def build_project(index_path: Path) -> dict | None:
     }
 
 
-def get_existing_project_dirs() -> set[str]:
-    """Parse the current index.html and return the set of project dir names already present."""
-    index_path = WIKI_DIR / "index.html"
+def get_existing_project_slugs() -> set[str]:
+    """Parse the current hub and return the set of project slugs already present."""
+    index_path = HUB_INDEX
     if not index_path.is_file():
         return set()
     content = index_path.read_text(encoding="utf-8")
-    hrefs = re.findall(r'<a class="card" href="([^"]+)"', content)
-    # Extract the top-level project directory from each href
-    return set(h.split("/")[0] for h in hrefs)
+    return extract_existing_project_slugs(content)
 
 
 def render_card(p: dict) -> str:
@@ -221,7 +283,7 @@ def update_stats(content: str) -> str:
 
 def append_projects(new_projects: list[dict]):
     """Append new project cards to index.html and update stats."""
-    index_path = WIKI_DIR / "index.html"
+    index_path = HUB_INDEX
     content = index_path.read_text(encoding="utf-8")
 
     # Insert new cards just before the closing </div> of card-grid
@@ -233,6 +295,7 @@ def append_projects(new_projects: list[dict]):
         content,
     )
 
+    content = dedupe_card_grid(content)
     content = update_stats(content)
     index_path.write_text(content, encoding="utf-8")
 
@@ -243,7 +306,7 @@ def append_projects(new_projects: list[dict]):
 
 def refresh_existing_cards(dirs: list[Path]):
     """Update href, page count, and date for cards whose latest version changed."""
-    index_path = WIKI_DIR / "index.html"
+    index_path = HUB_INDEX
     if not index_path.is_file():
         return
     content = index_path.read_text(encoding="utf-8")
@@ -257,14 +320,13 @@ def refresh_existing_cards(dirs: list[Path]):
         if idx is None:
             continue
 
-        rel = idx.relative_to(WIKI_DIR).as_posix()
+        rel = repo_relative(idx)
         proj = build_project(idx)
         if not proj:
             continue
 
-        # Find existing card for this project directory (any timestamp)
-        project_prefix = d.name + "/"
-        pattern = rf'<a class="card" href="({re.escape(project_prefix)}[^"]*)"'
+        # Find existing card for this project directory in either legacy or new form.
+        pattern = rf'<a class="card" href="((?:wiki/)?{re.escape(d.name)}/[^"]*)"'
         match = re.search(pattern, content)
         if not match:
             continue
@@ -298,6 +360,7 @@ def refresh_existing_cards(dirs: list[Path]):
         content = content[:card_start] + new_section + content[card_end:]
         updated.append(f"  ↻ {proj['name']}: {old_href} → {rel} ({proj['pages']} pages)")
 
+    content = dedupe_card_grid(content)
     if content != original:
         content = update_stats(content)
         index_path.write_text(content, encoding="utf-8")
@@ -311,16 +374,15 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     list_only = "--list" in sys.argv
 
-    existing_dirs = get_existing_project_dirs()
+    existing_dirs = get_existing_project_slugs()
     new_projects = []
 
     if args:
         # Specific directories requested
-        dirs = [WIKI_DIR / name for name in args]
+        dirs = [resolve_project_dir(name) for name in args]
     else:
         # Auto-detect all
-        dirs = sorted(d for d in WIKI_DIR.iterdir()
-                       if d.is_dir() and not d.name.startswith("."))
+        dirs = iter_project_dirs()
 
     for d in dirs:
         if not d.is_dir():
@@ -360,14 +422,14 @@ def main():
 
 def _run_post_scripts(project_args: list[str]):
     """Run generate_versions.py and inject_version_switcher.py."""
-    gen = WIKI_DIR / "generate_versions.py"
-    inj = WIKI_DIR / "inject_version_switcher.py"
+    gen = REPO_ROOT / "generate_versions.py"
+    inj = REPO_ROOT / "inject_version_switcher.py"
     for script in (gen, inj):
         if not script.is_file():
             continue
         cmd = [sys.executable, str(script)] + project_args
         print(f"\nRunning {script.name} ...")
-        subprocess.run(cmd, cwd=str(WIKI_DIR))
+        subprocess.run(cmd, cwd=str(REPO_ROOT))
 
 
 if __name__ == "__main__":

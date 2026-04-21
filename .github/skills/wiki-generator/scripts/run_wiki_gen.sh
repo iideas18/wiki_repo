@@ -7,7 +7,7 @@
 #
 # Options:
 #   -s, --source DIR|URL    Source directory or git URL to document (required)
-#   -o, --output DIR        Output base directory (default: /mnt/disk1/zy/internal_wiki)
+#   -o, --output DIR        Output base directory (default: <repo>/wiki)
 #   -m, --model MODEL       LLM model name (default: claude-opus-4.6)
 #   -n, --name NAME         Project slug for output dir (default: derived from source)
 #   -b, --branch REF        Git branch/tag/commit to checkout (default: default branch)
@@ -22,11 +22,11 @@
 #
 # Environment variables (override defaults, flags take priority):
 #   WIKI_SOURCE_DIR         Source directory or git URL
-#   WIKI_OUTPUT_BASE        Output base directory
+#   WIKI_OUTPUT_BASE        Output base directory (default: <repo>/wiki)
 #   WIKI_MODEL              LLM model
 #   WIKI_SKILL_REPO         Skill repository path
 #   WIKI_LOG_DIR            Log directory
-#   WIKI_GIT_CLONE_DIR      Base directory for git clones (default: OUTPUT_BASE/.git-clones)
+#   WIKI_GIT_CLONE_DIR      Base directory for git clones (default: <repo>/.git-clones)
 #
 # Examples:
 #   bash run_wiki_gen.sh -s /path/to/source
@@ -39,10 +39,16 @@
 # ============================================================================
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$(realpath "$0")")/../../../.." && pwd)"
+PROJECTS_ROOT="${REPO_ROOT}/wiki"
+CACHE_STAGING_ROOT="${REPO_ROOT}/.wiki-cache"
 # === Defaults (environment overrides, flags override both) ===
 SKILL_REPO="${WIKI_SKILL_REPO:-$REPO_ROOT}"
 SOURCE_DIR="${WIKI_SOURCE_DIR:-/mnt/disk2/applications.simulators.cpu.keiko/indigo}"
-OUTPUT_BASE="${WIKI_OUTPUT_BASE:-$REPO_ROOT}"
+OUTPUT_BASE="${WIKI_OUTPUT_BASE:-$PROJECTS_ROOT}"
+OUTPUT_BASE_EXPLICIT=false
+if [ -n "${WIKI_OUTPUT_BASE:-}" ]; then
+  OUTPUT_BASE_EXPLICIT=true
+fi
 LOG_DIR="${WIKI_LOG_DIR:-$REPO_ROOT/logs}"
 MODEL="${WIKI_MODEL:-claude-opus-4.6}"
 PROJECT_NAME=""
@@ -65,7 +71,7 @@ usage() {
 while [ $# -gt 0 ]; do
   case "$1" in
     -s|--source)       SOURCE_DIR="$2"; shift 2 ;;
-    -o|--output)       OUTPUT_BASE="$2"; shift 2 ;;
+    -o|--output)       OUTPUT_BASE="$2"; OUTPUT_BASE_EXPLICIT=true; shift 2 ;;
     -m|--model)        MODEL="$2"; shift 2 ;;
     -n|--name)         PROJECT_NAME="$2"; shift 2 ;;
     -b|--branch)       GIT_BRANCH="$2"; shift 2 ;;
@@ -112,7 +118,7 @@ if is_git_url "$SOURCE_DIR"; then
 
   # Determine clone directory
   if [ -z "$GIT_CLONE_BASE" ]; then
-    GIT_CLONE_BASE="${OUTPUT_BASE}/.git-clones"
+    GIT_CLONE_BASE="${REPO_ROOT}/.git-clones"
   fi
   CLONE_DIR="${GIT_CLONE_BASE}/${REPO_NAME}"
 
@@ -163,6 +169,25 @@ if [ -z "$PROJECT_NAME" ]; then
   fi
 fi
 
+if [ "$CACHE_ONLY" = "true" ] && [ "$OUTPUT_BASE_EXPLICIT" = "false" ]; then
+  OUTPUT_BASE="$CACHE_STAGING_ROOT"
+fi
+
+OUTPUT_BASE_REAL="$(realpath -m "$OUTPUT_BASE")"
+PROJECTS_ROOT_REAL="$(realpath -m "$PROJECTS_ROOT")"
+PUBLISH_TO_CANONICAL=false
+if [ "$OUTPUT_BASE_REAL" = "$PROJECTS_ROOT_REAL" ] && [ "$CACHE_ONLY" != "true" ]; then
+  PUBLISH_TO_CANONICAL=true
+fi
+
+LEGACY_PROJECT_DIR="${REPO_ROOT}/${PROJECT_NAME}"
+CANONICAL_PROJECT_DIR="${PROJECTS_ROOT}/${PROJECT_NAME}"
+if [ "$PUBLISH_TO_CANONICAL" = "true" ] && [ -d "$LEGACY_PROJECT_DIR" ]; then
+  echo "[ERROR] Legacy project directory still exists at $LEGACY_PROJECT_DIR" >&2
+  echo "[ERROR] Move it under $PROJECTS_ROOT before publishing new snapshots for $PROJECT_NAME." >&2
+  exit 1
+fi
+
 # === Environment (cron has minimal PATH) ===
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
@@ -196,24 +221,42 @@ CACHE_DIR=""
 CACHE_STATUS="MISS"
 
 find_latest_cache() {
-  _proj_dir="${OUTPUT_BASE}/${PROJECT_NAME}"
-  if [ ! -d "$_proj_dir" ]; then return 1; fi
-  for dir in $(ls -dt "$_proj_dir"/[0-9]*_[0-9]* 2>/dev/null); do
-    # Check for 3-pass research artifacts (new format)
-    if [ -f "$dir/docs/_research/01-survey.md" ] && [ -f "$dir/docs/_research/_synthesis.md" ]; then
-      echo "$dir/docs"
-      return 0
-    fi
-    # Fallback: legacy single-pass manifest
-    if [ -f "$dir/docs/_research/_manifest.json" ]; then
-      echo "$dir/docs"
-      return 0
-    fi
-    if [ -f "$dir/_research/_manifest.json" ]; then
-      echo "$dir"
-      return 0
-    fi
+  local best_dir=""
+  local best_ts=""
+  local proj_dir=""
+  local dir=""
+  local ts=""
+  for base in "$CACHE_STAGING_ROOT" "$PROJECTS_ROOT"; do
+    proj_dir="${base}/${PROJECT_NAME}"
+    [ -d "$proj_dir" ] || continue
+    for dir in "$proj_dir"/[0-9]*_[0-9]*; do
+      [ -d "$dir" ] || continue
+      if [ ! -f "$dir/docs/_research/01-survey.md" ] \
+         && [ ! -f "$dir/docs/_research/_manifest.json" ] \
+         && [ ! -f "$dir/_research/_manifest.json" ] \
+         && [ ! -f "$dir/docs/_research/_synthesis.md" ]; then
+        continue
+      fi
+      ts="$(basename "$dir")"
+      if [ -z "$best_dir" ] || [[ "$ts" > "$best_ts" ]]; then
+        best_dir="$dir"
+        best_ts="$ts"
+      fi
+    done
   done
+  [ -n "$best_dir" ] || return 1
+  if [ -f "$best_dir/docs/_research/01-survey.md" ] && [ -f "$best_dir/docs/_research/_synthesis.md" ]; then
+    echo "$best_dir/docs"
+    return 0
+  fi
+  if [ -f "$best_dir/docs/_research/_manifest.json" ]; then
+    echo "$best_dir/docs"
+    return 0
+  fi
+  if [ -f "$best_dir/_research/_manifest.json" ]; then
+    echo "$best_dir"
+    return 0
+  fi
   return 1
 }
 
@@ -258,6 +301,7 @@ if [ "$DRY_RUN" = "true" ]; then
   echo "Cache hit:    $CACHE_HIT"
   echo "No-cache:     $NO_CACHE"
   echo "Cache-only:   $CACHE_ONLY"
+  echo "Publish mode: $PUBLISH_TO_CANONICAL"
   if [ "$GIT_CLONED" = "true" ]; then
   echo "Git URL:      $GIT_URL"
   echo "Git branch:   ${GIT_BRANCH:-<default>}"
@@ -294,6 +338,7 @@ fi
   echo "  Cache dir:   ${CACHE_DIR:-none}"
   echo "  No-cache:    $NO_CACHE"
   echo "  Cache-only:  $CACHE_ONLY"
+  echo "  Publish:     $PUBLISH_TO_CANONICAL"
   if [ "$GIT_CLONED" = "true" ]; then
   echo "  Git URL:     $GIT_URL"
   echo "  Git branch:  ${GIT_BRANCH:-<default>}"
@@ -328,7 +373,7 @@ set -e
 find "$LOG_DIR" -name "wiki_gen_*.log" -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null || true
 
 # === Prune old wiki snapshots ===
-if [ "$KEEP_SNAPSHOTS" -gt 0 ]; then
+if [ "$PUBLISH_TO_CANONICAL" = "true" ] && [ "$KEEP_SNAPSHOTS" -gt 0 ]; then
   _proj_dir="${OUTPUT_BASE}/${PROJECT_NAME}"
   if [ -d "$_proj_dir" ]; then
     ls -dt "$_proj_dir"/[0-9]*_[0-9]* 2>/dev/null \
@@ -364,18 +409,20 @@ if [ $EXIT_CODE -eq 0 ]; then
   # --- end Overview Pass ---
 
   # === Post-generation: update versions, switcher, and hub index ===
-  GEN_VERSIONS="${OUTPUT_BASE}/generate_versions.py"
-  INJ_SWITCHER="${OUTPUT_BASE}/inject_version_switcher.py"
-  UPDATE_INDEX="${OUTPUT_BASE}/update_index.py"
-  if [ -f "$GEN_VERSIONS" ]; then
+  GEN_VERSIONS="${REPO_ROOT}/generate_versions.py"
+  INJ_SWITCHER="${REPO_ROOT}/inject_version_switcher.py"
+  UPDATE_INDEX="${REPO_ROOT}/update_index.py"
+  if [ "$PUBLISH_TO_CANONICAL" != "true" ]; then
+    echo "[INFO] Skipping repo-root versions/switcher/index updates for non-canonical output." 
+  elif [ -f "$GEN_VERSIONS" ]; then
     echo "[INFO] Regenerating versions.json for $PROJECT_NAME ..."
     python3 "$GEN_VERSIONS" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
   fi
-  if [ -f "$INJ_SWITCHER" ]; then
+  if [ "$PUBLISH_TO_CANONICAL" = "true" ] && [ -f "$INJ_SWITCHER" ]; then
     echo "[INFO] Injecting version switcher for $PROJECT_NAME ..."
     python3 "$INJ_SWITCHER" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
   fi
-  if [ -f "$UPDATE_INDEX" ]; then
+  if [ "$PUBLISH_TO_CANONICAL" = "true" ] && [ -f "$UPDATE_INDEX" ]; then
     echo "[INFO] Updating hub index.html for $PROJECT_NAME ..."
     python3 "$UPDATE_INDEX" "$PROJECT_NAME" 2>&1 | sed 's/^/  /'
   fi

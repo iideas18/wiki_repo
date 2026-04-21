@@ -16,7 +16,8 @@ import re
 import sys
 from pathlib import Path
 
-WIKI_DIR = Path(__file__).resolve().parent
+from internal_wiki_paths import iter_project_dirs, repo_relative, resolve_project_dir
+
 TIMESTAMP_RE = re.compile(r"^\d{8}_\d{6}$")
 
 MARKER_START = "<!-- VERSION_SWITCHER_START -->"
@@ -132,7 +133,7 @@ def process_project(project_dir: Path, dry_run: bool = False) -> int:
         if changed:
             count += 1
             tag = " (dry-run)" if dry_run else ""
-            print(f"  {idx.relative_to(WIKI_DIR)}{tag}")
+            print(f"  {repo_relative(idx)}{tag}")
 
     return count
 
@@ -142,12 +143,9 @@ def main():
     dry_run = "--check" in sys.argv
 
     if args:
-        dirs = [WIKI_DIR / name for name in args]
+        dirs = [resolve_project_dir(name) for name in args]
     else:
-        dirs = sorted(
-            d for d in WIKI_DIR.iterdir()
-            if d.is_dir() and not d.name.startswith(".")
-        )
+        dirs = iter_project_dirs()
 
     total = 0
     for d in dirs:

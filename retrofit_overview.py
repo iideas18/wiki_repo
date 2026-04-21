@@ -12,7 +12,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
+from internal_wiki_paths import REPO_ROOT, iter_project_dirs, resolve_project_dir
+
 SKILL_SCRIPTS = REPO_ROOT / ".github" / "skills" / "wiki-generator" / "scripts"
 SKILL_RESOURCES = REPO_ROOT / ".github" / "skills" / "wiki-generator" / "resources"
 
@@ -23,12 +24,15 @@ import overview_pass  # noqa: E402
 
 def _iter_project_dirs(explicit: list[str]) -> list[Path]:
     if explicit:
-        return [Path(p).resolve() for p in explicit]
-    candidates = []
-    for child in REPO_ROOT.iterdir():
-        if child.is_dir() and (child / "versions.json").is_file():
-            candidates.append(child)
-    return sorted(candidates)
+        resolved = []
+        for project in explicit:
+            candidate = Path(project)
+            if candidate.exists():
+                resolved.append(candidate.resolve())
+            else:
+                resolved.append(resolve_project_dir(project))
+        return resolved
+    return iter_project_dirs()
 
 
 def _active_version_dir(project: Path) -> Path | None:

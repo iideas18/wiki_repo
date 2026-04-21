@@ -1,5 +1,6 @@
 __pycache__
 .vscode
 .git-clones
+.wiki-cache
 logs
 .superpowers*.bak

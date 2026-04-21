@@ -138,6 +138,14 @@ python3 update_index.py --list
 
 ```
 ├── index.html              # Hub landing page with project cards
+├── wiki/                   # Canonical root for published wiki projects
+│   ├── <project>/          # Generated wiki (flat layout)
+│   │   ├── index.html
+│   │   ├── search-index.json
+│   │   └── <module>/index.html
+│   └── <project>/<timestamp>/  # Generated wiki (timestamped layout)
+│       ├── index.html
+│       └── ...
 ├── fix_wiki_html.py        # Post-generation HTML fixer
 ├── update_index.py         # Hub index updater
 ├── .github/skills/
@@ -152,11 +160,4 @@ python3 update_index.py --list
 │           ├── auto-crosslink.py     # Cross-reference linker
 │           ├── verify.sh             # Output verifier
 │           └── ...
-├── <project>/              # Generated wiki (flat layout)
-│   ├── index.html
-│   ├── search-index.json
-│   └── <module>/index.html
-└── <project>/<timestamp>/  # Generated wiki (timestamped layout)
-    ├── index.html
-    └── ...
 ```
