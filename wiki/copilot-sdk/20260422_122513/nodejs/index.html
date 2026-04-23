@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>nodejs — Copilot SDK</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Copilot SDK</a> &rsaquo; nodejs</nav>
+<h1>nodejs &mdash; TypeScript / Node.js SDK</h1>
+<div class="hero">
+<div class="subtitle">The reference SDK. <code>@github/copilot-sdk</code> on npm.</div>
+<p>The Node.js SDK is the <strong>reference implementation</strong> of the Copilot SDK contract. It's the first SDK to receive new features, the source from which behaviour is ported to the other three languages, and the largest single surface in the repo. Uses <code>vscode-jsonrpc</code> for transport, supports both plain JSON Schema and Zod for tool parameters, and bundles the Copilot CLI as a transitive npm dependency so users never install it separately.</p>
+<p style="margin-top:.8rem">
+<span class="badge blue">TypeScript</span>
+<span class="badge green">ESM only</span>
+<span class="badge yellow">Reference impl</span>
+</p>
+</div>
+
+<div class="stat-row">
+<div class="stat-box"><div class="num">98</div><div class="label">.ts files</div></div>
+<div class="stat-box"><div class="num">1990</div><div class="label">client.ts lines</div></div>
+<div class="stat-box"><div class="num">1097</div><div class="label">session.ts lines</div></div>
+<div class="stat-box"><div class="num">1735</div><div class="label">types.ts lines</div></div>
+<div class="stat-box"><div class="num">88</div><div class="label">Exports from index.ts</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>A TypeScript SDK that wraps JSON-RPC calls into idiomatic <code>async</code> methods on a <code>CopilotClient</code> class. When you call <code>await client.createSession({ model: "gpt-4" })</code>, under the hood the SDK spawns the <code>copilot</code> CLI as a sub-process, wires stdin/stdout into a <code>vscode-jsonrpc</code> message connection, negotiates the protocol version, and hands you back a typed <code>CopilotSession</code> object.</p>
+<details style="margin-top:.8rem">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the SDK as a remote-control headset for a powerful but complicated robot (the Copilot CLI). The headset doesn't contain the robot; it just speaks its language. You press a button in your app &mdash; "tell me about Seattle weather" &mdash; and the headset translates that to the correct robot protocol, streams the robot's visual feed (events) back to you, and when the robot asks "should I open the door?" (permission request), it hands the question to you before the robot moves. If your app quits mid-sentence, the headset sends a polite shutdown command before unplugging; if you kill your app abruptly, the OS cuts the pipe and the robot powers down cleanly.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-exists">&#127919; Why This Module Exists</h2>
+<p>The Node.js SDK exists because the Copilot CLI itself is a Node.js binary. That means (a) <code>@github/copilot</code> is already the dependency graph of any TypeScript project using the SDK, so bundling adds zero new runtime; (b) the maintainers of the SDK and the CLI work in the same language daily, so fixes roundtrip fast; (c) VS Code extensions and the massive Node ecosystem get first-class support immediately. Without this SDK, every TypeScript agent developer would shell out to <code>copilot</code> and parse stdout &mdash; losing the event stream, tool callbacks, permission flow, and streaming responses.</p>
+
+<p>Because it's the reference, it tends to pioneer features. Commands and UI elicitation shipped in Node first (v0.2.0), then landed in Python/Go/.NET in v0.2.1. The <code>enableConfigDiscovery</code> flag, system-message transforms, and <code>traceContextProvider</code> all debuted here. A consequence: occasionally the Node SDK has capabilities no other SDK does yet &mdash; check <code>CHANGELOG.md</code> before relying on parity.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+<tr><td>JSON-RPC library</td><td><code>vscode-jsonrpc</code></td><td>Hand-rolled, <code>json-rpc-2.0</code> npm</td><td>Battle-tested in millions of VS Code extensions; LSP-style Content-Length framing out of the box; cancellation tokens native</td></tr>
+<tr><td>Tool parameter spec</td><td>Accept JSON Schema <strong>or</strong> Zod</td><td>Force JSON Schema only</td><td>Zod is the de-facto TS validation lib; the <code>toJSONSchema</code> probe keeps Zod a truly optional dependency</td></tr>
+<tr><td>Event delivery</td><td>Custom <code>Set&lt;Handler&gt;</code> + <code>Map&lt;EventType, Set&gt;</code></td><td>Node <code>EventEmitter</code></td><td>EventEmitter leaks listeners silently; custom impl returns typed unsubscribe fns and enforces discriminated-union typing</td></tr>
+<tr><td>Module format</td><td>ESM with <code>.js</code> extensions in imports</td><td>CJS, dual package</td><td>Modern Node default; avoids "dual package hazard"; forces users to modern tooling</td></tr>
+<tr><td>System-message transforms</td><td>Wire stub + side-map of callbacks</td><td>Pre-expand on client; RPC with closures</td><td>Functions can't be serialised; pre-expanding defeats the server-driven substitution point</td></tr>
+<tr><td>Bundled-CLI resolution</td><td><code>createRequire(import.meta.url).resolve('@github/copilot')</code></td><td>Env var; hard-coded path</td><td>Uses Node's own resolver; works in nested node_modules layouts; respects peerDeps</td></tr>
+<tr><td>Types organisation</td><td>Single <code>types.ts</code> (1735 lines)</td><td>Per-domain files</td><td>Avoids circular imports (every file references types); idiomatic TS; re-exported from <code>index.ts</code></td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+classDiagram
+  class CopilotClient {
+    +options: CopilotClientOptions
+    -process: ChildProcess
+    -connection: MessageConnection
+    -sessions: Map~string, CopilotSession~
+    +start()
+    +stop()
+    +createSession(cfg)
+    +resumeSession(id)
+    +listSessions()
+    +listModels()
+    +getAuthStatus()
+    +getStatus()
+  }
+  class CopilotSession {
+    +sessionId: string
+    +capabilities: SessionCapabilities
+    -eventHandlers: Set~Handler~
+    -toolHandlers: Map~name, Handler~
+    -permissionHandler?
+    -elicitationHandler?
+    -hooks?: SessionHooks
+    +on(handler) Unsub
+    +send(opts) Promise~messageId~
+    +sendAndWait(opts, timeout)
+    +disconnect()
+    +ui SessionUiApi
+  }
+  class SessionFsProvider
+  class Tool {
+    +name: string
+    +description: string
+    +parameters: JSONSchema | ZodSchema
+    +handler: ToolHandler
+  }
+  class SessionEvent {
+    <<union>>
+    assistant.message
+    session.idle
+    session.error
+    tool.call_started
+    permission.requested
+    ...40+ variants
+  }
+  CopilotClient "1" o-- "*" CopilotSession : manages
+  CopilotSession "1" o-- "*" Tool : invokes
+  CopilotSession ..> SessionEvent : emits
+  CopilotClient ..> SessionFsProvider : wraps via adapter
+</pre>
+</div>
+
+<h2 id="data-flow">Session Lifecycle &amp; Event Pump</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant App
+    participant Client as CopilotClient
+    participant CLI as copilot subprocess
+    participant Session as CopilotSession
+
+    App->>Client: new CopilotClient(opts)
+    App->>Client: await client.createSession(cfg)
+    Client->>CLI: spawn if needed
+    Client->>CLI: JSON-RPC: getStatus
+    CLI-->>Client: protocolVersion=3, capabilities
+    Client->>CLI: JSON-RPC: session.create
+    CLI-->>Client: sessionId + session capabilities
+    Client-->>App: Session instance
+    App->>Session: session.on(handler)
+    App->>Session: await session.sendAndWait({prompt})
+    Session->>Session: pre-register idle/error listener
+    Session->>CLI: session.send
+    loop agent turn
+      CLI-->>Session: event: assistant.message (partial)
+      Session-->>App: handler fires
+      CLI->>Session: RPC: session/toolInvoke
+      Session->>App: tool handler runs
+      App-->>Session: result
+      Session-->>CLI: RPC reply
+    end
+    CLI-->>Session: event: session.idle
+    Session-->>App: resolve sendAndWait promise
+    App->>Client: await client.stop()
+    Client->>CLI: JSON-RPC: shutdown
+    Client->>CLI: SIGTERM if no graceful exit
+</pre>
+</div>
+
+<div class="intro-box">
+<h3>&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow a single <strong><code>session.sendAndWait({prompt: "weather?"})</code> call with one tool invocation</strong>:</p>
+<ol>
+<li><strong>Client instantiation</strong> &mdash; <code>new CopilotClient(options)</code> validates inputs but does no I/O. No process yet.</li>
+<li><strong>Session creation (lazy start)</strong> &mdash; <code>createSession</code> triggers <code>start()</code> if not already started. Spawn path: <code>createRequire</code> resolves <code>@github/copilot</code> &rarr; <code>spawn(cliPath, ['serve','--stdio'])</code>. Wire <code>StreamMessageReader/Writer</code> into <code>createMessageConnection</code>.</li>
+<li><strong>Protocol handshake</strong> &mdash; <code>getStatus</code> RPC. Compare <code>protocolVersion</code> against <code>MIN_PROTOCOL_VERSION = 2</code>; reject if lower. Cache negotiated version for capability gates.</li>
+<li><strong>Register server&rarr;client handlers</strong> &mdash; <code>registerClientSessionApiHandlers</code> installs shims for tool dispatch, permission, elicitation, and SessionFs ops. These handlers dispatch by session ID to the right Session instance.</li>
+<li><strong>session.create RPC</strong> &mdash; sends serialisable config. System-message callbacks are stripped and stored in a side-map; wire sends <code>{action:"transform"}</code> stubs.</li>
+<li><strong>Listener pre-registration (race fix)</strong> &mdash; <code>sendAndWait</code> attaches its <code>session.idle</code> listener <em>before</em> calling <code>send</code>. Comment in <code>session.ts</code> L231-243 explains this.</li>
+<li><strong>session.send RPC</strong> &mdash; returns a <code>messageId</code>. The agent turn is now running in the CLI.</li>
+<li><strong>Event stream &mdash; assistant.message (partial)</strong> &mdash; CLI emits streaming chunks; your <code>on()</code> handlers fire for each. The <code>sendAndWait</code> listener captures the last one.</li>
+<li><strong>Tool invocation (server&rarr;client RPC)</strong> &mdash; CLI's LLM decided to call <code>get_weather</code>. <code>session/toolInvoke</code> RPC arrives. SDK looks up the session, then <code>toolHandlers.get("get_weather")</code>.</li>
+<li><strong>Hook chain</strong> &mdash; if <code>hooks.preToolUse</code> is set, invoke it first. If it denies, RPC replies with error. If it modifies args, the modified set goes to the next stage.</li>
+<li><strong>Permission gate</strong> &mdash; if the tool is permission-gated (or the policy requires it), <code>permissionHandler</code> runs. Can return <code>approved</code>, <code>denied</code>, or (on v2+) <code>modified</code>.</li>
+<li><strong>User handler</strong> &mdash; awaits the user's <code>(args) =&gt; result</code>. Exceptions are caught and become <code>{isError:true, content:...}</code> results.</li>
+<li><strong>Post-hook + reply</strong> &mdash; <code>hooks.postToolUse</code> can rewrite the result. RPC responds.</li>
+<li><strong>session.idle event</strong> &mdash; agent loop complete. <code>sendAndWait</code>'s idlePromise resolves with the captured last assistant message. Listener unsubscribes in <code>finally</code>.</li>
+</ol>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>File</th><th>Export</th><th>Role (WHY it exists)</th></tr>
+<tr><td><code>src/client.ts</code></td><td><code>CopilotClient</code></td><td>Owns the CLI subprocess + JSON-RPC connection. Exists separately from Session because multiple sessions can share one CLI.</td></tr>
+<tr><td><code>src/session.ts</code></td><td><code>CopilotSession</code></td><td>One conversation. Holds event handlers, tool/permission/hook callbacks. Separate class so per-session state (tools) doesn't leak across sessions on the same client.</td></tr>
+<tr><td><code>src/types.ts</code></td><td>80+ exports</td><td>Single types file (1735 lines) avoids circular imports. All public types re-exported from <code>index.ts</code> one-by-one for stable public API.</td></tr>
+<tr><td><code>src/sessionFsProvider.ts</code></td><td><code>createSessionFsAdapter</code></td><td>Adapter that wraps a user <code>SessionFsProvider</code> into the generated <code>SessionFsHandler</code> shape. Translates Node errors (<code>ENOENT</code>, etc.) into structured <code>SessionFSError</code>.</td></tr>
+<tr><td><code>src/telemetry.ts</code></td><td><code>getTraceContext</code></td><td>Pulls W3C Trace Context from a user-supplied provider and attaches <code>traceparent</code>/<code>tracestate</code> headers to outbound RPCs. Thin by design &mdash; OpenTelemetry is not a dependency.</td></tr>
+<tr><td><code>src/sdkProtocolVersion.ts</code></td><td><code>getSdkProtocolVersion</code></td><td>19-line getter for the integer in <code>sdk-protocol-version.json</code>. Own module so other files can mock it in tests.</td></tr>
+<tr><td><code>src/extension.ts</code></td><td>(internal)</td><td>44-line file &mdash; appears to be the seed of a VS Code extension integration. Not in the public surface.</td></tr>
+<tr><td><code>src/generated/rpc.ts</code></td><td><code>createServerRpc</code>, <code>createSessionRpc</code>, <code>registerClientSessionApiHandlers</code></td><td>Codegen'd. Factory fns wrap the raw <code>MessageConnection</code> in typed method objects.</td></tr>
+<tr><td><code>src/generated/session-events.ts</code></td><td><code>SessionEvent</code> union + subtypes</td><td>Codegen'd. 40+ event variants discriminated by <code>type</code> field.</td></tr>
+<tr><td><code>src/index.ts</code></td><td>Re-exports 80+ public names</td><td>Stable public API surface. Adding a new type = new re-export here.</td></tr>
+<tr><td><code>samples/chat.ts</code></td><td>(executable)</td><td>Interactive chat loop &mdash; the "hello world".</td></tr>
+<tr><td><code>examples/basic-example.ts</code></td><td>(executable)</td><td>Minimal API surface walkthrough.</td></tr>
+</table>
+
+<h2 id="algorithms">&#9889; Algorithm Spotlight</h2>
+
+<h3 id="algo-race-fix">sendAndWait race-free idle detection</h3>
+<p><strong>Problem.</strong> A fast-returning LLM can emit <code>session.idle</code> before the caller attaches a listener. Pre-registering the listener <em>before</em> sending the RPC closes the gap.</p>
+<p><strong>Chosen over:</strong> polling <code>isIdle</code> (misses transient states); synchronous subscribe inside the send RPC (<code>vscode-jsonrpc</code> doesn't cleanly support this). <strong>Complexity:</strong> O(1) per event.</p>
+<pre><code class="language-typescript">// Register event handler BEFORE calling send to avoid race condition
+// where session.idle fires before we start listening
+const unsubscribe = this.on((event) =&gt; {
+    if (event.type === "assistant.message") {
+        lastAssistantMessage = event;
+    } else if (event.type === "session.idle") {
+        resolveIdle();
+    } else if (event.type === "session.error") {
+        const error = new Error(event.data.message);
+        error.stack = event.data.stack;
+        rejectWithError(error);
+    }
+});
+// ... now safe to send
+await this.send(options);
+</code></pre>
+
+<h3 id="algo-transform">System-message transform wire trick</h3>
+<p>User-supplied <em>functions</em> can't cross JSON-RPC. So <code>extractTransformCallbacks</code> replaces each function with <code>{action:"transform"}</code>, stores the originals in a <code>Map</code>, and when the server round-trips a <code>sections.transform</code> RPC, the stored callback runs and the result is returned.</p>
+
+<h3 id="algo-protoneg">Protocol version negotiation</h3>
+<p>On connect, <code>getStatus</code> returns <code>{protocolVersion, capabilities}</code>. Client checks <code>protocolVersion &gt;= MIN_PROTOCOL_VERSION (2)</code>; lower rejects with an error. Cached <code>negotiatedProtocolVersion</code> drives capability gates like <code>NO_RESULT_PERMISSION_V2_ERROR</code> (the <code>no-result</code> permission return value is only legal on v2+).</p>
+
+<h2 id="failures">&#9888; What Could Go Wrong</h2>
+<table>
+<tr><th>Failure</th><th>How Detected</th><th>Recovery Strategy</th><th>Cascading Effects</th></tr>
+<tr><td>CLI binary not found</td><td><code>createRequire.resolve</code> throws</td><td>Fall back to <code>options.cliPath</code>; error thrown on <code>start()</code> if still missing</td><td>Client construction proceeds but any RPC fails</td></tr>
+<tr><td>CLI process crashes mid-session</td><td>stdout EOF detected by reader</td><td>All pending sessions receive <code>session.error</code>; client state moves to <code>Disconnected</code></td><td>User must call <code>stop()</code> then recreate client</td></tr>
+<tr><td>Protocol mismatch (server older than SDK)</td><td><code>getStatus</code> returns <code>protocolVersion &lt; 2</code></td><td>Client throws immediately on start</td><td>Fail-fast &mdash; avoids silent feature degradation</td></tr>
+<tr><td>Tool handler throws</td><td>Caught by server&rarr;client RPC wrapper</td><td>Converted to <code>{isError:true, content:String(err)}</code>; LLM sees the error and can apologise/retry</td><td>Agent turn continues; session stays alive</td></tr>
+<tr><td>Permission handler returns invalid kind on v1 server</td><td>Version-gated check in <code>session.ts</code></td><td>Throws <code>NO_RESULT_PERMISSION_V2_ERROR</code></td><td>User must check <code>session.capabilities</code> before using v2-only return values</td></tr>
+<tr><td>Listener never unregistered</td><td>Not detected</td><td>Closure retains session state; use returned unsubscribe function</td><td>Memory growth; <code>sendAndWait</code> does this correctly in <code>finally</code></td></tr>
+</table>
+
+<h2 id="performance">&#128202; Performance Profile</h2>
+<p>The hot path is the <strong>event pump</strong>: a single <code>Set.forEach(h =&gt; h(event))</code> per event, O(handlers) per dispatch. No allocation beyond the event object itself. Session creation is one RPC round-trip (~10ms localhost) plus subprocess spawn on first call (~50-100ms, amortised across later sessions on the same client). The bottleneck for large workloads is JSON serialisation of tool results &mdash; no streaming-tool-results protocol exists (would require a protocol extension). Memory per idle session is ~1 MB (event handler sets + tools map + capability cache); 10 sessions with 20 tools each = 200 handler closures but still well under 10 MB total.</p>
+
+<p>What was optimised for: <em>correctness and type safety</em>. What was sacrificed: <em>throughput for tool-heavy workloads</em> (each tool invocation is a JSON-RPC round trip, so ~100 tool calls/sec is the practical ceiling per session).</p>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core mechanisms extracted into dedicated focus pages.</p>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="../focus/jsonrpc-transport/index.html" title="JSON-RPC Transport — Deep Dive">
+    <h4>JSON-RPC Transport <span class="focus-badge">Focus</span></h4>
+    <p>Content-Length framing, bidirectional dispatch, stdio vs TCP &mdash; how all four SDKs talk to the CLI.</p>
+    <div class="focus-meta">Cross-module focus page</div>
+  </a>
+  <a class="card" href="../focus/protocol-negotiation/index.html" title="Protocol Negotiation — Deep Dive">
+    <h4>Protocol Version Negotiation <span class="focus-badge">Focus</span></h4>
+    <p>How SDK and CLI agree on protocol version and capabilities. What happens on mismatch.</p>
+    <div class="focus-meta">Cross-module focus page</div>
+  </a>
+  <a class="card" href="../focus/codegen-pipeline/index.html" title="Codegen Pipeline — Deep Dive">
+    <h4>Schema-Driven Codegen <span class="focus-badge">Focus</span></h4>
+    <p>How <code>scripts/codegen/</code> turns one JSON Schema into four language binding files.</p>
+    <div class="focus-meta">Cross-module focus page</div>
+  </a>
+</div>
+
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+<tr><th>Option</th><th>Type</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>cliPath</code></td><td><code>string</code></td><td>bundled via npm</td><td>Override the Copilot CLI binary path</td></tr>
+<tr><td><code>cliUrl</code></td><td><code>string</code></td><td>&mdash;</td><td>Connect to an external CLI server (skip spawn)</td></tr>
+<tr><td><code>model</code></td><td><code>string</code></td><td>CLI default</td><td>Model for sessions created by this client</td></tr>
+<tr><td><code>enableConfigDiscovery</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Auto-load <code>.mcp.json</code> and skill dirs from CWD</td></tr>
+<tr><td><code>onPermissionRequest</code></td><td><code>PermissionHandler</code></td><td>deny-all</td><td>Gate for permission-gated tools</td></tr>
+<tr><td><code>tools</code></td><td><code>Tool[]</code></td><td><code>[]</code></td><td>Custom tools available to the session</td></tr>
+<tr><td><code>commands</code></td><td><code>CommandDefinition[]</code></td><td><code>[]</code></td><td>Slash-command handlers</td></tr>
+<tr><td><code>hooks</code></td><td><code>SessionHooks</code></td><td>&mdash;</td><td>preToolUse / postToolUse / userPromptSubmitted / sessionLifecycle</td></tr>
+<tr><td><code>systemMessage</code></td><td><code>SystemMessageConfig</code></td><td>CLI default</td><td><code>replace</code> / <code>customize</code> / <code>transform</code> modes</td></tr>
+<tr><td><code>sessionFs</code></td><td><code>SessionFsConfig</code></td><td>&mdash;</td><td>Virtual filesystem provider</td></tr>
+<tr><td><code>reasoningEffort</code></td><td><code>"low"|"medium"|"high"</code></td><td>model default</td><td>Reasoning budget for reasoning-capable models</td></tr>
+<tr><td><code>traceContextProvider</code></td><td><code>TraceContextProvider</code></td><td>&mdash;</td><td>W3C Trace Context for telemetry correlation</td></tr>
+<tr><td><code>telemetry</code></td><td><code>TelemetryConfig</code></td><td>CLI default</td><td>Opt in/out of CLI telemetry</td></tr>
+<tr><td><code>onElicitationRequest</code></td><td><code>ElicitationHandler</code></td><td>&mdash;</td><td>Interactive UI callbacks (confirm/select/input)</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+
+<h3 id="ex-minimal">Minimal client &amp; session</h3>
+<pre><code class="language-typescript">import { CopilotClient, approveAll } from "@github/copilot-sdk";
+
+const client = new CopilotClient({ model: "gpt-4" });
+
+const session = await client.createSession({
+    onPermissionRequest: approveAll,
+});
+
+session.on((event) =&gt; {
+    if (event.type === "assistant.message") {
+        console.log(event.data.content);
+    }
+});
+
+const final = await session.sendAndWait({ prompt: "Hello, world!" });
+console.log("final:", final?.data.content);
+
+await client.stop();
+</code></pre>
+
+<h3 id="ex-define-tool">Custom tool with Zod</h3>
+<pre><code class="language-typescript">import { defineTool } from "@github/copilot-sdk";
+import { z } from "zod";
+
+const getWeather = defineTool({
+    name: "get_weather",
+    description: "Get current weather for a city",
+    parameters: z.object({
+        city: z.string(),
+        unit: z.enum(["C", "F"]).optional(),
+    }),
+    handler: async ({ city, unit }) =&gt; {
+        return `Cloudy, 62°${unit ?? "F"} in ${city}`;
+    },
+});
+
+const session = await client.createSession({
+    tools: [getWeather],
+    onPermissionRequest: approveAll,
+});
+</code></pre>
+
+<h3 id="ex-sendAndWait">sendAndWait signature (from session.ts)</h3>
+<pre><code class="language-typescript">async sendAndWait(
+    options: MessageOptions,
+    timeout?: number
+): Promise&lt;AssistantMessageEvent | undefined&gt; {
+    const effectiveTimeout = timeout ?? 60_000;
+    // ... pre-registers idle/error listener before send (race fix)
+    await this.send(options);
+    await Promise.race([idlePromise, timeoutPromise]);
+    // ...
+    return lastAssistantMessage;
+}
+</code></pre>
+
+<h3 id="ex-public-exports">Public surface (from index.ts)</h3>
+<pre><code class="language-typescript">export { CopilotClient } from "./client.js";
+export { CopilotSession, type AssistantMessageEvent } from "./session.js";
+export {
+    defineTool,
+    approveAll,
+    convertMcpCallToolResult,
+    createSessionFsAdapter,
+    SYSTEM_PROMPT_SECTIONS,
+} from "./types.js";
+// + 80 individual type re-exports
+</code></pre>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">nodejs/ source tree</summary>
+<pre><code>nodejs/
+├── src/
+│   ├── client.ts                 ← CopilotClient — process & connection lifecycle
+│   ├── session.ts                ← CopilotSession — one conversation + event pump
+│   ├── types.ts                  ← All public types (1735 lines)
+│   ├── sessionFsProvider.ts      ← SessionFs adapter + error translation
+│   ├── telemetry.ts              ← W3C Trace Context plumbing
+│   ├── sdkProtocolVersion.ts     ← Embedded protocol version constant
+│   ├── extension.ts              ← VS Code extension seed
+│   ├── index.ts                  ← Public re-exports
+│   └── generated/
+│       ├── rpc.ts                ← Codegen'd RPC client/server factories
+│       └── session-events.ts     ← Codegen'd SessionEvent union (40+ types)
+├── samples/
+│   └── chat.ts                   ← Interactive chat demo
+├── examples/
+│   └── basic-example.ts          ← Minimal walkthrough
+├── scripts/
+│   └── update-protocol-version.ts← Sync sdk-protocol-version.json
+├── test/e2e/                     ← End-to-end tests
+├── docs/                         ← Per-SDK docs fragments
+├── esbuild-copilotsdk-nodejs.ts  ← Build pipeline
+└── package.json
+</code></pre>
+</details>
+
+<div class="footer"><a href="../index.html">&#8592; Project hub</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+</body></html>

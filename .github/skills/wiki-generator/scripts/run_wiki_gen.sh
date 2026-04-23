@@ -50,7 +50,7 @@ if [ -n "${WIKI_OUTPUT_BASE:-}" ]; then
   OUTPUT_BASE_EXPLICIT=true
 fi
 LOG_DIR="${WIKI_LOG_DIR:-$REPO_ROOT/logs}"
-MODEL="${WIKI_MODEL:-claude-opus-4.6}"
+MODEL="${WIKI_MODEL:-claude-opus-4.7}"
 PROJECT_NAME=""
 GIT_BRANCH=""
 GIT_SUBDIR=""

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>python — Copilot SDK</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Copilot SDK</a> &rsaquo; python</nav>
+<h1>python &mdash; Async Python SDK</h1>
+<div class="hero">
+<div class="subtitle"><code>github-copilot-sdk</code> on PyPI. asyncio-native, 3.11+.</div>
+<p>The Python SDK brings Copilot's agent runtime into the world of notebooks, LangChain agents, MLOps pipelines, and data-science scripting. It's <strong>stdlib-only</strong> (no pydantic, no aiohttp &mdash; just <code>asyncio</code>, <code>subprocess</code>, <code>threading</code>, <code>json</code>), uses <code>async with</code> for lifecycle, and carefully side-steps asyncio-on-Windows subprocess bugs with a threaded-read-loop JSON-RPC bridge.</p>
+<p style="margin-top:.8rem">
+<span class="badge blue">asyncio</span>
+<span class="badge green">Python 3.11+</span>
+<span class="badge yellow">Stdlib only</span>
+</p>
+</div>
+
+<div class="stat-row">
+<div class="stat-box"><div class="num">79</div><div class="label">.py files</div></div>
+<div class="stat-box"><div class="num">2730</div><div class="label">client.py lines</div></div>
+<div class="stat-box"><div class="num">2047</div><div class="label">session.py lines</div></div>
+<div class="stat-box"><div class="num">385</div><div class="label">_jsonrpc.py lines</div></div>
+<div class="stat-box"><div class="num">2</div><div class="label">OS threads per Client</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>A Python SDK that mirrors the Node.js reference implementation nearly 1:1. <code>CopilotClient</code>, <code>CopilotSession</code>, <code>SessionFsProvider</code> &mdash; same concepts, different syntax. You can open a client with <code>async with CopilotClient() as client:</code> and every resource is deterministically cleaned up on exit. Under the hood, two daemon threads read the CLI's stdout/stderr into a queue, and <code>asyncio.call_soon_threadsafe</code> bridges the results back to the event loop.</p>
+<details style="margin-top:.8rem">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine an async receptionist at a busy clinic who needs to talk to an <em>old</em> phone system that only works with a real human picking up the handset. The Python SDK uses a dedicated human (an OS thread) to hold the phone, listen for incoming messages, and relay them to the async receptionist via a tiny physical pigeonhole (<code>call_soon_threadsafe</code>). The receptionist never touches the phone herself &mdash; she only reads slips from the pigeonhole. This keeps her async queue flowing even if a phone call takes a long time, and sidesteps all the weirdness of the Windows-era phone system.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-exists">&#127919; Why This Module Exists</h2>
+<p>A massive fraction of AI/agent development happens in Python &mdash; LangChain, DSPy, LlamaIndex, every ML paper's reference code. Without a Python SDK, these developers would be forced to shell out to <code>copilot</code> and scrape stdout, losing the event stream, tool callback flow, and permission handling. This SDK exists to make the Copilot agent loop a first-class Python citizen: an awaitable, typed, context-managed object that behaves like <code>aiohttp.ClientSession</code> or <code>httpx.AsyncClient</code>.</p>
+
+<p>The design also intentionally avoids heavy dependencies. Pydantic would add 1&nbsp;MB+ of transitive dependencies that Python data-science environments often already have in a conflicting version; <code>aiohttp</code> pulls in SSL and DNS libraries that are overkill for stdio communication. By sticking to stdlib only, <code>pip install github-copilot-sdk</code> finishes in seconds and doesn't conflict with anything.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+<tr><td>Async runtime</td><td>stdlib <code>asyncio</code></td><td>trio, anyio, sync-only</td><td>asyncio is the "standard" everyone interops with; no extra deps</td></tr>
+<tr><td>JSON-RPC transport</td><td>hand-rolled <code>_jsonrpc.py</code> with threads + asyncio bridge</td><td><code>jsonrpc-async</code> pkg; pure <code>asyncio.subprocess_exec</code></td><td>asyncio subprocess on Windows has years-old bugs with stdin/stdout fragmentation. Threads with <code>call_soon_threadsafe</code> sidestep it</td></tr>
+<tr><td>Type system</td><td><code>TypedDict</code> payloads + dataclasses for config</td><td>pydantic, attrs, plain dicts</td><td><code>TypedDict</code> is stdlib and works with mypy/pyright; pydantic adds 1MB+; dataclasses fit config with defaults</td></tr>
+<tr><td>FS provider</td><td><code>abc.ABC</code> with abstract methods</td><td>Protocol, duck-typed callables</td><td>Clear compiler/IDE errors at class-definition time; users prefer explicit interface</td></tr>
+<tr><td>Lifecycle</td><td><code>async with</code> context manager</td><td>Explicit <code>start()</code>/<code>stop()</code></td><td>Impossible-to-forget cleanup; fits Python idioms (like <code>open(...)</code>)</td></tr>
+<tr><td>Package layout</td><td>Flat <code>copilot/</code> package, private modules prefixed <code>_</code></td><td>Sub-packages</td><td>Short import paths (<code>from copilot import CopilotClient</code>); underscore signals "private"</td></tr>
+<tr><td>Error translation in SessionFs</td><td>Catch exception &rarr; convert to <code>SessionFSError</code></td><td>Let exceptions propagate through RPC</td><td>RPC counterpart expects structured error payload; exceptions can't cross JSON</td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph app["Your Python app"]
+    USER[async def main]
+  end
+  subgraph pub["copilot (public API)"]
+    CLIENT[CopilotClient<br/>client.py]
+    SESSION[CopilotSession<br/>session.py]
+    FS[SessionFsProvider<br/>session_fs_provider.py]
+    TOOLS[define_tool<br/>tools.py]
+  end
+  subgraph priv["copilot._internals"]
+    JRPC[JsonRpcClient<br/>_jsonrpc.py<br/>2 threads + bridge]
+    VER[_sdk_protocol_version.py]
+    TEL[_telemetry.py]
+  end
+  subgraph gen["copilot.generated"]
+    RPC[rpc.py<br/>ServerRpc, ClientSessionApiHandlers]
+    EVT[session_events.py<br/>TypedDict event payloads]
+  end
+  CLIPROC[copilot CLI subprocess]
+
+  USER --> CLIENT
+  CLIENT --> SESSION
+  CLIENT --> FS
+  SESSION --> TOOLS
+  CLIENT --> JRPC
+  SESSION --> JRPC
+  JRPC -->|stdio pipes| CLIPROC
+  CLIENT --> RPC
+  SESSION --> RPC
+  SESSION --> EVT
+  CLIENT --> VER
+  CLIENT --> TEL
+</pre>
+</div>
+
+<h2 id="jsonrpc-bridge">The Threaded JSON-RPC Bridge</h2>
+<p>The single most interesting file in this SDK is <code>_jsonrpc.py</code> (385 lines). Everything else ports behaviour from Node; the bridge solves a Python-specific problem.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Loop as asyncio event loop
+    participant User as user coroutine
+    participant Client as JsonRpcClient
+    participant RT as read_thread (daemon)
+    participant Proc as CLI subprocess (stdio)
+
+    User->>Client: await call("session.send", params)
+    Client->>Client: allocate request_id (UUID)
+    Client->>Client: future = Loop.create_future()
+    Client->>Client: pending_requests[id] = future
+    Client->>Proc: write Content-Length header + JSON (behind write_lock)
+    Client-->>User: return future
+
+    loop forever
+      RT->>Proc: blocking read of headers
+      RT->>Proc: blocking read of body N bytes
+      RT->>RT: parse JSON
+      alt response
+        RT->>Loop: call_soon_threadsafe(future.set_result, result)
+      else notification
+        RT->>Loop: call_soon_threadsafe(notif_handler, method, params)
+      else incoming request
+        RT->>Loop: call_soon_threadsafe(dispatch_request)
+      end
+    end
+
+    Loop-->>User: future resolves with result
+</pre>
+</div>
+
+<div class="callout success">
+<strong>Why threads.</strong> The cleanest pure-asyncio alternative (<code>asyncio.subprocess_exec</code> + <code>StreamReader</code>) has long-standing reliability issues on Windows: the <code>ProactorEventLoop</code> can drop bytes under load, return partial reads as empty strings, or deadlock during child process shutdown. Blocking stdio reads on a dedicated thread avoid this entire category of bugs.
+</div>
+
+<h2 id="walkthrough">&#128694; Step-by-Step Narrated Walkthrough</h2>
+<div class="intro-box">
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow <code>await session.send_and_wait({"prompt": "What is 2+2?"})</code> end-to-end:</p>
+<ol>
+<li><strong><code>async with CopilotClient() as client</code></strong> &mdash; <code>__aenter__</code> calls <code>await self.start()</code>, which locates the CLI binary, spawns via <code>subprocess.Popen(..., stdin=PIPE, stdout=PIPE, stderr=PIPE)</code>, wraps it in <code>JsonRpcClient</code>.</li>
+<li><strong>Thread launch</strong> &mdash; <code>JsonRpcClient.start()</code> spawns the <code>_read_thread</code> (daemon) and <code>_stderr_thread</code> (drains stderr so it can't deadlock on a full pipe).</li>
+<li><strong>Protocol handshake</strong> &mdash; <code>await client._call("getStatus")</code>. Reads back <code>{protocolVersion, capabilities}</code>; compares against minimum supported.</li>
+<li><strong><code>await client.create_session(...)</code></strong> &mdash; sends <code>session.create</code> RPC, gets <code>sessionId</code> + session capabilities.</li>
+<li><strong>Register handlers</strong> &mdash; <code>register_client_session_api_handlers(rpc, {...self})</code> wires callbacks for server&rarr;client calls (tool invoke, permission, elicit, FS).</li>
+<li><strong>send_and_wait</strong> &mdash; pre-registers an event handler (same race fix as Node) then <code>await self._rpc.session_send(...)</code>.</li>
+<li><strong>Event delivery</strong> &mdash; as events arrive on stdout, the read thread parses JSON, recognises it as a notification, and posts to the loop: <code>loop.call_soon_threadsafe(self._dispatch_event, event)</code>.</li>
+<li><strong>User handler fires</strong> &mdash; the captured lambda stores the last <code>assistant.message</code>, detects <code>session.idle</code>, resolves the internal future.</li>
+<li><strong>Tool invocation (if any)</strong> &mdash; server sends <code>session/toolInvoke</code> request. <code>_dispatch_request</code> on the loop finds the registered handler, schedules as a task, awaits result, writes response back to stdin.</li>
+<li><strong>Idle resolves</strong> &mdash; <code>send_and_wait</code> returns with the captured message.</li>
+<li><strong><code>__aexit__</code></strong> &mdash; <code>await self.stop()</code> sends <code>shutdown</code> RPC, waits for process exit, threads see EOF and exit cleanly.</li>
+</ol>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>File</th><th>Key class / fn</th><th>Role (WHY it exists)</th></tr>
+<tr><td><code>copilot/client.py</code></td><td><code>CopilotClient</code>, <code>ExternalServerConfig</code>, <code>SubprocessConfig</code>, <code>ModelCapabilitiesOverride</code></td><td>Owns subprocess + JSON-RPC; <code>async with</code> entry point. Async context manager simplifies cleanup.</td></tr>
+<tr><td><code>copilot/session.py</code></td><td><code>CopilotSession</code>, <code>CommandContext</code>, <code>ElicitationContext</code>, <code>SessionFsConfig</code></td><td>One conversation; async-native event handlers; TypedDict event payloads.</td></tr>
+<tr><td><code>copilot/_jsonrpc.py</code></td><td><code>JsonRpcClient</code>, <code>JsonRpcError</code>, <code>ProcessExitedError</code></td><td>Threaded JSON-RPC bridge (see deep-dive); the only place where thread/asyncio interop lives.</td></tr>
+<tr><td><code>copilot/session_fs_provider.py</code></td><td><code>SessionFsProvider (ABC)</code>, <code>SessionFsFileInfo</code>, <code>create_session_fs_adapter</code></td><td>User subclasses <code>ABC</code>, SDK wraps into generated <code>SessionFsHandler</code>; exceptions get translated to <code>SessionFSError</code>.</td></tr>
+<tr><td><code>copilot/tools.py</code></td><td><code>define_tool</code>, <code>convert_mcp_call_tool_result</code></td><td>Helpers to wrap user functions into <code>Tool</code> objects with JSON Schema params.</td></tr>
+<tr><td><code>copilot/_telemetry.py</code></td><td><code>get_trace_context</code>, <code>trace_context</code></td><td>48-line W3C Trace Context plumbing; underscore-private because OTel is outside this SDK's scope.</td></tr>
+<tr><td><code>copilot/_sdk_protocol_version.py</code></td><td><code>get_sdk_protocol_version</code></td><td>Single getter for the embedded integer; own module for testability.</td></tr>
+<tr><td><code>copilot/generated/rpc.py</code></td><td><code>ServerRpc</code>, <code>ClientSessionApiHandlers</code>, <code>register_client_session_api_handlers</code></td><td>Codegen'd. Typed RPC wrappers around <code>JsonRpcClient</code>.</td></tr>
+<tr><td><code>copilot/generated/session_events.py</code></td><td>TypedDict union of session events</td><td>Codegen'd.</td></tr>
+<tr><td><code>copilot/__init__.py</code></td><td>Public re-exports + <code>__version__</code></td><td>Keeps import paths short.</td></tr>
+<tr><td><code>samples/chat.py</code></td><td>(executable)</td><td>Interactive chat demo.</td></tr>
+<tr><td><code>e2e/</code></td><td>Test harness</td><td>Cross-SDK conformance suite adapter.</td></tr>
+</table>
+
+<h2 id="algorithms">&#9889; Algorithm Spotlight</h2>
+
+<h3 id="algo-bridge">Threaded JSON-RPC bridge</h3>
+<p>See the sequence diagram above. Key insight: <code>call_soon_threadsafe</code> is the <strong>only</strong> cross-thread handoff &mdash; everything else stays on either (a) the asyncio loop or (b) the dedicated reader thread. This localises the thread-safety reasoning to one function.</p>
+<pre><code class="language-python">class JsonRpcClient:
+    def __init__(self, process):
+        self.process = process
+        self.pending_requests: dict[str, asyncio.Future] = {}
+        self.notification_handler = None
+        self.request_handlers: dict[str, RequestHandler] = {}
+        self._write_lock = threading.Lock()
+        self._pending_lock = threading.Lock()
+        # ...
+</code></pre>
+
+<h3 id="algo-async-with">async with lifecycle</h3>
+<p>Users write:</p>
+<pre><code class="language-python">async with CopilotClient() as client:
+    session = await client.create_session()
+    await session.send_and_wait({"prompt": "hi"})
+# On exit: client.stop() runs no matter what exception killed the block
+</code></pre>
+<p>Even if the user's code raises <code>KeyboardInterrupt</code>, Python guarantees <code>__aexit__</code> runs. The shutdown escalation: <em>graceful RPC &rarr; SIGTERM &rarr; SIGKILL</em> with configurable timeout.</p>
+
+<h3 id="algo-fs-error">SessionFs error translation</h3>
+<p><code>_to_session_fs_error</code> maps Python exceptions to the wire-format <code>SessionFSError</code> shape:</p>
+<ul>
+<li><code>FileNotFoundError</code> &rarr; <code>{code: "not_found"}</code></li>
+<li><code>PermissionError</code> &rarr; <code>{code: "permission_denied"}</code></li>
+<li><code>NotImplementedError</code> &rarr; <code>{code: "not_supported"}</code></li>
+<li>other &rarr; <code>{code: "internal", message: str(exc)}</code></li>
+</ul>
+
+<h2 id="failures">&#9888; What Could Go Wrong</h2>
+<table>
+<tr><th>Failure</th><th>Detection</th><th>Recovery</th><th>Cascading Effects</th></tr>
+<tr><td>CLI process crashes</td><td>Reader thread sees EOF; sets <code>_process_exit_error</code></td><td>All pending futures rejected with <code>ProcessExitedError</code> via <code>call_soon_threadsafe</code></td><td>Client must be recreated (<code>await __aexit__</code> then new <code>async with</code>)</td></tr>
+<tr><td>Malformed JSON from CLI</td><td>Reader thread logs to stderr, continues</td><td>Tolerant &mdash; keeps reading</td><td>Response matching may time out if the malformed message was a critical reply</td></tr>
+<tr><td>Back-pressure: CLI stops reading stdin</td><td>Write thread blocks on OS pipe buffer (~64KB)</td><td>No timeout; relies on CLI resuming</td><td>If CLI deadlocked, <code>await client.stop()</code> will terminate it forcibly after the shutdown grace period</td></tr>
+<tr><td>Windows subprocess quirks</td><td>N/A &mdash; sidestepped by using threads</td><td>This is why the threaded bridge exists</td><td>Zero flakiness even on CI Windows runners</td></tr>
+<tr><td>Tool handler raises</td><td>Caught in <code>_dispatch_request</code></td><td>Converted to <code>{isError: True, content: str(e)}</code></td><td>Agent sees the error and can apologise or retry</td></tr>
+</table>
+
+<h2 id="performance">&#128202; Performance Profile</h2>
+<p><strong>Fast path:</strong> event dispatch is O(1) &mdash; one dict lookup, one future resolve. <strong>Slow path:</strong> JSON serialisation for large tool results holds the GIL, stalling the asyncio loop briefly. <strong>Thread overhead:</strong> 2 OS threads per client regardless of session count &mdash; cheap on Linux/Mac (~100&nbsp;KB each) but accumulates across many clients. <strong>Memory:</strong> ~3 MB per idle client, ~500 KB per active session.</p>
+<p>Optimised for: <em>reliability across platforms</em>. Sacrificed: <em>lowest possible latency</em> (the cross-thread hop adds ~10-50&nbsp;&micro;s per message). Acceptable because LLM latency dominates.</p>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="../focus/jsonrpc-transport/index.html" title="JSON-RPC transport">
+    <h4>JSON-RPC Transport <span class="focus-badge">Focus</span></h4>
+    <p>Deep-dive on Content-Length framing and bidirectional dispatch (covers this SDK's threaded bridge).</p>
+  </a>
+  <a class="card" href="../focus/protocol-negotiation/index.html" title="Protocol negotiation">
+    <h4>Protocol Negotiation <span class="focus-badge">Focus</span></h4>
+    <p>How the Python SDK reconciles <code>MIN_PROTOCOL_VERSION</code> with the server's version.</p>
+  </a>
+  <a class="card" href="../focus/codegen-pipeline/index.html" title="Codegen pipeline">
+    <h4>Codegen Pipeline <span class="focus-badge">Focus</span></h4>
+    <p>How <code>generated/rpc.py</code> is produced from the shared JSON Schemas.</p>
+  </a>
+</div>
+
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+<tr><th>Kwarg</th><th>Type</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>cli_path</code></td><td><code>str | Path</code></td><td>bundled</td><td>Override CLI binary</td></tr>
+<tr><td><code>cli_url</code></td><td><code>str</code></td><td>&mdash;</td><td>Connect to external server</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>CLI default</td><td>Model for sessions</td></tr>
+<tr><td><code>enable_config_discovery</code></td><td><code>bool</code></td><td><code>False</code></td><td>Auto-load <code>.mcp.json</code> + skill dirs</td></tr>
+<tr><td><code>on_permission_request</code></td><td>async callable</td><td>deny</td><td>Permission gate</td></tr>
+<tr><td><code>tools</code></td><td><code>list[Tool]</code></td><td><code>[]</code></td><td>Custom tools</td></tr>
+<tr><td><code>commands</code></td><td><code>list[CommandDefinition]</code></td><td><code>[]</code></td><td>Slash commands</td></tr>
+<tr><td><code>hooks</code></td><td><code>dict</code></td><td>&mdash;</td><td>pre/post tool use, lifecycle</td></tr>
+<tr><td><code>system_message</code></td><td><code>SystemMessageConfig</code></td><td>&mdash;</td><td>replace / customize / transform</td></tr>
+<tr><td><code>session_fs</code></td><td><code>SessionFsConfig</code></td><td>&mdash;</td><td>Virtual FS provider</td></tr>
+<tr><td><code>reasoning_effort</code></td><td><code>"low"|"medium"|"high"</code></td><td>&mdash;</td><td>Reasoning budget</td></tr>
+<tr><td><code>trace_context_provider</code></td><td>callable</td><td>&mdash;</td><td>W3C Trace Context</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-minimal">Minimal usage</h3>
+<pre><code class="language-python">import asyncio
+from copilot import CopilotClient
+
+async def main():
+    async with CopilotClient() as client:
+        session = await client.create_session(model="gpt-4")
+        response = await session.send_and_wait({"prompt": "Hello!"})
+        print(response["data"]["content"])
+
+asyncio.run(main())
+</code></pre>
+
+<h3 id="ex-tool">Custom tool (Python)</h3>
+<pre><code class="language-python">from copilot import define_tool
+
+get_weather = define_tool(
+    name="get_weather",
+    description="Get current weather for a city",
+    parameters={
+        "type": "object",
+        "properties": {"city": {"type": "string"}},
+        "required": ["city"],
+    },
+    handler=lambda args, _inv: f"Cloudy, 62F in {args['city']}",
+)
+</code></pre>
+
+<h3 id="ex-fs">Custom SessionFsProvider</h3>
+<pre><code class="language-python">from copilot import SessionFsProvider, SessionFsFileInfo
+
+class InMemoryFs(SessionFsProvider):
+    def __init__(self):
+        self._store: dict[str, bytes] = {}
+
+    async def read(self, path: str) -&gt; bytes:
+        try:
+            return self._store[path]
+        except KeyError:
+            raise FileNotFoundError(path)  # becomes {code:"not_found"}
+
+    async def write(self, path: str, content: bytes) -&gt; None:
+        self._store[path] = content
+</code></pre>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">python/ source tree</summary>
+<pre><code>python/
+├── copilot/
+│   ├── __init__.py                 ← Public exports + __version__
+│   ├── client.py                   ← CopilotClient — async with lifecycle
+│   ├── session.py                  ← CopilotSession — async event pump
+│   ├── tools.py                    ← define_tool, convert_mcp_call_tool_result
+│   ├── session_fs_provider.py      ← ABC + adapter + error translation
+│   ├── _jsonrpc.py                 ← Threaded JSON-RPC bridge (385 lines)
+│   ├── _telemetry.py               ← W3C Trace Context
+│   ├── _sdk_protocol_version.py    ← Embedded constant
+│   └── generated/
+│       ├── rpc.py                  ← Codegen: ServerRpc + handlers
+│       └── session_events.py       ← Codegen: TypedDict event union
+├── samples/
+│   └── chat.py                     ← Interactive chat demo
+├── e2e/
+│   ├── __init__.py
+│   └── testharness/                ← Cross-SDK conformance adapter
+├── scripts/                        ← Build + release helpers
+├── pyproject.toml                  ← hatch-based build
+└── README.md
+</code></pre>
+</details>
+
+<div class="footer"><a href="../index.html">&#8592; Project hub</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+</body></html>

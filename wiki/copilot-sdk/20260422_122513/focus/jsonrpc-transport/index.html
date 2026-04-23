@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>JSON-RPC Transport — Focus — Copilot SDK</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+<meta name="wiki-focus-parent" content="../../nodejs/index.html">
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">Copilot SDK</a> &rsaquo; Focus &rsaquo; JSON-RPC Transport</nav>
+<h1>JSON-RPC Transport <span class="focus-label">Focus Deep-Dive</span></h1>
+<div class="hero">
+<div class="subtitle">Content-Length-framed JSON-RPC 2.0 over stdio (or TCP) &mdash; the cross-language wire protocol.</div>
+<p>Every SDK talks to the CLI through the same wire shape: LSP-style Content-Length headers, JSON-RPC 2.0 messages, bidirectional request/response/notification flow. This page explains the framing, the bidirectional dispatch, and why stdio beats the obvious alternatives.</p>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>A transport that lets four SDKs in four languages speak to one CLI without HTTP, without IPC sockets, without shared memory. Each SDK spawns the CLI as a subprocess, writes <code>Content-Length: N\r\n\r\n{json...}</code> to its stdin, and reads the same shape from its stdout. Bidirectional means the CLI can also initiate calls to the SDK (tool invocations, permission requests), so both sides run request dispatchers.</p>
+<details style="margin-top:.8rem">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine two submarines communicating through a pneumatic tube. Each capsule has a label saying "contents: 487 bytes" (Content-Length) before the actual message. Either submarine can send, either can respond, either can ask a question. No harbour, no shared air, no radio licences &mdash; just a physical tube between them that they both understand the same way.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="problem">&#127919; The Problem</h2>
+<p>You have a single CLI binary that orchestrates an LLM agent. You want to embed it into a Node.js app, a Python script, a Go service, or a .NET API &mdash; without forcing any of them to fork the CLI source. The transport must: (1) handle request/response correlation with IDs, (2) allow either side to initiate calls (tool invocations flow CLI&rarr;SDK), (3) stream <em>notifications</em> (events with no reply), (4) work identically on Linux, macOS, Windows, (5) require zero runtime configuration from the user. It must also be <em>simple enough</em> to implement in Go with 400 lines and in Python with 300.</p>
+
+<h2 id="approach">&#128295; The Approach</h2>
+<p>Use JSON-RPC 2.0 as the payload format (well-known, self-describing, language-neutral), Content-Length framing borrowed from LSP (unambiguous message boundaries, works on any byte stream), and stdio as the transport (subprocess spawn is a solved problem; no port binding; no firewall). Each side runs two halves: a reader that pulls one framed message at a time and dispatches by kind, and a writer that serialises outgoing messages.</p>
+<p>Message kinds (JSON-RPC 2.0):</p>
+<ul>
+<li><strong>Request</strong> &mdash; <code>&#123;id, method, params&#125;</code>; requires a response.</li>
+<li><strong>Response</strong> &mdash; <code>&#123;id, result&#125;</code> or <code>&#123;id, error&#125;</code>; correlated by id.</li>
+<li><strong>Notification</strong> &mdash; <code>&#123;method, params&#125;</code> (no <code>id</code>); fire-and-forget.</li>
+</ul>
+
+<h2 id="alternatives">&#128260; Why Not Alternatives?</h2>
+<table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Why Not Chosen</th></tr>
+<tr><td>HTTP + REST</td><td>Familiar, trivially debuggable</td><td>Request/response only; needs port; firewall complexity; server lifecycle</td><td>Can't do bidirectional cleanly; tool calls CLI&rarr;SDK would need long-polling</td></tr>
+<tr><td>gRPC</td><td>Efficient, bidirectional streaming</td><td>Requires code-gen toolchain per language, protobuf schema, HTTP/2 stack</td><td>Dep-heavy; static-binary Go SDK doesn't want linked protobuf</td></tr>
+<tr><td>Raw sockets / Unix domain</td><td>Fast, bidirectional</td><td>Windows semantics different (named pipes); socket lifecycle management</td><td>Stdio is simpler &amp; identical across OSes</td></tr>
+<tr><td>MessagePack / CBOR over stdio</td><td>Smaller payloads</td><td>Not human-readable; additional dep in each language</td><td>JSON is good-enough; debuggability &gt; bytes</td></tr>
+<tr><td>Line-delimited JSON</td><td>Simpler framing</td><td>Breaks if payload contains unescaped newlines; needs sanitisation</td><td>Content-Length is unambiguous and well-understood (LSP)</td></tr>
+</table>
+
+<h2 id="overview">Overview Diagram</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph sdk["SDK (any language)"]
+    WR[writer goroutine/task]
+    RD[reader goroutine/task]
+    PEND[pending requests map<br/>id -&gt; promise]
+    DISP[dispatcher<br/>method -&gt; handler]
+  end
+  subgraph cli["CLI subprocess"]
+    CW[writer]
+    CR[reader]
+    CP[pending map]
+    CD[dispatcher]
+  end
+  STDIN[stdin pipe]
+  STDOUT[stdout pipe]
+  WR -->|Content-Length frame| STDIN
+  STDIN --> CR
+  CR --> CD
+  CR --> CP
+  CW -->|Content-Length frame| STDOUT
+  STDOUT --> RD
+  RD --> DISP
+  RD --> PEND
+</pre>
+</div>
+
+<h2 id="framing">Step-by-Step Frame Handling</h2>
+<div class="code-walk">
+<div class="step">
+<h4>Read Content-Length header</h4>
+<pre><code class="language-go">// go/internal/jsonrpc2/frame.go
+func ReadMessage(r *bufio.Reader) ([]byte, error) {
+    var n int64
+    for {
+        line, err := r.ReadString('\n')
+        if err != nil { return nil, err }
+        if line == "\r\n" { break }              // end of headers
+        if strings.HasPrefix(line, "Content-Length:") {
+            fmt.Sscanf(line, "Content-Length: %d", &n)
+        }
+    }
+    body := make([]byte, n)
+    _, err := io.ReadFull(r, body)
+    return body, err
+}
+</code></pre>
+<p><strong>Why read line-by-line first?</strong> The header block is unbounded in length but bounded in structure (<code>\r\n\r\n</code> terminator). Reading the exact body size in one shot prevents partial reads.</p>
+</div>
+<div class="step">
+<h4>Unmarshal and route by kind</h4>
+<pre><code class="language-go">var raw struct {
+    ID     json.RawMessage `json:"id"`
+    Method string          `json:"method"`
+    Result json.RawMessage `json:"result"`
+    Error  *Error          `json:"error"`
+}
+json.Unmarshal(body, &raw)
+
+switch {
+case raw.Method != "" && len(raw.ID) > 0:  // request
+    go handleRequest(raw)
+case raw.Method != "":                     // notification
+    go handleNotification(raw)
+default:                                   // response
+    completePending(raw.ID, raw.Result, raw.Error)
+}
+</code></pre>
+<p><strong>Why <code>json.RawMessage</code> for ID?</strong> JSON-RPC allows the id to be a number OR a string OR null &mdash; a <code>RawMessage</code> avoids committing to a type too early.</p>
+</div>
+<div class="step">
+<h4>Correlate responses</h4>
+<pre><code class="language-go">pending := map[string]chan Response{}
+// When sending:
+ch := make(chan Response, 1)
+pending[id] = ch
+writeFrame(req)
+// When the reader sees a response with matching id:
+pending[id] &lt;- resp
+delete(pending, id)
+</code></pre>
+<p><strong>Why a buffered channel?</strong> The reader goroutine delivers the response even if the caller has not yet selected on the channel. Unbuffered would deadlock the reader.</p>
+</div>
+<div class="step">
+<h4>Writer serialisation</h4>
+<pre><code class="language-go">func WriteMessage(w io.Writer, body []byte) error {
+    hdr := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(body))
+    if _, err := w.Write([]byte(hdr)); err != nil { return err }
+    _, err := w.Write(body)
+    return err
+}
+</code></pre>
+<p>Crucially, the write is serialised by a mutex so concurrent senders never interleave frames.</p>
+</div>
+</div>
+
+<h2 id="bidirectional">Bidirectional Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant USR as User code
+    participant SDK as SDK Client
+    participant CLI as CLI Server
+    USR->>SDK: session.send(prompt)
+    SDK->>CLI: session.send (req, id=7)
+    CLI-->>SDK: assistantMessage (notification)
+    CLI->>SDK: tool.invoke shell (req, id=42)
+    Note over SDK: dispatches to user tool handler
+    SDK-->>CLI: tool result (resp, id=42)
+    CLI-->>SDK: toolCallCompleted (notification)
+    CLI-->>SDK: sessionIdle (notification)
+    CLI-->>SDK: response to session.send (id=7)
+    SDK-->>USR: messageId returned
+</pre>
+</div>
+<p>The sequence above shows that a single user call may trigger many notifications and at least one server&rarr;client request before its own response arrives.</p>
+
+<div class="callout">
+<strong>Note:</strong> The SDK must service server&rarr;client requests <em>while awaiting its own response</em>. If it blocks the reader, the CLI's tool request starves and the conversation stalls. Node does this naturally via the event loop; Python uses a dedicated reader thread; Go uses reader goroutine + per-request goroutines; .NET uses the Task read-loop + ThreadPool dispatch.
+</div>
+
+<h2 id="errors">Error Handling</h2>
+<table>
+<tr><th>Scenario</th><th>Behaviour</th><th>Code</th></tr>
+<tr><td>Truncated frame (EOF mid-body)</td><td>Reader returns error; all pending promises rejected</td><td><code>io.ErrUnexpectedEOF</code></td></tr>
+<tr><td>Invalid JSON body</td><td>Drop frame, log; don't crash</td><td>Resilience for CLI bugs</td></tr>
+<tr><td>Unknown method in request</td><td>Respond with JSON-RPC error code -32601</td><td>Method not found</td></tr>
+<tr><td>Handler throws</td><td>Catch, respond with error code -32000</td><td>Server error</td></tr>
+<tr><td>Timeout on pending</td><td>Reject promise; entry eventually GC'd</td><td>Caller-driven</td></tr>
+</table>
+
+<h2 id="complexity">&#9878;&#65039; Complexity &amp; Tradeoffs</h2>
+<p><strong>Time.</strong> Frame read: O(bytes). Dispatch: O(1) map lookup. Response correlation: O(1). <strong>Space.</strong> Pending-requests map bounded by in-flight count (typically &lt;10). <strong>Throughput.</strong> Limited by JSON serialisation cost and pipe buffer size (usually 64KB). <strong>Latency.</strong> 1-2ms round-trip locally; LSP-style stdio is faster than localhost TCP because no TCP handshake or Nagle.</p>
+<p>Tradeoff: JSON is larger than binary. For a chat SDK where the dominant payload is LLM-generated text, JSON overhead is a rounding error. For a high-throughput RPC system, MessagePack would be worth it.</p>
+
+<h2 id="stdio-vs-tcp">stdio vs TCP</h2>
+<p>All four SDKs support both. TCP is used when <code>CLIUrl</code> is set &mdash; typically for debugging (attach the SDK to a separately launched CLI) or for containerised setups where the CLI runs in a sidecar. The framing is identical; only the byte transport changes. stdio is default because:</p>
+<ul>
+<li>No port allocation or clash with user's services.</li>
+<li>Automatic lifetime binding: when the SDK process exits, the CLI's stdin EOFs and the CLI exits too. No orphan processes.</li>
+<li>No auth model needed &mdash; the subprocess inherits the parent's credentials; third parties can't connect.</li>
+</ul>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Files touching the transport</summary>
+<pre><code>nodejs/
+├── src/client.ts            ← uses vscode-jsonrpc (external library)
+└── node_modules/vscode-jsonrpc/ ← Content-Length framing implementation
+
+python/copilot/
+└── _jsonrpc.py              ← hand-rolled framing + threaded reader
+
+go/internal/jsonrpc2/
+├── jsonrpc2.go              ← Client, handlers, pending map
+└── frame.go                 ← ReadMessage / WriteMessage
+
+dotnet/src/                  ← STJ-based framing inside Client.cs
+</code></pre>
+</details>
+
+<h2 id="related">Related Topics</h2>
+<ul>
+<li><a href="../protocol-negotiation/index.html">Protocol Negotiation</a> &mdash; how the handshake is itself a transport-layer exchange.</li>
+<li><a href="../codegen-pipeline/index.html">Codegen Pipeline</a> &mdash; how RPC method wrappers are generated on top of this transport.</li>
+</ul>
+
+<div class="footer"><a href="../../nodejs/index.html">&#8592; Back to parent</a> &nbsp;|&nbsp; <a href="../../index.html">Project hub</a> &nbsp;|&nbsp; <a href="../../search.html">Search</a></div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+</body></html>

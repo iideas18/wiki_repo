@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>Copilot SDK — Project Hub</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+
+<h1>GitHub Copilot SDK</h1>
+<div class="hero">
+  <div class="subtitle">Programmable agent runtime, four languages, one wire contract</div>
+  <p>Embed the Copilot CLI's planning, tool-use, and file-editing engine directly into your application via <strong>JSON-RPC</strong>. Ships as parallel SDKs for <strong>Node.js, Python, Go, and .NET</strong> — each native-feeling, all driven by the same schema-generated protocol.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">v0.3.0-preview.0</span>
+    <span class="badge green">Protocol v3</span>
+    <span class="badge yellow">Public Preview</span>
+    <span class="badge red">Multi-language</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">4</div><div class="label">SDK languages</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">Protocol version</div></div>
+  <div class="stat-box"><div class="num">40+</div><div class="label">Event types</div></div>
+  <div class="stat-box"><div class="num">~25k</div><div class="label">Lines of SDK code</div></div>
+  <div class="stat-box"><div class="num">338</div><div class="label">Source files</div></div>
+  <div class="stat-box"><div class="num">YAML</div><div class="label">Conformance suite</div></div>
+</div>
+
+<h2 id="philosophy">&#127919; Project Philosophy</h2>
+
+<p>When you first open this repository, the most striking design choice is the <em>absence of a shared runtime</em>. There is no "core library" that all SDKs thunk into; no shared C++ module, no WebAssembly shim, no RPC proxy written in Rust. Instead, four SDKs reimplement the same behaviour from scratch — in TypeScript, Python, Go, and C# — and guarantee parity through <strong>three enforcement layers</strong>: a shared JSON Schema for the wire contract, a code generator that emits the RPC boilerplate, and a YAML-driven conformance test suite that diffs behaviour across all four.</p>
+
+<p>This is a deliberate trade. A shared core would have been faster to build initially. But anyone who has used polyglot SDKs derived from a single code base knows the feeling — the Node SDK is a joy; the Python one is a thin wrapper over unmarshalled JSON; the Go one has a quirky camelCase API. By committing to per-language idiomaticity, every user of every SDK gets a first-class experience: Python users get <code>async with CopilotClient()</code>, .NET users get <code>await using</code> + <code>CancellationToken</code>, Go users get <code>DefineTool[T,U]</code> generics, TS users get discriminated-union <code>SessionEvent</code>s. The cost — four parallel implementations — is managed by the contract-enforcement triad.</p>
+
+<p>The second architectural commitment is treating the <strong>Copilot CLI binary as the server</strong>. Not an HTTP service, not a library. A sub-process. This feels old-school until you recognise how many problems it eliminates: process death is an OS-level signal (not a TCP timeout), clean-up is <code>SIGKILL</code>, authentication is inherited from the shell session, updates are a single binary swap, and no language's SDK has to reimplement the agent loop. The JSON-RPC framing (LSP-style Content-Length headers) is boring and well-understood; every SDK's &quot;hardest file&quot; is still under 400 lines.</p>
+
+<p>The SDK prioritises <strong>correctness over performance</strong> and <strong>explicit over implicit</strong>. Every async entry point takes a cancellation token (or language equivalent). Capabilities are negotiated at session start — no <em>try-call-catch-MethodNotFound</em> patterns. Permission handlers get full tool call context (not just a boolean gate). The tool-use loop is observable via 40+ typed events, not a callback into a black box.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+<tr><td>Polyglot architecture</td><td>Four independent SDKs, no shared runtime</td><td>Shared core via FFI; WASM; gRPC proxy</td><td>Every language gets idiomatic API; no transitive dependency chain; <em>contract-driven</em> parity rather than <em>code-driven</em></td></tr>
+<tr><td>Transport</td><td>JSON-RPC 2.0 over stdio or TCP, Content-Length framed</td><td>gRPC, HTTP, WebSocket, custom binary</td><td>Well-understood (LSP uses it), no extra deps per SDK, stdio gives OS-level back-pressure and lifecycle signals for free</td></tr>
+<tr><td>Server topology</td><td>CLI spawned as sub-process</td><td>HTTP daemon; embedded library; system service</td><td>OS process semantics handle death/cleanup; auth inherited; no service management surface</td></tr>
+<tr><td>Contract enforcement</td><td>JSON Schema → codegen → conformance tests</td><td>Hand-maintained docs; integration tests only</td><td>Three layers mean no silent drift: schema catches at compile time, tests catch at runtime</td></tr>
+<tr><td>Protocol versioning</td><td>Single integer in <code>sdk-protocol-version.json</code></td><td>Semver on wire; per-method versions; feature bitmap</td><td>Small matrix of compatible combinations; capability flags per session handle sub-version features</td></tr>
+<tr><td>Extensibility</td><td>User-defined tools, commands, hooks, elicitation callbacks</td><td>Plugin loader; script embedding</td><td>Language-native callbacks keep the extension surface tiny; hooks are pure function interposition</td></tr>
+<tr><td>Auth</td><td>Inherited from CLI login OR env vars OR BYOK provider keys</td><td>SDK-managed OAuth flow</td><td>The CLI already solves auth — one place to log in, one place to rotate tokens</td></tr>
+<tr><td>Session FS</td><td>Optional <code>SessionFsProvider</code> interface</td><td>Always write to real disk</td><td>Lets users run sandboxed or in-memory session workspaces; test harnesses use it to avoid disk side-effects</td></tr>
+</table>
+
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph User["Your Application"]
+    App[App code]
+  end
+  subgraph SDK_LANG["SDK layer - pick one"]
+    NODE[nodejs SDK<br/>client.ts, session.ts]
+    PY[python SDK<br/>client.py, session.py]
+    GO[go SDK<br/>client.go, session.go]
+    NET[dotnet SDK<br/>Client.cs, Session.cs]
+  end
+  subgraph CONTRACT["Shared contract"]
+    SCH[api.schema.json<br/>session-events.schema.json]
+    VER[sdk-protocol-version.json]
+    CODEGEN[scripts codegen<br/>emits rpc + session_events]
+    TESTS[test snapshots YAML<br/>conformance fixtures]
+  end
+  subgraph CLI["Copilot CLI subprocess"]
+    AGT[Agent loop<br/>plan -> tool -> respond]
+    TOOLS[Builtin tools<br/>shell, file, web]
+    MCP[MCP servers<br/>optional sub-processes]
+  end
+
+  App -->|language-native API| NODE
+  App -->|language-native API| PY
+  App -->|language-native API| GO
+  App -->|language-native API| NET
+
+  NODE -->|JSON-RPC / stdio or TCP| AGT
+  PY -->|JSON-RPC / stdio or TCP| AGT
+  GO -->|JSON-RPC / stdio or TCP| AGT
+  NET -->|JSON-RPC / stdio or TCP| AGT
+
+  SCH -->|read at build| CODEGEN
+  VER -->|embedded constant| NODE
+  VER -->|embedded constant| PY
+  VER -->|embedded constant| GO
+  VER -->|embedded constant| NET
+  CODEGEN -->|generated/ rpc.ts| NODE
+  CODEGEN -->|generated/ rpc.py| PY
+  CODEGEN -->|rpc generated_rpc.go| GO
+  CODEGEN -->|Generated/ Rpc.cs| NET
+
+  TESTS -.runs against.-> NODE
+  TESTS -.runs against.-> PY
+  TESTS -.runs against.-> GO
+  TESTS -.runs against.-> NET
+
+  AGT --> TOOLS
+  AGT --> MCP
+</pre>
+</div>
+
+<h2 id="modules">Modules</h2>
+
+<p class="section-label">Language SDKs</p>
+<div class="module-grid">
+  <a class="module-card" href="nodejs/index.html">
+    <h3>nodejs</h3>
+    <div class="tagline">TypeScript / Node.js SDK &mdash; reference implementation</div>
+    <p>Ships as <code>@github/copilot-sdk</code> on npm. Uses <code>vscode-jsonrpc</code> for transport; supports Zod or plain JSON Schema for tool params. Bundles the Copilot CLI as a transitive npm dependency.</p>
+    <div class="stats"><span>98 .ts files</span><span>~5k LOC</span><span>ESM only</span></div>
+  </a>
+  <a class="module-card" href="python/index.html">
+    <h3>python</h3>
+    <div class="tagline">Async Python SDK &mdash; asyncio-native, 3.11+</div>
+    <p>Ships as <code>github-copilot-sdk</code> on PyPI. Threaded JSON-RPC bridge sidesteps asyncio subprocess pitfalls on Windows. <code>async with</code> lifecycle; TypedDict payloads; stdlib-only.</p>
+    <div class="stats"><span>79 .py files</span><span>~6.5k LOC</span><span>asyncio</span></div>
+  </a>
+  <a class="module-card" href="go/index.html">
+    <h3>go</h3>
+    <div class="tagline">Go SDK &mdash; idiomatic generics, cross-platform file-lock</div>
+    <p>Uses Go 1.18+ generics for <code>DefineTool[T,U]</code>. Custom <code>internal/jsonrpc2</code> transport; flock-guarded CLI extraction; build-tag split files for Windows/Unix syscalls.</p>
+    <div class="stats"><span>85 .go files</span><span>~4.6k LOC</span><span>Go 1.21+</span></div>
+  </a>
+  <a class="module-card" href="dotnet/index.html">
+    <h3>dotnet</h3>
+    <div class="tagline">.NET 8.0+ SDK &mdash; System.Text.Json + nullable refs</div>
+    <p>NuGet package <code>GitHub.Copilot.SDK</code>. Source-generated converters for polymorphic events; <code>IAsyncDisposable</code> lifecycle; <code>Channel&lt;T&gt;</code> for event streaming; custom <code>MillisecondsTimeSpanConverter</code>.</p>
+    <div class="stats"><span>76 .cs files</span><span>~4.3k LOC</span><span>.NET 8+</span></div>
+  </a>
+</div>
+
+<p class="section-label">Shared infrastructure</p>
+<div class="module-grid">
+  <a class="module-card" href="scripts/index.html">
+    <h3>scripts</h3>
+    <div class="tagline">Codegen &mdash; the contract layer</div>
+    <p>Reads JSON Schemas shipped with the CLI and emits RPC bindings into each SDK's <code>generated/</code> folder. Four language-specific emitters share <code>utils.ts</code> for schema normalisation.</p>
+    <div class="stats"><span>TypeScript</span><span>quicktype</span><span>json-schema-to-typescript</span></div>
+  </a>
+  <a class="module-card" href="test/index.html">
+    <h3>test</h3>
+    <div class="tagline">Cross-SDK conformance suite</div>
+    <p>YAML scenarios run through every SDK and diff against stored snapshots. Organised by feature (<code>permissions/</code>, <code>hooks_extended/</code>, <code>session_fs/</code>, ...), not by SDK &mdash; enforces behavioural parity.</p>
+    <div class="stats"><span>YAML fixtures</span><span>Snapshot diff</span><span>Per-feature folders</span></div>
+  </a>
+</div>
+
+<h2 id="data-flow">&#128279; Key Data Flows</h2>
+
+<h3 id="flow-hello">Flow A &mdash; Single-prompt conversation</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant App as Your App
+    participant SDK as SDK Client
+    participant CLI as Copilot CLI subprocess
+    participant LLM as LLM provider
+
+    App->>SDK: new CopilotClient / createSession
+    SDK->>CLI: spawn / TCP connect
+    SDK->>CLI: JSON-RPC getStatus
+    CLI-->>SDK: protocolVersion + capabilities
+    Note over SDK,CLI: WHY: negotiate features before first turn
+    SDK->>CLI: JSON-RPC session.create
+    CLI-->>SDK: sessionId + session.capabilities
+    App->>SDK: session.sendAndWait(prompt)
+    SDK->>SDK: register idle listener (race fix)
+    SDK->>CLI: JSON-RPC session.send
+    CLI->>LLM: prompt + tools + system message
+    LLM-->>CLI: assistant response
+    CLI-->>SDK: event: assistant.message (streamed)
+    CLI-->>SDK: event: session.idle
+    SDK-->>App: resolved Promise / Task / channel
+    App->>SDK: client.stop() / dispose
+    SDK->>CLI: JSON-RPC shutdown
+</pre>
+</div>
+
+<h3 id="flow-tool">Flow B &mdash; Tool invocation round-trip</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant LLM as LLM
+    participant CLI as Copilot CLI
+    participant SDK as SDK (server-to-client RPC)
+    participant Hook as preToolUse hook
+    participant Perm as Permission handler
+    participant Tool as User tool handler
+
+    LLM->>CLI: decide: call get_weather(Seattle)
+    CLI->>SDK: session/toolInvoke RPC
+    Note over CLI,SDK: WHY: CLI calls back into SDK because tool lives in user code
+    SDK->>Hook: pre-tool-use(toolName, args)
+    Hook-->>SDK: modified args OR deny
+    SDK->>Perm: request approval?
+    Note over SDK,Perm: WHY: user gates destructive actions before execution
+    Perm-->>SDK: approved
+    SDK->>Tool: handler(args)
+    Tool-->>SDK: "Cloudy, 62F"
+    SDK-->>CLI: RPC reply with result
+    CLI->>LLM: tool result appended to context
+    LLM-->>CLI: final assistant message
+    CLI-->>SDK: event: assistant.message + session.idle
+</pre>
+</div>
+
+<h3 id="flow-codegen">Flow C &mdash; Codegen pipeline (build time)</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  SCH[api.schema.json<br/>session-events.schema.json<br/>from @github/copilot/schemas]
+  UTILS[scripts/codegen/utils.ts<br/>postProcessSchema]
+  TSE[typescript.ts]
+  PYE[python.ts]
+  GOE[go.ts]
+  CSE[csharp.ts]
+  NODE[nodejs/src/generated/rpc.ts<br/>nodejs/src/generated/session-events.ts]
+  PY[python/copilot/generated/rpc.py<br/>session_events.py]
+  GO[go/rpc/generated_rpc.go]
+  NET[dotnet/src/Generated/Rpc.cs<br/>SessionEvents.cs]
+
+  SCH --> UTILS
+  UTILS --> TSE --> NODE
+  UTILS --> PYE --> PY
+  UTILS --> GOE --> GO
+  UTILS --> CSE --> NET
+</pre>
+</div>
+
+<h2 id="navigation">Navigation Guide</h2>
+<table style="max-width:720px">
+<tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+<tr><td><strong>L0 &mdash; Project Hub</strong> (this page)</td><td>Philosophy, cross-SDK design, system flows</td><td>New to the repo</td></tr>
+<tr><td><strong>L1 &mdash; Module Overview</strong></td><td>Per-SDK architecture, components, design rationale</td><td>Using or working on a specific SDK</td></tr>
+<tr><td><strong>Focus pages</strong></td><td>Deep-dive: JSON-RPC framing, protocol negotiation, codegen pipeline</td><td>Understanding cross-cutting mechanisms</td></tr>
+</table>
+
+<h2 id="rpc-boundary">How SDK &amp; CLI Connect</h2>
+<p>Every SDK speaks to the CLI through the same two-way JSON-RPC channel. Understanding the boundary is the single most important concept:</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant App as User App
+    participant SDK as SDK client-side handlers
+    participant RPC as JSON-RPC connection<br/>Content-Length framed
+    participant CLI as CLI server-side handlers
+
+    App->>SDK: client.createSession()
+    SDK->>RPC: request: session.create {config}
+    RPC->>CLI: bytes
+    CLI->>CLI: spawn internal session
+    CLI-->>RPC: response {sessionId, capabilities}
+    Note over RPC: SDK -> CLI: user-intent calls
+
+    App->>SDK: session.send("hello")
+    SDK->>RPC: request: session.send
+    RPC->>CLI: bytes
+
+    CLI->>RPC: notification: assistant.message
+    RPC->>SDK: dispatched to SessionEvent listeners
+    SDK-->>App: event callback fires
+
+    CLI->>RPC: request: session/toolInvoke {tool,args}
+    Note over RPC: CLI -> SDK: tool/permission/FS calls (bidirectional!)
+    RPC->>SDK: dispatched to registered tool handler
+    SDK->>App: user's tool code runs
+    App-->>SDK: tool result
+    SDK->>RPC: response {result}
+    RPC->>CLI: bytes
+
+    CLI->>RPC: notification: session.idle
+    RPC->>SDK: resolves sendAndWait promise
+</pre>
+</div>
+
+<blockquote>
+<strong>Key insight.</strong> The JSON-RPC channel is <em>bidirectional</em>. The SDK makes calls like <code>session.create</code> and <code>session.send</code>; the CLI calls <em>back</em> for tool execution, permissions, FS operations, and elicitation. Every SDK must register both client-to-server call shims AND server-to-client handler maps on connect. This is why every SDK has a <code>registerClientSessionApiHandlers</code>-equivalent function.
+</blockquote>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre><code>copilot-sdk/
+├── nodejs/                       ← TypeScript SDK (reference impl)
+│   ├── src/                      ← client.ts, session.ts, types.ts, sessionFsProvider.ts
+│   ├── src/generated/            ← codegen output (rpc.ts, session-events.ts)
+│   ├── samples/ examples/        ← chat demo, basic-example
+│   ├── scripts/                  ← update-protocol-version
+│   └── test/e2e/                 ← end-to-end tests
+├── python/                       ← Async Python SDK
+│   ├── copilot/                  ← client.py, session.py, _jsonrpc.py, tools.py
+│   ├── copilot/generated/        ← codegen output
+│   ├── samples/ e2e/             ← chat demo + harness
+│   └── scripts/
+├── go/                           ← Go SDK
+│   ├── client.go session.go      ← main entry points
+│   ├── definetool.go             ← generic tool wrapper
+│   ├── internal/jsonrpc2/        ← custom JSON-RPC impl
+│   ├── internal/embeddedcli/     ← bundled CLI extraction
+│   ├── internal/flock/           ← cross-platform file locking
+│   ├── rpc/                      ← codegen output
+│   ├── cmd/bundler/              ← release-time bundling tool
+│   └── samples/
+├── dotnet/                       ← .NET SDK
+│   ├── src/                      ← Client.cs, Session.cs, Types.cs
+│   ├── src/Generated/            ← codegen output
+│   ├── samples/ test/
+├── scripts/                      ← codegen pipeline
+│   ├── codegen/                  ← typescript.ts, python.ts, go.ts, csharp.ts, utils.ts
+│   ├── corrections/              ← hand-patched regions
+│   └── docs-validation/
+├── test/                         ← cross-SDK conformance
+│   ├── snapshots/                ← YAML fixtures per feature
+│   └── harness/ scenarios/
+├── docs/                         ← narrative docs (features, hooks, auth)
+├── assets/                       ← images for README
+├── justfile                      ← dev task runner
+├── sdk-protocol-version.json     ← single-source protocol integer
+├── CHANGELOG.md                  ← per-release feature log
+└── README.md
+</code></pre>
+</details>
+
+<h2 id="tech-stack">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+<div class="card"><h4>Languages</h4><p>TypeScript, Python, Go, C# + YAML fixtures</p></div>
+<div class="card"><h4>Build tools</h4><p>npm (TS), hatch (Py), go build, dotnet + NuGet, <code>just</code> for cross-repo tasks</p></div>
+<div class="card"><h4>Codegen</h4><p><code>json-schema-to-typescript</code>, <code>quicktype</code></p></div>
+<div class="card"><h4>Transport</h4><p>vscode-jsonrpc (TS), hand-rolled elsewhere</p></div>
+<div class="card"><h4>Auth</h4><p>OAuth via CLI, env tokens, BYOK (OpenAI / Anthropic / Azure)</p></div>
+<div class="card"><h4>Release cadence</h4><p>Public preview &mdash; see <code>CHANGELOG.md</code></p></div>
+</div>
+
+<div class="footer"><a href="search.html">Search</a> &nbsp;|&nbsp; Copilot SDK Wiki</div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+
+<!-- VERSION_SWITCHER_START -->
+<style>.version-switcher{display:inline-flex;align-items:center;gap:8px;margin-top:1rem;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:8px;padding:6px 14px}
+.version-label{color:var(--text-muted,#8b949e);font-size:.85rem}
+.version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
+@media print{.version-switcher{display:none!important}}</style>
+<script>(function(){
+  var versions=[{"timestamp":"20260422_122513","date":"2026-04-22","rev":"a3e273c","pages":11,"latest":true}];
+  if(!versions||versions.length<2)return;
+  var dirPath=location.pathname.replace(/[^/]*$/,'');
+  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
+  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
+  var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
+  var wrap=document.createElement('div');
+  wrap.className='version-switcher';
+  var lbl=document.createElement('span');
+  lbl.className='version-label';
+  lbl.textContent='Version:';
+  var sel=document.createElement('select');
+  sel.className='version-select';
+  sel.setAttribute('aria-label','Switch wiki version');
+  versions.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v.timestamp;
+    var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+    o.textContent=v.date+rev+(v.latest?' (latest)':'');
+    if(v.timestamp===curTs)o.selected=true;
+    sel.appendChild(o);
+  });
+  wrap.appendChild(lbl);
+  wrap.appendChild(sel);
+  var hero=document.querySelector('.hero');
+  if(hero)hero.appendChild(wrap);
+  sel.addEventListener('change',function(){
+    var newTs=this.value;
+    if(newTs===curTs)return;
+    location.href=projectBase+newTs+'/index.html';
+  });
+})();</script>
+<!-- VERSION_SWITCHER_END -->
+</body></html>

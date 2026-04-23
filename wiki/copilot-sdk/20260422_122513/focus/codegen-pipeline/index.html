@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>Codegen Pipeline — Focus — Copilot SDK</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+<meta name="wiki-focus-parent" content="../../scripts/index.html">
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">Copilot SDK</a> &rsaquo; Focus &rsaquo; Codegen Pipeline</nav>
+<h1>Codegen Pipeline <span class="focus-label">Focus Deep-Dive</span></h1>
+<div class="hero">
+<div class="subtitle">From <code>api.schema.json</code> to four language-native SDKs, fully reviewable.</div>
+<p>Every typed surface in every SDK &mdash; every method stub, every request/response struct, every event record &mdash; originates in one JSON Schema. This page traces the data path: schema &rarr; normalisation &rarr; AST &rarr; per-language emitter &rarr; formatter &rarr; committed source file. It is the backbone that keeps four SDKs behaviourally identical.</p>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>A tightly-scoped TypeScript program that reads one schema and writes four languages' worth of RPC bindings. It is invoked by <code>npm run codegen</code>. Output is <em>committed</em> to the repo, so PRs can show readable diffs like "+<code>session.setModel</code> method in all four SDKs" rather than "schema changed; trust us."</p>
+<details style="margin-top:.8rem">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of a mint that stamps coins in four currencies from a single die. The die (schema) defines the portrait and inscription; the stamps (emitters) apply currency-specific details: the euro version shows "EUR", the dollar shows "USD", all from the same underlying engraving. When the portrait is updated (schema change), every currency gets the update in one mint run &mdash; not four independent engravings hoping they match.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="problem">&#127919; The Problem</h2>
+<p>Four SDKs in four languages need to stay in lockstep with a JSON-RPC schema that evolves monthly. Humans cannot reliably keep 4 sets of type declarations in sync. Common failure modes without codegen: Node adds a parameter, Python is missed; Go emits a <code>number</code> where the schema demands an <code>integer</code>; .NET misses a nullable and crashes when the field is null. Each of these is a silent wire-level bug.</p>
+<p>The codegen pipeline removes the human-memory dependency. Any schema change produces a diff in all four SDKs; if the diff is unexpected, the PR author fixes the schema (or the emitter). If the diff is missing, CI fails.</p>
+
+<h2 id="approach">&#128295; The Approach</h2>
+<p>A three-stage pipeline:</p>
+<ol>
+<li><strong>Normalise</strong> the schema so per-language emitters see a clean AST (inline small <code>$ref</code>s, tag integer vs number, canonicalise nullable, patch "required-but-nullable" fields).</li>
+<li><strong>Walk</strong> the normalised tree once per language, writing idiomatic code via string concatenation + per-language name/quote helpers.</li>
+<li><strong>Format</strong> the output with each language's canonical formatter so diffs are deterministic.</li>
+</ol>
+<p>Corrections are applied <em>before</em> normalisation so they look like schema edits rather than emitter overrides &mdash; this keeps emitters simple and the correction footprint obvious.</p>
+
+<h2 id="alternatives">&#128260; Why Not Alternatives?</h2>
+<table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Why Not Chosen</th></tr>
+<tr><td>OpenAPI Generator</td><td>Existing tool, broad language support</td><td>Heavy, template-driven, hard to customise idioms per language</td><td>Output doesn't look hand-written enough; too many dependencies</td></tr>
+<tr><td>Protocol Buffers + protoc</td><td>Mature, proven</td><td>Requires switching wire format; loses JSON debuggability; binds to protoc toolchain</td><td>JSON is core to the product; would be a ground-up rewrite</td></tr>
+<tr><td>Handlebars/Mustache templates</td><td>Familiar templating</td><td>Logic-in-template hell for complex cases</td><td>String concat + helpers is clearer than templates when logic is non-trivial</td></tr>
+<tr><td>Build-time generation (not committed)</td><td>No stale-output risk</td><td>CI needs Node to build Go; debuggers step into source-mapped gen; reviewers can't see diffs</td><td>Committed output wins on reviewability</td></tr>
+<tr><td>Hand-written in each SDK</td><td>Perfect idiom</td><td>Guaranteed drift</td><td>Catastrophic at scale</td></tr>
+</table>
+
+<h2 id="flow">Pipeline Diagram</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  S[api.schema.json<br/>from @github/copilot/schemas]
+  C[corrections/*.ts,.json<br/>patches]
+  P1[inlineSmallRefs]
+  P2[tagIntegers]
+  P3[canonicaliseNullable]
+  P4[fixNullableRequiredRefs]
+  AST[Shared AST<br/>methods / types / events]
+  FMT[Formatter<br/>prettier / black / gofmt / dotnet-format]
+
+  subgraph emit["Emitters"]
+    E1[typescript.ts]
+    E2[python.ts]
+    E3[go.ts]
+    E4[csharp.ts]
+  end
+
+  S --> P1
+  C --> P1
+  P1 --> P2 --> P3 --> P4 --> AST
+  AST --> E1 --> FMT --> O1[nodejs/src/generated/rpc.ts]
+  AST --> E2 --> FMT --> O2[python/copilot/_generated_rpc.py]
+  AST --> E3 --> FMT --> O3[go/rpc/generated_rpc.go]
+  AST --> E4 --> FMT --> O4[dotnet/src/Generated/Rpc.cs]
+</pre>
+</div>
+
+<h2 id="walkthrough">Step-by-Step</h2>
+<div class="code-walk">
+<div class="step">
+<h4>Read the schema</h4>
+<pre><code class="language-typescript">// scripts/codegen/index.ts
+const schemaPath = process.env.SCHEMA_PATH ??
+    path.join(__dirname, "../../nodejs/node_modules/@github/copilot/schemas/api.schema.json");
+const raw = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
+</code></pre>
+<p>Why relative to <code>node_modules</code>? The schema ships with the <code>@github/copilot</code> package, so versions stay paired. Environment override allows schema forks for experiments.</p>
+</div>
+<div class="step">
+<h4>Apply corrections</h4>
+<pre><code class="language-typescript">const corrected = applyCorrections(raw, loadCorrections());
+// corrections can: override a type, add description, delete a method, pin a field to integer
+</code></pre>
+<p>Corrections are scoped by JSONPath-like selectors. Each one has a comment explaining <em>why</em>, and a target schema version after which it can be removed.</p>
+</div>
+<div class="step">
+<h4>Normalise</h4>
+<pre><code class="language-typescript">const normalised = fixNullableRequiredRefsInApiSchema(postProcessSchema(corrected));
+</code></pre>
+<p><code>postProcessSchema</code> does the generic normalisation. <code>fixNullableRequiredRefsInApiSchema</code> handles a specific schema pattern that maps inconsistently across languages: a required field typed as <code>[T, null]</code> is a nullable-but-always-present field. Each emitter needs to represent this as <code>T?</code> / <code>Optional[T]</code> / <code>*T</code>.</p>
+</div>
+<div class="step">
+<h4>Build AST</h4>
+<pre><code class="language-typescript">const ast = buildAst(normalised);
+// ast.methods[n] = { name, params, result, description }
+// ast.types[n]   = { name, fields, kind: "record" | "union" | "enum" }
+// ast.events[n]  = { tag, fields }
+</code></pre>
+<p>The AST drops JSON-Schema-specific syntax in favour of a stable shape the emitters can pattern-match against.</p>
+</div>
+<div class="step">
+<h4>Emit per language</h4>
+<pre><code class="language-typescript">await emitTypeScript(ast, { out: "nodejs/src/generated/rpc.ts" });
+await emitPython(ast, { out: "python/copilot/_generated_rpc.py" });
+await emitGo(ast, { out: "go/rpc/generated_rpc.go", skipEvents: true });
+await emitCSharp(ast, { out: "dotnet/src/Generated/Rpc.cs" });
+await emitCSharp(ast, { out: "dotnet/src/Generated/SessionEvents.cs", eventsOnly: true });
+</code></pre>
+<p>Go skips events because <code>rpc/result_union.go</code> is hand-written &mdash; the emitter can't yet produce idiomatic Go union handling.</p>
+</div>
+<div class="step">
+<h4>Format</h4>
+<pre><code class="language-typescript">await runFormatter("prettier", "nodejs/src/generated/rpc.ts");
+await runFormatter("black",    "python/copilot/_generated_rpc.py");
+await runFormatter("gofmt",    "go/rpc/generated_rpc.go");
+await runFormatter("dotnet",   "dotnet/src/Generated/*.cs");
+</code></pre>
+<p>Missing formatters are skipped with a warning (useful in local dev; CI has them all).</p>
+</div>
+<div class="step">
+<h4>Check drift</h4>
+<pre><code class="language-bash">npm run codegen -- --check
+# Generates into .tmp/, diffs against committed files, exits 1 on any difference.
+</code></pre>
+<p>CI runs this. Any schema edit that wasn't accompanied by a regenerated commit fails the PR.</p>
+</div>
+</div>
+
+<h2 id="types">Type Mapping Cheatsheet</h2>
+<table>
+<tr><th>JSON Schema</th><th>TypeScript</th><th>Python</th><th>Go</th><th>C#</th></tr>
+<tr><td><code>string</code></td><td><code>string</code></td><td><code>str</code></td><td><code>string</code></td><td><code>string</code></td></tr>
+<tr><td><code>integer</code></td><td><code>number</code></td><td><code>int</code></td><td><code>int64</code></td><td><code>long</code></td></tr>
+<tr><td><code>number</code></td><td><code>number</code></td><td><code>float</code></td><td><code>float64</code></td><td><code>double</code></td></tr>
+<tr><td><code>boolean</code></td><td><code>boolean</code></td><td><code>bool</code></td><td><code>bool</code></td><td><code>bool</code></td></tr>
+<tr><td><code>[T, null]</code></td><td><code>T | null</code></td><td><code>Optional[T]</code></td><td><code>*T</code></td><td><code>T?</code></td></tr>
+<tr><td><code>array[T]</code></td><td><code>T[]</code></td><td><code>list[T]</code></td><td><code>[]T</code></td><td><code>IReadOnlyList&lt;T&gt;</code></td></tr>
+<tr><td>duration ms</td><td><code>number</code></td><td><code>int</code></td><td><code>time.Duration</code>*</td><td><code>TimeSpan</code>**</td></tr>
+<tr><td>oneOf (tagged)</td><td>discriminated union</td><td><code>Union[...]</code> + match</td><td>type + tag dispatch</td><td>polymorphic converter</td></tr>
+</table>
+<p>* Go could emit <code>time.Duration</code> but currently uses <code>int64</code> ms; future emitter work. ** C# uses <code>MillisecondsTimeSpanConverter</code> to bridge wire ms to <code>TimeSpan</code>.</p>
+
+<h2 id="complexity">&#9878;&#65039; Complexity &amp; Tradeoffs</h2>
+<p>The whole pipeline runs in ~1.5s for all four languages. Not optimised &mdash; emitters use <code>string +=</code> patterns and run sequentially. Could be parallelised but there's no pressure.</p>
+<p>The <em>expensive</em> cost isn't time but intellectual: each emitter must understand its target language's idioms deeply. Adding a fifth language (e.g., Rust, Java) would mean writing a fifth emitter of ~500-800 lines. The <em>shared</em> infrastructure (schema loading, AST, corrections) is reused, so it's not starting from zero &mdash; but it's not free either.</p>
+
+<h2 id="failure">&#128165; Failure Recovery</h2>
+<p>Codegen is not a runtime path &mdash; no user ever runs it. Failures manifest as: (1) local <code>npm run codegen</code> exits non-zero; (2) CI <code>--check</code> step fails the PR; (3) compile failures in whichever SDK consumed a malformed output. The repo's <code>scripts/check-api-surface.ts</code> is a secondary guard &mdash; it compares the Node public API to a committed manifest, catching accidentally-exported renames.</p>
+
+<h2 id="gotchas">Edge Cases</h2>
+<table>
+<tr><th>Scenario</th><th>Behaviour</th><th>Why</th></tr>
+<tr><td>Schema field renamed</td><td>Codegen updates all four SDKs; compile fails in user code</td><td>Intentional &mdash; wire-breaking renames should break compile</td></tr>
+<tr><td>New enum variant</td><td>All four SDKs gain the variant; user switch statements with <code>default</code> keep working</td><td>Forward-compat pattern that users opt into</td></tr>
+<tr><td>Correction file targets removed path</td><td>Warning; codegen continues</td><td>Stale corrections are a normal intermediate state</td></tr>
+<tr><td>Target file locked on Windows</td><td>Emitter retries with backoff</td><td>IDE file locks in dev environments</td></tr>
+<tr><td>Go emitter on a type with unions</td><td>Skipped; hand-written <code>result_union.go</code> covers it</td><td>Go idiom for unions is not yet automatable</td></tr>
+</table>
+
+<h2 id="config">Configuration</h2>
+<table>
+<tr><th>Knob</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>SCHEMA_PATH</code></td><td>paired Node install</td><td>Override schema</td></tr>
+<tr><td><code>--check</code></td><td>off</td><td>Drift detection for CI</td></tr>
+<tr><td><code>--language</code></td><td>all</td><td>Regenerate one language only</td></tr>
+<tr><td>Corrections dir</td><td><code>scripts/codegen/corrections/</code></td><td>Patch overrides</td></tr>
+<tr><td>Formatter timeout</td><td>30s</td><td>Safety on slow dotnet-format</td></tr>
+<tr><td>Reserved-word list</td><td>per-emitter</td><td>Rename collisions (<code>class</code>&rarr;<code>class_</code>)</td></tr>
+<tr><td>Skip events</td><td>Go emitter: true</td><td>Go unions are hand-written</td></tr>
+<tr><td>Emit STJ polymorphic converter</td><td>C# emitter: true</td><td>Required for event deser</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">scripts/codegen/</summary>
+<pre><code>scripts/codegen/
+├── index.ts               ← orchestrator entry
+├── utils.ts               ← name helpers, AST walkers
+├── postProcess.ts         ← postProcessSchema + fixNullableRequiredRefs
+├── typescript.ts          ← TS emitter
+├── python.ts              ← Py emitter
+├── go.ts                  ← Go emitter
+├── csharp.ts              ← C# emitter
+└── corrections/           ← patches
+</code></pre>
+</details>
+
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="../jsonrpc-transport/index.html">JSON-RPC Transport</a> &mdash; the wire format these RPCs ride on.</li>
+<li><a href="../protocol-negotiation/index.html">Protocol Negotiation</a> &mdash; where <code>SDK_PROTOCOL_VERSION</code> ends up.</li>
+</ul>
+
+<div class="footer"><a href="../../scripts/index.html">&#8592; Back to parent</a> &nbsp;|&nbsp; <a href="../../index.html">Project hub</a> &nbsp;|&nbsp; <a href="../../search.html">Search</a></div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+</body></html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-04-22">
+<meta name="wiki-source" content=".git-clones/copilot-sdk">
+<meta name="wiki-source-rev" content="a3e273c">
+<title>go — Copilot SDK</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.6rem 0 .6rem 1.6rem}
+li{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.4rem;margin:1rem 0;columns:2;column-gap:2rem}
+.toc ol{list-style:decimal;margin-left:1.4rem}
+.toc li{break-inside:avoid}
+.toc ol ol{margin-left:1rem;list-style:lower-alpha}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:.25rem .6rem;border-radius:4px;font-size:.75rem;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--accent3)}.callout.danger{border-left-color:var(--accent4)}.callout.success{border-left-color:var(--accent2)}
+.code-walk{counter-reset:step;margin:1rem 0}
+.code-walk .step{counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin:.8rem 0;position:relative;padding-left:3rem}
+.code-walk .step::before{content:counter(step);position:absolute;left:1rem;top:1rem;background:var(--accent);color:#fff;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#fff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#fff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{columns:1}}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.card,.module-card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"dark",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre code').forEach(function(b){hljs.highlightElement(b);});});</script>
+</head><body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">Copilot SDK</a> &rsaquo; go</nav>
+<h1>go &mdash; Go SDK</h1>
+<div class="hero">
+<div class="subtitle"><code>github.com/github/copilot-sdk/go</code> &mdash; generics, flock, cross-platform syscalls.</div>
+<p>The Go SDK is built for <strong>cloud-native integrations</strong>: Kubernetes operators, CI runners, backend services, CLI tools. Ships as a single import path; compiles into a static binary with the CLI either externally installed or bundled and extracted on first use. Uses Go 1.18+ generics for type-safe tool handlers (<code>DefineTool[T, U]</code>), a hand-rolled <code>internal/jsonrpc2</code> transport, and platform-split files for Windows/Unix syscalls.</p>
+<p style="margin-top:.8rem">
+<span class="badge blue">Go 1.21+</span>
+<span class="badge green">Static binary</span>
+<span class="badge yellow">Generics</span>
+</p>
+</div>
+
+<div class="stat-row">
+<div class="stat-box"><div class="num">85</div><div class="label">.go files</div></div>
+<div class="stat-box"><div class="num">1814</div><div class="label">client.go</div></div>
+<div class="stat-box"><div class="num">1270</div><div class="label">session.go</div></div>
+<div class="stat-box"><div class="num">1213</div><div class="label">types.go</div></div>
+<div class="stat-box"><div class="num">4</div><div class="label">flock variants</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>A Go SDK exposing <code>copilot.Client</code> and <code>copilot.Session</code> types. You call <code>client := copilot.NewClient(nil)</code>, <code>client.Start()</code>, <code>defer client.Stop()</code> &mdash; then create sessions, register tool handlers, and process events through channels and callbacks. The SDK handles subprocess spawning, JSON-RPC framing, cross-platform file locking (for bundled-CLI extraction), and typed tool argument unmarshaling via Go generics.</p>
+<details style="margin-top:.8rem">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of the Go SDK as a self-contained embassy kit for a static building. Every embassy (binary) ships with its own printed embassy manual (the bundled CLI), its own lockbox keys that differ per country (flock_windows vs flock_unix), and generic passport forms that get filled in with real types (<code>DefineTool[T,U]</code>) at compile time so you never get a "wrong form" error at the border. Because the embassy is self-contained, you can deploy it anywhere Go runs with <code>scp</code> and a single binary drop.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-exists">&#127919; Why This Module Exists</h2>
+<p>Go dominates cloud-native tooling: Kubernetes operators, Terraform providers, CI systems, observability agents. A Go SDK unlocks embedding Copilot's agent loop into these systems <em>without shelling out</em> &mdash; preserving the event stream, permission flow, and tool callback ergonomics. Because Go compiles to a single static binary, a Copilot-powered operator can be deployed with <code>kubectl apply</code> and a pulled image, no runtime install required.</p>
+<p>The Go SDK also showcases something the other SDKs don't: an <strong>embedded CLI pattern</strong>. Go can't trivially depend on npm packages, so <code>internal/embeddedcli</code> ships the CLI binary inside the SDK and extracts it on first use to a content-addressable cache directory. Concurrent processes race to extract &mdash; handled by platform-specific <code>flock</code> advisory locks.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+<tr><td>JSON-RPC library</td><td>Hand-rolled <code>internal/jsonrpc2</code></td><td><code>sourcegraph/jsonrpc2</code>, <code>creachadair/jrpc2</code></td><td>External libs assume HTTP/websocket; we need Content-Length-framed stdio &mdash; a different transport</td></tr>
+<tr><td>Tool handlers</td><td><code>DefineTool[T, U]</code> with generics + reflection on <code>T</code></td><td><code>interface{}</code> args; code generation</td><td>Generics give compile-time arg typing and let schema generation derive from the same type</td></tr>
+<tr><td>Cross-platform syscalls</td><td>Build-tag split files: <code>process_{windows,other}.go</code>, <code>flock_{unix,windows,other}.go</code></td><td><code>runtime.GOOS</code> switches in one file</td><td>Build tags isolate platform imports; each file compiles only on its target OS</td></tr>
+<tr><td>Concurrency primitives</td><td><code>sync.Mutex</code>, <code>sync.RWMutex</code>, <code>atomic.Pointer[os.Process]</code></td><td>Single mutex; channels-only</td><td>Fine-grained locks match access patterns: RW for start/stop (rare write, many reads); atomic for process-pointer reads during shutdown</td></tr>
+<tr><td>CLI bundling</td><td><code>internal/embeddedcli</code> + <code>flock</code>-guarded extraction</td><td>Require CLI install; use <code>go:embed</code></td><td>flock handles parallel-process races; extraction keeps binary size normal; <code>go:embed</code> would 3x the compiled size</td></tr>
+<tr><td>Public API style</td><td>Pointer receivers; <code>NewClient</code> constructor; <code>nil</code> options = defaults</td><td>Exported struct direct init</td><td>Constructor enforces invariants; lets internal fields evolve without breaking the API</td></tr>
+<tr><td>Result unions</td><td>Hand-written <code>rpc/result_union.go</code> with type tags</td><td>Bare <code>interface{}</code>; codegen-attempted unions</td><td>Codegen can't yet emit idiomatic Go unions; hand-written keeps user code clean: <code>if d, ok := event.Data.(*AssistantMessageData); ok {}</code></td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph pub["public (package copilot)"]
+    CL[Client<br/>client.go]
+    SE[Session<br/>session.go]
+    T[DefineTool[T,U]<br/>definetool.go]
+    PH[PermissionHandler<br/>permissions.go]
+    TY[Types<br/>types.go]
+    SF[SessionFsProvider<br/>session_fs_provider.go]
+  end
+  subgraph int["internal (unexported)"]
+    JR[jsonrpc2<br/>custom transport]
+    EC[embeddedcli<br/>extraction]
+    FL[flock<br/>cross-platform]
+  end
+  subgraph gen["rpc (generated + hand-written)"]
+    GR[generated_rpc.go<br/>codegen]
+    RU[result_union.go<br/>hand-written]
+  end
+  CLIPROC[copilot subprocess]
+
+  CL --> JR
+  CL --> EC
+  EC --> FL
+  SE --> JR
+  CL --> GR
+  SE --> GR
+  CL --> TY
+  SE --> TY
+  SE --> T
+  SE --> PH
+  SE --> SF
+  GR --> RU
+  JR -->|stdio / TCP| CLIPROC
+</pre>
+</div>
+
+<h2 id="walkthrough">&#128694; Narrated Walkthrough</h2>
+<div class="intro-box">
+<p style="color:var(--text-muted);margin-bottom:1rem;">Follow <code>session.Send(copilot.MessageOptions{Prompt: "hi"})</code> through the SDK:</p>
+<ol>
+<li><strong><code>copilot.NewClient(nil)</code></strong> &mdash; returns a zero-value-safe <code>*Client</code>. No I/O.</li>
+<li><strong><code>client.Start()</code></strong> &mdash; acquires <code>startStopMux</code> as writer. If <code>CLIUrl</code> is set, dials TCP. Otherwise resolves CLI path: <code>Options.CLIPath</code> &rarr; <code>$PATH</code> lookup &rarr; <code>internal/embeddedcli</code> extraction.</li>
+<li><strong>embeddedcli extraction</strong> (bundled path) &mdash; compute content hash, check cache. If missing: acquire <code>flock</code> on <code>&lt;target&gt;.lock</code>, re-check, extract to <code>.tmp</code>, chmod 0755, atomic rename, release lock.</li>
+<li><strong>Spawn</strong> &mdash; <code>exec.CommandContext(ctx, cliPath, "serve", "--stdio")</code>; wire stdin/stdout.</li>
+<li><strong>jsonrpc2.NewClient</strong> &mdash; starts reader goroutine that loops: parse Content-Length header, read N bytes, unmarshal, dispatch by kind (response/notification/request).</li>
+<li><strong>Handshake</strong> &mdash; <code>client.RPC.GetStatus(ctx)</code>. Cache <code>negotiatedProtocolVersion</code>.</li>
+<li><strong><code>CreateSession(ctx, cfg)</code></strong> &mdash; acquires <code>startStopMux</code> reader. Serialises <code>cfg</code>, sends <code>session.create</code> RPC. Registers callbacks into <code>sessions[sessionId] = &Session{...}</code>.</li>
+<li><strong><code>session.On(func(evt SessionEvent){...})</code></strong> &mdash; appends to <code>eventHandlers</code> slice (under mutex).</li>
+<li><strong><code>session.Send(MessageOptions{...})</code></strong> &mdash; sends <code>session.send</code> RPC; returns <code>messageId</code>.</li>
+<li><strong>Events flow from reader goroutine</strong> &mdash; notification received, unmarshal via <code>result_union.go</code> tag-dispatch, invoke each <code>eventHandlers[i](evt)</code>.</li>
+<li><strong>Tool invocation</strong> (if any) &mdash; server&rarr;client request arrives; dispatcher finds session, looks up tool, runs wrapped handler <code>createTypedHandler(userFn)</code> (unmarshal JSON&rarr;<code>T</code>, call userFn, marshal <code>U</code>&rarr;JSON), writes response.</li>
+<li><strong><code>defer client.Stop()</code></strong> &mdash; acquires writer lock, sends <code>shutdown</code>, cancels contexts, <code>process.Wait()</code>, falls back to <code>process.Kill()</code> after timeout.</li>
+</ol>
+</div>
+
+<h2 id="key-components">Key Components</h2>
+<table>
+<tr><th>File</th><th>Key symbols</th><th>Role (WHY)</th></tr>
+<tr><td><code>client.go</code></td><td><code>Client</code>, <code>NewClient</code>, <code>Start</code>, <code>Stop</code>, <code>CreateSession</code>, <code>RPC</code></td><td>Subprocess + connection + session registry. <code>atomic.Pointer</code> for process handle; <code>RWMutex</code> for lifecycle.</td></tr>
+<tr><td><code>session.go</code></td><td><code>Session</code>, <code>Send</code>, <code>On</code>, <code>Disconnect</code>, <code>UI</code></td><td>Per-conversation state, event dispatch, tool handler registry.</td></tr>
+<tr><td><code>types.go</code></td><td>All public types: <code>ClientOptions</code>, <code>SessionConfig</code>, <code>MessageOptions</code>, etc.</td><td>Single file avoids circular imports; 1213 lines.</td></tr>
+<tr><td><code>definetool.go</code></td><td><code>DefineTool[T, U]</code>, <code>generateSchemaForType</code>, <code>createTypedHandler</code></td><td>Generic tool wrapper &mdash; schema via reflection on <code>T</code>, unmarshal in wrapper.</td></tr>
+<tr><td><code>permissions.go</code></td><td>Exported <code>PermissionHandler</code> struct (13 lines)</td><td>Namespaces pre-built handlers without polluting package root. <code>copilot.PermissionHandler.ApproveAll</code>.</td></tr>
+<tr><td><code>session_fs_provider.go</code></td><td><code>SessionFsProvider</code> interface + adapter</td><td>Users implement an interface; adapter translates Go errors to <code>SessionFSError</code> results.</td></tr>
+<tr><td><code>telemetry.go</code></td><td><code>TraceContextProvider</code></td><td>W3C Trace Context plumbing.</td></tr>
+<tr><td><code>process_windows.go</code> / <code>process_other.go</code></td><td>Platform-specific signal handling</td><td>Build-tag split: Windows <code>CTRL_BREAK_EVENT</code> vs Unix <code>SIGTERM</code>.</td></tr>
+<tr><td><code>internal/jsonrpc2/jsonrpc2.go</code></td><td><code>Client</code>, <code>NotificationHandler</code>, <code>RequestHandler</code></td><td>Custom JSON-RPC 2.0 impl for Content-Length-framed stdio.</td></tr>
+<tr><td><code>internal/jsonrpc2/frame.go</code></td><td><code>ReadMessage</code>, <code>WriteMessage</code></td><td>LSP-style framing: headers then body.</td></tr>
+<tr><td><code>internal/embeddedcli/embeddedcli.go</code></td><td><code>Installer</code>, <code>EnsureInstalled</code></td><td>Content-addressed CLI extraction with flock guard.</td></tr>
+<tr><td><code>internal/flock/flock_unix.go</code></td><td><code>Lock</code>, <code>Unlock</code> via <code>unix.Flock</code></td><td>POSIX advisory lock.</td></tr>
+<tr><td><code>internal/flock/flock_windows.go</code></td><td><code>Lock</code>, <code>Unlock</code> via <code>LockFileEx</code></td><td>Windows kernel lock.</td></tr>
+<tr><td><code>internal/flock/flock_other.go</code></td><td>No-op fallback</td><td>For filesystems that don't support advisory locks.</td></tr>
+<tr><td><code>rpc/generated_rpc.go</code></td><td><code>ServerRpc</code>, method wrappers</td><td>Codegen'd from <code>api.schema.json</code>.</td></tr>
+<tr><td><code>rpc/result_union.go</code></td><td>Hand-written tag-dispatch for event data</td><td>Codegen can't yet emit this idiomatically in Go.</td></tr>
+<tr><td><code>cmd/bundler/main.go</code></td><td>(executable)</td><td>Release-time tool: packages CLI into the module. Not part of user builds.</td></tr>
+<tr><td><code>samples/chat.go</code></td><td>(executable)</td><td>Chat demo.</td></tr>
+</table>
+
+<h2 id="algorithms">&#9889; Algorithm Spotlight</h2>
+
+<h3 id="algo-definetool">DefineTool — generic tool wrapper</h3>
+<p><strong>Problem.</strong> Users want to write <code>func(args GetWeatherArgs, inv ToolInvocation) (string, error)</code> and have the SDK generate the JSON Schema, unmarshal JSON into <code>T</code>, and marshal <code>U</code> back &mdash; without manually writing schema strings.</p>
+<pre><code class="language-go">func DefineTool[T any, U any](name, description string, handler func(T, ToolInvocation) (U, error)) Tool {
+    var zero T
+    schema := generateSchemaForType(reflect.TypeOf(zero))
+    return Tool{
+        Name:        name,
+        Description: description,
+        Parameters:  schema,
+        Handler:     createTypedHandler(handler),
+    }
+}</code></pre>
+<p>The clever bit is that <code>T</code> is used <em>twice</em> &mdash; once by <code>reflect.TypeOf(zero)</code> to synthesise the schema, and once in the compiled closure <code>createTypedHandler</code> to unmarshal incoming JSON. The generic parameter keeps both in lockstep with compile-time checks.</p>
+
+<h3 id="algo-flock">flock-guarded CLI extraction</h3>
+<p>Content-addressed cache; double-checked locking; atomic rename. See <code>installer.go</code>. The POSIX advisory lock is automatically released on process exit &mdash; no stale-lock cleanup needed.</p>
+<pre><code class="language-go">// Pseudocode from installer.go
+target := filepath.Join(cacheDir, "cli-"+contentHash, "copilot")
+if fileExists(target) { return target, nil }
+
+lockFile, _ := os.OpenFile(target+".lock", os.O_CREATE|os.O_RDWR, 0644)
+defer lockFile.Close()
+flock.Lock(lockFile.Fd())
+defer flock.Unlock(lockFile.Fd())
+
+if fileExists(target) { return target, nil } // re-check under lock
+// extract zip to .tmp, chmod, os.Rename to target
+</code></pre>
+
+<h3 id="algo-startstop">Start/Stop under RWMutex</h3>
+<p><code>startStopMux.Lock()</code> for <code>Start</code>/<code>Stop</code> (writer), <code>RLock()</code> for all methods that need a live process. Many <code>CreateSession</code> calls can proceed concurrently; a <code>Stop</code> waits for them to finish before tearing down.</p>
+
+<h2 id="failures">&#9888; What Could Go Wrong</h2>
+<table>
+<tr><th>Failure</th><th>Detection</th><th>Recovery</th><th>Effects</th></tr>
+<tr><td>CLI binary not in PATH and not bundled</td><td>Extraction returns error</td><td><code>Start()</code> returns error</td><td>Nothing created</td></tr>
+<tr><td>Concurrent processes extracting CLI</td><td>flock loser blocks on lock</td><td>Loser re-checks after lock; sees extracted copy; uses it</td><td>One extracts; others wait briefly</td></tr>
+<tr><td>Filesystem doesn't support flock</td><td>Runtime behaviour (NFS old versions)</td><td><code>flock_other.go</code> no-op; atomic rename still prevents most corruption</td><td>Rare race possible; acceptable on exotic FS</td></tr>
+<tr><td>CLI crashes mid-session</td><td>Reader goroutine sees <code>io.EOF</code></td><td>Closes sessions with error; <code>Client.state</code> = Disconnected</td><td>User must call <code>Stop()</code> and create a new client</td></tr>
+<tr><td>Stop called during an in-flight RPC</td><td>RWMutex blocks <code>Stop</code> writer until readers drain</td><td>Shutdown sent gracefully; timeout then Kill()</td><td>In-flight RPC may return <code>context.Canceled</code></td></tr>
+<tr><td>Tool handler returns error</td><td>Wrapped in <code>ToolResult{IsError: true}</code></td><td>LLM sees error string</td><td>Agent can retry or apologise</td></tr>
+</table>
+
+<h2 id="performance">&#128202; Performance Profile</h2>
+<p><strong>Zero-alloc hot path:</strong> JSON decoder reuses <code>bufio.Reader</code>; event dispatch iterates slice. <strong>Reflection cost:</strong> paid once per tool at <code>DefineTool</code> time; runtime invocations use captured closures. <strong>Goroutines:</strong> one reader per client + short-lived per-RPC; not thousands. <strong>Bundled CLI overhead:</strong> first extraction ~20-100ms (disk-bound); subsequent starts skip extraction in O(1).</p>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<div class="card-grid deep-dive-grid">
+  <a class="card" href="../focus/jsonrpc-transport/index.html"><h4>JSON-RPC Transport <span class="focus-badge">Focus</span></h4><p>How <code>internal/jsonrpc2</code> frames messages and bridges two goroutines to the CLI.</p></a>
+  <a class="card" href="../focus/protocol-negotiation/index.html"><h4>Protocol Negotiation <span class="focus-badge">Focus</span></h4><p>Version handshake in the Go SDK.</p></a>
+  <a class="card" href="../focus/codegen-pipeline/index.html"><h4>Codegen Pipeline <span class="focus-badge">Focus</span></h4><p>How <code>rpc/generated_rpc.go</code> is produced, and why <code>result_union.go</code> is hand-written.</p></a>
+</div>
+
+<h2 id="configuration">Configuration Reference</h2>
+<table>
+<tr><th>Field</th><th>Type</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>ClientOptions.CLIPath</code></td><td><code>string</code></td><td>bundled</td><td>Override binary path</td></tr>
+<tr><td><code>ClientOptions.CLIUrl</code></td><td><code>string</code></td><td>&mdash;</td><td>Connect to external TCP server</td></tr>
+<tr><td><code>ClientOptions.UseStdio</code></td><td><code>*bool</code></td><td>true</td><td>stdio vs TCP transport</td></tr>
+<tr><td><code>ClientOptions.AutoStart</code></td><td><code>*bool</code></td><td>false</td><td>Auto-<code>Start</code> on first use</td></tr>
+<tr><td><code>SessionConfig.Model</code></td><td><code>string</code></td><td>CLI default</td><td>Per-session model</td></tr>
+<tr><td><code>SessionConfig.EnableConfigDiscovery</code></td><td><code>*bool</code></td><td>false</td><td>Auto-load <code>.mcp.json</code></td></tr>
+<tr><td><code>SessionConfig.OnPermissionRequest</code></td><td><code>PermissionHandlerFunc</code></td><td>nil (deny)</td><td>Permission gate</td></tr>
+<tr><td><code>SessionConfig.Tools</code></td><td><code>[]Tool</code></td><td>nil</td><td>Custom tools</td></tr>
+<tr><td><code>SessionConfig.Commands</code></td><td><code>[]CommandDefinition</code></td><td>nil</td><td>Slash commands</td></tr>
+<tr><td><code>SessionConfig.Hooks</code></td><td><code>*SessionHooks</code></td><td>nil</td><td>pre/post tool use</td></tr>
+<tr><td><code>SessionConfig.SystemMessage</code></td><td><code>*SystemMessageConfig</code></td><td>nil</td><td>replace/customize/transform</td></tr>
+<tr><td><code>SessionConfig.SessionFs</code></td><td><code>*SessionFsConfig</code></td><td>nil</td><td>Virtual FS</td></tr>
+<tr><td><code>SessionConfig.ReasoningEffort</code></td><td><code>string</code></td><td>&mdash;</td><td>low/medium/high</td></tr>
+</table>
+
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="ex-minimal">Minimal client/session</h3>
+<pre><code class="language-go">package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    copilot "github.com/github/copilot-sdk/go"
+)
+
+func main() {
+    client := copilot.NewClient(nil)
+    if err := client.Start(); err != nil { log.Fatal(err) }
+    defer client.Stop()
+
+    session, err := client.CreateSession(context.Background(), &copilot.SessionConfig{
+        OnPermissionRequest: copilot.PermissionHandler.ApproveAll,
+    })
+    if err != nil { log.Fatal(err) }
+
+    session.On(func(evt copilot.SessionEvent) {
+        if d, ok := evt.Data.(*copilot.AssistantMessageData); ok {
+            fmt.Println(d.Content)
+        }
+    })
+
+    session.Send(copilot.MessageOptions{Prompt: "Hello!"})
+}
+</code></pre>
+
+<h3 id="ex-definetool">Generic DefineTool</h3>
+<pre><code class="language-go">type GetWeatherParams struct {
+    City string `json:"city" jsonschema:"city name"`
+    Unit string `json:"unit" jsonschema:"temperature unit (celsius or fahrenheit)"`
+}
+
+tool := copilot.DefineTool("get_weather", "Get weather for a city",
+    func(params GetWeatherParams, inv copilot.ToolInvocation) (string, error) {
+        return fmt.Sprintf("Weather in %s: 22°%s", params.City, params.Unit), nil
+    })
+</code></pre>
+
+<h3 id="ex-jsonrpc">jsonrpc2 Request/Response types</h3>
+<pre><code class="language-go">type Request struct {
+    JSONRPC string          `json:"jsonrpc"`
+    ID      json.RawMessage `json:"id"`      // nil for notifications
+    Method  string          `json:"method"`
+    Params  json.RawMessage `json:"params"`
+}
+
+type Response struct {
+    JSONRPC string          `json:"jsonrpc"`
+    ID      json.RawMessage `json:"id,omitempty"`
+    Result  json.RawMessage `json:"result,omitempty"`
+    Error   *Error          `json:"error,omitempty"`
+}
+</code></pre>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">go/ source tree</summary>
+<pre><code>go/
+├── client.go                    ← Client + Start/Stop/CreateSession
+├── session.go                   ← Session + event pump + tool dispatch
+├── types.go                     ← All public types
+├── definetool.go                ← Generic DefineTool[T,U]
+├── permissions.go               ← Pre-built permission handlers (13 lines)
+├── session_fs_provider.go       ← FS interface + adapter
+├── telemetry.go                 ← W3C Trace Context
+├── sdk_protocol_version.go      ← Embedded constant
+├── process_windows.go           ← Windows CTRL_BREAK signal
+├── process_other.go             ← Unix SIGTERM
+├── internal/
+│   ├── jsonrpc2/
+│   │   ├── jsonrpc2.go          ← Client, handlers
+│   │   └── frame.go             ← Content-Length framing
+│   ├── embeddedcli/
+│   │   └── embeddedcli.go       ← Content-addressed extraction
+│   ├── flock/
+│   │   ├── flock.go             ← Lock interface
+│   │   ├── flock_unix.go        ← POSIX advisory
+│   │   ├── flock_windows.go     ← LockFileEx
+│   │   └── flock_other.go       ← No-op fallback
+│   └── e2e/                     ← Conformance tests
+├── embeddedcli/
+│   └── installer.go             ← Public installer helper
+├── rpc/
+│   ├── generated_rpc.go         ← Codegen'd ServerRpc
+│   └── result_union.go          ← Hand-written event data union
+├── cmd/bundler/main.go          ← Release-time packaging
+├── samples/chat.go              ← Demo
+└── go.mod
+</code></pre>
+</details>
+
+<div class="footer"><a href="../index.html">&#8592; Project hub</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></div>
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){if(!el.getAttribute('data-source'))el.setAttribute('data-source',el.textContent);});
+// Auto-TOC
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('main h2[id],main h3[id]');if(!headings.length)return;var ol=document.createElement('ol');var currentH2=null;headings.forEach(function(h){if(h.closest('.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^[^\w\s]+\s*/,'');li.appendChild(a);if(h.tagName==='H3'&&currentH2){var sub=currentH2.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2=li;}});toc.appendChild(ol);})();
+// Theme toggle
+(function(){var btn=document.getElementById('themeToggle');function renderMermaid(t){var nodes=document.querySelectorAll('pre.mermaid');if(!nodes.length||!window.mermaid)return;nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}}function applyTheme(t){document.documentElement.setAttribute('data-theme',t);if(btn)btn.textContent=(t==='light')?'\u2600':'\u263E';localStorage.setItem('neutra-ip-theme',t);renderMermaid(t);}var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');applyTheme(saved);if(btn)btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});})();
+// Diagram zoom with scroll-wheel
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');if(!overlay||!content)return;var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Copy buttons on <pre> blocks (not mermaid)
+(function(){document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre){var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(e){e.stopPropagation();var code=pre.querySelector('code');var text=code?code.textContent:pre.textContent;navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+// Reading time
+(function(){var hero=document.querySelector('.hero');var main=document.getElementById('main');if(!hero||!main)return;var text=main.innerText||'';var words=text.split(/\s+/).length;var mins=Math.max(1,Math.ceil(words/200));var span=document.createElement('p');span.style.cssText='color:var(--text-muted);font-size:.85rem;margin-top:.5rem';span.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(span);})();
+// j/k keyboard navigation
+(function(){var hs=Array.from(document.querySelectorAll('main h2[id]'));document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key!=='j'&&e.key!=='k')return;var y=window.scrollY;var targets=hs.map(function(h){return h.getBoundingClientRect().top+y;});var cur=0;for(var i=0;i<targets.length;i++){if(targets[i]<y+5)cur=i;}var ni=e.key==='j'?Math.min(hs.length-1,cur+1):Math.max(0,cur-1);if(hs[ni])hs[ni].scrollIntoView({behavior:'smooth'});});})();
+</script>
+</body></html>

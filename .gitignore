@@ -5,3 +5,4 @@ __pycache__
 internal
 logs
 .superpowers*.bak
+internal_gen.sh
