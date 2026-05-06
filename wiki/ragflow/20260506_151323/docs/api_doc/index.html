@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGFlow API Module - Documentation Hub</title>
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/rag/ragflow/api">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f5f5f5;
+            --border: #e0e0e0;
+            --text: #333333;
+            --accent: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --link: #2563eb;
+        }
+        
+        html[data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #e0e0e0;
+            --accent: #3b82f6;
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+            --link: #60a5fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--accent), #1e40af);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: background-color 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--border);
+        }
+        
+        nav {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        nav h2 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            list-style: none;
+            columns: 2;
+            gap: 2rem;
+        }
+        
+        nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        nav a {
+            color: var(--link);
+            text-decoration: none;
+            border-bottom: 1px dotted transparent;
+            transition: border-color 0.3s;
+        }
+        
+        nav a:hover {
+            border-bottom-color: var(--link);
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        section h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        section h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        
+        .breadcrumbs {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+        
+        .breadcrumbs a {
+            color: var(--link);
+            text-decoration: none;
+        }
+        
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumbs span {
+            margin: 0 0.5rem;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .mermaid-container {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            min-height: 400px;
+        }
+        
+        .walkthrough-steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        
+        .walkthrough-steps li {
+            counter-increment: step-counter;
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+        
+        .walkthrough-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--accent);
+            color: white;
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .walkthrough-steps li strong {
+            color: var(--accent);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        table th {
+            background: var(--accent);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        table tr:hover {
+            background: var(--bg);
+        }
+        
+        code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 40;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .back-to-top:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+        }
+        
+        .back-to-top.visible {
+            display: flex;
+        }
+        
+        .intro-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .intro-box strong {
+            color: var(--accent);
+        }
+        
+        footer {
+            background: var(--surface);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle theme" tabindex="0">☀️</div>
+    
+    <header>
+        <h1>RAGFlow API Module</h1>
+        <p>HTTP/WebSocket Adapter Layer for Multi-Tenant RAG Platform</p>
+    </header>
+    
+    <main id="main">
+        <div class="breadcrumbs">
+            <a href="/wiki/ragflow/">RAGFlow</a>
+            <span>›</span>
+            <span>API Module</span>
+        </div>
+        
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>The RAGFlow API module is the HTTP/WebSocket adapter layer that connects external clients to the RAG (Retrieval-Augmented Generation) platform core. It implements:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                <li><strong>Async Web Server (Quart):</strong> High-concurrency request handling with Python async/await</li>
+                <li><strong>Multi-Tenant Isolation:</strong> Tenant ID filtering at query level, enforced across all data access</li>
+                <li><strong>Service Layer Pattern:</strong> 15+ domain services (DocumentService, DialogService, TaskService, etc.) encapsulating business logic and state mutations</li>
+                <li><strong>Implicit Task Queue:</strong> Redis-backed document processing with background executor coordination</li>
+                <li><strong>Hybrid Async+Sync:</strong> Async handlers + synchronous Peewee ORM, optimal for I/O-bound workloads</li>
+                <li><strong>Dual Auth Strategy:</strong> JWT tokens + session-based authentication with password hashing (bcrypt)</li>
+            </ul>
+        </section>
+        
+        <section id="architecture">
+            <h2>Architecture Diagram</h2>
+            <div class="mermaid-container">
+                <div class="mermaid" data-source="api-architecture">
+                    graph TD
+                    A["Client<br/>(Web/Mobile/API)"] -->|HTTP/WebSocket| B["Quart Server<br/>(Async Handler)"]
+                    B -->|Request Validation| C["Auth Middleware<br/>(JWT Decode)"]
+                    C -->|Load Tenant| D["Multi-Tenant Context"]
+                    D -->|Route to Handler| E["REST Endpoints<br/>(apps/)"]
+                    E -->|Business Logic| F["Service Layer<br/>(15+ Services)"]
+                    F -->|Tenant Filtering| G["Peewee ORM<br/>(Synchronous)"]
+                    G -->|SQL Queries| H["MySQL/PostgreSQL<br/>(Transactional)"]
+                    F -->|Queue Task| I["Redis Queue"]
+                    I -->|Poll & Process| J["Background Executor<br/>(Task Worker)"]
+                    J -->|Update Progress| K["Redis Cache"]
+                    B -->|Progress Stream| L["WebSocket Handler"]
+                    K -->|Fetch Status| L
+                    L -->|Push Update| A
+                    J -->|State Mutation| H
+                    M["Error Handler<br/>(Custom Exceptions)"] -->|Convert to HTTP| E
+                    N["Connection Pool<br/>(10-20 conns)"] -->|Absorb Contention| G
+                </div>
+            </div>
+        </section>
+        
+        <section id="design-philosophy">
+            <h2>Design Philosophy</h2>
+            <div class="intro-box">
+                <strong>Key Principle:</strong> Optimize for concurrent I/O with a clear separation between request handling (async) and business logic (service layer). Delegate heavy processing (embeddings, parsing) to background workers instead of blocking HTTP handlers.
+            </div>
+            
+            <h3>Why Async Web Server + Sync ORM?</h3>
+            <p>The hybrid approach achieves high concurrency for I/O-bound workloads (uploads, API calls to external LLMs) while keeping business logic simple and debuggable:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Quart (async Flask): Handles concurrent requests without thread-per-request overhead</li>
+                <li>Peewee (sync ORM): Simple query API, fewer abstractions to debug, connection pool (10-20) absorbs DB contention</li>
+                <li>Task Queue (Redis): Document processing returns immediately; progress updates via WebSocket</li>
+                <li>Avoids async ORM complexity: Async drivers (asyncpg, motor) add significant operational burden</li>
+            </ul>
+            
+            <h3>Multi-Tenancy Enforcement</h3>
+            <p>Every domain object carries a <code>tenant_id</code>. Auth layer loads the user's default tenant and passes it through the entire request lifecycle:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Queries are filtered at ORM level, not application tier</li>
+                <li>Missing <code>tenant_id</code> check = security vulnerability</li>
+                <li>Services are responsible for enforcing tenant isolation (critical responsibility)</li>
+            </ul>
+            
+            <h3>Service Layer: More Than CRUD</h3>
+            <p>Domain services do not merely wrap database operations. They coordinate state transitions, manage soft deletes, queue tasks, and handle cross-table mutations atomically. Bypassing a service = bypassing multi-tenancy isolation.</p>
+        </section>
+        
+        <section id="submodules">
+            <h2>Sub-Modules</h2>
+            <div class="card-grid">
+                <a href="/wiki/ragflow/docs/api_doc/apps/" class="card">
+                    <h3>apps/</h3>
+                    <p>Blueprint routing, REST endpoints, request handlers, and auth middleware. Entry point for all HTTP requests and WebSocket connections.</p>
+                </a>
+                <a href="/wiki/ragflow/docs/api_doc/db/" class="card">
+                    <h3>db/</h3>
+                    <p>Peewee ORM models (15+ tables), schema definitions, and the 15+ domain services that coordinate state mutations.</p>
+                </a>
+                <a href="/wiki/ragflow/docs/api_doc/services/" class="card">
+                    <h3>services/</h3>
+                    <p>Detailed analysis of all 15+ domain services: DocumentService, DialogService, TaskService, KnowledgebaseService, and others.</p>
+                </a>
+                <a href="/wiki/ragflow/docs/api_doc/joint_services/" class="card">
+                    <h3>joint_services/</h3>
+                    <p>Cross-domain services coordinating operations across multiple entities (UserAccount, Memory+Message, Tenant+Model).</p>
+                </a>
+                <a href="/wiki/ragflow/docs/api_doc/common/" class="card">
+                    <h3>common/</h3>
+                    <p>Shared utilities: custom exceptions, auth decorators, utility functions, and error handling patterns.</p>
+                </a>
+                <a href="/wiki/ragflow/docs/api_doc/utils/" class="card">
+                    <h3>utils/</h3>
+                    <p>Miscellaneous helpers for file operations, serialization, logging, and module-level utilities.</p>
+                </a>
+            </div>
+        </section>
+        
+        <section id="walkthrough">
+            <h2>Document Upload Lifecycle (Narrated Walkthrough)</h2>
+            <p>Trace a PDF upload from HTTP request through task execution and progress reporting:</p>
+            
+            <ol class="walkthrough-steps">
+                <li>
+                    <strong>HTTP POST /api/documents/upload</strong> — Client sends multipart form with PDF file, document name, and knowledge base ID. Request lands in <code>apps/document_api.py</code> handler.
+                </li>
+                <li>
+                    <strong>Auth Middleware Validates JWT</strong> — Token decoded in <code>common/auth.py</code>. User's default tenant extracted; tenant ID passed through request context.
+                </li>
+                <li>
+                    <strong>Handler Calls DocumentService.create()</strong> — Business logic layer receives request. Validates: tenant isolation, knowledge base ownership, file format, size limits.
+                </li>
+                <li>
+                    <strong>File Saved to Storage</strong> — PDF persisted to disk or cloud storage. File path stored in Document row.
+                </li>
+                <li>
+                    <strong>Document Row Inserted</strong> — Peewee ORM inserts row into <code>documents</code> table. Tenant ID enforced at ORM level.
+                </li>
+                <li>
+                    <strong>TaskService.queue()</strong> — DocumentService delegates heavy lifting to TaskService. Creates Task row with status=<code>pending</code>.
+                </li>
+                <li>
+                    <strong>Redis Queue Entry Created</strong> — Task ID pushed to Redis list. Background executor polls this queue.
+                </li>
+                <li>
+                    <strong>Handler Returns 202 Accepted</strong> — HTTP response sent immediately. Document created, processing queued.
+                </li>
+                <li>
+                    <strong>Background Executor Polls Redis</strong> — Separate process (not blocking HTTP handler) dequeues task ID.
+                </li>
+                <li>
+                    <strong>Parsing & Chunking</strong> — ParsingService extracts text. ChunkService breaks PDF into semantic chunks. Embeddings generated (external LLM call).
+                </li>
+                <li>
+                    <strong>Progress Updated in Redis</strong> — Executor pushes progress events: <code>{ "task_id": "...", "progress": 45 }</code> to Redis.
+                </li>
+                <li>
+                    <strong>WebSocket Handler Fetches Status</strong> — Browser WebSocket listener polls <code>/api/tasks/{task_id}/status</code> or listens to server push.
+                </li>
+                <li>
+                    <strong>Client Receives Progress</strong> — UI updates progress bar in real-time without blocking HTTP.
+                </li>
+                <li>
+                    <strong>Task Completion</strong> — Executor marks task status=<code>completed</code>. Document now searchable.
+                </li>
+            </ol>
+        </section>
+        
+        <section id="auth-flow">
+            <h2>Authentication & Multi-Tenancy</h2>
+            
+            <h3>JWT Token Flow</h3>
+            <p>All requests require a valid JWT token issued by the identity provider:</p>
+            <pre><code>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code></pre>
+            
+            <p>Auth middleware in <code>common/auth.py</code> decodes the token and extracts:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li><code>user_id</code> — Unique user identifier</li>
+                <li><code>tenant_id</code> — Default tenant for this user</li>
+                <li><code>permissions</code> — Role-based access control (admin, editor, viewer)</li>
+            </ul>
+            
+            <h3>Tenant Isolation</h3>
+            <p>Multi-tenancy is enforced at three levels:</p>
+            <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li><strong>Auth Layer:</strong> User's tenant ID loaded from token</li>
+                <li><strong>ORM Layer:</strong> All queries filtered by <code>WHERE tenant_id = ?</code></li>
+                <li><strong>Service Layer:</strong> Services validate tenant ownership before state mutations</li>
+            </ol>
+            
+            <h3>Password Hashing</h3>
+            <p>Passwords (if used for local auth) are hashed with bcrypt in <code>apps/auth/password.py</code>:</p>
+            <pre><code>import bcrypt
+hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+bcrypt.checkpw(password.encode(), hashed)  # verify</code></pre>
+        </section>
+        
+        <section id="key-decisions">
+            <h2>Architectural Decisions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Decision</th>
+                        <th>Alternative</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Async Web Server (Quart)</td>
+                        <td>Synchronous Flask</td>
+                        <td>Handle 100+ concurrent uploads without thread-per-request overhead. Optimal for I/O-bound workloads.</td>
+                    </tr>
+                    <tr>
+                        <td>Synchronous Peewee ORM</td>
+                        <td>Async ORM (asyncpg, motor)</td>
+                        <td>Simpler to debug, fewer abstractions. Connection pool absorbs DB contention. Avoids async driver complexity.</td>
+                    </tr>
+                    <tr>
+                        <td>Service Layer Pattern</td>
+                        <td>Direct ORM queries in handlers</td>
+                        <td>Isolate business logic, coordinate state transitions atomically, enforce multi-tenancy consistently.</td>
+                    </tr>
+                    <tr>
+                        <td>Implicit Task Queue (Redis)</td>
+                        <td>Celery / RabbitMQ</td>
+                        <td>Simpler operations (no external broker), Redis widely deployed. Tradeoff: manual retry/dead-letter handling.</td>
+                    </tr>
+                    <tr>
+                        <td>Tenant ID at Query Level</td>
+                        <td>Application-tier filtering</td>
+                        <td>Prevent data leaks from missed filters. ORM-level enforcement is harder to bypass accidentally.</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Peewee Fields (JSONField, ListField)</td>
+                        <td>JSON columns (native DB types)</td>
+                        <td>Portability across MySQL/PostgreSQL. Custom serialization logic stays in Python, not SQL.</td>
+                    </tr>
+                    <tr>
+                        <td>Deadlock Retry Pattern</td>
+                        <td>Fail on first deadlock</td>
+                        <td>MySQL InnoDB deadlocks under high concurrency. Exponential backoff retry improves reliability without re-architecting transactions.</td>
+                    </tr>
+                    <tr>
+                        <td>WebSocket for Real-Time Progress</td>
+                        <td>Polling / Server-Sent Events</td>
+                        <td>Bidirectional communication. Lower latency than polling. More efficient than HTTP long-polling.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section id="directory-map">
+            <h2>Directory Structure</h2>
+            <pre><code>api/
+├── apps/                       # Blueprint routing and REST handlers
+│   ├── __init__.py            # Blueprint registration
+│   ├── auth/                  # JWT decode, password hashing
+│   ├── document_api.py        # /api/documents/* endpoints
+│   ├── dialog_api.py          # /api/dialogs/* endpoints
+│   ├── task_api.py            # /api/tasks/* endpoints (status polling)
+│   └── websocket/             # WebSocket handlers for real-time updates
+├── db/
+│   ├── db_models.py           # Peewee ORM models (15+ tables)
+│   ├── services/              # 15+ domain services
+│   │   ├── document_service.py
+│   │   ├── dialog_service.py
+│   │   ├── task_service.py
+│   │   ├── llm_service.py
+│   │   └── ...
+│   └── joint_services/        # Cross-domain services
+│       ├── user_account_service.py
+│       ├── memory_message_service.py
+│       └── tenant_model_service.py
+├── common/
+│   ├── auth.py               # Auth decorators, JWT decode
+│   ├── exceptions.py         # Custom exception classes
+│   └── utils.py              # Shared utility functions
+└── utils/
+    ├── file_ops.py           # File I/O helpers
+    ├── serialization.py      # JSON/pickle serialization
+    └── logging.py            # Custom logging setup</code></pre>
+        </section>
+    </main>
+    
+    <footer>
+        <p>RAGFlow API Module Documentation | Generated 2025-05-06 | <a href="/wiki/ragflow/" style="color: var(--link);">Back to RAGFlow Hub</a></p>
+    </footer>
+    
+    <button class="back-to-top" id="backToTop" aria-label="Back to top"></button>
+    
+    <script>
+        const themeKey = 'neutra-ip-theme';
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        // Initialize theme
+        const currentTheme = localStorage.getItem(themeKey) || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle
+        themeToggle.addEventListener('click', toggleTheme);
+        themeToggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+        
+        function toggleTheme() {
+            const current = localStorage.getItem(themeKey) || 'light';
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem(themeKey, newTheme);
+            updateThemeIcon(newTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+        
+        // Back to top button
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Mermaid setup
+        function renderMermaidDiagrams(theme) {
+            if (typeof mermaid === 'undefined') return;
+            
+            mermaid.initialize({ 
+                startOnLoad: false,
+                theme: theme === 'dark' ? 'dark' : 'default',
+                securityLevel: 'loose'
+            });
+            
+            document.querySelectorAll('.mermaid').forEach(diagram => {
+                try {
+                    mermaid.contentLoaderAsync.render('mermaid-' + Math.random(), 
+                        diagram.textContent, 
+                        (html) => {
+                            diagram.innerHTML = html;
+                        }, 
+                        diagram
+                    );
+                } catch (e) {
+                    console.error('Mermaid render error:', e);
+                }
+            });
+        }
+        
+        // Render diagrams on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => renderMermaidDiagrams(currentTheme));
+        } else {
+            renderMermaidDiagrams(currentTheme);
+        }
+        
+        // Re-render on theme change
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'data-theme') {
+                    const newTheme = html.getAttribute('data-theme');
+                    renderMermaidDiagrams(newTheme);
+                }
+            });
+        });
+        
+        observer.observe(html, { attributes: true });
+        
+        // Add copy buttons to code blocks
+        document.querySelectorAll('pre').forEach((pre) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

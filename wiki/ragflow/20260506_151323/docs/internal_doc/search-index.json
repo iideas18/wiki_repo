@@ -1,0 +1,206 @@
+[
+  {
+    "title": "RAGFlow Internal Module",
+    "url": "index.html",
+    "text": "High-Performance Go Backend C++ Tokenizer parallel service layer Gin GORM cgo bindings search chat embeddings goroutines",
+    "section": "overview"
+  },
+  {
+    "title": "Handler Layer",
+    "url": "handler/index.html",
+    "text": "HTTP request processing validation authorization response formatting handlers thin thin business logic",
+    "section": "h2"
+  },
+  {
+    "title": "Service Layer",
+    "url": "service/index.html",
+    "text": "Business logic orchestration DAO caching transactions dependency injection",
+    "section": "h2"
+  },
+  {
+    "title": "DAO Layer",
+    "url": "dao/index.html",
+    "text": "Data Access Objects GORM PostgreSQL models queries schema migrations",
+    "section": "h2"
+  },
+  {
+    "title": "C++ Text Analysis",
+    "url": "cpp/index.html",
+    "text": "Tokenization lemmatization OpenCC RE2 UTF-8 DARTS double-array trie cgo FFI",
+    "section": "h2"
+  },
+  {
+    "title": "DARTS Algorithm",
+    "url": "cpp/dart-double-array-trie/index.html",
+    "text": "Double-Array Trie Strings dictionary lookup O(n) memory efficient cache locality",
+    "section": "h1"
+  },
+  {
+    "title": "Request Lifecycle",
+    "url": "handler/request-lifecycle/index.html",
+    "text": "Search query trace end-to-end timing latency breakdown embedding vector database",
+    "section": "h1"
+  },
+  {
+    "title": "Router",
+    "url": "index.html#module-organization",
+    "text": "Gin route registration middleware setup CORS auth logging",
+    "section": "module"
+  },
+  {
+    "title": "Server",
+    "url": "index.html#module-organization",
+    "text": "Application startup config loading graceful shutdown",
+    "section": "module"
+  },
+  {
+    "title": "Entity",
+    "url": "index.html#module-organization",
+    "text": "Domain models File Pipeline Connector API contracts",
+    "section": "module"
+  },
+  {
+    "title": "Engine",
+    "url": "index.html#module-organization",
+    "text": "Document processing pipeline PDF extraction text chunking",
+    "section": "module"
+  },
+  {
+    "title": "Storage",
+    "url": "index.html#module-organization",
+    "text": "File I/O abstraction S3 MinIO local filesystem upload download",
+    "section": "module"
+  },
+  {
+    "title": "Cache",
+    "url": "index.html#module-organization",
+    "text": "LRU in-memory caching embeddings frequent queries eviction",
+    "section": "module"
+  },
+  {
+    "title": "Tokenizer",
+    "url": "index.html#module-organization",
+    "text": "Go wrapper C++ analyzer batching support tokens",
+    "section": "module"
+  },
+  {
+    "title": "Binding",
+    "url": "index.html#module-organization",
+    "text": "cgo FFI definitions C function declarations",
+    "section": "module"
+  },
+  {
+    "title": "Common",
+    "url": "index.html#module-organization",
+    "text": "Shared constants utilities logging DB pooling",
+    "section": "module"
+  },
+  {
+    "title": "Utility",
+    "url": "index.html#module-organization",
+    "text": "Helper functions UUID tokens paths version",
+    "section": "module"
+  },
+  {
+    "title": "Chat Handler",
+    "url": "handler/index.html#handler-types",
+    "text": "Conversational AI streaming responses context window token accounting",
+    "section": "handler"
+  },
+  {
+    "title": "Search Handler",
+    "url": "handler/index.html#handler-types",
+    "text": "Full-text semantic search ranking pagination snippets",
+    "section": "handler"
+  },
+  {
+    "title": "Knowledge Base CRUD",
+    "url": "handler/index.html#handler-types",
+    "text": "KB creation deletion document indexing management",
+    "section": "handler"
+  },
+  {
+    "title": "Dependency Injection",
+    "url": "service/index.html#dependency-injection-pattern",
+    "text": "Constructor parameters interfaces mocking testing",
+    "section": "pattern"
+  },
+  {
+    "title": "Transaction Management",
+    "url": "service/index.html#transaction-management",
+    "text": "ACID multi-step operations rollback error handling",
+    "section": "pattern"
+  },
+  {
+    "title": "Embedding Cache",
+    "url": "service/index.html#caching-strategy",
+    "text": "LRU vector cache API call reduction hits misses",
+    "section": "pattern"
+  },
+  {
+    "title": "GORM Models",
+    "url": "dao/index.html#core-models",
+    "text": "Knowledgebase Document Chunk Chat Message structs",
+    "section": "model"
+  },
+  {
+    "title": "Vector Search",
+    "url": "dao/index.html#chunk-queries-vector-search",
+    "text": "pgvector similarity search distance calculation topK",
+    "section": "query"
+  },
+  {
+    "title": "Indexes Performance",
+    "url": "dao/index.html#indexes-for-performance",
+    "text": "tenant_id kb_id pgvector fast filtering lookup",
+    "section": "index"
+  },
+  {
+    "title": "cgo Integration",
+    "url": "cpp/index.html#cgo-integration",
+    "text": "C API binding Go FFI marshaling memory ownership",
+    "section": "integration"
+  },
+  {
+    "title": "Tokenization Pipeline",
+    "url": "cpp/index.html#tokenization-pipeline",
+    "text": "Unicode normalization DARTS lookup POS tagging lemmatization",
+    "section": "pipeline"
+  },
+  {
+    "title": "Error Handling",
+    "url": "handler/index.html#error-handling",
+    "text": "HTTP status codes 400 401 403 404 429 500",
+    "section": "pattern"
+  },
+  {
+    "title": "Authorization Patterns",
+    "url": "handler/index.html#submodules",
+    "text": "JWT tenant isolation role-based access control RBAC",
+    "section": "pattern"
+  },
+  {
+    "title": "DARTS vs HashMap",
+    "url": "cpp/dart-double-array-trie/index.html#comparison-darts-vs-hashmap-vs-b-tree",
+    "text": "Lookup time memory cache locality comparison",
+    "section": "comparison"
+  },
+  {
+    "title": "Base Check Array",
+    "url": "cpp/dart-double-array-trie/index.html#baseheck-array-semantics",
+    "text": "DARTS construction state transitions validation",
+    "section": "algorithm"
+  },
+  {
+    "title": "Latency Breakdown",
+    "url": "handler/request-lifecycle/index.html#latency-breakdown",
+    "text": "Network TLS handler validation search database transmission timing",
+    "section": "timing"
+  },
+  {
+    "title": "Network Performance",
+    "url": "handler/request-lifecycle/index.html#phase-6-network-transmission-55-150ms",
+    "text": "TLS encryption TCP transmission RTT latency",
+    "section": "network"
+  }
+]
