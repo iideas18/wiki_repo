@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="https://github.com/infiniflow/ragflow">
+<meta name="wiki-source-rev" content="e8f19aa33">
+<title>RAGFlow — 6-Module Architecture Documentation</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.8rem;margin:1rem 0;border-bottom:3px solid var(--accent);padding-bottom:1rem}
+h2{color:var(--accent);font-size:1.8rem;margin:2.5rem 0 1.2rem;border-bottom:1px solid var(--border);padding-bottom:.5rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.5rem 0 .8rem}
+p{margin:.8rem 0;max-width:70ch;line-height:1.8}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:1rem}
+.breadcrumb a{color:var(--accent)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:2px solid var(--accent);border-radius:14px;padding:3rem;margin:2rem 0 3rem;text-align:center}
+.hero h2{border:none;color:var(--heading);margin:0 0 1rem}
+.hero p{color:var(--text-muted);font-size:1.15rem;margin:0.5rem 0}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin:2rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.8rem;transition:all 0.3s ease;position:relative;overflow:hidden}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transform-origin:left;transition:transform 0.3s ease}
+.module-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(88,166,255,0.15)}
+.module-card:hover::before{transform:scaleX(1)}
+.module-card h3{margin-top:0;color:var(--accent)}
+.module-card .stats{display:flex;gap:1rem;margin:1.2rem 0;font-size:.85rem}
+.module-card .stat{background:var(--bg);padding:.6rem 1rem;border-radius:6px;flex:1;text-align:center;color:var(--text-muted)}
+.module-card .stat strong{color:var(--accent2);display:block;font-size:1.3rem;margin-bottom:.2rem}
+.module-card .desc{color:var(--text-muted);font-size:.95rem;margin:.8rem 0}
+.module-card a.link{display:inline-block;margin-top:1rem;padding:.6rem 1.2rem;background:var(--accent);color:#000;border-radius:6px;font-weight:600;transition:background 0.2s}
+.module-card a.link:hover{background:var(--accent2);text-decoration:none}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin:2rem 0;columns:2}
+.toc li{margin-bottom:.8rem;break-inside:avoid}
+.toc a{color:var(--accent)}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:12px;margin-right:6px;margin-bottom:.4rem}
+.badge.blue{background:var(--accent);color:#000}
+.badge.green{background:var(--accent2);color:#000}
+.badge.yellow{background:var(--accent3);color:#000}
+.content-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin:2rem 0}
+.content-section h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:12px 14px;border:1px solid var(--border);font-weight:600}
+td{padding:12px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:rgba(88,166,255,0.05)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:4rem;padding-top:2rem;border-top:2px solid var(--border)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000}
+.skip-link:focus{top:0}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--text);font-size:1.2rem}
+.back-to-top.visible{display:flex}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9e6a03;--heading:#000}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">☉</button>
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<main id="main">
+<h1>RAGFlow Module Documentation Hub</h1>
+<div class="hero">
+  <h2>Complete Architecture Reference for 6 Core Modules</h2>
+  <p>Self-hosted wiki generated from RAGFlow source code on 2026-05-06</p>
+  <p>Updated from commit <code>e8f19aa33</code></p>
+</div>
+
+<p style="font-size:1.05rem;max-width:none;">RAGFlow is organized into six core modules, each handling a specific architectural concern. This documentation provides deep-dive explanations of design decisions, data flows, failure modes, and performance characteristics.</p>
+
+<div class="toc" id="toc">
+<h3 style="margin-top:0;">Module Overview</h3>
+<ol id="toc-list"></ol>
+</div>
+
+<h2>Modules at a Glance</h2>
+
+<div class="modules-grid">
+  <!-- Common Module -->
+  <div class="module-card">
+    <h3>📦 Common</h3>
+    <p class="desc">Cross-cutting Python utilities & infrastructure (91 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>91</strong> Files</div>
+      <div class="stat"><strong>8</strong> Sub-modules</div>
+    </div>
+    <p>Provides crypto, HTTP, token counting, data adapters, and settings across all modules. Eliminates duplication by centralizing utilities.</p>
+    <div>
+      <span class="badge blue">Infrastructure</span>
+      <span class="badge green">Foundation</span>
+    </div>
+    <a href="common/" class="link">→ Read Full Documentation</a>
+  </div>
+
+  <!-- MCP Module -->
+  <div class="module-card">
+    <h3>🤖 MCP</h3>
+    <p class="desc">Model Context Protocol server (3 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>3</strong> Files</div>
+      <div class="stat"><strong>2</strong> Tools</div>
+    </div>
+    <p>Exposes knowledge base and chat as native Claude tools via the MCP standard. Enables Claude to access RAGFlow as a first-class resource.</p>
+    <div>
+      <span class="badge blue">Integration</span>
+      <span class="badge yellow">LLM</span>
+    </div>
+    <a href="mcp/" class="link">→ Read Full Documentation</a>
+  </div>
+
+  <!-- SDK Module -->
+  <div class="module-card">
+    <h3>📚 SDK</h3>
+    <p class="desc">Python REST client library (19 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>19</strong> Files</div>
+      <div class="stat"><strong>4</strong> Submodules</div>
+    </div>
+    <p>High-level Python bindings for RAGFlow's REST API. Provides idiomatic KB, chat, and document operations without boilerplate.</p>
+    <div>
+      <span class="badge blue">Client Library</span>
+      <span class="badge green">Developer-Friendly</span>
+    </div>
+    <a href="sdk/" class="link">→ Read Full Documentation</a>
+  </div>
+
+  <!-- Memory Module -->
+  <div class="module-card">
+    <h3>🧠 Memory</h3>
+    <p class="desc">Long-term chat history subsystem (12 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>12</strong> Files</div>
+      <div class="stat"><strong>2</strong> Adapters</div>
+    </div>
+    <p>Stores and retrieves chat history with embeddings and summarization. Supports Postgres and Redis backends via pluggable adapters.</p>
+    <div>
+      <span class="badge blue">Storage</span>
+      <span class="badge green">Scalable</span>
+    </div>
+    <a href="memory/" class="link">→ Read Full Documentation</a>
+  </div>
+
+  <!-- Tools Module -->
+  <div class="module-card">
+    <h3>🔧 Tools</h3>
+    <p class="desc">DevOps & data integration scripts (24 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>24</strong> Files</div>
+      <div class="stat"><strong>4</strong> Integrations</div>
+    </div>
+    <p>Specialized integrations: WeChat chatbot, ES-to-OceanBase migration, Firecrawl scraper, deployment utilities. Optional ecosystem.</p>
+    <div>
+      <span class="badge blue">Ecosystem</span>
+      <span class="badge green">Extensions</span>
+    </div>
+    <a href="tools/" class="link">→ Read Full Documentation</a>
+  </div>
+
+  <!-- Admin Module -->
+  <div class="module-card">
+    <h3>⚙️ Admin</h3>
+    <p class="desc">Administration & management tools (14 files)</p>
+    <div class="stats">
+      <div class="stat"><strong>14</strong> Files</div>
+      <div class="stat"><strong>2</strong> Layers</div>
+    </div>
+    <p>User/workspace management, RBAC, audit logging, system configuration. Safe operator interface avoiding direct DB access.</p>
+    <div>
+      <span class="badge blue">Operations</span>
+      <span class="badge green">Security</span>
+    </div>
+    <a href="admin/" class="link">→ Read Full Documentation</a>
+  </div>
+</div>
+
+<h2>Architecture Overview</h2>
+
+<div class="content-section">
+<h3>Module Dependencies</h3>
+<p>The modules follow a layered architecture:</p>
+<table>
+  <tr><th>Layer</th><th>Modules</th><th>Purpose</th><th>Dependencies</th></tr>
+  <tr><td><strong>Infrastructure</strong></td><td>common</td><td>Shared utilities, crypto, HTTP, config</td><td>None (foundation)</td></tr>
+  <tr><td><strong>Core APIs</strong></td><td>sdk, mcp</td><td>Client libraries and protocol bridges</td><td>Depends on common</td></tr>
+  <tr><td><strong>Features</strong></td><td>memory, tools</td><td>Optional features and integrations</td><td>Depend on common and core</td></tr>
+  <tr><td><strong>Operations</strong></td><td>admin</td><td>Management and control plane</td><td>Depends on all layers</td></tr>
+</table>
+</div>
+
+<div class="content-section">
+<h3>Key Characteristics</h3>
+<ul>
+<li><strong>Total Scope</strong>: 163 Python files across 6 modules</li>
+<li><strong>Primary Language</strong>: Python 3.8+</li>
+<li><strong>Documentation</strong>: Each module has 350+ lines of detailed HTML documentation</li>
+<li><strong>Diagrams</strong>: 12 Mermaid diagrams showing architecture and data flows</li>
+<li><strong>Design Tables</strong>: 24+ decision/failure mode tables</li>
+<li><strong>Research Files</strong>: 6 deep-dive markdown files in _research/ directory</li>
+</ul>
+</div>
+
+<h2>Documentation Structure</h2>
+
+<div class="content-section">
+<h3>Each Module Page Includes</h3>
+<table>
+  <tr><th>Section</th><th>Content</th><th>Purpose</th></tr>
+  <tr><td><strong>Why This Module Exists</strong></td><td>150+ word narrative + analogy</td><td>Context for the module's role</td></tr>
+  <tr><td><strong>Architecture Diagram</strong></td><td>Mermaid flowchart showing components</td><td>Visual overview of structure</td></tr>
+  <tr><td><strong>Data Flow Diagram</strong></td><td>Mermaid sequence/flow showing operations</td><td>Understand how data moves through module</td></tr>
+  <tr><td><strong>Design Decisions Table</strong></td><td>5+ decision rows with rationale</td><td>Understand the "why" behind choices</td></tr>
+  <tr><td><strong>Algorithm Spotlight</strong></td><td>Key algorithms and implementation notes</td><td>Deep technical understanding</td></tr>
+  <tr><td><strong>Failure Handling Table</strong></td><td>4+ failure modes with recovery strategies</td><td>Know what can go wrong and how to fix it</td></tr>
+  <tr><td><strong>Performance Metrics</strong></td><td>Throughput, latency, scalability notes</td><td>Understand production characteristics</td></tr>
+  <tr><td><strong>Walkthroughs</strong></td><td>Step-by-step flow of typical operations</td><td>Learn by example</td></tr>
+</table>
+</div>
+
+<h2>How to Use This Documentation</h2>
+
+<div class="content-section">
+<h3>For New Team Members</h3>
+<ol>
+<li>Start with this hub page to understand the overall architecture</li>
+<li>Read "Why This Module Exists" on each module page</li>
+<li>Study the architecture and data flow diagrams</li>
+<li>Review design decisions to understand the rationale</li>
+<li>Examine the source code with documentation as reference</li>
+</ol>
+</div>
+
+<div class="content-section">
+<h3>For Feature Development</h3>
+<ol>
+<li>Identify which module(s) your feature affects</li>
+<li>Read the relevant module's design decisions and architecture</li>
+<li>Understand failure modes and edge cases</li>
+<li>Check integration points with other modules</li>
+<li>Design your feature to follow established patterns</li>
+</ol>
+</div>
+
+<div class="content-section">
+<h3>For Troubleshooting</h3>
+<ol>
+<li>Find the relevant module documentation</li>
+<li>Check the failure handling table for your symptom</li>
+<li>Review the walkthrough to understand normal flow</li>
+<li>Look at performance notes for common bottlenecks</li>
+<li>Consult integration points if cross-module issue</li>
+</ol>
+</div>
+
+<h2>Research & Design Documents</h2>
+
+<p>Detailed research markdown files are available in the <code>_research/</code> directory, providing deep-dive analysis including:</p>
+<ul>
+<li><strong>Existence Rationale</strong> — Why the module is necessary and what problems it solves</li>
+<li><strong>Real-World Analogies</strong> — Comparisons to familiar systems for intuitive understanding</li>
+<li><strong>Design Decisions</strong> — Key architectural choices and their trade-offs</li>
+<li><strong>Algorithm Spotlights</strong> — Core algorithms and their implementation</li>
+<li><strong>Failure Modes</strong> — What can go wrong and recovery strategies</li>
+<li><strong>Performance Notes</strong> — Throughput, latency, scaling characteristics</li>
+<li><strong>Key Files</strong> — Important source files and their purposes</li>
+</ul>
+
+<h2>Quick Links</h2>
+
+<div class="content-section">
+<p>Jump directly to a module's documentation:</p>
+<ul>
+  <li><a href="common/">📦 Common Module</a> — Utilities, crypto, HTTP, config</li>
+  <li><a href="mcp/">🤖 MCP Module</a> — Claude integration via Model Context Protocol</li>
+  <li><a href="sdk/">📚 SDK Module</a> — Python client library</li>
+  <li><a href="memory/">🧠 Memory Module</a> — Chat history and embeddings</li>
+  <li><a href="tools/">🔧 Tools Module</a> — Integrations and utilities</li>
+  <li><a href="admin/">⚙️ Admin Module</a> — User management and operations</li>
+</ul>
+</div>
+
+<h2>About This Documentation</h2>
+
+<div class="content-section">
+<p><strong>Generated:</strong> 2026-05-06</p>
+<p><strong>Source Commit:</strong> <code>e8f19aa33</code></p>
+<p><strong>RAGFlow Repository:</strong> <a href="https://github.com/infiniflow/ragflow">github.com/infiniflow/ragflow</a></p>
+<p><strong>Documentation Format:</strong> Self-contained HTML with dark/light theme support, full-text search, and Mermaid diagrams</p>
+<p><strong>Accessibility:</strong> WCAG 2.1 AA compliance with skip links, semantic HTML, and keyboard navigation support</p>
+</div>
+
+<div class="footer">
+  <p><strong>RAGFlow 6-Module Architecture Documentation</strong></p>
+  <p>Generated from source code analysis — Dark/light theme toggle available in top-right corner</p>
+  <p style="color:var(--text-muted);font-size:0.75rem;margin-top:1rem;">This documentation is maintained alongside source code and evolves with each release.</p>
+</div>
+</main>
+
+<script>
+// Theme toggle
+var theme = localStorage.getItem('neutra-ip-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('themeToggle').addEventListener('click', function() {
+  var isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  var newTheme = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('neutra-ip-theme', newTheme);
+});
+
+// Back to top button
+window.addEventListener('scroll', function() {
+  document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 300);
+});
+document.getElementById('backToTop').addEventListener('click', function() {
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+
+// TOC generation
+var tocList = document.getElementById('toc-list');
+if (tocList) {
+  var modules = ['common', 'mcp', 'sdk', 'memory', 'tools', 'admin'];
+  var icons = ['📦', '🤖', '📚', '🧠', '🔧', '⚙️'];
+  modules.forEach(function(m, i) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = m + '/';
+    a.textContent = icons[i] + ' ' + m.charAt(0).toUpperCase() + m.slice(1);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+}
+</script>
+</body>
+</html>
