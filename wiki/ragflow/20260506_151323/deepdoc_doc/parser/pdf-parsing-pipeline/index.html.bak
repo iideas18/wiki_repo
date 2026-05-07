@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2025-05-06T15:30:00Z">
+<meta name="wiki-source" content="/mnt/disk1/zy/LLM/rag/ragflow/deepdoc/parser/pdf_parser.py">
+<meta name="wiki-source-rev" content="deepdoc-research">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>PDF Parsing Pipeline - Deepdoc Wiki</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #333333;
+  --accent: #0066cc;
+  --accent-light: #e6f0ff;
+  --code-bg: #f8f8f8;
+}
+html[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --surface: #2d2d2d;
+  --border: #444444;
+  --text: #e0e0e0;
+  --accent: #4da6ff;
+  --accent-light: #1a3a52;
+  --code-bg: #2d2d2d;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 16px;
+}
+header {
+  background: linear-gradient(135deg, var(--accent) 0%, rgba(0, 102, 204, 0.9) 100%);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+}
+header h1 { font-size: 2.5em; margin-bottom: 10px; }
+header p { font-size: 1.2em; opacity: 0.95; }
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+nav a {
+  display: inline-block;
+  padding: 8px 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+nav a:hover { color: var(--accent); }
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 300px);
+}
+section { margin-bottom: 50px; }
+h2 {
+  font-size: 1.8em;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 10px;
+}
+h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: var(--text); }
+p { margin-bottom: 15px; text-align: justify; }
+ul { margin-left: 20px; margin-bottom: 15px; }
+li { margin-bottom: 8px; }
+code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "Monaco", "Courier New", monospace;
+  font-size: 0.95em;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 15px;
+  overflow-x: auto;
+  margin: 15px 0;
+  position: relative;
+}
+pre code { background: none; padding: 0; }
+.copy-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85em;
+}
+.copy-button:hover { opacity: 0.9; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  border: 1px solid var(--border);
+}
+th {
+  background: var(--accent-light);
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+td { padding: 12px; border: 1px solid var(--border); }
+tr:nth-child(even) { background: var(--surface); }
+.intro-box {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+}
+.summary-card h4 { color: var(--accent); margin-bottom: 10px; }
+.diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px 0;
+  overflow-x: auto;
+  min-height: 300px;
+}
+.mermaid { display: flex; justify-content: center; background: var(--bg); }
+.mermaid svg { cursor: pointer; }
+#themeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 200;
+}
+#backToTop {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+  z-index: 200;
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: white;
+  padding: 8px;
+  z-index: 100;
+}
+.skip-link:focus { top: 0; }
+.diagram-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 300;
+  justify-content: center;
+  align-items: center;
+}
+.diagram-overlay.show { display: flex; }
+.diagram-overlay-content {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+}
+.diagram-overlay-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+@media print {
+  #themeToggle, #backToTop, .copy-button { display: none !important; }
+  main { padding: 20px 0; }
+  section { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<button id="themeToggle" aria-label="Toggle light/dark theme">🌙 Dark</button>
+<nav>
+  <a title="Why deepdoc?" href="../../index.html">← Back to Deepdoc</a>
+  <span style="margin: 0 10px">›</span>
+  <a title="Parser Module — deepdoc" href="../index.html">Parser</a>
+  <span style="margin: 0 10px">›</span>
+  <span>PDF Parsing Pipeline</span>
+</nav>
+<header>
+  <h1>PDF Parsing Pipeline</h1>
+  <p>Multi-Engine Strategy for Robust Document Text Extraction</p>
+</header>
+
+<main id="main">
+
+<section>
+<h2>Overview</h2>
+<p>The PDF parsing pipeline is the critical first stage of deepdoc's document understanding system. PDFs present a unique challenge: unlike structured formats (JSON, XML), PDFs are visual containers that may contain text metadata, embedded fonts, OCR'd scanned content, or a mix of all three. The pipeline solves this by implementing a fallback chain of extraction engines, each optimized for different PDF characteristics and failure modes. This design pattern trades slightly increased latency for dramatically improved reliability across the wild diversity of real-world PDF documents encountered in production systems.</p>
+
+<div class="intro-box">
+<strong>What is this:</strong> The PDF parsing pipeline is a sophisticated multi-engine text extraction framework that intelligently attempts extraction from the most efficient to most robust methods. It trades speed for accuracy and handles corrupted, scanned, and mixed-format PDFs that single-engine approaches would fail on entirely. The pipeline represents a pragmatic solution to the fundamental tension between PDF specifications and implementation reality.</div>
+
+<div class="summary-grid">
+<div class="summary-card">
+<h4>Primary Role</h4>
+<p>Extract text from diverse PDF formats while handling edge cases (scans, corruption, embedded fonts, obfuscated encodings)</p>
+</div>
+<div class="summary-card">
+<h4>Key Input</h4>
+<p>Raw PDF file bytes with unknown format characteristics, page count, layout complexity, and encoding</p>
+</div>
+<div class="summary-card">
+<h4>Critical Decision</h4>
+<p>Which extraction engine(s) to use; when to fall back; when to invoke OCR; how to merge results</p>
+</div>
+<div class="summary-card">
+<h4>Main Output</h4>
+<p>Extracted text per page with confidence metadata, bbox information, and fallback indicators for downstream processing</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Problem Statement: Why PDF Parsing Is Hard</h2>
+<p>PDF is fundamentally a rendering format, not a data format. The PDF specification (ISO 32000) defines how to display content, not how to structure or extract it. This asymmetry between rendering and extraction requirements creates several difficult parsing challenges that no single-engine solution adequately addresses.</p>
+
+<h3>The Six Core PDF Extraction Challenges</h3>
+<ul>
+<li><strong>Text Encoding Ambiguity:</strong> PDFs can embed custom character maps (ToUnicode CMaps). A byte sequence might map to different characters depending on the font's encoding table. Some PDFs contain text objects with no ToUnicode map, making character identity fundamentally ambiguous. The parser must reverse-engineer the mapping from rendered glyphs.</li>
+<li><strong>Layout Loss and Reading Order:</strong> PDF text objects are positioned as individual glyphs with absolute coordinates. Reconstructing logical text order (reading direction, line breaks, paragraph boundaries) requires spatial analysis, font metrics analysis, and heuristics about reading direction that fail on multilingual or unusual layouts.</li>
+<li><strong>Scanned Documents Without Extractable Text:</strong> Many PDFs are scanned images without embedded text metadata. Extracting content requires OCR. Single-language OCR engines struggle with multilingual content, small fonts, or poor scan quality. Some documents contain mixed scanned and digital text, requiring hybrid approaches.</li>
+<li><strong>Format Corruption and Malformation:</strong> Real-world PDFs often have malformed headers, inconsistent compression, incorrect object offsets, circular references, or incomplete cross-reference tables. Strict parsers fail entirely; permissive parsers sometimes produce garbled output. The PDF specification permits implementation-defined behavior in many edge cases.</li>
+<li><strong>Embedded Fonts and Obfuscation:</strong> PDFs can define fonts inline, use custom encodings, apply compression, or intentionally obfuscate text. Some generators (especially older ones or certain security tools) create structurally invalid PDFs that nonetheless render correctly in Adobe Reader via error recovery.</li>
+<li><strong>Mixed Content Types:</strong> Modern PDFs often blend native text, rendered form fields, embedded images with OCR metadata, and annotations. Extracting only the semantic content requires understanding the PDF operator stream at a deep level.</li>
+</ul>
+
+<p>These challenges make single-engine PDF parsing unreliable at production scale. A system processing thousands of diverse PDFs will encounter all of these failure modes. Graceful degradation—falling back to slower methods when fast extraction fails—is essential for reliability.</p>
+</section>
+
+<section>
+<h2>Approach: Multi-Engine Fallback Strategy</h2>
+<p>Rather than building a single "perfect" PDF parser (an impossible goal), the pipeline implements a fallback chain: attempt extraction with fast engines first, and fall back to slower, more robust methods if text yield is insufficient. This design maximizes both speed (fast path for clean PDFs) and coverage (recovery path for challenging PDFs), accepting higher latency in the worst case to ensure completeness in common cases.</p>
+
+<h3>Engine Characteristics and Trade-Offs</h3>
+<p>Each engine in the chain is optimized for different PDF characteristics:</p>
+
+<table>
+<tr>
+<th>Engine</th>
+<th>Speed</th>
+<th>Best For</th>
+<th>Typical Yield</th>
+<th>Constraints & Limitations</th>
+</tr>
+<tr>
+<td><strong>pdfplumber</strong></td>
+<td>Very Fast</td>
+<td>Modern, well-formed PDFs with embedded text; native digital documents</td>
+<td>95%+ on clean PDFs</td>
+<td>Fails on scans, obfuscated fonts, corrupted headers, custom encodings without ToUnicode CMaps</td>
+</tr>
+<tr>
+<td><strong>Docling</strong></td>
+<td>Medium</td>
+<td>Mixed text + layout PDFs with moderate complexity; preservation of visual structure</td>
+<td>85-90% across diverse PDFs</td>
+<td>Slower than pdfplumber; layout preservation is strength but increases computation</td>
+</tr>
+<tr>
+<td><strong>MinerU</strong></td>
+<td>Medium</td>
+<td>Complex layouts, Chinese/Asian documents, table-heavy PDFs, scientific papers</td>
+<td>80-85% on target content</td>
+<td>Requires specific model versions; specialized for Asian scripts and complex layouts</td>
+</tr>
+<tr>
+<td><strong>PaddleOCR</strong></td>
+<td>Slow</td>
+<td>Scanned documents, multilingual content, OCR-heavy cases, poor-quality scans</td>
+<td>Varies by scan quality (50-95%)</td>
+<td>GPU-accelerated strongly recommended; requires PDF-to-image rendering; inherent OCR errors</td>
+</tr>
+<tr>
+<td><strong>TCADp</strong></td>
+<td>Very Slow</td>
+<td>Technical diagrams, scientific papers with embedded figures, CAD drawings</td>
+<td>Specialized (90%+ on target)</td>
+<td>Highly specialized; not suitable for general documents; very high computational cost</td>
+</tr>
+</table>
+
+<h3>Adaptive Fallback Decision Tree</h3>
+<div class="diagram">
+<div class="mermaid" data-mermaid-startOnLoad="false">
+graph TD
+    A["PDF Input"] -->|Lightweight analysis| B{"Text Objects<br/>vs Rendered?"}
+    B -->|"75%+ text ratio"| C["Strategy: Fast<br/>Use pdfplumber"]
+    B -->|"25-75% ratio"| D["Strategy: Balanced<br/>Try pdfplumber,<br/>prepare fallback"]
+    B -->|"&lt;25% ratio"| E{"Detect Document Type"}
+    E -->|"Chinese/Tables"| F["Use MinerU<br/>Strategy"]
+    E -->|"Mixed content"| G["Use Docling<br/>Strategy"]
+    E -->|"Scanned image"| H["Use PaddleOCR<br/>Strategy"]
+    C -->|"Assess yield"| I{"Yield &gt; 80%?"}
+    D -->|"Assess yield"| I
+    I -->|"YES"| J["✓ Accept result"]
+    I -->|"NO"| K["Trigger fallback"]
+    F --> L["Extract & validate"]
+    G --> L
+    H --> L
+    K --> M["Execute next<br/>engine in chain"]
+    M --> L
+    L -->|"Confidence good?"| N{"Merge multi-<br/>engine results?"}
+    N -->|"YES"| O["Combine & weight"]
+    N -->|"NO"| J
+    O --> J
+    J --> P["Return normalized<br/>text + metadata"]
+</div>
+</section>
+
+<section>
+<h2>Mechanism: Seven-Phase Extraction Pipeline</h2>
+
+<h3>Phase 1: Lightweight PDF Structure Analysis</h3>
+<p>Before attempting full text extraction, the pipeline analyzes the PDF structure to predict engine suitability. This phase is intentionally lightweight—sampling the first few pages and PDF header, not parsing the entire document.</p>
+<pre><code class="language-python"># Simplified structure analysis (from pdf_parser.py pattern)
+def analyze_pdf_structure(pdf_bytes):
+    """Determine PDF characteristics without full parsing."""
+    # Quick checks for text vs render ratio
+    has_text_objects = detect_text_streams(pdf_bytes)
+    text_operation_count = count_text_operations(pdf_bytes)
+    estimated_glyphs = estimate_total_glyphs(pdf_bytes)
+    
+    # Calculate text ratio heuristic
+    text_ratio = text_operation_count / estimated_glyphs if estimated_glyphs > 0 else 0
+    
+    # Detect encoding anomalies (e.g., missing ToUnicode CMaps)
+    has_encoding_issues = detect_encoding_anomalies(pdf_bytes)
+    
+    # Estimate scanned content by sampling rendered size vs text size
+    suspected_scanned = text_ratio < 0.25
+    
+    return {
+        'text_ratio': text_ratio,
+        'has_text_objects': has_text_objects,
+        'encoding_issues': has_encoding_issues,
+        'suspected_scanned': suspected_scanned,
+        'recommendation': compute_engine_recommendation(text_ratio)
+    }
+</code></pre>
+<button class="copy-button" onclick="copyCode(this)">Copy</button>
+
+<h3>Phase 2: Engine Selection and Chain Construction</h3>
+<p>Based on structure analysis, select the initial engine and construct a fallback chain ordered by speed and applicability. The chain is pre-computed to avoid dynamic decisions during extraction.</p>
+<pre><code class="language-python"># Engine selection logic (core heuristic)
+def select_extraction_engines(structure_analysis, document_hints=None):
+    """Build ordered engine chain based on PDF characteristics."""
+    base_chain = []
+    
+    # Start with fastest applicable engine
+    if structure_analysis['text_ratio'] > 0.75 and not structure_analysis['encoding_issues']:
+        base_chain.append('pdfplumber')  # Pure text PDF, no encoding issues
+    else:
+        base_chain.append('pdfplumber')  # Always try fast path first
+    
+    # Add secondary engines based on document characteristics
+    if 'Chinese' in structure_analysis.get('detected_languages', []):
+        base_chain.extend(['MinerU', 'Docling'])  # MinerU for Asian scripts
+    elif structure_analysis['suspected_scanned']:
+        base_chain.extend(['Docling', 'PaddleOCR'])  # Scanned: try Docling then OCR
+    else:
+        base_chain.extend(['Docling', 'MinerU'])  # Mixed: balanced fallback
+    
+    # OCR as ultimate fallback
+    if 'PaddleOCR' not in base_chain:
+        base_chain.append('PaddleOCR')
+    
+    return base_chain
+</code></pre>
+<button class="copy-button" onclick="copyCode(this)">Copy</button>
+
+<h3>Phase 3: Primary Engine Extraction</h3>
+<p>Attempt text extraction with the first (typically fastest) engine in the chain. Wrap in error handling to detect soft failures (partial extraction, encoding errors).</p>
+<pre><code class="language-python"># Primary extraction with pdfplumber
+def extract_with_pdfplumber(pdf_path, timeout_seconds=30):
+    """Fast text extraction for well-formed PDFs."""
+    import pdfplumber
+    results = []
+    
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for page_num, page in enumerate(pdf.pages):
+                try:
+                    text = page.extract_text()
+                    bbox_info = extract_character_bboxes(page)
+                    
+                    # Detect mojibake (encoding failure) indicators
+                    confidence = 0.95 if is_valid_text(text) else 0.60
+                    
+                    results.append({
+                        'page': page_num,
+                        'text': text,
+                        'bboxes': bbox_info,
+                        'confidence': confidence,
+                        'engine': 'pdfplumber',
+                        'encoding_valid': confidence > 0.80
+                    })
+                except Exception as page_error:
+                    logger.warning(f"pdfplumber failed on page {page_num}: {page_error}")
+                    results.append({
+                        'page': page_num,
+                        'text': None,
+                        'error': str(page_error),
+                        'engine': 'pdfplumber'
+                    })
+    except Exception as e:
+        logger.warning(f"pdfplumber failed: {e}")
+        return None
+    
+    return results
+</code></pre>
+<button class="copy-button" onclick="copyCode(this)">Copy</button>
+
+<h3>Phase 4: Quality Assessment and Fallback Trigger</h3>
+<p>Evaluate extraction quality to determine if fallback is needed. Use multiple metrics: text length, encoding validity, layout coherence, and confidence scores.</p>
+<ul>
+<li><strong>Yield Check:</strong> Is text length sufficient (>80% of expected)? Account for PDF page count and typical page length.</li>
+<li><strong>Encoding Check:</strong> Are there mojibake characters (replacement chars, invalid UTF-8 sequences)? This indicates ToUnicode CMap failure.</li>
+<li><strong>Order Check:</strong> Is text in logical reading order, or jumbled spatial order? Spatial disorder suggests layout reconstruction failure.</li>
+<li><strong>Confidence Scoring:</strong> Per-page confidence based on text validity, page structure, and encoding validity.</li>
+</ul>
+
+<h3>Phase 5: Fallback Chain Execution with Adaptive Timeout</h3>
+<p>If quality assessment indicates insufficient yield, invoke the next engine in the chain. Use adaptive timeout: faster engines (pdfplumber) get 30 seconds; slower engines (PaddleOCR) get 120+ seconds with GPU.</p>
+
+<h3>Phase 6: Result Merging for Multi-Engine Extractions</h3>
+<p>When multiple engines produce results, merge intelligently:</p>
+<ul>
+<li><strong>Per-Page Selection:</strong> For each page, choose the result with highest confidence score.</li>
+<li><strong>Weighted Merging:</strong> If confidence scores are close, merge text tokens weighted by confidence.</li>
+<li><strong>Fallback Indicator:</strong> Mark pages that required fallback for downstream processing (may need extra validation).</li>
+</ul>
+
+<h3>Phase 7: OCR Integration (Last Resort)</h3>
+<p>If text extraction fails entirely, render PDF pages and apply OCR as final fallback:</p>
+<ul>
+<li>Render PDF pages at 150-300 DPI (higher for small fonts)</li>
+<li>Apply PaddleOCR with language detection</li>
+<li>Preserve spatial information from rendered bboxes</li>
+<li>Mark results as OCR'd (lower confidence, different error profile)</li>
+</ul>
+
+<h3>Phase 8: Result Normalization and Output</h3>
+<p>Standardize output across all engines and produce consistent interface:</p>
+<ul>
+<li>Normalize text encoding (UTF-8 with replacement for invalid sequences)</li>
+<li>Align bbox coordinate systems (all relative to page top-left)</li>
+<li>Merge confidence scores from multiple sources</li>
+<li>Include fallback indicators: which engine(s) were used, whether OCR was invoked</li>
+<li>Preserve source page ranges and engine metadata for debugging</li>
+</ul>
+</section>
+
+<section>
+<h2>Behavior Diagram: Fallback State Machine</h2>
+<div class="diagram">
+<div class="mermaid" data-mermaid-startOnLoad="false">
+stateDiagram-v2
+    [*] --> Analyze: PDF arrives
+    Analyze --> SelectEngine: Structure analyzed
+    SelectEngine --> Primary: Engine chain built
+    
+    Primary --> Assess: Extraction complete
+    Assess --> Success: Yield &gt; 80%?
+    Assess --> Fallback: Yield &lt;= 80%
+    
+    Success --> Encode: Check encoding valid?
+    Fallback --> Secondary: Try next engine
+    Secondary --> Assess
+    
+    Encode --> Good: Valid UTF-8?
+    Good --> Normalize: Yes - continue
+    Good --> Fallback: No - mojibake
+    
+    Assess --> Merge: Multiple engines?
+    Merge --> Weight: Compute confidence
+    Weight --> Normalize
+    Fallback --> LastResort: Chain exhausted?
+    LastResort --> OCR: Render & OCR
+    OCR --> Normalize
+    
+    Normalize --> [*]: Return results
+    
+    Primary --> Error: Fatal error
+    Secondary --> Error
+    Error --> LastResort
+    Error --> [*]: Return partial
+</div>
+</div>
+</section>
+
+<section>
+<h2>Annotated Code Walkthrough: Core Extraction Logic</h2>
+
+<h3>Main Extraction Entry Point</h3>
+<p>The entry point orchestrates the multi-engine fallback strategy. It handles error recovery, timeout management, and result merging:</p>
+<pre><code class="language-python"># Core extraction orchestration (simplified from pdf_parser.py)
+def extract_pdf_text(pdf_path, engines=None, merge_results=True):
+    """Extract text from PDF using adaptive fallback strategy."""
+    
+    # Step 1: Analyze structure
+    with open(pdf_path, 'rb') as f:
+        pdf_bytes = f.read()
+    structure = analyze_pdf_structure(pdf_bytes)
+    
+    # Step 2: Build engine chain
+    if engines is None:
+        engines = select_extraction_engines(structure)
+    
+    # Step 3: Run extraction pipeline
+    all_results = []
+    for engine in engines:
+        try:
+            logger.info(f"Attempting extraction with {engine}")
+            results = extract_with_engine(pdf_path, engine, timeout=compute_timeout(engine))
+            
+            if results is None:
+                continue  # Engine failed, try next
+            
+            all_results.append((engine, results))
+            
+            # Check yield
+            yield_pct = compute_yield(results)
+            if yield_pct > 0.80:
+                logger.info(f"{engine} succeeded with {yield_pct:.1%} yield")
+                if merge_results and len(all_results) > 1:
+                    return merge_engine_results(all_results)
+                return format_output(results, engine_chain=engines, selected=engine)
+        
+        except Exception as e:
+            logger.warning(f"{engine} failed: {e}")
+            continue
+    
+    # Step 4: Fallback to OCR if all engines failed
+    if not all_results:
+        logger.info("Text extraction failed, attempting OCR fallback")
+        ocr_results = extract_with_ocr(pdf_path)
+        return format_output(ocr_results, engine_chain=engines, selected='PaddleOCR')
+    
+    # Merge and return best results
+    return merge_engine_results(all_results)
+</code></pre>
+<button class="copy-button" onclick="copyCode(this)">Copy</button>
+
+<h3>Engine Timeout Strategy</h3>
+<p>Different engines have different expected latencies. The timeout reflects the expected speed of each engine, plus buffer for system load:</p>
+<pre><code class="language-python"># Compute appropriate timeout per engine
+def compute_timeout(engine, page_count=10):
+    """Adaptive timeout based on engine speed and document complexity."""
+    base_timeouts = {
+        'pdfplumber': 30,   # Very fast, timeout quickly to detect hangs
+        'Docling': 120,     # Medium speed
+        'MinerU': 150,      # Medium-slow, model loading overhead
+        'PaddleOCR': 300,   # Slow, GPU processing can be variable
+        'TCADp': 600        # Very slow, specialized processing
+    }
+    
+    # Scale by page count (rough approximation)
+    timeout = base_timeouts.get(engine, 60)
+    timeout = timeout * (1 + (page_count - 10) * 0.05)  # Scale up for many pages
+    
+    return timeout
+</code></pre>
+<button class="copy-button" onclick="copyCode(this)">Copy</button>
+</section>
+
+<section>
+<h2>Edge Cases and Failure Modes</h2>
+
+<table>
+<tr>
+<th>Edge Case</th>
+<th>Symptom</th>
+<th>Root Cause</th>
+<th>Recovery Strategy</th>
+</tr>
+<tr>
+<td><strong>Corrupted PDF Header</strong></td>
+<td>Parsers fail immediately with "invalid PDF"</td>
+<td>Malformed cross-reference table or circular object references</td>
+<td>Try permissive parser (Docling), or render+OCR as ultimate fallback</td>
+</tr>
+<tr>
+<td><strong>Missing ToUnicode CMap</strong></td>
+<td>Mojibake characters or replacement chars (U+FFFD)</td>
+<td>Font encoding undefined; parser cannot map glyphs to Unicode</td>
+<td>Detect mojibake, trigger Docling or MinerU (better at inferring encoding), or OCR</td>
+</tr>
+<tr>
+<td><strong>Scanned PDF Without OCR Layer</strong></td>
+<td>Zero text extracted; engine yields empty string</td>
+<td>PDF contains only rendered images, no embedded text metadata</td>
+<td>Render PDF to images, invoke PaddleOCR, mark results as OCR'd</td>
+</tr>
+<tr>
+<td><strong>Mixed Scanned + Digital Text</strong></td>
+<td>Partial text extracted; visible content not extracted</td>
+<td>Some pages have text objects, others are scanned images</td>
+<td>Per-page fallback: if page yields <50%, try OCR for that page only</td>
+</tr>
+<tr>
+<td><strong>Embedded Fonts with Custom Encoding</strong></td>
+<td>Text extracted but wrong characters; garbled output</td>
+<td>PDF defines font inline with non-standard character mapping</td>
+<td>Detect garbled text pattern, trigger Docling (better at font analysis)</td>
+</tr>
+<tr>
+<td><strong>Timeout on Large PDF</strong></td>
+<td>Extraction hangs; timeout reached</td>
+<td>Processing cost exceeds timeout (e.g., huge page count, GPU contention)</td>
+<td>Return partial results from pages processed so far, log warning for incomplete extraction</td>
+</tr>
+<tr>
+<td><strong>OCR Failure on Low-Quality Scan</strong></td>
+<td>OCR produces garbage; confidence very low</td>
+<td>Scan quality too poor for OCR (blur, skew, degradation)</td>
+<td>Attempt image enhancement (rotation, contrast), or return low-confidence results with flag</td>
+</tr>
+<tr>
+<td><strong>Multilingual PDF with Wrong Language Hint</strong></td>
+<td>Incorrect characters or loss of diacritics</td>
+<td>PaddleOCR language detection failed; using wrong model</td>
+<td>Auto-detect language from text samples, retry with correct language model</td>
+</tr>
+</table>
+</section>
+
+<section>
+<h2>Configuration and Tuning</h2>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Default Value</th>
+<th>Purpose & Guidance</th>
+</tr>
+<tr>
+<td><code>text_yield_threshold</code></td>
+<td>0.80 (80%)</td>
+<td>Minimum text yield to accept engine result without fallback. Lower values trigger fallback sooner (more robust); higher values accept results faster (lower latency).</td>
+</tr>
+<tr>
+<td><code>encoding_confidence_threshold</code></td>
+<td>0.75</td>
+<td>Minimum encoding validity score to accept text extraction. Below this threshold, result is marked as unreliable and fallback is considered.</td>
+</tr>
+<tr>
+<td><code>pdfplumber_timeout</code></td>
+<td>30s</td>
+<td>Timeout for fast path. Set lower to fail fast on corrupt PDFs; higher to tolerate system load.</td>
+</tr>
+<tr>
+<td><code>ocr_dpi</code></td>
+<td>150-300</td>
+<td>DPI for PDF-to-image rendering in OCR path. Higher DPI = better OCR accuracy but higher computation cost.</td>
+</tr>
+<tr>
+<td><code>merge_multi_engine_results</code></td>
+<td>true</td>
+<td>When multiple engines produce results, merge them using confidence weighting. Set false to accept first successful engine (faster, less robust).</td>
+</tr>
+<tr>
+<td><code>fallback_chain</code></td>
+<td>['pdfplumber', 'Docling', 'MinerU', 'PaddleOCR']</td>
+<td>Ordered list of engines to try in sequence. Customize based on document type distribution in your corpus.</td>
+</tr>
+</table>
+</section>
+
+<section>
+<h2>Related Topics and Further Reading</h2>
+
+<ul>
+<li><strong>Layout Recognition Model:</strong> After text extraction, bbox information is refined by the layout recognizer, which detects columns, tables, and semantic document structure.</li>
+<li><strong>OCR Pipeline:</strong> The two-stage OCR system (detection + recognition) used as fallback—CRAFT for text detection, PaddleOCR for character recognition.</li>
+<li><strong>Vision Module:</strong> Neural recognizers (layout, table structure) that operate on rendered PDF pages when text extraction alone is insufficient.</li>
+<li><strong>Semantic Chunking:</strong> The PDF parsing output (text + bboxes) feeds into semantic chunking, which respects spatial boundaries and logical document structure.</li>
+<li><strong>Multi-Engine Philosophy in Deepdoc:</strong> All extraction layers in deepdoc use adaptive fallback chains. This pattern enables graceful degradation across the entire pipeline.</li>
+</ul>
+</section>
+
+</main>
+
+<button id="backToTop">↑ Top</button>
+<div id="diagramOverlay" class="diagram-overlay">
+  <div class="diagram-overlay-content">
+    <button class="diagram-overlay-close" onclick="closeDiagramZoom()">✕</button>
+    <div id="diagramZoomContent"></div>
+  </div>
+</div>
+
+<script>
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const htmlElement = document.documentElement;
+const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+htmlElement.setAttribute('data-theme', theme);
+themeToggle.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+
+themeToggle.addEventListener('click', () => {
+  const currentTheme = htmlElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  htmlElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('neutra-ip-theme', newTheme);
+  themeToggle.textContent = newTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+});
+
+// Back to top button
+const backToTopButton = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTopButton.style.display = window.scrollY > 300 ? 'block' : 'none';
+});
+backToTopButton.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Copy button functionality
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling || button.parentElement.querySelector('code');
+  if (codeBlock) {
+    const text = codeBlock.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 2000);
+    });
+  }
+}
+
+// Mermaid diagram setup
+if (typeof mermaid !== 'undefined') {
+  mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
+  
+  document.querySelectorAll('.mermaid').forEach((diagram, idx) => {
+    mermaid.contentLoaderAsync && mermaid.contentLoaderAsync(diagram);
+  });
+  
+  // Diagram click zoom
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.mermaid svg')) {
+      const svg = e.target.closest('svg');
+      if (svg) {
+        const zoomContent = document.getElementById('diagramZoomContent');
+        zoomContent.innerHTML = '';
+        const cloned = svg.cloneNode(true);
+        cloned.style.maxWidth = '100%';
+        zoomContent.appendChild(cloned);
+        document.getElementById('diagramOverlay').classList.add('show');
+      }
+    }
+  });
+}
+
+function closeDiagramZoom() {
+  const overlay = document.getElementById('diagramOverlay');
+  if (overlay) overlay.classList.remove('show');
+}
+
+// Zoom overlay close on escape or background click
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDiagramZoom();
+});
+document.getElementById('diagramOverlay')?.addEventListener('click', (e) => {
+  if (e.target.id === 'diagramOverlay') closeDiagramZoom();
+});
+
+// Wheel zoom in diagram overlay
+let zoomScale = 1;
+document.getElementById('diagramZoomContent')?.addEventListener('wheel', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    zoomScale += e.deltaY > 0 ? -0.1 : 0.1;
+    zoomScale = Math.max(0.5, Math.min(zoomScale, 3));
+    document.getElementById('diagramZoomContent').style.transform = `scale(${zoomScale})`;
+  }
+});
+
+// Reading time calculation
+const mainContent = document.getElementById('main');
+const wordCount = mainContent ? mainContent.innerText.split(/\s+/).length : 0;
+const readingTime = Math.ceil(wordCount / 200);
+console.log(`Estimated reading time: ${readingTime} minutes`);
+</script>
+
+</body>
+</html>

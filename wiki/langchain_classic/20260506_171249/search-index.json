@@ -1,0 +1,464 @@
+[
+  {
+    "title": "agents — ReAct/MRKL agents, AgentExecutor, plan-and-execute",
+    "path": "agents_doc/index.html",
+    "excerpt": "agents — ReAct/MRKL agents, AgentExecutor, plan-and-execute Skip to content ☾ ⇧ langchain_classic › agents agents — ReAct/MRKL agents, AgentExecutor, plan-and-execute ReAct/MRKL agents, AgentExecutor, plan-and-execute Module langchain_classic/agents/ — ReAct/MRKL agents, AgentExecutor, plan-and-execute. Part of the Orchestration group. 🎯 Why This Module Exists This module is documented from the agents_deep.md Phase 1B research artifact. See sections below for design decisions, algorithms, error…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions visible in the code",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "callbacks — Observer pattern for tracing, logging, streaming, metrics",
+    "path": "callbacks_doc/index.html",
+    "excerpt": "callbacks — Observer pattern for tracing, logging, streaming, metrics Skip to content ☾ ⇧ langchain_classic › callbacks callbacks — Observer pattern for tracing, logging, streaming, metrics Observer pattern for tracing, logging, streaming, metrics Module langchain_classic/callbacks/ — Observer pattern for tracing, logging, streaming, metrics. Part of the Cross-cutting group. 🎯 Why This Module Exists This module is documented from the callbacks_deep.md Phase 1B research artifact. See sections…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "chains — Pre-LCEL composition primitive — Chain class + 28 chain families",
+    "path": "chains_doc/index.html",
+    "excerpt": "chains — Pre-LCEL composition primitive — Chain class + 28 chain families Skip to content ☾ ⇧ langchain_classic › chains chains — Pre-LCEL composition primitive — Chain class + 28 chain families Pre-LCEL composition primitive — Chain class + 28 chain families Module langchain_classic/chains/ — Pre-LCEL composition primitive — Chain class + 28 chain families. Part of the Orchestration group. 🎯 Why This Module Exists This module is documented from the chains_deep.md Phase 1B research artifact.…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions visible in the code",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "chat_models — Message-based chat model wrappers (BaseMessage in/out)",
+    "path": "chat_models_doc/index.html",
+    "excerpt": "chat_models — Message-based chat model wrappers (BaseMessage in/out) Skip to content ☾ ⇧ langchain_classic › chat_models chat_models — Message-based chat model wrappers (BaseMessage in/out) Message-based chat model wrappers (BaseMessage in/out) Module langchain_classic/chat_models/ — Message-based chat model wrappers (BaseMessage in/out). Part of the Models I/O group. 🎯 Why This Module Exists Chat models accept a list of BaseMessage objects (Human/AI/System/Tool/Function) and return an…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "document_loaders — PDF, web, S3, Notion, ... unified Document model",
+    "path": "document_loaders_doc/index.html",
+    "excerpt": "document_loaders — PDF, web, S3, Notion, ... unified Document model Skip to content ☾ ⇧ langchain_classic › document_loaders document_loaders — PDF, web, S3, Notion, ... unified Document model PDF, web, S3, Notion, ... unified Document model Module langchain_classic/document_loaders/ — PDF, web, S3, Notion, ... unified Document model. Part of the Retrieval & Data group. 🎯 Why This Module Exists Bridges arbitrary data sources into a uniform Document(page_content, metadata) shape. 100+ loaders…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "document_transformers — Splitters, doc compressors, EmbeddingsRedundantFilter",
+    "path": "document_transformers_doc/index.html",
+    "excerpt": "document_transformers — Splitters, doc compressors, EmbeddingsRedundantFilter Skip to content ☾ ⇧ langchain_classic › document_transformers document_transformers — Splitters, doc compressors, EmbeddingsRedundantFilter Splitters, doc compressors, EmbeddingsRedundantFilter Module langchain_classic/document_transformers/ — Splitters, doc compressors, EmbeddingsRedundantFilter. Part of the Retrieval & Data group. 🎯 Why This Module Exists Transformers post-process Document lists between loading and…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "embeddings — Vector embedding adapters for retrieval & semantic search",
+    "path": "embeddings_doc/index.html",
+    "excerpt": "embeddings — Vector embedding adapters for retrieval & semantic search Skip to content ☾ ⇧ langchain_classic › embeddings embeddings — Vector embedding adapters for retrieval & semantic search Vector embedding adapters for retrieval & semantic search Module langchain_classic/embeddings/ — Vector embedding adapters for retrieval & semantic search. Part of the Models I/O group. 🎯 Why This Module Exists Embedding models map text to fixed-dimension vectors. The Embeddings ABC has just two methods —…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "evaluation — QA correctness, criteria, embedding distance, agent trajectory eval",
+    "path": "evaluation_doc/index.html",
+    "excerpt": "evaluation — QA correctness, criteria, embedding distance, agent trajectory eval Skip to content ☾ ⇧ langchain_classic › evaluation evaluation — QA correctness, criteria, embedding distance, agent trajectory eval QA correctness, criteria, embedding distance, agent trajectory eval Module langchain_classic/evaluation/ — QA correctness, criteria, embedding distance, agent trajectory eval. Part of the Cross-cutting group. 🎯 Why This Module Exists This module is documented from the…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dive — Criteria evaluator",
+      "Error philosophy",
+      "Sub-modules at a glance",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "foundations — schema, _api, adapters, load, utils, graphs, chat_loaders",
+    "path": "foundations_doc/index.html",
+    "excerpt": "foundations — schema, _api, adapters, load, utils, graphs, chat_loaders Skip to content ☾ ⇧ langchain_classic › foundations foundations — schema, _api, adapters, load, utils, graphs, chat_loaders schema, _api, adapters, load, utils, graphs, chat_loaders Module langchain_classic/foundations/ — schema, _api, adapters, load, utils, graphs, chat_loaders. Part of the Foundations group. 🎯 Why This Module Exists This module is documented from the foundations_deep.md Phase 1B research artifact. See…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dive — Serializable round-trip",
+      "Error philosophy",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "langchain_classic — Legacy LangChain composition library",
+    "path": "index.html",
+    "excerpt": "langchain_classic — Legacy LangChain composition library Skip to content ☾ ⇧ langchain_classic — Internal Wiki The legacy LangChain composition library — chains, agents, retrievers, tools, memory. This wiki documents langchain_classic/ : the 1,321-file module that powers pre-LCEL LangChain code. It is the bridge between the modern langchain_core Runnable protocol and the 2022–2023 Chain / AgentExecutor idioms that production users still rely on. 21 Documented modules 1,321 Python files 28…",
+    "headings": [
+      "Project Philosophy",
+      "Project-level Design Decisions",
+      "System Architecture",
+      "Modules",
+      "Orchestration",
+      "Models I/O",
+      "Retrieval & Data",
+      "State & Tools",
+      "Cross-cutting",
+      "Foundations",
+      "Cross-module Synthesis",
+      "End-to-end flows",
+      "Coupling analysis",
+      "Architectural philosophy",
+      "Shared state inventory",
+      "System evolution",
+      "Connection diagram",
+      "Phase 1A — Broad Survey",
+      "What this package is",
+      "Depth detection",
+      "Module classification table",
+      "Cross-module dependency map (high-level)",
+      "Architectural patterns observed across the codebase",
+      "Domain terminology (cross-module glossary)",
+      "Per-module headline metrics",
+      "Top-level single-file modules",
+      "Source tree (top-level)",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "indexes — Source-controlled vector store sync (delete, update, upsert)",
+    "path": "indexes_doc/index.html",
+    "excerpt": "indexes — Source-controlled vector store sync (delete, update, upsert) Skip to content ☾ ⇧ langchain_classic › indexes indexes — Source-controlled vector store sync (delete, update, upsert) Source-controlled vector store sync (delete, update, upsert) Module langchain_classic/indexes/ — Source-controlled vector store sync (delete, update, upsert). Part of the Retrieval & Data group. 🎯 Why This Module Exists This module is documented from the indexes_deep.md Phase 1B research artifact. See…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dive — index()",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "llms — Legacy completion-style LLM wrappers (text-in, text-out)",
+    "path": "llms_doc/index.html",
+    "excerpt": "llms — Legacy completion-style LLM wrappers (text-in, text-out) Skip to content ☾ ⇧ langchain_classic › llms llms — Legacy completion-style LLM wrappers (text-in, text-out) Legacy completion-style LLM wrappers (text-in, text-out) Module langchain_classic/llms/ — Legacy completion-style LLM wrappers (text-in, text-out). Part of the Models I/O group. 🎯 Why This Module Exists Wraps completion-style LLM providers (text-in, text-out) under a single BaseLLM abstraction. Each subclass owns…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "memory — Conversation history strategies (Buffer, Window, Summary, KG, Vector)",
+    "path": "memory_doc/index.html",
+    "excerpt": "memory — Conversation history strategies (Buffer, Window, Summary, KG, Vector) Skip to content ☾ ⇧ langchain_classic › memory memory — Conversation history strategies (Buffer, Window, Summary, KG, Vector) Conversation history strategies (Buffer, Window, Summary, KG, Vector) Module langchain_classic/memory/ — Conversation history strategies (Buffer, Window, Summary, KG, Vector). Part of the State & Tools group. 🎯 Why This Module Exists This module is documented from the memory_deep.md Phase 1B…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions visible in the code",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "models_io (legacy alias) — Re-export façade for prompts/llms/chat_models/parsers",
+    "path": "models_io_doc/index.html",
+    "excerpt": "models_io (legacy alias) — Re-export façade for prompts/llms/chat_models/parsers Skip to content ☾ ⇧ langchain_classic › models_io (legacy alias) models_io (legacy alias) — Re-export façade for prompts/llms/chat_models/parsers Re-export façade for prompts/llms/chat_models/parsers Module langchain_classic/models_io/ — Re-export façade for prompts/llms/chat_models/parsers. Part of the Models I/O group. 🎯 Why This Module Exists This module is documented from the models_io_deep.md Phase 1B research…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dive — CacheBackedEmbeddings",
+      "Error philosophy",
+      "Cross-module dependencies",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "output_parsers — Structured output extraction from LLM strings",
+    "path": "output_parsers_doc/index.html",
+    "excerpt": "output_parsers — Structured output extraction from LLM strings Skip to content ☾ ⇧ langchain_classic › output_parsers output_parsers — Structured output extraction from LLM strings Structured output extraction from LLM strings Module langchain_classic/output_parsers/ — Structured output extraction from LLM strings. Part of the Models I/O group. 🎯 Why This Module Exists This module is documented from the output_parsers_deep.md Phase 1B research artifact. See sections below for design decisions,…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "prompts — PromptTemplate, ChatPromptTemplate, FewShot, example selectors",
+    "path": "prompts_doc/index.html",
+    "excerpt": "prompts — PromptTemplate, ChatPromptTemplate, FewShot, example selectors Skip to content ☾ ⇧ langchain_classic › prompts prompts — PromptTemplate, ChatPromptTemplate, FewShot, example selectors PromptTemplate, ChatPromptTemplate, FewShot, example selectors Module langchain_classic/prompts/ — PromptTemplate, ChatPromptTemplate, FewShot, example selectors. Part of the Models I/O group. 🎯 Why This Module Exists Templates plus example selectors. PromptTemplate handles f-string and Jinja;…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "retrievers — MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever",
+    "path": "retrievers_doc/index.html",
+    "excerpt": "retrievers — MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever Skip to content ☾ ⇧ langchain_classic › retrievers retrievers — MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever Module langchain_classic/retrievers/ — MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever. Part of the Retrieval & Data group. 🎯 Why This Module Exists This module is documented from the…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions visible in the code",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "runnables — LangChain-classic surface adapters over langchain_core Runnables",
+    "path": "runnables_doc/index.html",
+    "excerpt": "runnables — LangChain-classic surface adapters over langchain_core Runnables Skip to content ☾ ⇧ langchain_classic › runnables runnables — LangChain-classic surface adapters over langchain_core Runnables LangChain-classic surface adapters over langchain_core Runnables Module langchain_classic/runnables/ — LangChain-classic surface adapters over langchain_core Runnables. Part of the Orchestration group. 🎯 Why This Module Exists This is a thin shim over langchain_core.runnables. langchain-classic…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "smith — LangSmith dataset evaluation runner (legacy)",
+    "path": "smith_doc/index.html",
+    "excerpt": "smith — LangSmith dataset evaluation runner (legacy) Skip to content ☾ ⇧ langchain_classic › smith smith — LangSmith dataset evaluation runner (legacy) LangSmith dataset evaluation runner (legacy) Module langchain_classic/smith/ — LangSmith dataset evaluation runner (legacy). Part of the Cross-cutting group. 🎯 Why This Module Exists Legacy harness for running an LLM/agent against a LangSmith dataset, scoring results with evaluators, and pushing the run back to LangSmith. Most of this is now…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "storage (+ docstore) — Key-value byte stores: in-memory, file, Redis, encoder layers",
+    "path": "storage_doc/index.html",
+    "excerpt": "storage (+ docstore) — Key-value byte stores: in-memory, file, Redis, encoder layers Skip to content ☾ ⇧ langchain_classic › storage (+ docstore) storage (+ docstore) — Key-value byte stores: in-memory, file, Redis, encoder layers Key-value byte stores: in-memory, file, Redis, encoder layers Module langchain_classic/storage/ — Key-value byte stores: in-memory, file, Redis, encoder layers. Part of the State & Tools group. 🎯 Why This Module Exists This module is documented from the…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "tools — BaseTool + 64 first-party tool integrations",
+    "path": "tools_doc/index.html",
+    "excerpt": "tools — BaseTool + 64 first-party tool integrations Skip to content ☾ ⇧ langchain_classic › tools tools — BaseTool + 64 first-party tool integrations BaseTool + 64 first-party tool integrations Module langchain_classic/tools/ — BaseTool + 64 first-party tool integrations. Part of the State & Tools group. 🎯 Why This Module Exists This module is documented from the tools_deep.md Phase 1B research artifact. See sections below for design decisions, algorithms, error philosophy, performance, and…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Existence rationale",
+      "Design decisions visible in the code",
+      "Algorithm deep-dives",
+      "Error philosophy",
+      "Performance characteristics",
+      "Evolution clues",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "utilities — Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc.",
+    "path": "utilities_doc/index.html",
+    "excerpt": "utilities — Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc. Skip to content ☾ ⇧ langchain_classic › utilities utilities — Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc. Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc. Module langchain_classic/utilities/ — Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc.. Part of the Cross-cutting group. 🎯 Why This Module Exists Provider wrappers that aren't LLMs themselves but back tools and chains: SerpAPI, GoogleSearch, Bing,…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  },
+  {
+    "title": "vectorstores — Pinecone, FAISS, Chroma, Weaviate, ... uniform interface",
+    "path": "vectorstores_doc/index.html",
+    "excerpt": "vectorstores — Pinecone, FAISS, Chroma, Weaviate, ... uniform interface Skip to content ☾ ⇧ langchain_classic › vectorstores vectorstores — Pinecone, FAISS, Chroma, Weaviate, ... uniform interface Pinecone, FAISS, Chroma, Weaviate, ... uniform interface Module langchain_classic/vectorstores/ — Pinecone, FAISS, Chroma, Weaviate, ... uniform interface. Part of the Retrieval & Data group. 🎯 Why This Module Exists VectorStore is a uniform façade over 60+ similarity-search backends (FAISS, Chroma,…",
+    "headings": [
+      "🎯 Why This Module Exists",
+      "Architecture",
+      "Data Flow",
+      "Design Decisions",
+      "Step-by-Step Walkthrough",
+      "What Could Go Wrong",
+      "Performance Profile",
+      "Hot Paths",
+      "Resource Usage",
+      "Directory Map"
+    ]
+  }
+]

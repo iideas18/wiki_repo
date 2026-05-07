@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/rag-from-scratch">
+<meta name="wiki-source-rev" content="38e1a7a">
+
+<title>text-splitters — rag-from-scratch</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;column-count:2;column-gap:2rem}
+.toc ol{margin-left:1.5rem}.toc ol ol{column-count:1;font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.2rem .6rem;font-size:.75rem;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.code-walk{counter-reset:cw}
+.code-walk .step{counter-increment:cw;border-left:3px solid var(--accent);padding:.5rem 0 .5rem 1rem;margin:1rem 0;position:relative}
+.code-walk .step:before{content:counter(cw);position:absolute;left:-1.2rem;top:.5rem;background:var(--accent);color:#000;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--accent3)}.callout.danger{border-color:var(--accent4)}.callout.success{border-color:var(--accent2)}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:.1rem .4rem;border-radius:8px;margin-left:.4rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{column-count:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.module-card,.card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">rag-from-scratch</a> &rsaquo; <a href="../index.html">src</a> &rsaquo; text-splitters</nav>
+
+<h1>text-splitters/</h1>
+<div class="hero">
+  <div class="subtitle">Chunk long text into overlapping pieces, respecting structure</div>
+  <p>Four classes: an abstract base plus three concrete strategies (Character, Recursive, Token). The recursive splitter walks a priority list of separators and falls through to finer granularity when chunks overflow &mdash; the LangChain-standard middle ground between hard windowing and full sentence parsing.</p>
+  <p style="margin-top:.6rem">
+    <span class="badge blue">Mature</span>
+    <span class="badge green">200 LOC</span>
+    <span class="badge yellow">3 strategies</span>
+    <span class="badge red">Sliding-window overlap</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">4</div><div class="label">classes</div></div>
+  <div class="stat-box"><div class="num">200</div><div class="label">LOC</div></div>
+  <div class="stat-box"><div class="num">1000</div><div class="label">default chunkSize</div></div>
+  <div class="stat-box"><div class="num">200</div><div class="label">default chunkOverlap</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">recursive separators</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>Embedding models have a maximum input length (bge-small-en-v1.5 caps around 512 tokens). Documents are usually longer. <code>text-splitters/</code> turns a long document into a sequence of overlapping <em>chunks</em> small enough to embed. The chunks become the indexable unit in the vector store: each chunk gets one embedding, and retrieval returns chunks (not whole documents).</p>
+<details>
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of slicing bread for a sandwich. You can use a hard cut every 1cm (character window &mdash; you might cut through a key word) or you can try to slice at the natural seams of the loaf (separator-aware) and only resort to harder cuts when a slice gets too long. The <code>chunkOverlap</code> is the bread you let stay on both adjacent slices so a meaningful phrase isn't lost at the boundary &mdash; like buttering both edges of the cut so the filling sticks.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-component">&#127919; Why This Component</h2>
+<p>Splitting is non-obvious because the embedding model has zero awareness of chunk boundaries. If you slice mid-sentence, the chunk's embedding becomes ambiguous &mdash; representing half a thought. If you slice every paragraph regardless of size, you get embeddings that overflow the context window. The recursive separator approach navigates this with three concrete claims: (a) coarse separators preserve more meaning, so try them first; (b) when a piece is still too big, recurse to finer separators; (c) maintain <code>chunkOverlap</code> chars of context across boundaries so phrases near a cut are still indexed somewhere whole.</p>
+<p>The component exists as a <strong>family</strong> rather than one class because the right strategy depends on the document. Code and CSV want a different separator priority than prose. Token-aware splitting (where the chunk-size budget is in tokens, not characters) wants a different length function. The base class factors out everything that's shared (overlap, document construction, metadata propagation) so each strategy is just an override of <code>splitText()</code>.</p>
+
+<h2 id="rationale">&#127959;&#65039; Design Rationale</h2>
+<table>
+<tr><th>Decision</th><th>Choice</th><th>Why</th></tr>
+<tr><td>Strategy hierarchy</td><td>Abstract <code>BaseTextSplitter</code> + 3 subclasses overriding <code>splitText()</code></td><td>Mirrors LangChain. Common machinery (overlap, doc construction) lives once in the base.</td></tr>
+<tr><td>Recursive separator list</td><td><code>['\n\n','\n','. ',' ','']</code></td><td>Paragraph &gt; line &gt; sentence &gt; word &gt; char. The empty-string fallback guarantees termination on any text.</td></tr>
+<tr><td>Overlap implementation</td><td><code>mergeSplits</code> shifts <code>current[]</code> from the front while <code>length &gt; chunkOverlap</code></td><td>Char-accurate overlap regardless of separator. Alternative: re-slice from end of previous chunk &mdash; tangles with separator stripping.</td></tr>
+<tr><td>Token estimation</td><td><code>chars/4</code> heuristic in <code>TokenTextSplitter</code></td><td>Avoids tiktoken dep. Real BPE tokens average ~4 chars in English. <code>lengthFunction</code> seam lets a real tokenizer drop in later.</td></tr>
+<tr><td><code>chunkOverlap &lt; chunkSize</code> validation</td><td>Throw in constructor</td><td>Without this, <code>mergeSplits</code> would loop forever (overlap &gt;= size means the cut never moves forward).</td></tr>
+<tr><td>Per-chunk metadata</td><td>Inherit document metadata + add <code>{chunk:j, totalChunks:N}</code></td><td>Preserves provenance &mdash; readers can cite "page 3, chunk 2 of 4".</td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+classDiagram
+    class BaseTextSplitter {
+      +chunkSize: 1000
+      +chunkOverlap: 200
+      +lengthFunction: fn
+      +keepSeparator: false
+      +splitText()*
+      +splitDocuments(docs) Document[]
+      +createDocuments(texts, metadatas) Document[]
+      +mergeSplits(splits, separator) string[]
+      +joinSplits(splits, sep) string
+    }
+    class CharacterTextSplitter {
+      +separator: '\n\n'
+      +splitText(text) string[]
+    }
+    class RecursiveCharacterTextSplitter {
+      +separators: ['\n\n','\n','. ',' ','']
+      +splitText(text) string[]
+    }
+    class TokenTextSplitter {
+      +encodingName: 'cl100k_base'
+      +lengthFunction: chars/4
+      +splitText(text) string[]
+    }
+    BaseTextSplitter &lt;|-- CharacterTextSplitter
+    BaseTextSplitter &lt;|-- RecursiveCharacterTextSplitter
+    BaseTextSplitter &lt;|-- TokenTextSplitter
+    TokenTextSplitter ..> RecursiveCharacterTextSplitter : delegates to
+    BaseTextSplitter ..> Document : emits via createDocuments
+</pre>
+</div>
+
+<h2 id="lifecycle">Lifecycle &amp; Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant RS as RecursiveCharSplitter
+    participant Base as BaseTextSplitter
+    U->>RS: splitDocuments([Document(pageContent, meta)])
+    RS->>Base: createDocuments([text], [meta])
+    Base->>RS: splitText(text)
+    Note over RS: pick coarsest separator<br/>that exists in text
+    RS->>RS: text.split(sep).filter(Boolean)
+    loop for each split
+        alt split <= chunkSize
+            RS->>RS: temp.push(split)
+        else split too big
+            RS->>Base: mergeSplits(temp, sep)
+            Base-->>RS: chunks (with overlap)
+            alt has finer separators
+                RS->>RS: recurse with nextSeparators
+            else no finer
+                RS->>RS: emit oversize as-is
+            end
+        end
+    end
+    RS->>Base: mergeSplits(remaining temp, sep)
+    Base-->>RS: final chunks
+    RS-->>Base: chunks: string[]
+    Base->>Base: wrap each chunk in Document<br/>add {chunk:j, totalChunks:N}
+    Base-->>U: Document[]
+</pre>
+</div>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+<tr><th>From</th><th>To</th><th>Interface</th><th>Why this interaction exists</th></tr>
+<tr><td>User code</td><td><code>RecursiveCharSplitter</code></td><td><code>splitDocuments(Document[])</code></td><td>Default choice for prose &mdash; respects paragraph &gt; sentence &gt; word boundaries.</td></tr>
+<tr><td>Splitter</td><td><code>Document</code> (utils)</td><td><code>new Document(text, metadata)</code></td><td>The unified payload type carries metadata across the splitter boundary.</td></tr>
+<tr><td><code>RecursiveCharSplitter</code></td><td>itself (recursion)</td><td><code>new RecursiveCharSplitter({...this, separators: nextSeparators})</code></td><td>Recurse into oversize pieces with the next finer separator list.</td></tr>
+<tr><td><code>TokenTextSplitter</code></td><td><code>RecursiveCharSplitter</code></td><td>delegation</td><td>Re-uses the recursion logic but with a token-counting <code>lengthFunction</code>.</td></tr>
+<tr><td><code>PDFLoader.loadAndSplit</code></td><td>any splitter</td><td><code>splitter.splitDocuments(docs)</code></td><td>Convenience method for the loader-then-splitter pattern.</td></tr>
+<tr><td>Lesson 03</td><td><code>BaseTextSplitter.mergeSplits</code></td><td>direct call (re-implementation)</td><td>The lesson re-implements the base class inline to teach the overlap algorithm.</td></tr>
+</table>
+
+<h2 id="annotated-walk">&#128221; Annotated Code Walkthrough &mdash; <code>RecursiveCharacterTextSplitter.splitText</code></h2>
+<p>The most important algorithm in this module. Every line solves a specific failure mode.</p>
+<div class="code-walk">
+<div class="step"><h4>Default to the finest separator</h4>
+<pre><code class="language-javascript">splitText(text) {
+    const finalChunks = [];
+    let separator = this.separators.at(-1);
+    let nextSeparators = [];</code></pre>
+<p>Default is the empty string &mdash; <code>text.split('')</code> splits per-character, the brute-force fallback. Without this default, a text containing none of the separators would produce empty results.</p>
+</div>
+<div class="step"><h4>Choose the coarsest separator that appears</h4>
+<pre><code class="language-javascript">    for (let i = 0; i &lt; this.separators.length; i++) {
+        const sep = this.separators[i];
+        if (text.includes(sep)) {
+            separator = sep;
+            nextSeparators = this.separators.slice(i + 1);
+            break;
+        }
+    }</code></pre>
+<p>Walks left-to-right; first hit wins. <code>nextSeparators</code> is the suffix of the priority list &mdash; saved for recursion when a split overflows.</p>
+</div>
+<div class="step"><h4>Split and filter empties</h4>
+<pre><code class="language-javascript">    const splits = text.split(separator).filter(Boolean);
+    let temp = [];</code></pre>
+<p><code>filter(Boolean)</code> removes empty strings caused by consecutive separators. <code>temp</code> accumulates fitting splits until they need to be flushed via <code>mergeSplits</code>.</p>
+</div>
+<div class="step"><h4>Per-split: fits or doesn't</h4>
+<pre><code class="language-javascript">    for (const s of splits) {
+        if (this.lengthFunction(s) &lt;= this.chunkSize) {
+            temp.push(s);
+        } else {</code></pre>
+<p>The fast path: fits. The slow path: overflows &mdash; we have to flush <code>temp</code> and recurse on <code>s</code>.</p>
+</div>
+<div class="step"><h4>Flush before recursing</h4>
+<pre><code class="language-javascript">            if (temp.length) {
+                finalChunks.push(...this.mergeSplits(temp, separator));
+                temp = [];
+            }</code></pre>
+<p>Why flush first? Because the oversize piece's recursive splits should be <em>after</em> what's already accumulated, not interleaved with it. Order preservation matters for downstream context.</p>
+</div>
+<div class="step"><h4>Recurse or surrender</h4>
+<pre><code class="language-javascript">            if (nextSeparators.length === 0) {
+                finalChunks.push(s);
+            } else {
+                const recursiveSplitter = new RecursiveCharacterTextSplitter({
+                    ...this,
+                    separators: nextSeparators
+                });
+                finalChunks.push(...recursiveSplitter.splitText(s));
+            }
+        }
+    }</code></pre>
+<p>If we've exhausted the priority list (already at empty-string), surrender and emit the oversize piece. Otherwise construct a child splitter with finer separators and recurse. The <code>...this</code> spread carries chunkSize/Overlap/lengthFunction along.</p>
+</div>
+<div class="step"><h4>Final flush</h4>
+<pre><code class="language-javascript">    if (temp.length) {
+        finalChunks.push(...this.mergeSplits(temp, separator));
+    }
+    return finalChunks;
+}</code></pre>
+<p>Don't forget the trailing pieces that fit. Without this final <code>mergeSplits</code>, the tail of any text would be silently dropped.</p>
+</div>
+</div>
+
+<h2 id="merge-walk">&#128221; <code>BaseTextSplitter.mergeSplits</code> &mdash; the overlap engine</h2>
+<div class="code-walk">
+<div class="step"><h4>State: current chunk + length tracker</h4>
+<pre><code class="language-javascript">mergeSplits(splits, separator) {
+    const chunks = [];
+    let current = [];
+    let length = 0;</code></pre>
+<p><code>current[]</code> holds the pieces that will form the next chunk; <code>length</code> tracks total characters including separators.</p>
+</div>
+<div class="step"><h4>For each split, check if it fits</h4>
+<pre><code class="language-javascript">    for (const split of splits) {
+        const splitLength = this.lengthFunction(split);
+        const extraLength = current.length ? separator.length : 0;
+        if (length + splitLength + extraLength &gt; this.chunkSize) {</code></pre>
+<p><code>extraLength</code> accounts for the separator that would join this split to the previous one. Forgetting it makes chunks slightly oversize when separators are non-empty (e.g., '. ' is 2 chars).</p>
+</div>
+<div class="step"><h4>Flush the chunk</h4>
+<pre><code class="language-javascript">            if (current.length) {
+                chunks.push(this.joinSplits(current, separator));
+            }
+            while (length &gt; this.chunkOverlap &amp;&amp; current.length) {
+                length -= this.lengthFunction(current.shift()) + separator.length;
+            }
+        }</code></pre>
+<p><strong>This is the overlap.</strong> After flushing, we don't reset <code>current</code> &mdash; we shift pieces off the front while <code>length</code> is still over the overlap budget. What remains in <code>current</code> becomes the prefix of the next chunk. That's how a phrase near a chunk boundary gets indexed in <em>both</em> chunks.</p>
+</div>
+<div class="step"><h4>Add the current split</h4>
+<pre><code class="language-javascript">        current.push(split);
+        length += splitLength + (current.length &gt; 1 ? separator.length : 0);
+    }</code></pre>
+<p>The trailing ternary handles the first item in a chunk &mdash; no leading separator yet.</p>
+</div>
+<div class="step"><h4>Final emission</h4>
+<pre><code class="language-javascript">    if (current.length) {
+        chunks.push(this.joinSplits(current, separator));
+    }
+    return chunks.filter(Boolean);
+}</code></pre>
+<p>Filter <code>Boolean</code> drops any chunk that ended up empty after <code>joinSplits</code> trimmed it.</p>
+</div>
+</div>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<div class="card-grid">
+  <div class="card"><h4>Overlap as sliding window <span class="focus-badge">Algorithm</span></h4><p>The <code>while length &gt; chunkOverlap</code> loop is the secret &mdash; it keeps the tail of one chunk as the head of the next, char-accurate, regardless of separator.</p></div>
+  <div class="card"><h4>Why recursion beats sentence tokenisation <span class="focus-badge">Design</span></h4><p>Real text mixes prose with code, lists, tables. A sentence tokenizer mis-splits any of these. Recursion degrades gracefully: paragraph &rarr; line &rarr; sentence &rarr; word &rarr; char.</p></div>
+  <div class="card"><h4>Token estimation tradeoff <span class="focus-badge">Heuristic</span></h4><p><code>chars/4</code> is wrong by ~30% on languages with non-ASCII (Mandarin, Japanese). The lessons stay English; the seam (<code>lengthFunction</code>) lets you swap in a proper tokenizer when needed.</p></div>
+</div>
+
+<h2 id="edge-cases">&#9888; Edge Cases &amp; Boundaries</h2>
+<table>
+<tr><th>Scenario</th><th>What Actually Happens</th></tr>
+<tr><td>Empty text</td><td><code>text.split(separator)</code> yields <code>['']</code>; <code>filter(Boolean)</code> drops it; loop doesn't run; returns <code>[]</code>.</td></tr>
+<tr><td>Single huge token (no separators)</td><td>Falls through every separator level to <code>''</code>; the recursion surrenders and emits the oversize string. Better to oversize than to crash.</td></tr>
+<tr><td><code>chunkOverlap &gt;= chunkSize</code></td><td>Constructor throws <code>"chunkOverlap must be less than chunkSize"</code>. Without this guard, <code>mergeSplits</code> would loop forever.</td></tr>
+<tr><td>All splits exactly <code>chunkSize</code></td><td>Each is a chunk of its own. Overlap collapses to zero in this degenerate case.</td></tr>
+<tr><td>Separator is multi-character (e.g., <code>'. '</code>)</td><td><code>extraLength = separator.length</code> accounts for it &mdash; chunk size stays correct.</td></tr>
+<tr><td>Mixed CJK + Latin text in <code>TokenTextSplitter</code></td><td><code>chars/4</code> over-estimates token count for CJK. Chunks become smaller than necessary &mdash; inefficient but correct.</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">text-splitters/ files</summary>
+<pre><code>src/text-splitters/
+&#9500;&#9472;&#9472; BaseTextSplitter.js              (99 LOC)   &larr; abstract: chunkSize/Overlap, mergeSplits, splitDocuments
+&#9500;&#9472;&#9472; CharacterTextSplitter.js         (18 LOC)   &larr; single-separator strategy
+&#9500;&#9472;&#9472; RecursiveCharacterTextSplitter.js (59 LOC)  &larr; priority-list recursion (recommended)
+&#9500;&#9472;&#9472; TokenTextSplitter.js             (23 LOC)   &larr; chars/4 heuristic + delegates to recursive
+&#9492;&#9472;&#9472; index.js                                    &larr; barrel re-export
+</code></pre>
+</details>
+
+<h2 id="config">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>chunkSize</code></td><td>1000</td><td>Maximum chunk length in <code>lengthFunction</code> units.</td></tr>
+<tr><td><code>chunkOverlap</code></td><td>200</td><td>Overlap maintained at chunk boundaries.</td></tr>
+<tr><td><code>lengthFunction</code></td><td><code>t =&gt; t.length</code></td><td>Hook for token-aware sizing. Used by TokenTextSplitter.</td></tr>
+<tr><td><code>keepSeparator</code></td><td>false</td><td>Whether to retain the separator string in chunks. (Currently unused; reserved for future strategies.)</td></tr>
+<tr><td><code>CharacterTextSplitter.separator</code></td><td><code>'\n\n'</code></td><td>Single split delimiter.</td></tr>
+<tr><td><code>RecursiveCharSplitter.separators</code></td><td><code>['\n\n','\n','. ',' ','']</code></td><td>Priority list. Replace for code (e.g., <code>['\n\n','\nfunction ','\n','; ',' ']</code>).</td></tr>
+<tr><td><code>TokenTextSplitter.encodingName</code></td><td><code>'cl100k_base'</code></td><td>Currently unused (no real tokenizer); naming reserved for future tiktoken integration.</td></tr>
+<tr><td>Output: <code>metadata.chunk</code></td><td>(set per chunk)</td><td>0-based chunk index within the source document.</td></tr>
+<tr><td>Output: <code>metadata.totalChunks</code></td><td>(set per chunk)</td><td>How many chunks the source document produced.</td></tr>
+<tr><td>Inherited metadata</td><td>spread from input <code>Document.metadata</code></td><td>Preserves source provenance (page number, file path, etc.).</td></tr>
+</table>
+
+<h2 id="examples">Code Examples</h2>
+
+<h3 id="example-recursive">Recursive splitter (recommended for prose)</h3>
+<pre><code class="language-javascript">import { RecursiveCharacterTextSplitter } from './src/text-splitters/index.js';
+
+const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 800,
+    chunkOverlap: 150,
+    separators: ['\n\n', '\n', '. ', ' ', '']
+});
+
+const chunks = splitter.splitText(longDocument);
+console.log(`${chunks.length} chunks`);
+chunks.forEach((c, i) =&gt; console.log(`[${i}] ${c.slice(0, 80)}...`));
+</code></pre>
+
+<h3 id="example-doc">Split documents preserving metadata</h3>
+<pre><code class="language-javascript">import { PDFLoader, RecursiveCharacterTextSplitter } from './src/index.js';
+
+const docs = await new PDFLoader(url, { splitPages: true }).load();
+const chunks = await new RecursiveCharacterTextSplitter({
+    chunkSize: 1000, chunkOverlap: 200
+}).splitDocuments(docs);
+
+// Each chunk carries: pageContent + {source, page, loc, chunk, totalChunks, ...}
+const cited = chunks.map(c =&gt; `(p${c.metadata.page}, chunk ${c.metadata.chunk + 1}/${c.metadata.totalChunks}) ${c.pageContent}`);
+</code></pre>
+
+<h3 id="example-token">Token-aware splitter</h3>
+<pre><code class="language-javascript">import { TokenTextSplitter } from './src/text-splitters/index.js';
+
+// Approx: 1 token = 4 chars. So 256 "tokens" = 1024 chars in the budget.
+const splitter = new TokenTextSplitter({ chunkSize: 256, chunkOverlap: 32 });
+const chunks = splitter.splitText(longDocument);
+</code></pre>
+
+<div class="footer"><a href="../index.html">&larr; src/</a> &nbsp;|&nbsp; <a href="../../index.html">Project Hub</a> &nbsp;|&nbsp; <a href="../../search.html">Search</a></div>
+
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(btn) btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  if(btn) btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){document.querySelectorAll('pre').forEach(function(pre){if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(){var c=pre.querySelector('code');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+(function(){var main=document.querySelector('main');if(!main)return;var hero=document.querySelector('.hero');if(!hero)return;var words=main.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var rt=document.createElement('p');rt.style.color='var(--text-muted)';rt.style.fontSize='.85rem';rt.style.marginTop='.5rem';rt.innerHTML='\u23F1 ~'+mins+' min read';hero.appendChild(rt);})();
+(function(){document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key==='j'||e.key==='k'){var hs=Array.from(document.querySelectorAll('h2[id]'));var sy=window.scrollY;var idx=-1;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top+sy<=sy+50)idx=i;}if(e.key==='j')idx=Math.min(hs.length-1,idx+1);else idx=Math.max(0,idx-1);if(hs[idx])hs[idx].scrollIntoView({behavior:'smooth'});}});})();
+
+document.querySelectorAll('pre code').forEach(function(b){try{hljs.highlightElement(b);}catch(e){}});
+</script>
+</body></html>

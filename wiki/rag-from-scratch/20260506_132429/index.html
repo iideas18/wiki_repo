@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/rag-from-scratch">
+<meta name="wiki-source-rev" content="38e1a7a">
+
+<title>rag-from-scratch — rag-from-scratch</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;column-count:2;column-gap:2rem}
+.toc ol{margin-left:1.5rem}.toc ol ol{column-count:1;font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.2rem .6rem;font-size:.75rem;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.code-walk{counter-reset:cw}
+.code-walk .step{counter-increment:cw;border-left:3px solid var(--accent);padding:.5rem 0 .5rem 1rem;margin:1rem 0;position:relative}
+.code-walk .step:before{content:counter(cw);position:absolute;left:-1.2rem;top:.5rem;background:var(--accent);color:#000;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--accent3)}.callout.danger{border-color:var(--accent4)}.callout.success{border-color:var(--accent2)}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:.1rem .4rem;border-radius:8px;margin-left:.4rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{column-count:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.module-card,.card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+
+
+<h1>rag-from-scratch</h1>
+<div class="hero">
+  <div class="subtitle">Build Retrieval-Augmented Generation (RAG) yourself — no black boxes.</div>
+  <p>A dependency-light, local-first RAG toolkit that doubles as a JavaScript library and a sequenced tutorial. Each lesson is runnable end-to-end; each module mirrors LangChain.js shapes without LangChain's weight.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">JavaScript ESM</span>
+    <span class="badge green">Local LLM &middot; node-llama-cpp</span>
+    <span class="badge yellow">15 lessons</span>
+    <span class="badge red">Educational + Library</span>
+  </p>
+</div>
+
+<h2 id="philosophy">&#127919; Project Philosophy</h2>
+<p>When you first open <code>rag-from-scratch</code>, the most striking design choice is what is <em>missing</em>: no Docker, no Postgres, no API keys, no Python. Everything runs in Node 18+, on a laptop, with files you can <code>cat</code>. The author's wager is that RAG — a topic that sounds intimidating in the LangChain era — becomes obvious if you are forced to write the keyword-scorer, the splitter, the embedding cache, and the rank-fusion equation yourself. The repo is built around this wager.</p>
+<p>Two halves split the same idea. <strong>examples/</strong> is the curriculum: fifteen numbered lessons (00&ndash;06), each a self-contained <code>example.js</code> plus a <code>CONCEPT.md</code> (the why) and a <code>CODE.md</code> (the line-by-line walk). <strong>src/</strong> is the library — the layers that have been promoted out of the examples once the abstraction stabilised, named to mirror LangChain.js so that learners can transfer concepts later. The current <code>src/</code> is honestly partial: <code>chains/</code>, <code>retrievers/</code>, <code>vector-stores/</code>, and <code>prompts/</code> hold scaffolded <code>index.js</code> stubs because those layers are still being taught in lessons; they will graduate next.</p>
+<p>The third design priority is <em>cognitive locality over DRY</em>. Lesson 03 re-implements its own <code>TextSplitter</code> even though <code>src/text-splitters/</code> exists. Why? Because a reader of lesson 03 must be able to understand it without opening <code>src/</code>. A tab-jumping codebase fails the educational mission. The library exists for downstream consumers; the lessons exist for human eyes.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+<tr><td>Class taxonomy</td><td>LangChain.js naming verbatim (<code>Document</code>, <code>BaseLoader.load()</code>, <code>embedQuery/embedDocuments</code>)</td><td>Custom names; functional API</td><td>Lower cognitive cost when learners graduate to LangChain proper.</td></tr>
+<tr><td>Local vs cloud LLM</td><td>node-llama-cpp + GGUF default</td><td>OpenAI; HuggingFace Inference API</td><td>Runs offline, no API keys; matches "no black boxes" promise. OpenAI is supported optionally for query rewriting.</td></tr>
+<tr><td>Vector DB</td><td><code>embedded-vector-db</code> (HNSW, in-process)</td><td>Qdrant, Chroma, pgvector (network)</td><td>Local-first; zero infrastructure; sub-millisecond search at 10K vectors.</td></tr>
+<tr><td>Lesson granularity</td><td>15 numbered lessons with sub-numbering for complex topics</td><td>Flat 1..N; tagged by topic</td><td>Sub-numbering signals "this concept needs multiple passes" without dirtying the top-level.</td></tr>
+<tr><td>Examples vs library</td><td>Examples re-implement what they teach; <code>src/</code> crystallises after</td><td>Single shared scaffold; examples import everything</td><td>Cognitive locality &mdash; a reader must not have to open <code>src/</code> to understand a lesson.</td></tr>
+<tr><td>Module loading</td><td>ESM throughout (<code>"type":"module"</code>)</td><td>CommonJS; bundled UMD</td><td><code>node example.js</code> works without any build step. Aligns with promise of transparency.</td></tr>
+<tr><td>Async setup</td><td>Static factory <code>LlamaCpp.initialize()</code></td><td>Two-step <code>new + await init()</code></td><td>Constructors can&rsquo;t <code>await</code>; factory keeps init atomic so half-built instances never escape.</td></tr>
+<tr><td>Embedding cache</td><td>Optional, side-channel, in-memory + JSON disk</td><td>Mandatory cache; SQLite</td><td>Caches must never break the primary path; JSON dumps are inspectable by hand.</td></tr>
+</table>
+
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph Library["src/ &mdash; the library"]
+    Doc["Document<br/>(universal payload)"]
+    Loaders["loaders/<br/>BaseLoader, PDFLoader"]
+    Splitters["text-splitters/<br/>Base/Character/Recursive/Token"]
+    Embeds["embeddings/<br/>EmbeddingModel + EmbeddingCache"]
+    LLMs["llms/<br/>BaseLLM + LlamaCpp"]
+    Chat["chat-models/<br/>ChatLlamaCpp"]
+    Stub1["chains/ retrievers/<br/>vector-stores/ prompts/<br/>(scaffolded stubs)"]
+  end
+  subgraph Curriculum["examples/ &mdash; the lessons"]
+    Ex0["00 How RAG Works<br/>(no embeddings)"]
+    Ex1["01 LLM basics"]
+    Ex2["02 Data Loading"]
+    Ex3["03 Splitting"]
+    Ex4["04 Embeddings"]
+    Ex5["05 Vector Store<br/>(3 sub-lessons)"]
+    Ex6["06 Retrieval Strategies<br/>(5 sub-lessons)"]
+  end
+  subgraph Helpers["helpers/ &mdash; CLI chrome"]
+    Out["OutputHelper<br/>(chalk + ora)"]
+    Llp["LlamaPrompter<br/>(used by 06)"]
+    Op["OpenAIClient"]
+  end
+  Loaders -->|emits| Doc
+  Splitters -->|emits| Doc
+  Doc --> Embeds
+  Embeds -->|number array 384d| Stub1
+  LLMs --> Chat
+  Ex2 -->|imports| Loaders
+  Ex3 -->|imports| Doc
+  Ex4 -->|reimplements then uses| Embeds
+  Ex5 -->|imports + uses HNSW| Doc
+  Ex6 -->|uses| LLMs
+  Ex6 -->|uses| Llp
+  Ex0 -->|standalone| Curriculum
+  Curriculum -->|formatted via| Out
+</pre>
+</div>
+
+<p class="section-label">Library &mdash; src/</p>
+<div class="module-grid">
+  <a href="src_doc/index.html" class="module-card">
+    <h3>src/</h3>
+    <div class="tagline">The reusable RAG library &mdash; LangChain-shaped, dependency-light</div>
+    <p>10 sub-modules: embeddings, text-splitters, loaders, llms, chat-models, utils are filled in; chains, retrievers, vector-stores, prompts are scaffolded for upcoming lessons.</p>
+    <div class="stats"><span>~1,857 LOC</span><span>10 sub-dirs</span><span>40 .js files</span></div>
+  </a>
+</div>
+
+<p class="section-label">Curriculum &mdash; examples/</p>
+<div class="module-grid">
+  <a href="examples_doc/index.html" class="module-card">
+    <h3>examples/</h3>
+    <div class="tagline">15 numbered tutorial lessons (00&ndash;06)</div>
+    <p>Each lesson is <code>example.js</code> + <code>CONCEPT.md</code> + <code>CODE.md</code>. Self-contained &mdash; runnable without reading any other lesson.</p>
+    <div class="stats"><span>~6,954 LOC</span><span>15 lessons</span><span>3 artefact types</span></div>
+  </a>
+</div>
+
+<p class="section-label">CLI Infrastructure &mdash; helpers/</p>
+<div class="module-grid">
+  <a href="helpers/index.html" class="module-card">
+    <h3>helpers/</h3>
+    <div class="tagline">chalk/ora output + OpenAI/llama prompter wrappers</div>
+    <p>3 files providing terminal UX (<code>OutputHelper</code>) and LLM access (<code>OpenAIClient</code>, <code>LlamaPrompter</code>). Used by every example for consistent CLI presentation.</p>
+    <div class="stats"><span>152 LOC</span><span>3 files</span><span>chalk + ora + openai</span></div>
+  </a>
+</div>
+
+<h2 id="navigation">Navigation Guide</h2>
+<table style="max-width:800px">
+<tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+<tr><td><strong>L0 &mdash; Project Hub</strong> (this page)</td><td>Philosophy, design decisions, module map, end-to-end flows</td><td>Getting oriented; understanding the big picture</td></tr>
+<tr><td><strong>L1 &mdash; Module Overview</strong></td><td>Module rationale, design decisions, narrated walkthrough, performance profile</td><td>Understanding what a module does and why</td></tr>
+<tr><td><strong>L2 &mdash; Sub-Module Deep Dive</strong></td><td>Annotated code walkthroughs, classes, edge cases, configuration knobs</td><td>Implementing, debugging, or extending</td></tr>
+<tr><td><strong>Search</strong></td><td>Full-text search across all wiki pages</td><td>Finding a specific term or class fast</td></tr>
+</table>
+
+<h2 id="data-flows">&#128279; Key Data Flows</h2>
+
+<h3 id="flow-loader-to-chunks">Flow A &mdash; Document loaded, split, and embedded</h3>
+<p>The classic preprocessing pipeline. Annotations explain WHY each stage exists.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant PDF as PDFLoader
+    participant Split as RecursiveCharacterTextSplitter
+    participant Cache as EmbeddingCache
+    participant EM as EmbeddingModel
+    participant Llama as node-llama-cpp
+    U->>PDF: new PDFLoader(url).load()
+    Note over PDF: WHY: pdf-parse normalises<br/>whitespace + page boundaries
+    PDF-->>U: Document[] with metadata.page
+    U->>Split: splitDocuments(docs)
+    Note over Split: WHY: chunks must fit context window<br/>and respect paragraph/sentence boundaries
+    Split-->>U: Document[] (chunked, with overlap)
+    U->>EM: embedDocuments(texts)
+    EM->>Cache: get(text)
+    alt Cache hit
+        Cache-->>EM: vector
+        Note over Cache,EM: WHY: embedding is the slow path<br/>~10-50ms per call
+    else Cache miss
+        EM->>Llama: ctx.getEmbeddingFor(text)
+        Llama-->>EM: Float32Array[384]
+        EM->>Cache: set(text, vector)
+    end
+    EM-->>U: number[384][]
+</pre>
+</div>
+
+<h3 id="flow-multi-query">Flow B &mdash; Advanced retrieval with multi-query and RRF</h3>
+<p>Lesson 06/04 wires together LLM-driven query expansion, parallel retrieval, and rank fusion.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User Query
+    participant LLM as LlamaPrompter
+    participant Retr as retrieveParallel()
+    participant DB as embedded-vector-db
+    participant Fuse as rrfFuse(k=60)
+    participant Gen as ChatLlamaCpp
+    U->>LLM: "rewrite as 3 paraphrases"
+    Note over LLM: WHY: single query misses<br/>vocabulary mismatches
+    LLM-->>U: [orig, para1, para2]
+    U->>Retr: retrieveParallel(queries)
+    par embed + search per query
+        Retr->>DB: search(NS, vec1, k=5)
+        Retr->>DB: search(NS, vec2, k=5)
+        Retr->>DB: search(NS, vec3, k=5)
+    end
+    DB-->>Retr: 3 ranked lists
+    Retr->>Fuse: rrfFuse(lists)
+    Note over Fuse: WHY: similarity scores from<br/>different queries aren't comparable
+    Fuse-->>U: top-N fused
+    U->>Gen: prompt + retrieved context
+    Gen-->>U: grounded answer
+</pre>
+</div>
+
+<h3 id="flow-tutorial">Flow C &mdash; The reader's path through the curriculum</h3>
+<p>Each lesson teaches one concept then layers complexity. The promotion frontier from <code>examples/</code> to <code>src/</code> is the dotted edge.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  L0["00 How RAG works<br/>(keyword)"] --> L1["01 LLM basics"]
+  L1 --> L2["02 Data loading"]
+  L2 --> L3["03 Splitting"]
+  L3 --> L4["04 Embeddings"]
+  L4 --> L5a["05/01 In-memory store"]
+  L5a --> L5b["05/02 NN search"]
+  L5b --> L5c["05/03 Metadata filtering"]
+  L5c --> L6a["06/01 Basic retrieval"]
+  L6a --> L6b["06/02 Query preprocess"]
+  L6b --> L6c["06/03 Hybrid search"]
+  L6c --> L6d["06/04 Multi-query"]
+  L6d --> L6e["06/05 Query rewriting"]
+  L6e -.->|promotion frontier| Lib["src/retrievers/<br/>(scaffold)"]
+</pre>
+</div>
+
+<h2 id="boundary">How <code>src/</code> &amp; <code>examples/</code> Connect</h2>
+<p>The boundary is one-directional and deliberately thin. <code>examples/</code> imports from <code>src/</code> only the abstractions that have already been promoted (<code>Document</code>, <code>PDFLoader</code>). Everything else &mdash; splitters in lesson 03, vector store wiring in lesson 05 &mdash; is re-implemented inline. <code>src/</code> never imports from <code>examples/</code>. This is the <em>cognitive-locality contract</em>: lessons stay self-readable; the library is downstream of the curriculum, not the reverse.</p>
+<blockquote><strong>Key insight:</strong> Examples teach. <code>src/</code> crystallises. Helpers ornament. Reading the empty <code>src/</code> stubs (<code>chains/</code>, <code>retrievers/</code>, <code>vector-stores/</code>, <code>prompts/</code>) tells you exactly which lessons are next on the author's roadmap.</blockquote>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre><code>rag-from-scratch/
+&#9500;&#9472;&#9472; src/                              &larr; The library half
+&#9474;   &#9500;&#9472;&#9472; index.js                      &larr; Re-exports every sub-module
+&#9474;   &#9500;&#9472;&#9472; embeddings/                   &larr; Mature: text -> vectors with cache
+&#9474;   &#9500;&#9472;&#9472; text-splitters/               &larr; Mature: chunk + overlap strategies
+&#9474;   &#9500;&#9472;&#9472; loaders/                      &larr; Partial: only PDFLoader filled
+&#9474;   &#9500;&#9472;&#9472; llms/                         &larr; Mature: BaseLLM + LlamaCpp
+&#9474;   &#9500;&#9472;&#9472; chat-models/                  &larr; Minimal: ChatLlamaCpp (32 LOC)
+&#9474;   &#9500;&#9472;&#9472; utils/                        &larr; Document + llama_cpp factories
+&#9474;   &#9500;&#9472;&#9472; chains/                       &larr; Stub (interface promised, empty files)
+&#9474;   &#9500;&#9472;&#9472; retrievers/                   &larr; Stub
+&#9474;   &#9500;&#9472;&#9472; vector-stores/                &larr; Stub
+&#9474;   &#9492;&#9472;&#9472; prompts/                      &larr; Stub (templates/ has 3 prompt strings)
+&#9500;&#9472;&#9472; examples/                         &larr; The curriculum (15 lessons)
+&#9474;   &#9500;&#9472;&#9472; 00_how_rag_works/             &larr; Pure JS, no embeddings
+&#9474;   &#9500;&#9472;&#9472; 01_intro_to_llms/             &larr; node-llama-cpp basics + wrapper
+&#9474;   &#9500;&#9472;&#9472; 02_data_loading/              &larr; PDF parsing
+&#9474;   &#9500;&#9472;&#9472; 03_text_splitting_and_chunking/
+&#9474;   &#9500;&#9472;&#9472; 04_intro_to_embeddings/       &larr; similarity then generation (2 sub-lessons)
+&#9474;   &#9500;&#9472;&#9472; 05_building_vector_store/     &larr; in-memory, NN search, metadata (3 sub-lessons)
+&#9474;   &#9492;&#9472;&#9472; 06_retrieval_strategies/      &larr; basic, query-prep, hybrid, multi-query, rewriting (5 sub-lessons)
+&#9500;&#9472;&#9472; helpers/                          &larr; CLI chrome + LLM wrappers (3 files)
+&#9500;&#9472;&#9472; models/                           &larr; .gitkeep; users put GGUFs here
+&#9500;&#9472;&#9472; images/                           &larr; README diagrams
+&#9500;&#9472;&#9472; package.json                      &larr; "type":"module", 8 runtime deps
+&#9500;&#9472;&#9472; README.md DOWNLOAD.md             &larr; Setup + concept overview
+&#9492;&#9472;&#9472; .env_example                      &larr; OPENAI_API_KEY (optional)
+</code></pre>
+</details>
+
+<h2 id="tech-stack">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>Language</h4><p>JavaScript (ESM only). <code>"type":"module"</code> in package.json. Node 18+. No transpiler.</p></div>
+  <div class="card"><h4>Build System</h4><p>None. <code>npm install</code> then <code>node examples/&hellip;/example.js</code>. The "no black boxes" promise extends to the build pipeline.</p></div>
+  <div class="card"><h4>Runtime Deps</h4><p><code>node-llama-cpp</code> (local LLM), <code>embedded-vector-db</code> (HNSW), <code>pdf-parse</code>, <code>openai</code>, <code>chalk</code>, <code>ora</code>, <code>boxen</code>, <code>dotenv</code>.</p></div>
+  <div class="card"><h4>Models</h4><p><code>bge-small-en-v1.5.Q8_0.gguf</code> for embeddings (384-d). <code>Qwen3-1.7B.Q8_0</code> or similar for generation. See <code>DOWNLOAD.md</code>.</p></div>
+</div>
+
+<div class="footer"><a href="search.html">Search</a> &nbsp;|&nbsp; rag-from-scratch wiki &middot; generated 2026-05-06</div>
+
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(btn) btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  if(btn) btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){document.querySelectorAll('pre').forEach(function(pre){if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(){var c=pre.querySelector('code');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+(function(){var main=document.querySelector('main');if(!main)return;var hero=document.querySelector('.hero');if(!hero)return;var words=main.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var rt=document.createElement('p');rt.style.color='var(--text-muted)';rt.style.fontSize='.85rem';rt.style.marginTop='.5rem';rt.innerHTML='\u23F1 ~'+mins+' min read';hero.appendChild(rt);})();
+(function(){document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key==='j'||e.key==='k'){var hs=Array.from(document.querySelectorAll('h2[id]'));var sy=window.scrollY;var idx=-1;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top+sy<=sy+50)idx=i;}if(e.key==='j')idx=Math.min(hs.length-1,idx+1);else idx=Math.max(0,idx-1);if(hs[idx])hs[idx].scrollIntoView({behavior:'smooth'});}});})();
+
+document.querySelectorAll('pre code').forEach(function(b){try{hljs.highlightElement(b);}catch(e){}});
+</script>
+
+<!-- VERSION_SWITCHER_START -->
+<style>.version-switcher{display:inline-flex;align-items:center;gap:8px;margin-top:1rem;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:8px;padding:6px 14px}
+.version-label{color:var(--text-muted,#8b949e);font-size:.85rem}
+.version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
+@media print{.version-switcher{display:none!important}}</style>
+<script>(function(){
+  var versions=[{"timestamp":"20260506_132429","date":"2026-05-06","rev":"38e1a7a","pages":11,"latest":true}];
+  if(!versions||versions.length<2)return;
+  var dirPath=location.pathname.replace(/[^/]*$/,'');
+  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
+  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
+  var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
+  var wrap=document.createElement('div');
+  wrap.className='version-switcher';
+  var lbl=document.createElement('span');
+  lbl.className='version-label';
+  lbl.textContent='Version:';
+  var sel=document.createElement('select');
+  sel.className='version-select';
+  sel.setAttribute('aria-label','Switch wiki version');
+  versions.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v.timestamp;
+    var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+    o.textContent=v.date+rev+(v.latest?' (latest)':'');
+    if(v.timestamp===curTs)o.selected=true;
+    sel.appendChild(o);
+  });
+  wrap.appendChild(lbl);
+  wrap.appendChild(sel);
+  var hero=document.querySelector('.hero');
+  if(hero)hero.appendChild(wrap);
+  sel.addEventListener('change',function(){
+    var newTs=this.value;
+    if(newTs===curTs)return;
+    location.href=projectBase+newTs+'/index.html';
+  });
+})();</script>
+<!-- VERSION_SWITCHER_END -->
+</body></html>

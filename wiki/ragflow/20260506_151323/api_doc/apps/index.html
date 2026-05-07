@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/api/apps">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <title>API Apps Layer - RAGFlow Wiki</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #0066cc;
+            --accent-hover: #0052a3;
+            --success: #28a745;
+            --error: #d32f2f;
+            --warning: #ffc107;
+            --code-bg: #f8f8f8;
+            --code-text: #212121;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #f5f5f5;
+            --text-light: #b0b0b0;
+            --accent: #6db3f2;
+            --accent-hover: #4a9edc;
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ffb300;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text);
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--code-bg);
+        }
+        
+        .breadcrumbs {
+            padding: 12px 20px;
+            font-size: 13px;
+            color: var(--text-light);
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .breadcrumbs a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .hero {
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        
+        .hero p {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        
+        .intro-box {
+            background-color: var(--surface);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text-light);
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        
+        h4 {
+            font-size: 14px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        code {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        tr:hover {
+            background-color: var(--code-bg);
+        }
+        
+        .diagram-container {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+            font-size: 12px;
+            z-index: 50;
+        }
+        
+        .back-to-top:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .back-to-top.visible {
+            display: block;
+        }
+        
+        .collapsible {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .collapsible:hover {
+            background-color: var(--code-bg);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .collapsible.active ~ .collapsible-content {
+            max-height: 2000px;
+        }
+        
+        .collapsible-content {
+            background-color: var(--code-bg);
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-top: none;
+            margin-bottom: 12px;
+        }
+        
+        .focus-badge {
+            background-color: var(--accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+    @media print{.theme-toggle,.skip-link,.back-to-top,.copy-btn,.diagram-overlay{display:none!important}body{background:#fff!important;color:#000!important}.card,.diagram-container{break-inside:avoid}}</style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <header>
+        <div class="header-left">
+            <div class="logo">RAGFlow</div>
+            <nav>
+                <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">API Overview</a>
+                <a title="RAGFlow API Module - Documentation Hub" href="../index.html">Documentation</a>
+                <a href="index.html">Apps</a>
+            </nav>
+        </div>
+        <button class="theme-toggle" aria-label="Toggle light/dark theme" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="breadcrumbs">
+        <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">RAGFlow Wiki</a> › <a title="RAGFlow API Module - Documentation Hub" href="../index.html">API Module</a> › Apps Layer
+    </div>
+    
+    
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">📚 What is this &amp; why does it exist?</h3>
+<p>REST API handler layer that translates HTTP requests into service calls. Organized as Flask blueprints by domain (kb, document, dialog, conversation, user). Owns authentication, request validation, multi-tenancy enforcement, and JSON response shaping.</p>
+<details style="margin-top:.8rem;"><summary style="cursor:pointer;color:var(--accent2);font-weight:600;">💡 Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Think of apps/ as the front desk of a hotel. Guests (HTTP clients) walk in with requests; the front desk staff verify identity (JWT/API key auth), check booking details (request validation), and dispatch to the right department (services). They never cook the food themselves — they just relay orders accurately.</p></details>
+</div>
+
+<main id="main">
+        <div class="hero">
+            <h1>Apps Layer: HTTP & WebSocket Handlers</h1>
+            <p>REST endpoints, blueprint registration, request validation, and auth middleware that bridges HTTP clients to RAGFlow's business <a href="../../web_doc/services/index.html">services</a>.</p>
+        </div>
+        
+        <div class="intro-box">
+            <strong>Analogy:</strong> The apps/ layer is like the "front desk" of a hotel. It accepts HTTP requests, validates guest credentials (JWT tokens), checks tenant isolation, and routes requests to the appropriate <a href="../../internal_doc/service/index.html">service</a> department. Requests that don't match expectations or fail auth are rejected at the desk before consuming service resources.
+        </div>
+        
+        <h2>Purpose & Architecture</h2>
+        
+        <p>The <code>apps/</code> sub-module contains all REST endpoint handlers and WebSocket routes for the RAGFlow <a href="../index.html">API</a>. It serves as the HTTP-to-domain adapter layer:</p>
+        
+        <ul>
+            <li><strong>REST Handlers:</strong> One Python file per resource (e.g., <code>document.py</code>, <code>dialog.py</code>, <code>knowledge_base.py</code>). Each <a href="../../internal_doc/handler/index.html">handler</a> is a Quart async function decorated with route predicates.</li>
+            <li><strong>Blueprint Registration:</strong> Endpoints are organized into blueprints in <code>__init__.py</code>. Multiple blueprints (e.g., <code>bp_document</code>, <code>bp_dialog</code>) are registered with the main Quart <a href="../../rag_doc/app/index.html">app</a> at server startup.</li>
+            <li><strong>Auth Middleware:</strong> All handlers are protected by JWT verification (via <code>auth_required</code> decorator) and tenant isolation checks (multi-tenancy enforcement at the auth middleware level).</li>
+            <li><strong>Request Validation:</strong> Quart's request object provides access to JSON body, query params, and URL path params. Handlers validate request shape and delegate business logic to domain services.</li>
+            <li><strong>Response Shaping:</strong> Handlers convert domain objects (from services) to JSON responses and appropriate HTTP status codes (200 OK, 201 Created, 400 Bad Request, 403 Forbidden, 404 Not Found, 500 <a href="../../internal_doc/index.html">Internal</a> Error).</li>
+            <li><strong>WebSocket Support:</strong> Some handlers support WebSocket upgrades (e.g., for real-time chat progress streaming). WebSocket handlers manage connection lifecycle and push updates to clients.</li>
+        </ul>
+        
+        <h2>Handler Patterns & Request <a href="../../rag_doc/flow/index.html">Flow</a></h2>
+        
+        <h3>Typical REST Handler Structure</h3>
+        
+        <p>Each REST handler follows this pattern:</p>
+        
+        <pre><code>@bp_document.route('/documents', methods=['GET'])
+@auth_required
+async def list_documents():
+    # 1. Extract user identity from request context (auth_required sets it)
+    tenant_id = g.tenant_id
+    user_id = g.user_id
+    
+    # 2. Parse request parameters
+    limit = request.args.get('limit', 10, type=int)
+    offset = request.args.get('offset', 0, type=int)
+    
+    # 3. Call service layer
+    service = DocumentService()
+    docs = service.list_documents(tenant_id, limit, offset)
+    
+    # 4. Shape response
+    return jsonify({
+        'success': True,
+        'data': [doc.to_dict() for doc in docs],
+        'total': len(docs)
+    }), 200
+</code></pre>
+        
+        <h3>Authentication & Auth Middleware</h3>
+        
+        <p>The <code>auth_required</code> decorator (from <code>common/auth.py</code>) performs these checks before the handler is invoked:</p>
+        
+        <ol>
+            <li><strong>Extract JWT:</strong> Read Authorization header, extract Bearer token.</li>
+            <li><strong>Decode JWT:</strong> Verify signature using secret key. If invalid, raise 401 Unauthorized.</li>
+            <li><strong>Load <a href="../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">User</a>:</strong> Query database for user by sub claim. If not found, raise 401.</li>
+            <li><strong>Load <a href="../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Tenant</a>:</strong> Fetch user's default tenant_id. If tenant doesn't exist or is inactive, raise 403 Forbidden.</li>
+            <li><strong>Set Request Context:</strong> Store <code>user_id</code>, <code>tenant_id</code>, <code>user_object</code> in Quart's <code>g</code> (request-scoped storage).</li>
+            <li><strong>Verify Password Hash:</strong> For sensitive operations (account deletion, password reset), request body may include password. Verify via bcrypt before proceeding.</li>
+        </ol>
+        
+        <p>The tenant_id enforcement happens at TWO levels:</p>
+        
+        <ul>
+            <li><strong>Auth middleware:</strong> Ensures user belongs to tenant</li>
+            <li><strong>Service layer:</strong> Filters queries and validates mutations by tenant_id</li>
+        </ul>
+        
+        <h3>Request Validation Patterns</h3>
+        
+        <p>Most handlers validate request shape to prevent downstream errors:</p>
+        
+        <pre><code>@bp_document.route('/documents', methods=['POST'])
+@auth_required
+async def create_document():
+    # Validate request JSON
+    data = await request.json
+    if not data.get('name'):
+        return jsonify({'error': 'Field "name" is required'}), 400
+    
+    if not isinstance(data.get('name'), str):
+        return jsonify({'error': 'Field "name" must be a string'}), 400
+    
+    max_len = 255
+    if len(data['name']) > max_len:
+        return jsonify({'error': f'Field "name" must be <= {max_len} chars'}), 400
+    
+    # Proceed with validated data
+    service = DocumentService()
+    doc = service.create_document(
+        tenant_id=g.tenant_id,
+        user_id=g.user_id,
+        name=data['name'],
+        description=data.get('description', '')
+    )
+    return jsonify(doc.to_dict()), 201
+</code></pre>
+        
+        <h2>Blueprint Organization</h2>
+        
+        <p>Blueprints in <code>apps/__init__.py</code> are organized by resource type:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Blueprint Name</th>
+                    <th>Module</th>
+                    <th>Resource(s)</th>
+                    <th>Key Routes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>bp_document</td>
+                    <td>document.py</td>
+                    <td>Documents</td>
+                    <td>GET/POST /documents, GET/DELETE /documents/{id}, POST /documents/{id}/upload</td>
+                </tr>
+                <tr>
+                    <td>bp_dialog</td>
+                    <td>dialog.py</td>
+                    <td>Conversations</td>
+                    <td>GET/POST /dialogs, GET/DELETE /dialogs/{id}, POST /dialogs/{id}/message</td>
+                </tr>
+                <tr>
+                    <td>bp_knowledge_base</td>
+                    <td>knowledge_base.py</td>
+                    <td>Knowledge Bases</td>
+                    <td>GET/POST /knowledge-bases, GET/DELETE /knowledge-bases/{id}</td>
+                </tr>
+                <tr>
+                    <td>bp_chunk</td>
+                    <td>chunk.py</td>
+                    <td><a href="../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Document</a> Chunks</td>
+                    <td>GET /documents/{id}/chunks, GET /chunks/{chunk_id}, POST /chunks/{chunk_id}/rerank</td>
+                </tr>
+                <tr>
+                    <td>bp_task</td>
+                    <td>task.py</td>
+                    <td>Background Tasks</td>
+                    <td>GET /tasks, GET /tasks/{id}, POST /tasks/{id}/cancel</td>
+                </tr>
+                <tr>
+                    <td>bp_llm</td>
+                    <td><a href="../../rag_doc/llm/index.html">llm</a>.py</td>
+                    <td>LLM Configuration</td>
+                    <td>GET/POST /llm-models, GET/DELETE /llm-models/{id}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Error Handling & HTTP Status Code Mapping</h2>
+        
+        <p>The apps layer converts domain exceptions to HTTP status codes. <a href="../../common/index.html">Common</a> patterns:</p>
+        
+        <pre><code>try:
+    service = DocumentService()
+    doc = service.get_document(doc_id, tenant_id=g.tenant_id)
+except DocumentNotFound:
+    return jsonify({'error': 'Document not found'}), 404
+except TenantMismatch:
+    return jsonify({'error': 'Access denied'}), 403
+except ValidationError as e:
+    return jsonify({'error': str(e)}), 400
+except InternalError as e:
+    # Log error details
+    logger.exception(f"Internal error: {e}")
+    return jsonify({'error': 'Internal server error'}), 500
+</code></pre>
+        
+        <h2>WebSocket Handlers & Real-Time Updates</h2>
+        
+        <p>Some handlers support WebSocket upgrade to stream real-time updates:</p>
+        
+        <pre><code>@bp_document.websocket('/documents/{doc_id}/progress')
+@auth_required
+async def stream_document_progress(doc_id):
+    ws = websocket.receive()
+    tenant_id = g.tenant_id
+    
+    try:
+        doc = DocumentService().get_document(doc_id, tenant_id)
+    except DocumentNotFound:
+        return jsonify({'error': 'Document not found'}), 404
+    
+    # Subscribe to task progress updates
+    task_id = doc.task_id
+    
+    # Stream progress from Redis every 500ms
+    while True:
+        progress = redis_client.get(f'task:{task_id}:progress')
+        await websocket.send(json.dumps({
+            'task_id': task_id,
+            'progress': json.loads(progress)
+        }))
+        await asyncio.sleep(0.5)
+</code></pre>
+        
+        <h2>Multi-Tenancy Enforcement in Apps Layer</h2>
+        
+        <p>The apps layer enforces tenant isolation at the handler level before delegating to services:</p>
+        
+        <ul>
+            <li><strong>Auth middleware:</strong> All <code>@auth_required</code> handlers have access to <code>g.tenant_id</code>, which is pre-verified to belong to the authenticated user.</li>
+            <li><strong>Explicit tenant_id passing:</strong> Handlers MUST pass <code>tenant_id=g.tenant_id</code> to all service calls. Never trust request parameters for tenant_id; use the auth middleware value.</li>
+            <li><strong>URL path isolation:</strong> Some routes are tenant-aware (e.g., <code>/tenants/{tenant_id}/documents</code>). Always validate that the URL path tenant_id matches <code>g.tenant_id</code>.</li>
+        </ul>
+        
+        <h2>Key Files & Modules</h2>
+        
+        <ul>
+            <li><code>apps/__init__.py</code> — Blueprint registration, Quart app setup</li>
+            <li><code>apps/document.py</code> — Document CRUD and upload handlers</li>
+            <li><code>apps/dialog.py</code> — <a href="../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Conversation</a>/dialog handlers</li>
+            <li><code>apps/knowledge_base.py</code> — Knowledge base management handlers</li>
+            <li><code>apps/chunk.py</code> — Document chunk queries and reranking</li>
+            <li><code>apps/task.py</code> — Background task status and cancellation</li>
+            <li><code>apps/llm.py</code> — LLM model configuration</li>
+            <li><code>common/auth.py</code> — <code>auth_required</code> decorator, JWT decode, password hashing (bcrypt)</li>
+            <li><code>common/exceptions.py</code> — Custom exception classes (DocumentNotFound, TenantMismatch, ValidationError, etc.)</li>
+        </ul>
+        
+        <h2>Design Decisions & Trade-offs</h2>
+        
+        <p>The apps layer embodies several key design decisions:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Decision</th>
+                    <th>Rationale</th>
+                    <th>Trade-off</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quart async handlers</td>
+                    <td>High concurrency for I/O-bound requests without threading overhead</td>
+                    <td>Requires async/await syntax; not all libraries are async-ready</td>
+                </tr>
+                <tr>
+                    <td>Blueprints for organization</td>
+                    <td>Each resource has a single blueprint, making routes modular and testable</td>
+                    <td>More files to manage; blueprint imports must be explicit in __init__.py</td>
+                </tr>
+                <tr>
+                    <td>auth_required decorator</td>
+                    <td>Centralized auth logic, consistent across all protected routes</td>
+                    <td>Adds latency (JWT decode, DB query for user/tenant); can't be bypassed per-route</td>
+                </tr>
+                <tr>
+                    <td>Tenant ID in g context</td>
+                    <td>Prevents accidental data leaks; tenant_id is never derived from request params</td>
+                    <td>Requires auth_required wrapper on every handler that needs tenant_id</td>
+                </tr>
+                <tr>
+                    <td>Exception-to-HTTP-status mapping</td>
+                    <td>Clean separation of concerns; services don't know HTTP semantics</td>
+                    <td>Requires try/except in every handler; error messages may lose detail in transit</td>
+                </tr>
+                <tr>
+                    <td>WebSocket for real-time</td>
+                    <td>Low-latency, bidirectional communication; ideal for progress streaming</td>
+                    <td>Connection management overhead; can't use same pool as HTTP handlers</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Performance Considerations</h2>
+        
+        <p>The apps layer is designed to be lightweight and fast:</p>
+        
+        <ul>
+            <li><strong>Auth latency:</strong> Each request incurs JWT decode (~1ms) and user/tenant DB query (~3–5ms). Consider caching user objects in <code>g</code> or Redis for repeated requests.</li>
+            <li><strong>Validation overhead:</strong> Request validation is O(1) for basic checks (field existence, type). Custom validators (e.g., name length, regex) add negligible overhead.</li>
+            <li><strong>Response serialization:</strong> Converting domain objects to JSON is typically <1ms. Use incremental JSON streaming for large responses (e.g., paginated lists).</li>
+            <li><strong>Blueprint registration:</strong> Blueprint registration happens at server startup, not per-request. Negligible runtime cost.</li>
+        </ul>
+        
+        <h2>Security Implications</h2>
+        
+        <ul>
+            <li><strong>JWT validation:</strong> All tokens must be valid and non-expired. Secret key must be strong and protected.</li>
+            <li><strong>Password hashing:</strong> Passwords are hashed with bcrypt before transmission. Verify hash on sensitive operations (account deletion, password reset).</li>
+            <li><strong>Tenant isolation:</strong> Apps layer enforces tenant_id checks before service calls. Missing checks = data leak.</li>
+            <li><strong>CORS & CSRF:</strong> API endpoints should enforce CORS headers to prevent cross-origin attacks. CSRF tokens not needed for stateless JWT auth.</li>
+            <li><strong>Rate limiting:</strong> Consider per-user or per-IP rate limits on sensitive endpoints (login, password reset, document upload).</li>
+        </ul>
+        
+        <h2>Future Enhancements</h2>
+        
+        <ul>
+            <li><strong>API Versioning:</strong> Introduce versioned endpoints (e.g., <code>/api/v2/documents</code>) to support gradual schema evolution without breaking clients.</li>
+            <li><strong>OpenAPI/Swagger:</strong> Generate OpenAPI spec from handlers; serve Swagger UI for interactive exploration.</li>
+            <li><strong>Response Pagination:</strong> Standardize pagination across all list endpoints; support cursor-based pagination for large datasets.</li>
+            <li><strong>Webhook Callbacks:</strong> Allow external systems to subscribe to events (document upload complete, task failure) via webhook URLs.</li>
+            <li><strong>GraphQL Alternative:</strong> Consider GraphQL endpoint for flexible querying of related resources in a single request.</li>
+        </ul>
+    </main>
+    
+    <button class="back-to-top" id="back-to-top">↑ Top</button>
+    
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        
+        function loadTheme() {
+            const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+            htmlEl.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        loadTheme();
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neutra-ip-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        // Back-to-top button
+        const backToTopBtn = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Copy code blocks
+        document.querySelectorAll('pre').forEach((pre, idx) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

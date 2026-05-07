@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/api/db">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <title>Peewee Schema Deep-Dive - RAGFlow Wiki</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #0066cc;
+            --accent-hover: #0052a3;
+            --code-bg: #f8f8f8;
+            --code-text: #212121;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #f5f5f5;
+            --text-light: #b0b0b0;
+            --accent: #6db3f2;
+            --accent-hover: #4a9edc;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px; text-decoration: none; z-index: 100; }
+        .skip-link:focus { top: 0; }
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--accent); }
+        .theme-toggle { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text); }
+        .theme-toggle:hover { background-color: var(--code-bg); }
+        .breadcrumbs { padding: 12px 20px; font-size: 13px; color: var(--text-light); background-color: var(--surface); border-bottom: 1px solid var(--border); }
+        .breadcrumbs a { color: var(--accent); text-decoration: none; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .hero { margin-bottom: 40px; }
+        h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { font-size: 16px; color: var(--text-light); margin-bottom: 20px; }
+        h2 { font-size: 24px; margin-top: 40px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+        h4 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+        p { margin-bottom: 12px; line-height: 1.8; }
+        ul, ol { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        pre { background-color: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 4px; overflow-x: auto; margin-bottom: 16px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); position: relative; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background-color: var(--accent-hover); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background-color: var(--code-bg); font-weight: 600; }
+        tr:hover { background-color: var(--code-bg); }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; display: none; font-size: 12px; z-index: 50; }
+        .back-to-top:hover { background-color: var(--accent-hover); }
+        .back-to-top.visible { display: block; }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <header>
+        <div class="header-left">
+            <div class="logo">RAGFlow</div>
+            <nav>
+                <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../../index.html">API Overview</a>
+                <a title="RAGFlow API Module - Documentation Hub" href="../../index.html">Documentation</a>
+                <a title="API Database Layer - RAGFlow Wiki" href="../index.html">Database</a>
+            </nav>
+        </div>
+        <button class="theme-toggle" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="breadcrumbs">
+        <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../../index.html">RAGFlow Wiki</a> › <a title="RAGFlow API Module - Documentation Hub" href="../../index.html">API Module</a> › <a title="API Database Layer - RAGFlow Wiki" href="../index.html">Database</a> › Peewee Schema Deep-Dive
+    </div>
+    
+    <main id="main">
+        <div class="hero">
+            <h1>Peewee ORM Schema Deep-Dive</h1>
+            <p>Comprehensive analysis of RAGFlow's database schema design, custom field types, relationships, migration patterns, and performance characteristics.</p>
+        </div>
+        
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#overview">Schema Overview</a></li>
+            <li><a href="#models">Model Definitions & Field Types</a></li>
+            <li><a href="#relationships">Foreign Key Relationships</a></li>
+            <li><a href="#custom-fields">Custom Peewee Fields</a></li>
+            <li><a href="#migrations">Migration Patterns</a></li>
+            <li><a href="#pooling">Connection Pooling</a></li>
+            <li><a href="#deadlock">Deadlock Retry Pattern</a></li>
+            <li><a href="#optimization">Query Optimization & Indexing</a></li>
+            <li><a href="#soft-deletes">Soft Delete Implementation</a></li>
+        </ul>
+        
+        <h2 id="overview">Schema Overview</h2>
+        
+        <p>RAGFlow's database schema is organized around five core entity groups:</p>
+        
+        <ol>
+            <li><strong>Multi-Tenancy Core:</strong> Tenant, User (belongs to Tenant)</li>
+            <li><strong>Content Management:</strong> Document, Chunk, KnowledgeBase, File</li>
+            <li><strong>Conversation/Dialog:</strong> Dialog, Conversation, Message</li>
+            <li><strong>Task Queue:</strong> Task (background processing state)</li>
+            <li><strong>Context & Settings:</strong> Memory, LLMModel, TeacherModel</li>
+        </ol>
+        
+        <p>All tables include standard audit columns:</p>
+        <ul>
+            <li><code>id</code> (Primary Key, UUID or autoincrement)</li>
+            <li><code>created_at</code> (Timestamp, auto-set on insert)</li>
+            <li><code>updated_at</code> (Timestamp, auto-set on update)</li>
+            <li><code>deleted_at</code> (Optional, NULL = active, set for soft-deleted rows)</li>
+            <li><code>tenant_id</code> (Foreign Key to Tenant, for multi-tenancy isolation)</li>
+        </ul>
+        
+        <h2 id="models">Model Definitions & Field Types</h2>
+        
+        <p>Peewee models map to MySQL tables. Here's a detailed breakdown of schema:</p>
+        
+        <h3>Tenant (Multi-tenancy root)</h3>
+        
+        <pre><code>class Tenant(BaseModel):
+    id = CharField(primary_key=True, default=uuid4)
+    name = CharField(unique=True, max_length=255)
+    description = TextField(null=True)
+    created_by = ForeignKeyField(User, backref='created_tenants')
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+</code></pre>
+        
+        <h3>User (Authentication & multi-tenancy)</h3>
+        
+        <pre><code>class User(BaseModel):
+    id = CharField(primary_key=True, default=uuid4)
+    email = CharField(unique=True, max_length=255)
+    password_hash = CharField()  # bcrypt hash, never plaintext
+    tenant_id = ForeignKeyField(Tenant, backref='users')
+    is_active = BooleanField(default=True)
+    is_admin = BooleanField(default=False)
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+</code></pre>
+        
+        <h3>Document (Content entity)</h3>
+        
+        <pre><code>class Document(BaseModel):
+    id = CharField(primary_key=True, default=uuid4)
+    tenant_id = ForeignKeyField(Tenant)  # Multi-tenancy
+    name = CharField(max_length=255)
+    file_type = CharField()  # 'pdf', 'docx', 'txt', etc.
+    file_path = CharField()  # Path in S3/blob storage
+    created_by = ForeignKeyField(User)
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+    deleted_at = DateTimeField(null=True, default=None)  # Soft delete
+</code></pre>
+        
+        <h3>Chunk (Document chunks with embeddings)</h3>
+        
+        <pre><code>class Chunk(BaseModel):
+    id = CharField(primary_key=True, default=uuid4)
+    document_id = ForeignKeyField(Document)  # Parent document
+    content = TextField()  # Text content
+    tokens = IntegerField()  # Token count
+    embedding = ListField()  # Vector (stored as JSON array)
+    created_at = DateTimeField(default=datetime.now)
+    deleted_at = DateTimeField(null=True)  # Soft delete with parent doc
+</code></pre>
+        
+        <h3>Task (Background processing state)</h3>
+        
+        <pre><code>class Task(BaseModel):
+    id = CharField(primary_key=True, default=uuid4)
+    tenant_id = ForeignKeyField(Tenant)
+    document_id = ForeignKeyField(Document, null=True)
+    task_type = CharField()  # 'parse_and_embed', 'fine_tune', etc.
+    status = CharField(
+        default='pending',
+        choices=['pending', 'processing', 'done', 'error']
+    )
+    progress_json = JSONField(default={})  # Custom field type
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+</code></pre>
+        
+        <h2 id="relationships">Foreign Key Relationships</h2>
+        
+        <p>RAGFlow's schema uses foreign keys to express entity relationships:</p>
+        
+        <pre><code>Tenant (1) ---> (N) User
+    |
+    +---> (N) Document
+    |       |
+    |       +---> (N) Chunk
+    |       |
+    |       +---> (1) Task
+    |
+    +---> (N) Dialog
+            |
+            +---> (N) Conversation
+                    |
+                    +---> (N) Message
+
+Document (1) ---> (N) KnowledgeBase (join table)
+LLMModel (1) ---> (N) Dialog (config link)
+</code></pre>
+        
+        <p>Referential Integrity Rules:</p>
+        <ul>
+            <li><strong>ON DELETE CASCADE:</strong> Delete Tenant → delete all Users, Documents, Tasks, Dialogs in that tenant.</li>
+            <li><strong>ON DELETE CASCADE:</strong> Delete Document → delete all Chunks, Tasks for that document.</li>
+            <li><strong>ON DELETE CASCADE:</strong> Delete Dialog → delete all Conversations and Messages.</li>
+            <li><strong>ON DELETE SET NULL:</strong> Delete User → set Message.user_id = NULL (preserve message history).</li>
+        </ul>
+        
+        <h2 id="custom-fields">Custom Peewee Field Types</h2>
+        
+        <p>RAGFlow defines custom field types to handle complex data types in a portable way (works on MySQL and PostgreSQL).</p>
+        
+        <h3>JSONField (Semi-structured data)</h3>
+        
+        <pre><code>class JSONField(TextField):
+    '''Store Python dict/list as JSON, deserialize on fetch.'''
+    
+    def python_value(self, value):
+        if value is None:
+            return None
+        return json.loads(value) if isinstance(value, str) else value
+    
+    def db_value(self, value):
+        if value is None:
+            return None
+        return json.dumps(value)
+
+# Usage:
+task.progress_json = {'percent': 50, 'stage': 'embedding'}
+task.save()
+
+# When fetched, progress_json is automatically deserialized to dict:
+fetched_task = Task.get_by_id(task_id)
+progress = fetched_task.progress_json  # Already a dict, not JSON string
+</code></pre>
+        
+        <h3>ListField (Arrays as JSON)</h3>
+        
+        <pre><code>class ListField(JSONField):
+    '''Store Python list as JSON array.'''
+    
+    def python_value(self, value):
+        result = super().python_value(value)
+        return result if isinstance(result, list) else []
+    
+    def db_value(self, value):
+        return super().db_value(value if isinstance(value, list) else [])
+
+# Usage:
+doc.tags = ['important', 'finance', '2024-q4']
+doc.save()
+</code></pre>
+        
+        <h3>SerializedField (Object serialization)</h3>
+        
+        <pre><code>import pickle
+
+class SerializedField(TextField):
+    '''Store Python object using pickle or JSON.'''
+    
+    def __init__(self, use_json=False, **kwargs):
+        super().__init__(**kwargs)
+        self.use_json = use_json
+    
+    def python_value(self, value):
+        if value is None:
+            return None
+        if self.use_json:
+            return json.loads(value)
+        return pickle.loads(value)
+    
+    def db_value(self, value):
+        if value is None:
+            return None
+        if self.use_json:
+            return json.dumps(value)
+        return pickle.dumps(value)
+
+# Usage:
+context = ConversationContext()
+context.state = {'user_id': 123, 'prefs': {...}}
+context.save()
+</code></pre>
+        
+        <h2 id="migrations">Migration Patterns</h2>
+        
+        <p>RAGFlow uses Peewee migrations for schema changes. Typical workflow:</p>
+        
+        <pre><code># Create new migration:
+python manage.py makemigrations --name add_document_tags
+
+# Review generated migration file in db/migrations/:
+# 001_initial_schema.py
+# 002_add_user_roles.py
+# 003_add_document_tags.py (new)
+
+# Apply migrations:
+python manage.py migrate
+
+# Rollback (undo last migration):
+python manage.py migrate 002_add_user_roles
+</code></pre>
+        
+        <p>Best practices for migrations in production:</p>
+        <ul>
+            <li><strong>Backward compatibility:</strong> Add new columns as NULL-able or with defaults. Never drop columns without backfill.</li>
+            <li><strong>Zero-downtime:</strong> Deploy app that reads both old and new columns, then migrate DB, then app code only uses new column.</li>
+            <li><strong>Test on staging:</strong> Run migration on staging DB first, verify no data loss or performance degradation.</li>
+            <li><strong>Rollback plan:</strong> Keep migrations reversible (down() methods) in case rollback needed.</li>
+        </ul>
+        
+        <h2 id="pooling">Connection Pooling</h2>
+        
+        <p>RAGFlow uses Peewee's built-in connection pool to manage concurrent DB connections:</p>
+        
+        <pre><code># Initialize database with pool:
+from playhouse.pool import PooledMySQLDatabase
+
+database = PooledMySQLDatabase(
+    'ragflow_db',
+    host='localhost',
+    port=3306,
+    user='root',
+    password='...',
+    max_connections=20,
+    timeout=5  # Seconds to wait for connection from pool
+)
+
+# Pool behavior:
+# 1. App server has N concurrent workers (e.g., 10 Gunicorn workers)
+# 2. Each worker borrows a connection from pool when needed
+# 3. Worker executes query, returns connection to pool
+# 4. If all 20 connections in use, next request waits up to 5s
+# 5. Timeout expires -> ConnectionTimeoutError
+</code></pre>
+        
+        <p>Tuning connection pool size:</p>
+        <ul>
+            <li><strong>Small (10–15):</strong> Development, low concurrency. Risk: pool contention under load.</li>
+            <li><strong>Medium (20–30):</strong> Standard production (10–20 app workers). Good balance.</li>
+            <li><strong>Large (40+):</strong> High concurrency or slow queries that hold connections longer. Monitor memory.</li>
+        </ul>
+        
+        <h2 id="deadlock">Deadlock Retry Pattern</h2>
+        
+        <p>MySQL InnoDB can deadlock when two transactions lock the same rows in opposite order:</p>
+        
+        <pre><code>import random
+from peewee import IntegrityError
+
+def retry_on_deadlock(max_retries=3, base_delay=0.1):
+    '''Decorator: retry query on deadlock with exponential backoff.'''
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except IntegrityError as e:
+                    if 'Deadlock' in str(e) and attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 0.1)
+                        print(f"Deadlock on attempt {attempt + 1}, retrying in {delay:.2f}s")
+                        time.sleep(delay)
+                    else:
+                        raise
+        return wrapper
+    return decorator
+
+# Usage:
+@retry_on_deadlock(max_retries=3)
+def update_document_and_task(doc_id, task_id):
+    '''Atomically update document and create task.'''
+    with database.atomic():
+        doc = Document.get_by_id(doc_id)
+        doc.status = 'processing'
+        doc.save()
+        
+        Task.create(document_id=doc_id, status='pending')
+</code></pre>
+        
+        <h2 id="optimization">Query Optimization & Indexing</h2>
+        
+        <p>Performance-critical queries need indexes on frequently-filtered columns:</p>
+        
+        <pre><code>class Document(BaseModel):
+    id = CharField(primary_key=True)
+    tenant_id = ForeignKeyField(Tenant)  # Index: list by tenant
+    created_by = ForeignKeyField(User)   # Index: list by user
+    created_at = DateTimeField()          # Index: date range queries
+    deleted_at = DateTimeField(null=True) # Index: filter active docs
+    
+    # Composite indexes for common queries:
+    # (tenant_id, deleted_at) - list active docs in tenant
+    # (tenant_id, created_at) - list by tenant ordered by time
+
+# SQL:
+# ALTER TABLE document ADD INDEX (tenant_id);
+# ALTER TABLE document ADD INDEX (created_by);
+# ALTER TABLE document ADD INDEX (deleted_at);
+# ALTER TABLE document ADD INDEX (tenant_id, deleted_at);
+</code></pre>
+        
+        <p>Query optimization techniques:</p>
+        <ul>
+            <li><strong>Use indexes:</strong> Filter by indexed columns (tenant_id, created_by, created_at, deleted_at).</li>
+            <li><strong>Pagination:</strong> Use LIMIT + OFFSET for large result sets. Avoid fetching all rows.</li>
+            <li><strong>Selective fields:</strong> Use SELECT * or select(Model.id, Model.name) to fetch only needed columns.</li>
+            <li><strong>Eager loading:</strong> Use prefetch() to batch-load related entities (avoid N+1 queries).</li>
+            <li><strong>Query analysis:</strong> Use EXPLAIN to see execution plan, verify indexes are used.</li>
+        </ul>
+        
+        <h2 id="soft-deletes">Soft Delete Implementation</h2>
+        
+        <p>Soft deletes preserve data while marking it as inactive. Implementation details:</p>
+        
+        <pre><code>class BaseModel(Model):
+    '''Base for all models.'''
+    deleted_at = DateTimeField(null=True, default=None)
+    
+    def soft_delete(self):
+        '''Mark as deleted without removing from DB.'''
+        self.deleted_at = datetime.now()
+        return self.save()
+    
+    def restore(self):
+        '''Restore a soft-deleted entity.'''
+        self.deleted_at = None
+        return self.save()
+    
+    @classmethod
+    def active(cls):
+        '''Query only active (not soft-deleted) rows.'''
+        return cls.select().where(cls.deleted_at.is_null())
+    
+    @classmethod
+    def deleted(cls):
+        '''Query only soft-deleted rows.'''
+        return cls.select().where(cls.deleted_at.is_not_null())
+
+# Usage:
+# Soft delete document
+doc = Document.get_by_id(doc_id)
+doc.soft_delete()
+
+# Query only active documents
+active_docs = Document.active().where(Document.tenant_id == tenant_id)
+
+# Restore deleted document
+deleted_doc = Document.deleted().get(Document.id == doc_id)
+deleted_doc.restore()
+</code></pre>
+        
+        <p>Benefits of soft deletes:</p>
+        <ul>
+            <li>Preserves referential integrity (chunks still reference deleted documents)</li>
+            <li>Enables undo/restore operations</li>
+            <li>Supports audit trails (know when entities were deleted)</li>
+            <li>Simplifies cascading deletes (no need for ON DELETE CASCADE)</li>
+        </ul>
+        
+        <p>Drawbacks:</p>
+        <ul>
+            <li>Storage overhead (soft-deleted rows take up space)</li>
+            <li>Query complexity (must always filter deleted_at.is_null())</li>
+            <li>Data privacy concerns (deleted data still in DB; need separate anonymization/purge mechanism)</li>
+        </ul>
+        
+        <h2>Constraints & Validation</h2>
+        
+        <p>Database constraints enforce data integrity at the schema level:</p>
+        
+        <ul>
+            <li><strong>PRIMARY KEY:</strong> Every model has a unique id (UUID or autoincrement).</li>
+            <li><strong>UNIQUE:</strong> User.email is unique (no duplicate accounts).</li>
+            <li><strong>FOREIGN KEY:</strong> Document.tenant_id must reference valid Tenant.id.</li>
+            <li><strong>NOT NULL:</strong> Critical fields (name, tenant_id, created_at) are NOT NULL.</li>
+            <li><strong>UNSIGNED:</strong> Numeric fields like Task.tokens are UNSIGNED (no negative values).</li>
+        </ul>
+        
+        <p>Services catch constraint violations and convert to domain exceptions:</p>
+        
+        <pre><code>try:
+    user = User.create(email='duplicate@example.com', password_hash='...')
+except peewee.IntegrityError as e:
+    if 'UNIQUE' in str(e):
+        raise ValidationError('Email already exists')
+    raise InternalError(f'DB constraint violation: {e}')
+</code></pre>
+    </main>
+    
+    <button class="back-to-top" id="back-to-top">↑ Top</button>
+    
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        
+        function loadTheme() {
+            const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+            htmlEl.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        loadTheme();
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neutra-ip-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        document.querySelectorAll('pre').forEach((pre) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

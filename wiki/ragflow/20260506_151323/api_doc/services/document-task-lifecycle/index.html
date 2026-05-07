@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/api/db/services">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <title>Document Task Lifecycle Deep-Dive - RAGFlow Wiki</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #0066cc;
+            --accent-hover: #0052a3;
+            --code-bg: #f8f8f8;
+            --code-text: #212121;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #f5f5f5;
+            --text-light: #b0b0b0;
+            --accent: #6db3f2;
+            --accent-hover: #4a9edc;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px; text-decoration: none; z-index: 100; }
+        .skip-link:focus { top: 0; }
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--accent); }
+        .theme-toggle { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text); }
+        .theme-toggle:hover { background-color: var(--code-bg); }
+        .breadcrumbs { padding: 12px 20px; font-size: 13px; color: var(--text-light); background-color: var(--surface); border-bottom: 1px solid var(--border); }
+        .breadcrumbs a { color: var(--accent); text-decoration: none; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .hero { margin-bottom: 40px; }
+        h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { font-size: 16px; color: var(--text-light); margin-bottom: 20px; }
+        h2 { font-size: 24px; margin-top: 40px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+        h4 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+        p { margin-bottom: 12px; line-height: 1.8; }
+        ul, ol { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        pre { background-color: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 4px; overflow-x: auto; margin-bottom: 16px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); position: relative; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background-color: var(--accent-hover); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background-color: var(--code-bg); font-weight: 600; }
+        tr:hover { background-color: var(--code-bg); }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; display: none; font-size: 12px; z-index: 50; }
+        .back-to-top:hover { background-color: var(--accent-hover); }
+        .back-to-top.visible { display: block; }
+    @media print{.theme-toggle,.skip-link,.back-to-top,.copy-btn,.diagram-overlay{display:none!important}body{background:#fff!important;color:#000!important}.card,.diagram-container{break-inside:avoid}}</style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <header>
+        <div class="header-left">
+            <div class="logo">RAGFlow</div>
+            <nav>
+                <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../../index.html">API Overview</a>
+                <a title="RAGFlow API Module - Documentation Hub" href="../../index.html">Documentation</a>
+                <a title="API Services Layer - RAGFlow Wiki" href="../index.html">Services</a>
+            </nav>
+        </div>
+        <button class="theme-toggle" aria-label="Toggle light/dark theme" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="breadcrumbs">
+        <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../../index.html">RAGFlow Wiki</a> › <a title="RAGFlow API Module - Documentation Hub" href="../../index.html">API Module</a> › <a title="API Services Layer - RAGFlow Wiki" href="../index.html">Services</a> › Document Task Lifecycle
+    </div>
+    
+    <main id="main">
+        <div class="hero">
+            <h1>Document Upload to Task Execution Lifecycle</h1>
+            <p>End-to-end walkthrough of document upload, background task execution, progress tracking, and error handling in RAGFlow.</p>
+        </div>
+        
+        <h2>Overview: The Document Lifecycle</h2>
+        
+        <p>When a user uploads a document to RAGFlow, several systems coordinate:</p>
+        
+        <ol>
+            <li><strong><a href="../../index.html">API</a> <a href="../../../internal_doc/handler/index.html">Handler</a> (<a href="../../apps/index.html">apps</a>/):</strong> Receives HTTP POST with file upload.</li>
+            <li><strong><a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">DocumentService</a>:</strong> Validates, creates <a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Document</a> row, saves file to S3/blob storage.</li>
+            <li><strong><a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">TaskService</a>:</strong> Creates <a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Task</a> row (status: pending), pushes to Redis queue.</li>
+            <li><strong>API Returns 202:</strong> Immediate response to client with task_id (no blocking).</li>
+            <li><strong>Background Executor:</strong> Polls Redis queue, pulls task, processes (parse PDF, tokenize, embed chunks).</li>
+            <li><strong>Progress Updates:</strong> Executor updates Task.progress_json, broadcasts via WebSocket.</li>
+            <li><strong>Completion:</strong> Executor marks Task.status = 'done', cleanup.</li>
+        </ol>
+        
+        <h2>Phase 1: API Handler (File Upload)</h2>
+        
+        <h3>Handler Code: POST /api/documents/upload</h3>
+        
+        <pre><code>from quart import request, g
+from apps.documents import document_bp
+
+@document_bp.route('/documents/upload', methods=['POST'])
+@auth_required
+@multi_tenant_required
+async def upload_document():
+    '''Handle file upload, create document, queue task.
+    
+    Returns:
+        202 Accepted with task_id and document_id
+    '''
+    # Validate request
+    if 'file' not in request.files:
+        return {'error': 'file required'}, 400
+    
+    file = request.files['file']
+    if not file.filename:
+        return {'error': 'filename required'}, 400
+    
+    # Get authenticated tenant
+    tenant_id = g.tenant_id  # From auth middleware
+    user_id = g.user_id
+    
+    # Call service (synchronous, blocking on DB writes only)
+    doc_service = DocumentService()
+    try:
+        result = doc_service.upload(
+            file=file,
+            tenant_id=tenant_id,
+            kb_id=request.args.get('kb_id')
+        )
+        document = result['document']
+        task = result['task']
+        
+        return {
+            'document_id': document.id,
+            'task_id': task.id,
+            'status': 'processing'
+        }, 202  # Accepted, async processing started
+        
+    except ValidationError as e:
+        return {'error': str(e)}, 400
+    except Exception as e:
+        logger.exception(f"Upload error: {e}")
+        return {'error': 'upload failed'}, 500
+</code></pre>
+        
+        <h2>Phase 2: Document <a href="../../../internal_doc/service/index.html">Service</a> (Save & Queue)</h2>
+        
+        <h3>DocumentService.upload() Implementation</h3>
+        
+        <pre><code>class DocumentService(CommonService):
+    def upload(self, file, tenant_id: str, kb_id: str = None):
+        '''Upload document: create DB row, save file, create task.'''
+        
+        # 1. Validate inputs
+        if not file or not file.filename:
+            raise ValidationError('file required')
+        
+        allowed_types = {'pdf', 'docx', 'xlsx', 'txt', 'pptx'}
+        file_ext = file.filename.split('.')[-1].lower()
+        if file_ext not in allowed_types:
+            raise ValidationError(f'type {file_ext} not allowed')
+        
+        # 2. Create Document row (DB transaction)
+        document = None
+        try:
+            document = Document.create(
+                tenant_id=tenant_id,
+                name=file.filename,
+                file_type=file_ext,
+                created_by=g.user_id
+            )
+            self._logger.info(f"Created document {document.id}")
+        except IntegrityError as e:
+            self._logger.error(f"Failed to create document row: {e}")
+            raise InternalError("database error")
+        
+        # 3. Save file to blob storage (S3 or local)
+        try:
+            file_path = self._save_file_to_storage(file, document.id)
+            document.file_path = file_path
+            document.save()
+        except Exception as e:
+            # Rollback: soft delete document
+            document.deleted_at = datetime.now()
+            document.save()
+            self._logger.exception(f"Failed to save file: {e}")
+            raise InternalError("file upload failed")
+        
+        # 4. Add to knowledge base if provided
+        if kb_id:
+            kb_service = KnowledgebaseService()
+            kb_service.add_document(kb_id, document.id, tenant_id)
+        
+        # 5. Create processing task (DB + Redis queue)
+        task_service = TaskService()
+        task = task_service.create(
+            doc_id=document.id,
+            task_type='parse_and_embed',
+            tenant_id=tenant_id
+        )
+        
+        return {
+            'document': document,
+            'task': task
+        }
+    
+    def _save_file_to_storage(self, file, doc_id: str) -> str:
+        '''Save file to S3 or blob storage; return path.'''
+        # Implementation: save to S3/MinIO
+        # Returns: 's3://bucket/documents/doc-id/filename'
+        pass
+</code></pre>
+        
+        <h2>Phase 3: Task Service (Queue & Track)</h2>
+        
+        <h3>TaskService.create() & State Machine</h3>
+        
+        <pre><code>class TaskService(CommonService):
+    def create(self, doc_id: str, task_type: str, tenant_id: str) -> Task:
+        '''Create task and enqueue for background processing.'''
+        
+        # Validate document exists and belongs to tenant
+        doc_service = DocumentService()
+        doc = doc_service.get(doc_id, tenant_id)
+        
+        # Create Task row
+        task = Task.create(
+            document_id=doc_id,
+            tenant_id=tenant_id,
+            task_type=task_type,
+            status='pending',
+            progress_json={
+                'percent': 0,
+                'stage': 'queued',
+                'message': 'Waiting in queue'
+            }
+        )
+        
+        # Push to Redis queue for background executor
+        self._enqueue_task(task)
+        self._logger.info(f"Enqueued task {task.id} for document {doc_id}")
+        
+        return task
+    
+    def _enqueue_task(self, task: Task):
+        '''Push task to Redis queue.'''
+        # Implementation: JSON-serialize task, push to Redis list
+        # Key: 'tasks:queue'
+        # Value: {'task_id': task.id, 'document_id': task.document_id, 'task_type': task.task_type}
+        pass
+    
+    def update_progress(self, task_id: str, progress: dict, tenant_id: str):
+        '''Update task progress and broadcast to WebSocket clients.'''
+        
+        task = self.get(task_id, tenant_id)
+        
+        # Update progress in DB
+        task.progress_json = progress
+        task.updated_at = datetime.now()
+        task.save()
+        
+        # Broadcast to WebSocket subscribers
+        self._broadcast_progress(task_id, progress)
+    
+    def _broadcast_progress(self, task_id: str, progress: dict):
+        '''Broadcast progress update to WebSocket clients.
+        
+        Uses Redis Pub/Sub or in-memory WebSocket group.
+        '''
+        # Implementation: publish to Redis channel 'task:{task_id}:progress'
+        # WebSocket handler subscribes and relays to client
+        pass
+    
+    def mark_done(self, task_id: str, tenant_id: str, result: dict = None):
+        '''Mark task complete, finalize.'''
+        
+        task = self.get(task_id, tenant_id)
+        task.status = 'done'
+        task.progress_json = {
+            'percent': 100,
+            'stage': 'complete',
+            'result': result or {}
+        }
+        task.save()
+        
+        self._logger.info(f"Task {task_id} completed")
+    
+    def mark_error(self, task_id: str, tenant_id: str, error_msg: str):
+        '''Mark task failed.'''
+        
+        task = self.get(task_id, tenant_id)
+        task.status = 'error'
+        task.progress_json = {
+            'percent': 0,
+            'stage': 'error',
+            'error': error_msg
+        }
+        task.save()
+        
+        self._logger.error(f"Task {task_id} failed: {error_msg}")
+</code></pre>
+        
+        <h2>Phase 4: Background Executor (Processing)</h2>
+        
+        <h3>Background Executor: Polling & Processing</h3>
+        
+        <pre><code>#!/usr/bin/env python3
+'''Background executor process: polls Redis queue, processes tasks.'''
+
+import redis
+import json
+from db.db_models import Task, Document, Chunk
+from db.services import ParsingService, ChunkService, TaskService
+
+class TaskExecutor:
+    def __init__(self):
+        self.redis = redis.Redis(host='localhost', port=6379)
+        self.chunk_service = ChunkService()
+        self.parsing_service = ParsingService()
+        self.task_service = TaskService()
+    
+    def run(self):
+        '''Main loop: poll queue, process tasks.'''
+        while True:
+            try:
+                # Pop task from queue (blocking, 5s timeout)
+                task_json = self.redis.blpop('tasks:queue', timeout=5)
+                if not task_json:
+                    continue  # Timeout, loop again
+                
+                task_data = json.loads(task_json[1])
+                self.process_task(task_data)
+            except Exception as e:
+                logger.exception(f"Executor error: {e}")
+                time.sleep(1)  # Back off on error
+    
+    def process_task(self, task_data: dict):
+        '''Process a single task: parse document, embed chunks.'''
+        
+        task_id = task_data['task_id']
+        doc_id = task_data['document_id']
+        task_type = task_data['task_type']
+        
+        try:
+            # Load task from DB
+            task = Task.get_by_id(task_id)
+            tenant_id = task.tenant_id
+            
+            # Stage 1: Parsing
+            self.task_service.update_progress(
+                task_id, tenant_id,
+                {'percent': 10, 'stage': 'parsing', 'message': 'Extracting text from document...'}
+            )
+            
+            doc = Document.get_by_id(doc_id)
+            text = self.parsing_service.parse_file(doc.file_path, doc.file_type)
+            
+            # Stage 2: Chunking
+            self.task_service.update_progress(
+                task_id, tenant_id,
+                {'percent': 30, 'stage': 'chunking', 'message': f'Splitting into chunks...'}
+            )
+            
+            chunks = self._split_text_into_chunks(text)
+            
+            # Stage 3: Embedding
+            self.task_service.update_progress(
+                task_id, tenant_id,
+                {'percent': 50, 'stage': 'embedding', 'message': f'Embedding {len(chunks)} chunks...'}
+            )
+            
+            embedded_chunks = []
+            for i, chunk in enumerate(chunks):
+                embedding = self._embed_text(chunk['content'])
+                chunk['embedding'] = embedding
+                embedded_chunks.append(chunk)
+                
+                # Update progress every 10 chunks
+                if i % 10 == 0:
+                    self.task_service.update_progress(
+                        task_id, tenant_id,
+                        {'percent': 50 + int(40 * i / len(chunks)), 'stage': 'embedding'}
+                    )
+            
+            # Stage 4: Store in DB
+            self.task_service.update_progress(
+                task_id, tenant_id,
+                {'percent': 90, 'stage': 'storing', 'message': 'Storing in database...'}
+            )
+            
+            self.chunk_service.batch_create(doc_id, embedded_chunks, tenant_id)
+            
+            # Mark complete
+            self.task_service.mark_done(
+                task_id, tenant_id,
+                result={'chunk_count': len(chunks)}
+            )
+            
+            logger.info(f"Task {task_id} completed: {len(chunks)} chunks")
+            
+        except Exception as e:
+            logger.exception(f"Failed to process task {task_id}: {e}")
+            self.task_service.mark_error(task_id, task.tenant_id, str(e))
+    
+    def _split_text_into_chunks(self, text: str) -> list:
+        '''Split text into chunks (e.g., 512 tokens each).'''
+        # Implementation: use sentence boundaries, try to fit 512 tokens per chunk
+        pass
+    
+    def _embed_text(self, text: str) -> list:
+        '''Call embedding model (e.g., OpenAI embeddings API).'''
+        # Implementation: call embedding service, return vector
+        pass
+
+if __name__ == '__main__':
+    executor = TaskExecutor()
+    executor.run()
+</code></pre>
+        
+        <h2>Phase 5: WebSocket Progress Streaming</h2>
+        
+        <h3>WebSocket Handler: Stream Progress Updates</h3>
+        
+        <pre><code>from quart import websocket, g
+
+@app.websocket('/ws/tasks/<task_id>')
+@auth_required
+async def stream_task_progress(task_id):
+    '''Stream task progress updates via WebSocket.'''
+    
+    tenant_id = g.tenant_id
+    
+    # Validate task belongs to tenant
+    try:
+        task = TaskService().get(task_id, tenant_id)
+    except EntityNotFound:
+        await websocket.close(code=4004, reason='Task not found')
+        return
+    
+    # Subscribe to Redis Pub/Sub channel for this task
+    pubsub = redis_client.pubsub()
+    pubsub.subscribe(f'task:{task_id}:progress')
+    
+    try:
+        while True:
+            # Receive progress update from Redis
+            message = pubsub.get_message()
+            if message and message['type'] == 'message':
+                progress = json.loads(message['data'])
+                
+                # Send to WebSocket client
+                await websocket.send_json({
+                    'task_id': task_id,
+                    'progress': progress,
+                    'timestamp': datetime.now().isoformat()
+                })
+            
+            # Check if task is done
+            task = TaskService().get(task_id, tenant_id)
+            if task.status in ['done', 'error']:
+                await websocket.send_json({
+                    'task_id': task_id,
+                    'status': task.status,
+                    'progress': task.progress_json
+                })
+                break
+            
+            await asyncio.sleep(0.1)  # Small delay to avoid busy loop
+    
+    except websocket.Closed:
+        pass
+    finally:
+        pubsub.close()
+</code></pre>
+        
+        <h2>Phase 6: Error Handling & Retry</h2>
+        
+        <h3>Failure Scenarios</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Detection</th>
+                    <th>Handling</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>File upload fails (disk full, S3 error)</td>
+                    <td>Exception in DocumentService._save_file_to_storage()</td>
+                    <td>Soft delete Document, return 500 to client</td>
+                </tr>
+                <tr>
+                    <td>Task execution crashes (parsing error, OOM)</td>
+                    <td>Exception in TaskExecutor.process_task()</td>
+                    <td>Catch, mark Task.status = error, store error message in progress_json</td>
+                </tr>
+                <tr>
+                    <td>Database deadlock during chunk insert</td>
+                    <td>IntegrityError('Deadlock') in <a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">ChunkService</a>.batch_create()</td>
+                    <td>Retry with exponential backoff (3 attempts)</td>
+                </tr>
+                <tr>
+                    <td>Executor crashes mid-task</td>
+                    <td>Task remains in processing state indefinitely</td>
+                    <td>Scheduled cleanup job: mark stale tasks (>1h) as error</td>
+                </tr>
+                <tr>
+                    <td>WebSocket client disconnects</td>
+                    <td>websocket.Closed exception</td>
+                    <td>Cleanup pubsub subscription, close cleanly</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>State Machine Diagram</h2>
+        
+        <pre><code>Task Lifecycle States:
+
+pending ──────────────> processing ───> done
+   ^                        |             ^
+   |                        | error       |
+   |                        v             |
+   └─────────────────── error ────────────┘
+
+Transitions:
+- pending → processing: when executor pulls task from queue
+- processing → done: when all chunks embedded and stored
+- processing → error: when any step fails (parse, embed, store)
+- error → pending: manual retry (admin API)
+</code></pre>
+        
+        <h2>Performance Considerations</h2>
+        
+        <ul>
+            <li><strong>Async Handlers:</strong> API returns 202 immediately; document processing happens in background. Client polls task status or subscribes to WebSocket for updates.</li>
+            <li><strong>Chunking Strategy:</strong> Split by sentence boundaries (preserve context), aim for ~512 tokens per chunk (balance between embedding cost and search granularity).</li>
+            <li><strong>Batch Embedding:</strong> Embed chunks in parallel (e.g., 10 concurrent embedding requests) to reduce total time.</li>
+            <li><strong>Database Indexing:</strong> Index <a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Chunk</a>.document_id, Chunk.embedding (vector index if using PostgreSQL pgvector) for fast retrieval.</li>
+            <li><strong>Executor Scaling:</strong> Run multiple executor processes (separate servers or containers) to parallelize task processing.</li>
+        </ul>
+        
+        <h2>Security & Multi-Tenancy</h2>
+        
+        <ul>
+            <li><strong><a href="../../db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Tenant</a> Isolation:</strong> Every step (Document, Task, Chunk) validates tenant_id. Missing check = data leak.</li>
+            <li><strong>File Validation:</strong> Only allow whitelisted file types (PDF, DOCX, etc.). Validate file content (magic bytes) to prevent abuse.</li>
+            <li><strong>Credential Handling:</strong> Embedding API credentials stored encrypted in DB, decrypted only when needed for executor.</li>
+            <li><strong>Resource Limits:</strong> Max file size, max chunks per document, timeout on parsing/embedding to prevent DoS.</li>
+        </ul>
+        
+        <h2>Future Enhancements</h2>
+        
+        <ul>
+            <li><strong>Prioritization:</strong> Support task priority levels (urgent tasks processed first).</li>
+            <li><strong>Cancellation:</strong> Allow users to cancel in-progress tasks.</li>
+            <li><strong>Checkpointing:</strong> Save progress periodically so executor can resume after crash (don't re-embed already-done chunks).</li>
+            <li><strong>Cost Tracking:</strong> Log embedding costs per document, bill users.</li>
+            <li><strong>Dead Letter Queue:</strong> Move failed tasks to DLQ for manual inspection after 3 retries.</li>
+        </ul>
+    </main>
+    
+    <button class="back-to-top" id="back-to-top">↑ Top</button>
+    
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        
+        function loadTheme() {
+            const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+            htmlEl.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        loadTheme();
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neutra-ip-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        document.querySelectorAll('pre').forEach((pre) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

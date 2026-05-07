@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/api/db/services">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <title>API Services Layer - RAGFlow Wiki</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #0066cc;
+            --accent-hover: #0052a3;
+            --code-bg: #f8f8f8;
+            --code-text: #212121;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #f5f5f5;
+            --text-light: #b0b0b0;
+            --accent: #6db3f2;
+            --accent-hover: #4a9edc;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px; text-decoration: none; z-index: 100; }
+        .skip-link:focus { top: 0; }
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--accent); }
+        .theme-toggle { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text); }
+        .theme-toggle:hover { background-color: var(--code-bg); }
+        .breadcrumbs { padding: 12px 20px; font-size: 13px; color: var(--text-light); background-color: var(--surface); border-bottom: 1px solid var(--border); }
+        .breadcrumbs a { color: var(--accent); text-decoration: none; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .hero { margin-bottom: 40px; }
+        h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { font-size: 16px; color: var(--text-light); margin-bottom: 20px; }
+        .intro-box { background-color: var(--surface); border-left: 4px solid var(--accent); padding: 20px; margin-bottom: 30px; border-radius: 4px; font-style: italic; color: var(--text-light); }
+        h2 { font-size: 24px; margin-top: 40px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+        h4 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+        p { margin-bottom: 12px; line-height: 1.8; }
+        ul, ol { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        pre { background-color: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 4px; overflow-x: auto; margin-bottom: 16px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); position: relative; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background-color: var(--accent-hover); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background-color: var(--code-bg); font-weight: 600; }
+        tr:hover { background-color: var(--code-bg); }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; display: none; font-size: 12px; z-index: 50; }
+        .back-to-top:hover { background-color: var(--accent-hover); }
+        .back-to-top.visible { display: block; }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <header>
+        <div class="header-left">
+            <div class="logo">RAGFlow</div>
+            <nav>
+                <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">API Overview</a>
+                <a title="RAGFlow API Module - Documentation Hub" href="../index.html">Documentation</a>
+                <a href=".">Services</a>
+            </nav>
+        </div>
+        <button class="theme-toggle" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="breadcrumbs">
+        <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">RAGFlow Wiki</a> › <a title="RAGFlow API Module - Documentation Hub" href="../index.html">API Module</a> › Services
+    </div>
+    
+    <main id="main">
+        <div class="hero">
+            <h1>Services Layer: Domain Business Logic</h1>
+            <p>Domain services encapsulate entity-specific business logic. All 15+ services inherit from CommonService and implement CRUD, state transitions, and multi-tenant isolation.</p>
+        </div>
+        
+        <div class="intro-box">
+            <strong>Analogy:</strong> If the db/ layer is a "filing cabinet," then services are "job roles" in a company. A DocumentService is like a "Document Manager"—they know how to create, retrieve, update, and delete documents correctly. They know which documents are deleted, which belong to which tenant, and what the rules are for naming and organizing. Handlers (API endpoints) ask services to do work, rather than directly accessing the filing cabinet.
+        </div>
+        
+        <h2>Purpose & Architecture</h2>
+        
+        <p>The <code>services/</code> layer contains business logic for each domain entity:</p>
+        
+        <ul>
+            <li><strong>CommonService Base Class:</strong> All services inherit from CommonService, providing shared methods: pagination, tenant filtering, error handling, logging.</li>
+            <li><strong>15+ Domain Services:</strong> Each service manages one or more related entities (DocumentService manages Document + file uploads, DialogService manages Dialog definitions, etc.).</li>
+            <li><strong>State Transition Management:</strong> Services handle complex state machines (e.g., Task: pending → processing → done/error). Handlers never directly update entity state.</li>
+            <li><strong>Atomic Operations:</strong> Services coordinate multi-step operations (create document + queue task, create conversation + send welcome message) atomically.</li>
+            <li><strong>Soft Delete Coordination:</strong> Services enforce soft-delete semantics globally (queries filter deleted_at.is_null(), restore operations reset deleted_at).</li>
+        </ul>
+        
+        <h2>Common Service Base Class</h2>
+        
+        <p>All services inherit from <code>CommonService</code> in <code>common_service.py</code>:</p>
+        
+        <pre><code>class CommonService:
+    '''Base class for all domain services.'''
+    
+    def __init__(self):
+        self._logger = logging.getLogger(self.__class__.__name__)
+    
+    def get_by_id(self, id: str, tenant_id: str = None):
+        '''Retrieve entity by ID with optional tenant check.'''
+        entity = Entity.get_by_id(id)
+        if tenant_id and entity.tenant_id != tenant_id:
+            raise TenantMismatch(f"Entity {id} not in tenant {tenant_id}")
+        return entity
+    
+    def list_by_tenant(self, tenant_id: str, offset=0, limit=50):
+        '''Paginated list for tenant.'''
+        return Entity.select().where(
+            Entity.tenant_id == tenant_id,
+            Entity.deleted_at.is_null()
+        ).offset(offset).limit(limit)
+    
+    def delete(self, id: str, tenant_id: str):
+        '''Soft delete with tenant check.'''
+        entity = self.get_by_id(id, tenant_id)
+        entity.deleted_at = datetime.now()
+        entity.save()
+        return entity
+</code></pre>
+        
+        <h2>Domain Services Catalog</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Module File</th>
+                    <th>Primary Entity</th>
+                    <th>Key Methods</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>DocumentService</td>
+                    <td>document_service.py</td>
+                    <td>Document</td>
+                    <td>create(name, file), get(doc_id), list_by_kb(kb_id), delete(doc_id), upload_file(file_path)</td>
+                </tr>
+                <tr>
+                    <td>ChunkService</td>
+                    <td>chunk_service.py</td>
+                    <td>Chunk</td>
+                    <td>create(doc_id, content), get(chunk_id), batch_create(chunks), embed(chunk_id), search_by_vector(embedding)</td>
+                </tr>
+                <tr>
+                    <td>DialogService</td>
+                    <td>dialog_service.py</td>
+                    <td>Dialog</td>
+                    <td>create(name, desc), get(dialog_id), list_by_tenant(tenant_id), update(dialog_id, name), delete(dialog_id)</td>
+                </tr>
+                <tr>
+                    <td>ConversationService</td>
+                    <td>conversation_service.py</td>
+                    <td>Conversation</td>
+                    <td>create(dialog_id, user_id), get(conv_id), list_by_dialog(dialog_id), delete(conv_id)</td>
+                </tr>
+                <tr>
+                    <td>MessageService</td>
+                    <td>message_service.py</td>
+                    <td>Message</td>
+                    <td>create(conv_id, role, content), get(msg_id), list_by_conversation(conv_id), delete(msg_id)</td>
+                </tr>
+                <tr>
+                    <td>TaskService</td>
+                    <td>task_service.py</td>
+                    <td>Task</td>
+                    <td>create(doc_id, task_type), get(task_id), get_status(task_id), update_progress(task_id, progress_dict), mark_done(task_id)</td>
+                </tr>
+                <tr>
+                    <td>KnowledgebaseService</td>
+                    <td>knowledgebase_service.py</td>
+                    <td>KnowledgeBase</td>
+                    <td>create(name, desc), get(kb_id), list_by_tenant(tenant_id), add_document(kb_id, doc_id), remove_document(kb_id, doc_id)</td>
+                </tr>
+                <tr>
+                    <td>LLMService</td>
+                    <td>llm_service.py</td>
+                    <td>LLMModel</td>
+                    <td>create(model_name, provider, api_key), get(model_id), list_by_tenant(tenant_id), verify_credentials(model_id)</td>
+                </tr>
+                <tr>
+                    <td>MemoryService</td>
+                    <td>memory_service.py</td>
+                    <td>Memory</td>
+                    <td>create(user_id, content), get(memory_id), list_by_user(user_id), update(memory_id, content)</td>
+                </tr>
+                <tr>
+                    <td>FileService</td>
+                    <td>file_service.py</td>
+                    <td>File (S3/blob storage)</td>
+                    <td>upload(file_bytes, filename), download(file_id), delete(file_id), get_url(file_id)</td>
+                </tr>
+                <tr>
+                    <td>UserService</td>
+                    <td>user_service.py</td>
+                    <td>User</td>
+                    <td>create(email, password), get(user_id), get_by_email(email), update_profile(user_id, name), change_password(user_id, old_pwd, new_pwd)</td>
+                </tr>
+                <tr>
+                    <td>TenantService</td>
+                    <td>tenant_service.py</td>
+                    <td>Tenant</td>
+                    <td>get(tenant_id), get_by_name(name), list_for_user(user_id), update_settings(tenant_id, settings)</td>
+                </tr>
+                <tr>
+                    <td>ParsingService</td>
+                    <td>parsing_service.py</td>
+                    <td>Document parsing</td>
+                    <td>parse_pdf(file_path), parse_docx(file_path), parse_txt(file_path), extract_text(document_bytes)</td>
+                </tr>
+                <tr>
+                    <td>TeacherService</td>
+                    <td>teacher_service.py</td>
+                    <td>LLM fine-tuning</td>
+                    <td>start_training(dialog_id, training_data), get_training_status(training_id), list_trained_models(tenant_id)</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Service Design Patterns</h2>
+        
+        <h3>Pattern 1: CRUD with Tenant Isolation</h3>
+        
+        <pre><code>class DialogService(CommonService):
+    def create(self, tenant_id: str, name: str, description: str = ""):
+        if not name:
+            raise ValidationError("name required")
+        
+        dialog = Dialog.create(
+            tenant_id=tenant_id,
+            name=name,
+            description=description,
+            created_by=g.user_id
+        )
+        self._logger.info(f"Created dialog {dialog.id} in tenant {tenant_id}")
+        return dialog
+    
+    def get(self, dialog_id: str, tenant_id: str = None) -> Dialog:
+        dialog = Dialog.get_by_id(dialog_id)
+        if tenant_id and dialog.tenant_id != tenant_id:
+            raise TenantMismatch(f"Dialog {dialog_id} not in tenant {tenant_id}")
+        return dialog
+    
+    def list_by_tenant(self, tenant_id: str) -> List[Dialog]:
+        return Dialog.select().where(
+            Dialog.tenant_id == tenant_id,
+            Dialog.deleted_at.is_null()
+        ).order_by(Dialog.created_at.desc())
+</code></pre>
+        
+        <h3>Pattern 2: State Transition (Task Lifecycle)</h3>
+        
+        <pre><code>class TaskService(CommonService):
+    def create(self, doc_id: str, task_type: str, tenant_id: str) -> Task:
+        doc = DocumentService().get(doc_id, tenant_id)
+        
+        task = Task.create(
+            document_id=doc_id,
+            tenant_id=tenant_id,
+            status="pending",
+            task_type=task_type,
+            progress_json={"percent": 0, "stage": "queued"}
+        )
+        
+        # Queue task in Redis for background executor
+        self._enqueue_task(task)
+        return task
+    
+    def update_progress(self, task_id: str, progress: dict, tenant_id: str):
+        task = self.get(task_id, tenant_id)
+        task.progress_json = progress
+        task.save()
+        
+        # Notify WebSocket subscribers of progress update
+        self._broadcast_progress(task_id, progress)
+    
+    def mark_done(self, task_id: str, tenant_id: str, result: dict = None):
+        task = self.get(task_id, tenant_id)
+        task.status = "done"
+        task.progress_json = {"percent": 100, "stage": "complete", "result": result}
+        task.save()
+        
+        # Clean up temporary files, send completion notification
+        self._finalize_task(task)
+</code></pre>
+        
+        <h3>Pattern 3: Complex Mutation (Document Upload)</h3>
+        
+        <pre><code>class DocumentService(CommonService):
+    def upload(self, file: FileStorage, tenant_id: str, kb_id: str = None):
+        '''Upload document: create Document row, save file, create Task, return document.'''
+        
+        # Validate inputs
+        if not file or not file.filename:
+            raise ValidationError("file required")
+        
+        # Create Document row
+        doc = Document.create(
+            tenant_id=tenant_id,
+            name=file.filename,
+            file_type=self._get_file_type(file.filename),
+            created_by=g.user_id
+        )
+        
+        # Save file to blob storage (S3 or local)
+        file_path = self._save_file(file, doc.id)
+        doc.file_path = file_path
+        doc.save()
+        
+        # Add to knowledge base if provided
+        if kb_id:
+            KnowledgebaseService().add_document(kb_id, doc.id, tenant_id)
+        
+        # Create processing task
+        task = TaskService().create(doc.id, "parse_and_embed", tenant_id)
+        
+        return {"document": doc, "task": task}
+    
+    def _save_file(self, file: FileStorage, doc_id: str) -> str:
+        '''Save file to blob storage; return file path.'''
+        # Implementation: write to S3 or local storage
+        pass
+</code></pre>
+        
+        <h2>Joint Services for Cross-Domain Coordination</h2>
+        
+        <p>Some operations require coordinating multiple services atomically. Joint services in <code>joint_services/</code> manage these:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Joint Service</th>
+                    <th>File</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UserAccountService</td>
+                    <td>user_account_service.py</td>
+                    <td>Register new user: creates User + Tenant atomically, adds user as tenant owner, sends welcome email</td>
+                </tr>
+                <tr>
+                    <td>MemoryMessageService</td>
+                    <td>memory_message_service.py</td>
+                    <td>User sends message that should be memorized: creates Message + Memory atomically, tagged with conversation context</td>
+                </tr>
+                <tr>
+                    <td>TenantModelService</td>
+                    <td>tenant_model_service.py</td>
+                    <td>Configure tenant's default LLM model: updates Tenant settings + LLMModel associations atomically</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Error Handling & Logging</h2>
+        
+        <p>Services implement consistent error handling and logging:</p>
+        
+        <pre><code>import logging
+from common.exceptions import (
+    ValidationError, TenantMismatch, EntityNotFound, InternalError
+)
+
+class DocumentService(CommonService):
+    def create(self, tenant_id: str, name: str):
+        try:
+            if not name or len(name) > 255:
+                raise ValidationError("name must be 1-255 chars")
+            
+            doc = Document.create(
+                tenant_id=tenant_id,
+                name=name,
+                created_by=g.user_id
+            )
+            self._logger.info(f"Created document {doc.id}")
+            return doc
+            
+        except ValidationError:
+            raise  # Re-raise domain exceptions
+        except IntegrityError as e:
+            self._logger.warning(f"DB integrity error: {e}")
+            raise ValidationError("name already exists in tenant")
+        except Exception as e:
+            self._logger.exception(f"Unexpected error creating document: {e}")
+            raise InternalError("Failed to create document")
+</code></pre>
+        
+        <h2>Service Dependencies & Cross-References</h2>
+        
+        <p>Services can call other services for cross-domain operations:</p>
+        
+        <ul>
+            <li><strong>DocumentService → FileService:</strong> Upload document calls FileService.upload() to save file.</li>
+            <li><strong>DocumentService → TaskService:</strong> Upload document calls TaskService.create() to queue processing task.</li>
+            <li><strong>ConversationService → MessageService:</strong> Start conversation calls MessageService.create() to send welcome message.</li>
+            <li><strong>DialogService → LLMService:</strong> Get dialog config calls LLMService.get() to fetch associated LLM model.</li>
+            <li><strong>TaskService → ChunkService:</strong> Document parsing task calls ChunkService.batch_create() to insert chunks.</li>
+        </ul>
+        
+        <h2>Tenant Isolation in Services</h2>
+        
+        <p>Every service method that accesses or modifies data must enforce tenant isolation:</p>
+        
+        <ul>
+            <li><strong>Check tenant_id on read:</strong> When retrieving entity, verify tenant_id matches request's tenant_id.</li>
+            <li><strong>Enforce tenant_id on create:</strong> Always set entity.tenant_id = request.tenant_id; never trust user input.</li>
+            <li><strong>Filter by tenant_id on list:</strong> All list queries include WHERE tenant_id = ? filter.</li>
+            <li><strong>Validate tenant_id on mutation:</strong> Before update/delete, check tenant_id matches.</li>
+        </ul>
+        
+        <h2>Performance Considerations</h2>
+        
+        <ul>
+            <li><strong>Connection Pool:</strong> Services use shared connection pool (10–20). Keep transactions short; avoid long-running DB work in services.</li>
+            <li><strong>Query Optimization:</strong> List operations paginate results (default limit 50). Add indexes on tenant_id, created_by, deleted_at.</li>
+            <li><strong>Caching:</strong> Services can implement caching for slowly-changing data (LLM models, KnowledgeBases). Use Redis with TTL.</li>
+            <li><strong>Deadlock Retry:</strong> Services that perform multi-table updates can retry on deadlock with exponential backoff.</li>
+        </ul>
+        
+        <h2>Security Implications</h2>
+        
+        <ul>
+            <li><strong>No SQL Injection:</strong> Services use Peewee ORM; all queries are parameterized.</li>
+            <li><strong>Tenant Data Leaks:</strong> Missing tenant_id check = critical vulnerability. Code review must verify every service method.</li>
+            <li><strong>Privilege Escalation:</strong> Services don't enforce role-based access control (admin vs user). That's the API layer's responsibility. Services assume caller is authorized.</li>
+            <li><strong>Credential Handling:</strong> Services that work with secrets (LLM API keys) must encrypt at rest, decrypt only when needed, never log.</li>
+        </ul>
+        
+        <h2>Future Enhancements</h2>
+        
+        <ul>
+            <li><strong>Event-Driven Architecture:</strong> Add event publishing (service creates Document → emits DocumentCreated event → other services listen). Loosens coupling.</li>
+            <li><strong>Service Versioning:</strong> Support multiple service implementations (DocumentService v1 vs v2) for gradual migration.</li>
+            <li><strong>Service Composition:</strong> Build higher-level "use case" services that orchestrate multiple domain services.</li>
+            <li><strong>Audit Logging:</strong> Log all mutations (who, what, when, why) for compliance and debugging.</li>
+            <li><strong>Transaction Sagas:</strong> For multi-step workflows (upload doc → parse → embed → index), implement saga pattern for failure recovery.</li>
+        </ul>
+    </main>
+    
+    <button class="back-to-top" id="back-to-top">↑ Top</button>
+    
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        
+        function loadTheme() {
+            const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+            htmlEl.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        loadTheme();
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neutra-ip-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        document.querySelectorAll('pre').forEach((pre) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

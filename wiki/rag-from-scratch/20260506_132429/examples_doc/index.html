@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/rag-from-scratch">
+<meta name="wiki-source-rev" content="38e1a7a">
+
+<title>examples/ — rag-from-scratch</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;column-count:2;column-gap:2rem}
+.toc ol{margin-left:1.5rem}.toc ol ol{column-count:1;font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.2rem .6rem;font-size:.75rem;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.code-walk{counter-reset:cw}
+.code-walk .step{counter-increment:cw;border-left:3px solid var(--accent);padding:.5rem 0 .5rem 1rem;margin:1rem 0;position:relative}
+.code-walk .step:before{content:counter(cw);position:absolute;left:-1.2rem;top:.5rem;background:var(--accent);color:#000;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--accent3)}.callout.danger{border-color:var(--accent4)}.callout.success{border-color:var(--accent2)}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:.1rem .4rem;border-radius:8px;margin-left:.4rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{column-count:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.module-card,.card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">rag-from-scratch</a> &rsaquo; examples</nav>
+
+<h1>examples/ &mdash; The Curriculum</h1>
+<div class="hero">
+  <div class="subtitle">Fifteen self-contained lessons that teach RAG from first principles</div>
+  <p>Numbered 00&ndash;06. Each lesson is <code>example.js</code> + <code>CONCEPT.md</code> + <code>CODE.md</code>. Self-contained &mdash; runnable without reading any other lesson. ~6,954 lines of teaching code.</p>
+  <p style="margin-top:.6rem">
+    <span class="badge blue">15 lessons</span>
+    <span class="badge green">7 top-level dirs</span>
+    <span class="badge yellow">~6,954 LOC</span>
+    <span class="badge red">Cognitive locality</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">15</div><div class="label">lessons</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">artefact types</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="label">retrieval strategies</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">vector-store sub-lessons</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p><code>examples/</code> is <strong>the actual product of this repository</strong>. <code>src/</code> exists as a side-effect of stabilising what the lessons have proven. Every numbered directory is a self-contained, runnable lesson. A learner can read one lesson without having read any other &mdash; that is the central design contract.</p>
+<details>
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">A driving instructor's lesson plan: the first lesson teaches turning the wheel without ever explaining gear ratios. The fifth lesson explains the clutch without re-deriving inertia. Each lesson assumes you remember the previous; none assumes you've read the engineering textbook. The textbook (<code>src/</code>) is on the back shelf for the curious; the lessons (<code>examples/</code>) are the road.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-exists">&#127919; Why This Module Exists</h2>
+<p>The lessons exist because <strong>RAG appears intimidating in the LangChain era but stops being intimidating once you have written the keyword-scorer, the splitter, the embedding cache, and the rank-fusion equation yourself</strong>. The author's wager is that direct hands-on contact with each primitive removes the magic; the curriculum is built around that wager.</p>
+<p>The lessons are <em>not</em> a thin demo of the <code>src/</code> library. They are the <em>source of truth for what should eventually live in <code>src/</code></em>. Lesson 03 re-implements its own splitter; lesson 06/04 ships a <code>multi-query-retrieval.js</code> helper that has not yet been promoted. Reading the lessons in order, you watch the abstractions emerge.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why</th></tr>
+<tr><td>Lesson granularity</td><td>Numbered 00&ndash;06 with sub-numbering for complex topics</td><td>Flat 1..N; tagged by topic</td><td>Sub-numbering signals "this concept needs multiple passes" without dirtying the top-level.</td></tr>
+<tr><td>Code/concept split</td><td>Three files per lesson (<code>example.js</code> + <code>CONCEPT.md</code> + <code>CODE.md</code>)</td><td>Markdown with embedded code; comments only</td><td>Lets readers choose their depth: skim concept &rarr; read code &rarr; run example.</td></tr>
+<tr><td>First lesson</td><td>00 does keyword scoring with no embeddings</td><td>Start with embeddings</td><td>Demystifies RAG before introducing vector math. Reader sees retrieve+generate working without any "AI".</td></tr>
+<tr><td>Self-contained vs imports</td><td>Each <code>example.js</code> imports only <code>Document</code>/<code>PDFLoader</code> + helpers</td><td>Shared scaffold across lessons</td><td>Cognitive locality &mdash; the lesson must be readable in one tab without chasing imports.</td></tr>
+<tr><td>Vector DB</td><td><code>embedded-vector-db</code> (HNSW, in-process)</td><td>Qdrant/Chroma/PG-vector (network)</td><td>Local-first; no Docker required. Matches "no black boxes".</td></tr>
+<tr><td>Embedding model</td><td>bge-small-en-v1.5 (384-d)</td><td>OpenAI text-embedding-3-small</td><td>Local, no API keys, runs on CPU.</td></tr>
+<tr><td>Retrieval lessons</td><td>5 sub-lessons (basic &rarr; query-prep &rarr; hybrid &rarr; multi-query &rarr; query-rewriting)</td><td>One mega-lesson</td><td>Each sub-lesson teaches one technique in isolation, then the next layers complexity.</td></tr>
+</table>
+
+<h2 id="architecture">Lesson Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+  subgraph Foundations["Foundations"]
+    L0["00<br/>How RAG works<br/>(no embeddings)"]
+    L1A["01/01<br/>node-llama-cpp basics"]
+    L1B["01/02<br/>LLM wrapper"]
+  end
+  subgraph DataPrep["Data prep"]
+    L2["02<br/>Data Loading"]
+    L3["03<br/>Splitting + chunking"]
+  end
+  subgraph Vectors["Vectors"]
+    L4A["04/01<br/>Similarity basics"]
+    L4B["04/02<br/>Generate embeddings"]
+  end
+  subgraph Storage["Storage"]
+    L5A["05/01<br/>In-memory store"]
+    L5B["05/02<br/>NN search (HNSW)"]
+    L5C["05/03<br/>Metadata filtering"]
+  end
+  subgraph Retrieval["Retrieval strategies"]
+    L6A["06/01<br/>Basic retrieval"]
+    L6B["06/02<br/>Query preprocess"]
+    L6C["06/03<br/>Hybrid (dense + BM25)"]
+    L6D["06/04<br/>Multi-query + RRF"]
+    L6E["06/05<br/>Query rewriting"]
+  end
+  L0 --> L1A --> L1B --> L2 --> L3 --> L4A --> L4B
+  L4B --> L5A --> L5B --> L5C
+  L5C --> L6A --> L6B --> L6C --> L6D --> L6E
+</pre>
+</div>
+
+<h2 id="data-flow">A Lesson's Anatomy</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant R as Reader
+    participant C as CONCEPT.md
+    participant E as example.js
+    participant W as CODE.md
+    participant Out as Terminal
+    R->>C: read concepts (the WHY)
+    Note over R,C: 5-min read; sets mental model
+    R->>E: open example.js
+    R->>W: alongside CODE.md (line walk)
+    Note over R,W: dual-pane reading: code + commentary
+    R->>E: node example.js
+    E-&gt;&gt;Out: chalk-formatted output<br/>via OutputHelper
+    Out-&gt;&gt;R: visible structure<br/>(headers, spinners, stats)
+    R->>R: tweak config, re-run
+    R->>R: graduate to next lesson
+</pre>
+</div>
+
+<div class="intro-box">
+<h3>&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);">The reader's path from "what is RAG?" to "I can build my own retrieval strategy":</p>
+<ol style="line-height:2;">
+<li><strong>Lesson 00 (How RAG Works)</strong> &mdash; 68 LOC of pure JS. Knowledge is an array of strings. <code>naiveKeywordSearch()</code> scores each doc by word overlap. <code>generateAnswer()</code> concatenates retrieved docs (no LLM). The reader sees retrieve+generate work; the failures (e.g., "What is the weather today?") motivate every later lesson.</li>
+<li><strong>Lessons 01/01 + 01/02 (LLM basics)</strong> &mdash; loads a GGUF model with node-llama-cpp; wraps it in a class. The reader learns that "an LLM" is just a function from string to string.</li>
+<li><strong>Lesson 02 (Data Loading)</strong> &mdash; uses <code>PDFLoader</code> from <code>src/</code> (already promoted). Demonstrates page-split vs single-document modes.</li>
+<li><strong>Lesson 03 (Splitting)</strong> &mdash; re-implements <code>TextSplitter</code> inline (cognitive locality!). Compares character-window, sentence-aware, and recursive strategies on the same PDF.</li>
+<li><strong>Lesson 04/01 (Similarity basics)</strong> &mdash; embeds 5 sample sentences, computes pairwise cosine similarity, prints a heatmap. Reader sees "these two sentences are 0.82 similar".</li>
+<li><strong>Lesson 04/02 (Generate embeddings)</strong> &mdash; scales up to a real document set. Introduces caching as a side-channel.</li>
+<li><strong>Lesson 05/01 (In-memory store)</strong> &mdash; constructs a <code>VectorDB</code> from <code>embedded-vector-db</code>. CRUD operations, similarity search, metadata storage.</li>
+<li><strong>Lesson 05/02 (Nearest-neighbour search)</strong> &mdash; introduces HNSW parameters (<code>ef_construction</code>, <code>ef_search</code>, <code>M</code>). Shows the speed/precision knob.</li>
+<li><strong>Lesson 05/03 (Metadata filtering)</strong> &mdash; <code>where</code> clauses on metadata; pre-filter vs post-filter tradeoffs.</li>
+<li><strong>Lesson 06/01 (Basic retrieval)</strong> &mdash; the canonical retrieve-then-generate loop end to end.</li>
+<li><strong>Lesson 06/02 (Query preprocessing)</strong> &mdash; lowercase, strip stop-words, expand contractions. Heuristic-only; no LLM yet.</li>
+<li><strong>Lesson 06/03 (Hybrid search)</strong> &mdash; combine dense (cosine) + sparse (BM25) scores. Min-max normalisation. Dynamic weighting based on query patterns (regex SKU detection bumps sparse weight).</li>
+<li><strong>Lesson 06/04 (Multi-query)</strong> &mdash; <code>retrieveParallel(queries) &rarr; rrfFuse(lists)</code>. Reciprocal Rank Fusion at <code>k=60</code>. Promotion candidate for <code>src/retrievers/</code>.</li>
+<li><strong>Lesson 06/05 (Query rewriting)</strong> &mdash; LLM rewrites the user query into 1&ndash;3 paraphrases; feed to multi-query.</li>
+</ol>
+</div>
+
+<h2 id="components">Lesson Catalogue</h2>
+<table>
+<tr><th>#</th><th>Topic</th><th>Path</th><th>LOC</th><th>What's Taught</th></tr>
+<tr><td>00</td><td>How RAG works</td><td><code>00_how_rag_works/</code></td><td>68</td><td>Retrieve+generate concept with naive keyword overlap. Sets up motivation for embeddings.</td></tr>
+<tr><td>01/01</td><td>node-llama-cpp basics</td><td><code>01_intro_to_llms/01_node_llama_cpp_basics/</code></td><td>83</td><td>Load a GGUF, prompt it, dispose. Just enough llama.cpp.</td></tr>
+<tr><td>01/02</td><td>LLM wrapper</td><td><code>01_intro_to_llms/02_building_llm_wrapper/</code></td><td>141</td><td>Wrap llama.cpp in a class with retry, timeout, options. Foreshadows <code>src/llms/LlamaCpp</code>.</td></tr>
+<tr><td>02</td><td>Data loading</td><td><code>02_data_loading/</code></td><td>98</td><td>PDF parsing via <code>PDFLoader</code> from <code>src/</code>. <code>splitPages</code> tradeoff.</td></tr>
+<tr><td>03</td><td>Text splitting + chunking</td><td><code>03_text_splitting_and_chunking/</code></td><td>355</td><td>Inline splitter implementation; comparison of strategies on the same source PDF.</td></tr>
+<tr><td>04/01</td><td>Text similarity basics</td><td><code>04_intro_to_embeddings/01_text_similarity_basics/</code></td><td>321</td><td>Cosine similarity intuition with bge-small embeddings; heatmap of pairwise scores.</td></tr>
+<tr><td>04/02</td><td>Generate embeddings</td><td><code>04_intro_to_embeddings/02_generate_embeddings/</code></td><td>563</td><td>Batch embedding, cache, persistence; scales to real documents.</td></tr>
+<tr><td>05/01</td><td>In-memory vector store</td><td><code>05_building_vector_store/01_in_memory_store/</code></td><td>559</td><td>VectorDB CRUD, similarity search, metadata storage.</td></tr>
+<tr><td>05/02</td><td>Nearest-neighbour search</td><td><code>05_building_vector_store/02_nearest_neighbor_search/</code></td><td>677</td><td>HNSW deep-dive; <code>ef_search</code> sweep; speed vs recall.</td></tr>
+<tr><td>05/03</td><td>Metadata filtering</td><td><code>05_building_vector_store/03_metadata_filtering/</code></td><td>737</td><td>Pre-filter vs post-filter; <code>where</code> clauses; large catalogue.</td></tr>
+<tr><td>06/01</td><td>Basic retrieval</td><td><code>06_retrieval_strategies/01_basic_retrieval/</code></td><td>605</td><td>Canonical retrieve-then-generate loop. Includes a <code>showcase.js</code> demo.</td></tr>
+<tr><td>06/02</td><td>Query preprocessing</td><td><code>06_retrieval_strategies/02_query_preprocessing/</code></td><td>736</td><td>Heuristic normalisation; stop-word removal; contractions.</td></tr>
+<tr><td>06/03</td><td>Hybrid search</td><td><code>06_retrieval_strategies/03_hybrid_search/</code></td><td>805</td><td>Dense + sparse with min-max normalisation; dynamic weights for SKU/brand queries.</td></tr>
+<tr><td>06/04</td><td>Multi-query + RRF</td><td><code>06_retrieval_strategies/04_multi_query_retrieval/</code></td><td>943</td><td>Parallel retrieval, RRF, dedup. Helper file <code>multi-query-retrieval.js</code>.</td></tr>
+<tr><td>06/05</td><td>Query rewriting</td><td><code>06_retrieval_strategies/05_query_rewriting/</code></td><td>263</td><td>LLM-driven paraphrase generation; pipes into 06/04.</td></tr>
+</table>
+
+<h2 id="algorithm-spotlight">&#9889; Algorithm Spotlight</h2>
+<table>
+<tr><th>Algorithm</th><th>Lesson</th><th>Why This One</th><th>Complexity</th></tr>
+<tr><td><strong>Naive keyword retrieval</strong> &mdash; <code>matches = queryWords.filter(w =&gt; docWords.includes(w)).length</code></td><td>00</td><td>Pedagogical only. Showing "this works for some queries, fails for others" sets up the motivation for embeddings.</td><td>O(N&middot;Q)</td></tr>
+<tr><td><strong>HNSW kNN search</strong> via <code>embedded-vector-db</code></td><td>05/02</td><td>Logarithmic-ish lookup vs O(n) brute force. For 10K vectors gives sub-ms search; for 100K still &lt;10ms.</td><td>~O(log n)</td></tr>
+<tr><td><strong>Reciprocal Rank Fusion</strong> &mdash; <code>score(d) = &Sigma; 1/(k + rank + 1)</code></td><td>06/04</td><td>Similarity scores from different queries aren't directly comparable. Rank-based fusion sidesteps the calibration problem entirely.</td><td>O(N&thinsp;K)</td></tr>
+</table>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<div class="card-grid">
+  <a class="card" href="00_how_rag_works/index.html"><h4>Lesson 00 &mdash; How RAG Works <span class="focus-badge">Foundation</span></h4><p>Pure-JS keyword search. The 68-line lesson that demystifies RAG before introducing any vector math.</p></a>
+  <a class="card" href="06_retrieval_strategies/index.html"><h4>06 &mdash; Retrieval Strategies <span class="focus-badge">Advanced</span></h4><p>Five sub-lessons: basic, query preprocess, hybrid (dense+BM25), multi-query+RRF, LLM query rewriting. The mature retrieval pipeline.</p></a>
+</div>
+
+<h2 id="failure">&#9888; What Could Go Wrong</h2>
+<table>
+<tr><th>Failure</th><th>Detection</th><th>Recovery</th><th>Cascading Effects</th></tr>
+<tr><td>Missing GGUF in <code>models/</code></td><td>node-llama-cpp throws on <code>loadModel</code></td><td>Reader follows <code>DOWNLOAD.md</code></td><td>Lessons 01+ all fail; 00 still works (no model needed).</td></tr>
+<tr><td>Network unreachable for PDF download</td><td><code>pdf-parse</code> fails on URL fetch</td><td>Lesson scripts log error; reader can substitute a local PDF</td><td>Lessons 02, 03 fail.</td></tr>
+<tr><td>VectorDB capacity exceeded</td><td><code>embedded-vector-db</code> raises insert error</td><td>Reader bumps <code>MAX_ELEMENTS</code></td><td>Lessons 05, 06 fail to insert beyond 10K docs by default.</td></tr>
+<tr><td>OPENAI_API_KEY unset</td><td><code>OpenAIClient</code> constructor throws</td><td>Optional &mdash; only used in 06/05 fallback</td><td>Reader can use <code>LlamaPrompter</code> instead.</td></tr>
+</table>
+
+<h2 id="performance">&#128202; Performance Profile</h2>
+<p>The lessons are <strong>interactive demos</strong> &mdash; cold-start dominates everything. Loading <code>bge-small-en-v1.5.Q8_0.gguf</code> (~33 MB) takes ~500&thinsp;ms; loading a 1B-parameter generation model takes 1&ndash;3&thinsp;s. Once warm, embedding throughput is ~30 docs/s on a modern CPU; HNSW search over 10K vectors is sub-ms; LLM generation runs at 5&ndash;30 tok/s depending on the model and quantisation.</p>
+<p>The lessons trade speed for clarity. <code>OutputHelper.withSpinner</code> wraps long ops; <code>OutputHelper.runExample</code> reports total elapsed; <code>chalk</code>/<code>ora</code> ensure the reader sees what's happening. None of this matters for production performance &mdash; it matters for educational pacing.</p>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">examples/ source tree</summary>
+<pre><code>examples/
+&#9500;&#9472;&#9472; 00_how_rag_works/                    &larr; 68 LOC, no embeddings, pure JS
+&#9474;   &#9500;&#9472;&#9472; example.js  CONCEPT.md  CODE.md
+&#9500;&#9472;&#9472; 01_intro_to_llms/
+&#9474;   &#9500;&#9472;&#9472; 01_node_llama_cpp_basics/        &larr; 83 LOC
+&#9474;   &#9492;&#9472;&#9472; 02_building_llm_wrapper/         &larr; 141 LOC
+&#9500;&#9472;&#9472; 02_data_loading/                     &larr; 98 LOC, uses src/loaders/PDFLoader
+&#9500;&#9472;&#9472; 03_text_splitting_and_chunking/      &larr; 355 LOC, inline splitter
+&#9500;&#9472;&#9472; 04_intro_to_embeddings/
+&#9474;   &#9500;&#9472;&#9472; 01_text_similarity_basics/       &larr; 321 LOC
+&#9474;   &#9492;&#9472;&#9472; 02_generate_embeddings/          &larr; 563 LOC
+&#9500;&#9472;&#9472; 05_building_vector_store/
+&#9474;   &#9500;&#9472;&#9472; 01_in_memory_store/              &larr; 559 LOC
+&#9474;   &#9500;&#9472;&#9472; 02_nearest_neighbor_search/      &larr; 677 LOC
+&#9474;   &#9492;&#9472;&#9472; 03_metadata_filtering/           &larr; 737 LOC
+&#9492;&#9472;&#9472; 06_retrieval_strategies/
+    &#9500;&#9472;&#9472; 01_basic_retrieval/              &larr; 605 LOC + showcase.js
+    &#9500;&#9472;&#9472; 02_query_preprocessing/          &larr; 736 LOC
+    &#9500;&#9472;&#9472; 03_hybrid_search/                &larr; 805 LOC
+    &#9500;&#9472;&#9472; 04_multi_query_retrieval/        &larr; 943 LOC + multi-query-retrieval.js + config.js + logger.js
+    &#9492;&#9472;&#9472; 05_query_rewriting/              &larr; 263 LOC + query-rewriter.js + config.js
+</code></pre>
+</details>
+
+<h2 id="config">Lesson-Level Knobs</h2>
+<table>
+<tr><th>Lesson</th><th>Knob</th><th>Default</th><th>Effect</th></tr>
+<tr><td>00</td><td><code>topK</code> in <code>naiveKeywordSearch</code></td><td>2</td><td>Number of returned docs.</td></tr>
+<tr><td>03</td><td><code>chunkSize</code></td><td>1000</td><td>Max chunk length.</td></tr>
+<tr><td>03</td><td><code>chunkOverlap</code></td><td>200</td><td>Overlap between adjacent chunks.</td></tr>
+<tr><td>04+</td><td><code>EMBEDDING_MODEL_PATH</code></td><td>bge-small.Q8_0</td><td>Embedding model.</td></tr>
+<tr><td>05+</td><td><code>DIM</code></td><td>384</td><td>Vector dimensions; must match model.</td></tr>
+<tr><td>05+</td><td><code>MAX_ELEMENTS</code></td><td>10000</td><td>Vector DB capacity.</td></tr>
+<tr><td>05+</td><td><code>NS</code> namespace</td><td>per lesson</td><td>VectorDB namespace.</td></tr>
+<tr><td>05/02</td><td><code>ef_search</code></td><td>varies</td><td>HNSW search-time precision/speed knob.</td></tr>
+<tr><td>06/01</td><td><code>topK</code></td><td>5</td><td>Retrieval cardinality before context injection.</td></tr>
+<tr><td>06/03</td><td>dense vs sparse weight</td><td>0.5/0.5</td><td>Hybrid blend; auto-tuned for SKU-like queries.</td></tr>
+<tr><td>06/04</td><td><code>k</code> in RRF</td><td>60</td><td>RRF damping constant; industry default.</td></tr>
+</table>
+
+<h2 id="cards">Lesson Cards</h2>
+<div class="card-grid">
+  <a class="card" href="00_how_rag_works/index.html"><h4>00 &mdash; How RAG Works</h4><p>The 68-line foundation lesson. Pure JS, no embeddings, no LLM call. Read this first.</p></a>
+  <div class="card"><h4>01 &mdash; LLM basics</h4><p>node-llama-cpp basics + LLM wrapper. Loads a GGUF, prompts it, disposes.</p></div>
+  <div class="card"><h4>02 &mdash; Data loading</h4><p>PDF parsing via <code>PDFLoader</code>. <code>splitPages</code> tradeoff.</p></div>
+  <div class="card"><h4>03 &mdash; Text splitting</h4><p>Compares character-window, sentence-aware, and recursive splitters on the same PDF.</p></div>
+  <div class="card"><h4>04 &mdash; Embeddings</h4><p>Cosine similarity intuition; batch embedding with cache.</p></div>
+  <div class="card"><h4>05 &mdash; Vector store</h4><p>HNSW, CRUD, NN search, metadata filtering. Three sub-lessons.</p></div>
+  <a class="card" href="06_retrieval_strategies/index.html"><h4>06 &mdash; Retrieval strategies</h4><p>Five sub-lessons culminating in multi-query + RRF + LLM rewriting.</p></a>
+</div>
+
+<div class="footer"><a href="../index.html">&larr; Project Hub</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></div>
+
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(btn) btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  if(btn) btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){document.querySelectorAll('pre').forEach(function(pre){if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(){var c=pre.querySelector('code');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+(function(){var main=document.querySelector('main');if(!main)return;var hero=document.querySelector('.hero');if(!hero)return;var words=main.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var rt=document.createElement('p');rt.style.color='var(--text-muted)';rt.style.fontSize='.85rem';rt.style.marginTop='.5rem';rt.innerHTML='\u23F1 ~'+mins+' min read';hero.appendChild(rt);})();
+(function(){document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key==='j'||e.key==='k'){var hs=Array.from(document.querySelectorAll('h2[id]'));var sy=window.scrollY;var idx=-1;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top+sy<=sy+50)idx=i;}if(e.key==='j')idx=Math.min(hs.length-1,idx+1);else idx=Math.max(0,idx-1);if(hs[idx])hs[idx].scrollIntoView({behavior:'smooth'});}});})();
+
+document.querySelectorAll('pre code').forEach(function(b){try{hljs.highlightElement(b);}catch(e){}});
+</script>
+</body></html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/internal/handler">
+<meta name="wiki-source-rev" content="e8f19aa33">
+<title>Handler Layer — Request Processing</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.orange{background:var(--accent3)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem}
+.intro-box{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border-left:4px solid var(--accent2);border-radius:8px;padding:1.5rem;margin:1.5rem 0;color:var(--text)}
+.intro-box h3{color:var(--accent2);margin-top:0}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem}
+.skip-link:focus{top:0}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .intro-box{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%);border-left-color:var(--accent2)}
+.back-to-top{position:fixed;bottom:1rem;right:1rem;z-index:999;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;transition:background .2s}
+.back-to-top.show{display:flex}
+.back-to-top:hover{background:var(--accent2)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.copy-btn,.diagram-overlay{display:none!important}body{background:#fff!important;color:#000!important}.card,.diagram-container{break-inside:avoid}}</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<button class="theme-toggle" aria-label="Toggle light/dark theme" id="themeToggle" title="Toggle theme">🌙</button>
+<div class="breadcrumb"><a title="High-Performance Go Backend + C++ Tokenizer" href="../index.html">RAGFlow Internal</a> › <strong>Handler</strong></div>
+
+<h1>Handler Layer: HTTP Request Processing</h1>
+
+<div class="hero">
+<div class="subtitle">HTTP API Entry Points</div>
+<p>The handler package translates HTTP requests into domain objects, validates inputs, enforces authorization, and formats responses. Each handler delegates business logic to services.</p>
+</div>
+
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">📚 What is this &amp; why does it exist?</h3>
+<p>Request lifecycle handlers for the internal RPC/HTTP boundary. Each handler validates inputs, builds a request context with tenant/user identity, dispatches to a service, and shapes the response — all wrapped in error-handling middleware that converts exceptions to typed error codes.</p>
+<details style="margin-top:.8rem;"><summary style="cursor:pointer;color:var(--accent2);font-weight:600;">💡 Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Like a customs officer at an airport — every request gets stopped, papers checked (auth), bags inspected (validation), and then either waved through to the right terminal (service) or sent back with a stamped rejection (error response). The lifecycle is identical for every traveler.</p></details>
+</div>
+
+<main id="main">
+
+<div class="intro-box">
+<h3>Overview</h3>
+<p>Handlers are the <strong>outermost <a href="../../api_doc/index.html">API</a> boundary</strong>. They receive HTTP requests from Gin, parse and validate them, call <a href="../../web_doc/services/index.html">services</a>, and send back JSON responses. This separation keeps business logic testable and transport-agnostic.</p>
+<p><strong>Key principle:</strong> Handlers should be thin. If a handler exceeds ~50 lines, logic belongs in a <a href="../service/index.html">service</a>.</p>
+</div>
+
+<h2>Request Processing <a href="../../rag_doc/flow/index.html">Flow</a></h2>
+<div class="diagram-container">
+<pre><code>HTTP Request
+    |
+    v
+Gin Router (matches path)
+    |
+    v
+Middleware (auth, CORS, logging)
+    |
+    v
+Handler.Validate() (check JWT, unmarshal JSON)
+    |
+    v
+Handler.Call Service (business logic)
+    |
+    v
+Service returns (data, error)
+    |
+    v
+Handler.Marshal Response (JSON)
+    |
+    v
+Gin sends HTTP 200/4xx/5xx
+</code></pre>
+</div>
+
+<h2>Handler Types</h2>
+
+<table>
+<thead><tr><th>Handler</th><th>Endpoints</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>ChatHandler</strong></td><td>POST /chat, GET /chat/:id</td><td>Conversational AI. Streams responses, manages context window.</td></tr>
+<tr><td><strong>SearchHandler</strong></td><td>POST /search, GET /search/stats</td><td>Full-text + semantic search. Returns ranked results with snippets.</td></tr>
+<tr><td><strong>KBHandler</strong></td><td>POST /kb, DELETE /kb/:id</td><td>Knowledge base CRUD. Manages documents, indexes.</td></tr>
+<tr><td><strong>DocumentHandler</strong></td><td>PUT /doc/:id, GET /doc/:id/chunks</td><td><a href="../../api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Document</a> operations. Upload, delete, reprocess.</td></tr>
+<tr><td><strong>FileHandler</strong></td><td>POST /file/upload, GET /file/:id</td><td>File I/O wrapper. Delegates to storage backend.</td></tr>
+<tr><td><strong>LLMHandler</strong></td><td>POST /llm/chat, POST /llm/embed</td><td><a href="../../rag_doc/llm/index.html">LLM</a> API proxy. Routes to provider (OpenAI, local).</td></tr>
+<tr><td><strong>ChunkHandler</strong></td><td>GET /chunk/:id, PATCH /chunk/:id</td><td>Text chunk operations. Inspect, edit, rerank.</td></tr>
+</tbody>
+</table>
+
+<h2>Handler Anatomy</h2>
+
+<h3>Input Validation</h3>
+<p>Every handler validates HTTP inputs before calling services:</p>
+<pre><code>type ChatRequest struct {
+    KnowledgeBaseID string `json:"kb_id" binding:"required"`
+    Question        string `json:"question" binding:"required,max=2000"`
+    MaxTokens       int    `json:"max_tokens" binding:"gte=10,lte=4000"`
+}
+
+func (h *ChatHandler) Chat(c *gin.Context) {
+    var req ChatRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(400, gin.H{"error": err.Error()})
+        return
+    }
+    // Input is now type-safe and validated
+}</code></pre>
+
+<h3>Authorization</h3>
+<p>Middleware extracts JWT and injects user/tenant context. Handlers check scopes:</p>
+<pre><code>func (h *ChatHandler) Chat(c *gin.Context) {
+    userID := c.GetString("user_id")     // from JWT
+    tenantID := c.GetString("tenant_id")
+    
+    if userID == "" {
+        c.JSON(401, gin.H{"error": "unauthorized"})
+        return
+    }
+    
+    // Ensure user owns the KB
+    kb, err := h.service.GetKB(c.Context(), tenantID, kbID)
+    if err != nil || kb.OwnerID != userID {
+        c.JSON(403, gin.H{"error": "forbidden"})
+        return
+    }
+}</code></pre>
+
+<h3>Service Invocation</h3>
+<p>Delegate to service; let it handle retries, caching, transactions:</p>
+<pre><code>result, err := h.chatService.Chat(c.Context(), &ChatRequest{
+    KnowledgeBaseID: req.KnowledgeBaseID,
+    Question:        req.Question,
+    UserID:          userID,
+    TenantID:        tenantID,
+})
+if err != nil {
+    h.logger.Error("chat error", "user_id", userID, "error", err)
+    c.JSON(500, gin.H{"error": "internal error"})
+    return
+}</code></pre>
+
+<h3>Response Formatting</h3>
+<p>Return consistent, typed responses:</p>
+<pre><code>type ChatResponse struct {
+    ID        string    `json:"id"`
+    Answer    string    `json:"answer"`
+    Tokens    int       `json:"tokens"`
+    Sources   []Source  `json:"sources"`
+    Latency   float64   `json:"latency_ms"`
+}
+
+c.JSON(200, gin.H{
+    "data": result,
+    "meta": gin.H{
+        "request_id": c.GetString("request_id"),
+        "timestamp": time.Now().Unix(),
+    },
+})</code></pre>
+
+<h2>Error Handling</h2>
+
+<table>
+<thead><tr><th>Status</th><th>When</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>400</strong></td><td>Invalid input (missing field, wrong type)</td><td>missing kb_id parameter</td></tr>
+<tr><td><strong>401</strong></td><td>Missing or invalid JWT</td><td>expired token</td></tr>
+<tr><td><strong>403</strong></td><td><a href="../../api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">User</a> lacks permission</td><td>accessing other tenant's KB</td></tr>
+<tr><td><strong>404</strong></td><td>Resource not found</td><td>KB not in database</td></tr>
+<tr><td><strong>429</strong></td><td>Rate limit exceeded</td><td>user quota hit</td></tr>
+<tr><td><strong>500</strong></td><td>Unexpected service error</td><td>database connection lost</td></tr>
+</tbody>
+</table>
+
+<h2>Submodules</h2>
+
+<div class="card-grid">
+
+<a title="How a Search Query Becomes Results" href="request-lifecycle/index.html" class="card">
+<h4>Request Lifecycle Deep Dive</h4>
+<p>Trace a search query from client to response. End-to-end timing breakdown.</p>
+</a>
+
+<a href="#" class="card">
+<h4>Middleware</h4>
+<p>CORS, JWT extraction, request logging, panic recovery.</p>
+</a>
+
+<a href="#" class="card">
+<h4>Chat Handler Details</h4>
+<p>Streaming responses, context management, token accounting.</p>
+</a>
+
+<a href="#" class="card">
+<h4>Search Handler Details</h4>
+<p>Query parsing, ranking algorithms, result pagination.</p>
+</a>
+
+<a href="#" class="card">
+<h4>Authorization Patterns</h4>
+<p>JWT validation, tenant isolation, role-based access control.</p>
+</a>
+
+<a href="#" class="card">
+<h4>Response Formats</h4>
+<p>Consistent JSON schema, error codes, timing metadata.</p>
+</a>
+
+</div>
+
+<h2>Key Concepts</h2>
+
+<h3>Gin Context Injection</h3>
+<p>Handlers receive <code>*gin.Context</code>, which carries request state (user, tenant, request ID, headers). This allows middleware to inject data that handlers read.</p>
+
+<h3>Unmarshaling & Binding</h3>
+<p><code>c.ShouldBindJSON()</code> combines unmarshaling and validation in one call. Errors are caught early.</p>
+
+<h3>Layering Discipline</h3>
+<p>Handlers must <strong>not</strong> access the database directly. They must call services. This maintains separation of concerns and makes unit tests faster.</p>
+
+<h2><a href="../../common/index.html">Common</a> Pitfalls</h2>
+
+<ul>
+<li><strong>Too much logic in handlers:</strong> Handlers should be <5 KB. Move complex logic to services.</li>
+<li><strong>Forgetting to validate input:</strong> Always call <code>ShouldBindJSON()</code> or equivalent. Don't trust client input.</li>
+<li><strong>Inconsistent error responses:</strong> Return a consistent error schema. Document it in OpenAPI.</li>
+<li><strong>Not checking authorization:</strong> Every handler that accesses user data must verify ownership via tenant or user ID.</li>
+<li><strong>Direct database access:</strong> Handlers should never call <a href="../dao/index.html">DAO</a>. That's the service's job.</li>
+</ul>
+
+<h2>Common Patterns</h2>
+
+<h3>Request ID Tracking</h3>
+<p>Every request gets a unique ID in middleware. This ID flows through logs, allowing you to trace a single request through all systems.</p>
+
+<pre><code>func LoggingMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        requestID := uuid.New().String()
+        c.Set("request_id", requestID)
+        c.Header("X-Request-ID", requestID)
+        
+        c.Next()
+        
+        latency := time.Since(start)
+        logger.Info("request", "request_id", requestID, "latency_ms", latency.Milliseconds())
+    }
+}
+</code></pre>
+
+<h3>Timeout & Cancellation</h3>
+<p>All handlers pass context.Context down to services and DAOs. Set a timeout in middleware so slow requests don't accumulate.</p>
+
+<pre><code>func TimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+        defer cancel()
+        c.Request = c.Request.WithContext(ctx)
+        c.Next()
+    }
+}
+</code></pre>
+
+<h3>Graceful Shutdown</h3>
+<p>When the server shuts down, drain in-flight requests before closing connections.</p>
+
+<pre><code>server := &http.Server{Addr: ":8080", Handler: router}
+
+go func() {
+    <-shutdown // signal channel
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+    server.Shutdown(ctx)  // wait up to 5s for requests to finish
+}()
+
+server.ListenAndServe()
+</code></pre>
+
+<h2>Testing Handlers</h2>
+
+<p>Use Gin's test utilities to mock HTTP requests:</p>
+
+<pre><code>func TestSearchHandler(t *testing.T) {
+    router := gin.Default()
+    mockService := &MockSearchService{}
+    handler := &SearchHandler{searchService: mockService}
+    
+    router.POST("/search", handler.Search)
+    
+    body := `{"query": "test", "kb_id": "kb1", "top_k": 10}`
+    req, _ := http.NewRequest("POST", "/search", strings.NewReader(body))
+    w := httptest.NewRecorder()
+    
+    router.ServeHTTP(w, req)
+    
+    assert.Equal(t, 200, w.Code)
+}
+</code></pre>
+
+
+<h2>Response Formatting Best Practices</h2>
+
+<h3>Standard Response Envelope</h3>
+<p>Wrap all responses in a consistent envelope for client-side consistency:</p>
+
+<pre><code>type APIResponse struct {
+    Code    int         `json:"code"`      // 0 = success, non-zero = error
+    Message string      `json:"message"`   // human-readable message
+    Data    interface{} `json:"data"`      // actual response data
+    Meta    struct {
+        RequestID string `json:"request_id"`
+        Timestamp int64  `json:"timestamp"`
+    } `json:"meta"`
+}
+
+// Usage
+c.JSON(200, APIResponse{
+    Code: 0,
+    Message: "OK",
+    Data: searchResult,
+    Meta: {
+        RequestID: c.GetString("request_id"),
+        Timestamp: time.Now().Unix(),
+    },
+})
+</code></pre>
+
+<h3>Pagination Support</h3>
+<p>For list endpoints, support offset/limit pagination:</p>
+
+<pre><code>type ListRequest struct {
+    Offset int `json:"offset" binding:"gte=0"`
+    Limit  int `json:"limit" binding:"gte=1,lte=100"`
+}
+
+// Query
+var items []Item
+d.db.Offset(offset).Limit(limit).Find(&items)
+
+// Response includes total count
+type ListResponse struct {
+    Items []Item `json:"items"`
+    Total int    `json:"total"`
+}
+</code></pre>
+
+<h3>Error Response Standards</h3>
+<p>Provide detailed error information for debugging:</p>
+
+<pre><code>type ErrorResponse struct {
+    Code      int    `json:"code"`
+    Message   string `json:"message"`
+    Details   string `json:"details,omitempty"`    // internal error details
+    Timestamp int64  `json:"timestamp"`
+    Path      string `json:"path"`
+}
+
+// Example: Missing required field
+c.JSON(400, ErrorResponse{
+    Code: 400,
+    Message: "validation error",
+    Details: "field 'kb_id' is required",
+    Path: c.Request.URL.Path,
+    Timestamp: time.Now().Unix(),
+})
+</code></pre>
+
+
+<h2>Further Reading</h2>
+<ul>
+<li><a title="How a Search Query Becomes Results" href="request-lifecycle/index.html">Request Lifecycle Deep Dive</a> — Follow a chat query end-to-end</li>
+<li><a title="Domain Logic &amp; Transaction Boundaries" href="../service/index.html">Service Layer</a> — Where handlers delegate</li>
+<li><a title="High-Performance Go Backend + C++ <a href="../../index.html" title="RAGFlow — Open-source RAG engine with deep document understanding" class="xref">Tokenizer</a>" href="../index.html">Internal Module Overview</a></li>
+</ul>
+
+</main>
+
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+const key = 'neutra-ip-theme';
+
+const saved = localStorage.getItem(key);
+if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+  html.setAttribute('data-theme', 'light');
+  themeToggle.textContent = '☀️';
+} else {
+  html.removeAttribute('data-theme');
+  themeToggle.textContent = '🌙';
+}
+
+themeToggle.addEventListener('click', () => {
+  if (html.getAttribute('data-theme') === 'light') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem(key, 'dark');
+    themeToggle.textContent = '🌙';
+  } else {
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem(key, 'light');
+    themeToggle.textContent = '☀️';
+  }
+});
+
+const backToTopBtn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    backToTopBtn.classList.add('show');
+  } else {
+    backToTopBtn.classList.remove('show');
+  }
+});
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

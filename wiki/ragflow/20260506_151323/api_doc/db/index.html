@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+    <meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/api/db">
+    <meta name="wiki-source-rev" content="e8f19aa33">
+    <title>API Database Layer - RAGFlow Wiki</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #0066cc;
+            --accent-hover: #0052a3;
+            --code-bg: #f8f8f8;
+            --code-text: #212121;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #f5f5f5;
+            --text-light: #b0b0b0;
+            --accent: #6db3f2;
+            --accent-hover: #4a9edc;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px; text-decoration: none; z-index: 100; }
+        .skip-link:focus { top: 0; }
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a { color: var(--text); text-decoration: none; font-size: 14px; }
+        nav a:hover { color: var(--accent); }
+        .theme-toggle { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text); }
+        .theme-toggle:hover { background-color: var(--code-bg); }
+        .breadcrumbs { padding: 12px 20px; font-size: 13px; color: var(--text-light); background-color: var(--surface); border-bottom: 1px solid var(--border); }
+        .breadcrumbs a { color: var(--accent); text-decoration: none; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .hero { margin-bottom: 40px; }
+        h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { font-size: 16px; color: var(--text-light); margin-bottom: 20px; }
+        .intro-box { background-color: var(--surface); border-left: 4px solid var(--accent); padding: 20px; margin-bottom: 30px; border-radius: 4px; font-style: italic; color: var(--text-light); }
+        h2 { font-size: 24px; margin-top: 40px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+        h4 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+        p { margin-bottom: 12px; line-height: 1.8; }
+        ul, ol { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        pre { background-color: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 4px; overflow-x: auto; margin-bottom: 16px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); position: relative; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background-color: var(--accent-hover); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background-color: var(--code-bg); font-weight: 600; }
+        tr:hover { background-color: var(--code-bg); }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; display: none; font-size: 12px; z-index: 50; }
+        .back-to-top:hover { background-color: var(--accent-hover); }
+        .back-to-top.visible { display: block; }
+    @media print{.theme-toggle,.skip-link,.back-to-top,.copy-btn,.diagram-overlay{display:none!important}body{background:#fff!important;color:#000!important}.card,.diagram-container{break-inside:avoid}}</style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    
+    <header>
+        <div class="header-left">
+            <div class="logo">RAGFlow</div>
+            <nav>
+                <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">API Overview</a>
+                <a title="RAGFlow API Module - Documentation Hub" href="../index.html">Documentation</a>
+                <a href="index.html">Database</a>
+            </nav>
+        </div>
+        <button class="theme-toggle" aria-label="Toggle light/dark theme" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="breadcrumbs">
+        <a title="RAGFlow — Open-source RAG engine with deep document understanding" href="../../index.html">RAGFlow Wiki</a> › <a title="RAGFlow API Module - Documentation Hub" href="../index.html">API Module</a> › Database Layer
+    </div>
+    
+    
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">📚 What is this &amp; why does it exist?</h3>
+<p>Persistence layer using Peewee ORM with 15+ tables modeling tenants, users, knowledge bases, documents, and tasks. Implements multi-tenancy by always filtering on tenant_id, custom field types for JSON/list columns, and connection pooling with deadlock retry logic.</p>
+<details style="margin-top:.8rem;"><summary style="cursor:pointer;color:var(--accent2);font-weight:600;">💡 Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Like a giant filing cabinet shared across many companies — every drawer is labeled with the tenant code, and every clerk who reaches in must verify they belong to that company before touching anything. The custom JSON fields are like sticky notes attached to each folder for free-form metadata.</p></details>
+</div>
+
+<main id="main">
+        <div class="hero">
+            <h1>Database Layer: Peewee ORM & Models</h1>
+            <p>Peewee ORM models, database schema, custom field types, and multi-tenancy enforcement at the data access layer.</p>
+        </div>
+        
+        <div class="intro-box">
+            <strong>Analogy:</strong> The db/ layer is like a "filing system" in a company. Instead of storing papers in cabinets, it stores entity data (Users, Documents, Tasks, etc.) in a MySQL database. Each entity has a schema (columns, types, constraints). The Peewee ORM is the "librarian" who knows how to fetch, insert, and update records correctly. <a href="../../web_doc/services/index.html">Services</a> use the librarian to work with data, without needing to write SQL by hand.
+        </div>
+        
+        <h2>Purpose & Architecture</h2>
+        
+        <p>The <code>db/</code> sub-module contains:</p>
+        
+        <ul>
+            <li><strong>Peewee Models:</strong> <code>db_models.py</code> defines 15+ Peewee model classes corresponding to MySQL tables (User, Tenant, Document, Dialog, Task, Chunk, Conversation, Message, KnowledgeBase, etc.).</li>
+            <li><strong>Domain Services:</strong> <code>services/</code> contains 15+ domain <a href="../../internal_doc/service/index.html">service</a> classes (DocumentService, DialogService, TaskService, etc.) that encapsulate business logic and use Peewee models to query/update data.</li>
+            <li><strong>Joint Services:</strong> <code>joint_services/</code> contains cross-domain coordination services (<a href="../services/index.html" title="API Services Layer - RAGFlow Wiki" class="xref">UserAccountService</a>, <a href="../services/index.html" title="API Services Layer - RAGFlow Wiki" class="xref">MemoryMessageService</a>, <a href="../services/index.html" title="API Services Layer - RAGFlow Wiki" class="xref">TenantModelService</a>) for atomic multi-table mutations.</li>
+            <li><strong>Custom Field Types:</strong> Peewee extensions (JSONField, ListField, SerializedField) for portable field types across MySQL and PostgreSQL.</li>
+            <li><strong>Multi-Tenancy Enforcement:</strong> All queries automatically filter by tenant_id at the ORM level; services validate tenant ownership before mutations.</li>
+        </ul>
+        
+        <h2>Database Models Overview</h2>
+        
+        <p>RAGFlow's database schema includes 15+ Peewee models. Here are the core entities:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Class</th>
+                    <th>MySQL Table</th>
+                    <th>Purpose</th>
+                    <th>Key Fields</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>User</td>
+                    <td>user</td>
+                    <td>User accounts and authentication</td>
+                    <td>id, email, password_hash, tenant_id, created_at, is_active</td>
+                </tr>
+                <tr>
+                    <td>Tenant</td>
+                    <td>tenant</td>
+                    <td>Multi-tenant org boundaries</td>
+                    <td>id, name, description, created_by (FK User), created_at, updated_at</td>
+                </tr>
+                <tr>
+                    <td>Document</td>
+                    <td>document</td>
+                    <td>Uploaded documents (PDFs, Word, etc.)</td>
+                    <td>id, tenant_id, name, file_path, file_type, created_by (FK User), created_at, updated_at, deleted_at (soft delete)</td>
+                </tr>
+                <tr>
+                    <td>Chunk</td>
+                    <td>chunk</td>
+                    <td>Document chunks (embeddings + text)</td>
+                    <td>id, document_id (FK Document), content, tokens, embedding (vector), created_at, deleted_at</td>
+                </tr>
+                <tr>
+                    <td>Dialog</td>
+                    <td>dialog</td>
+                    <td>Conversation definitions</td>
+                    <td>id, tenant_id, name, description, created_by (FK User), created_at, updated_at</td>
+                </tr>
+                <tr>
+                    <td>Conversation</td>
+                    <td>conversation</td>
+                    <td>Chat sessions within a dialog</td>
+                    <td>id, dialog_id (FK Dialog), user_id (FK User), created_at, updated_at</td>
+                </tr>
+                <tr>
+                    <td>Message</td>
+                    <td>message</td>
+                    <td>Individual chat messages</td>
+                    <td>id, conversation_id (FK Conversation), role (user/assistant), content, created_at</td>
+                </tr>
+                <tr>
+                    <td>Task</td>
+                    <td>task</td>
+                    <td>Background processing tasks</td>
+                    <td>id, tenant_id, document_id (FK Document), status (pending/processing/done/error), progress_json (JSONField), created_at, updated_at</td>
+                </tr>
+                <tr>
+                    <td>KnowledgeBase</td>
+                    <td>knowledge_base</td>
+                    <td>Groupings of documents + chunks</td>
+                    <td>id, tenant_id, name, description, created_by (FK User), created_at, updated_at</td>
+                </tr>
+                <tr>
+                    <td><a href="../../memory/index.html">Memory</a></td>
+                    <td>memory</td>
+                    <td>User memory/context for conversations</td>
+                    <td>id, user_id (FK User), content, created_at, updated_at</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Schema Relationships & Foreign Keys</h2>
+        
+        <p>Key relationships in the schema:</p>
+        
+        <ul>
+            <li><strong>Tenant multi-tenancy:</strong> User → Tenant (many users per tenant), Document → Tenant (docs isolated by tenant), Dialog → Tenant, Task → Tenant.</li>
+            <li><strong>User isolation:</strong> Document.created_by → User (FK), Dialog.created_by → User (FK), Conversation.user_id → User (FK).</li>
+            <li><strong>Document relationships:</strong> Document → KnowledgeBase (documents belong to knowledge bases), Document → Chunk (documents have many chunks).</li>
+            <li><strong>Conversation relationships:</strong> Dialog → Conversation (many conversations per dialog), Conversation → Message (many messages per conversation).</li>
+            <li><strong>Task queuing:</strong> Document → Task (one document upload = one task), Task.status tracks processing state.</li>
+        </ul>
+        
+        <h2>Custom Peewee Field Types</h2>
+        
+        <p>RAGFlow defines custom Peewee field types to handle complex data structures:</p>
+        
+        <h3>JSONField</h3>
+        
+        <p>Stores JSON objects in TEXT columns. Used for semi-structured data (metadata, config, progress).</p>
+        
+        <pre><code># Example in db_models.py
+class Task(BaseModel):
+    progress_json = JSONField(default={})
+    
+    # Usage in service
+    task = Task.get(Task.id == task_id)
+    task.progress_json = {'percent': 50, 'stage': 'embedding'}
+    task.save()
+</code></pre>
+        
+        <h3>ListField</h3>
+        
+        <p>Stores Python lists as JSON arrays. Useful for tags, keywords, etc.</p>
+        
+        <pre><code>class Document(BaseModel):
+    tags = ListField(default=[])
+    
+    # Usage
+    doc.tags = ['important', 'finance', 'q4-2024']
+    doc.save()
+</code></pre>
+        
+        <h3>SerializedField</h3>
+        
+        <p>Serializes Python objects using pickle or JSON. Used for complex objects that don't fit JSON.</p>
+        
+        <pre><code>class ConversationContext(BaseModel):
+    context_obj = SerializedField()
+    
+    # Usage
+    ctx = ConversationContext()
+    ctx.context_obj = {'user_preferences': {...}, 'session_state': {...}}
+    ctx.save()
+</code></pre>
+        
+        <h2>Domain Services Layer</h2>
+        
+        <p>Services in <code>db/services/</code> are the primary interface for business logic. Each service encapsulates one entity's behavior:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service Class</th>
+                    <th>Module</th>
+                    <th>Responsibilities</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>DocumentService</td>
+                    <td>document_service.py</td>
+                    <td>CRUD for documents, file path resolution, soft delete, tenant isolation</td>
+                </tr>
+                <tr>
+                    <td>ChunkService</td>
+                    <td>chunk_service.py</td>
+                    <td>Chunk creation/retrieval, embedding queries, vector similarity search</td>
+                </tr>
+                <tr>
+                    <td>DialogService</td>
+                    <td>dialog_service.py</td>
+                    <td>Conversation template management, tenant-scoped queries</td>
+                </tr>
+                <tr>
+                    <td>ConversationService</td>
+                    <td>conversation_service.py</td>
+                    <td>Chat session lifecycle, message coordination</td>
+                </tr>
+                <tr>
+                    <td>MessageService</td>
+                    <td>message_service.py</td>
+                    <td>Message persistence, role-based filtering (user vs assistant)</td>
+                </tr>
+                <tr>
+                    <td>TaskService</td>
+                    <td>task_service.py</td>
+                    <td>Background task lifecycle, status updates, progress tracking</td>
+                </tr>
+                <tr>
+                    <td>KnowledgebaseService</td>
+                    <td>knowledgebase_service.py</td>
+                    <td>Knowledge base CRUD, document grouping, tenant isolation</td>
+                </tr>
+                <tr>
+                    <td>LLMService</td>
+                    <td>llm_service.py</td>
+                    <td><a href="../../rag_doc/llm/index.html">LLM</a> model configuration, credential management</td>
+                </tr>
+                <tr>
+                    <td>MemoryService</td>
+                    <td>memory_service.py</td>
+                    <td>User context/memory management for conversations</td>
+                </tr>
+                <tr>
+                    <td>FileService</td>
+                    <td>file_service.py</td>
+                    <td>File uploads to S3/blob storage, temp file cleanup</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Joint Services for Cross-Domain Mutations</h2>
+        
+        <p>Some operations span multiple entities and must be atomic. Joint services coordinate these:</p>
+        
+        <ul>
+            <li><strong>UserAccountService:</strong> Creates User + Tenant together. Ensures user is owner of created tenant.</li>
+            <li><strong>MemoryMessageService:</strong> Coordinates Memory and Message creation when a user sends a message that should be remembered.</li>
+            <li><strong>TenantModelService:</strong> Manages tenant settings and related model configurations atomically.</li>
+        </ul>
+        
+        <h2>Multi-Tenancy Enforcement in Database Layer</h2>
+        
+        <p>Multi-tenancy is enforced at THREE levels:</p>
+        
+        <ol>
+            <li><strong>ORM Level:</strong> Peewee queries are auto-filtered by tenant_id where applicable. Services should use tenant_id in WHERE clauses.</li>
+            <li><strong>Service Level:</strong> Services validate tenant_id before mutations. Example:
+            <pre><code>def delete_document(self, doc_id, tenant_id):
+    doc = Document.get_by_id(doc_id)
+    if doc.tenant_id != tenant_id:
+        raise TenantMismatch(f"Doc {doc_id} not in tenant {tenant_id}")
+    doc.deleted_at = datetime.now()
+    doc.save()
+</code></pre>
+            </li>
+            <li><strong><a href="../index.html">API</a> Layer:</strong> All handlers pass <code>g.tenant_id</code> to service calls. Never trust request parameters for tenant_id.</li>
+        </ol>
+        
+        <h2>Connection Pooling & Performance</h2>
+        
+        <p>RAGFlow uses Peewee's connection pool (typically 10–20 connections) to handle concurrent requests:</p>
+        
+        <ul>
+            <li><strong>Pool size:</strong> Configured at <a href="../../rag_doc/app/index.html">app</a> startup. Default is 10; can be tuned for throughput.</li>
+            <li><strong>Connection reuse:</strong> Each async <a href="../../internal_doc/handler/index.html">handler</a> borrows a connection from the pool, executes queries, returns it.</li>
+            <li><strong>Deadlock retry:</strong> MySQL InnoDB can deadlock under contention. Services implement exponential backoff (retry up to 3x) for failed transactions.</li>
+            <li><strong>Query caching:</strong> Peewee doesn't cache results. Services can implement caching at a higher level (Redis) for frequently-accessed, slowly-changing data (LLM models, KnowledgeBases).</li>
+        </ul>
+        
+        <h2>Soft Deletes & Data Integrity</h2>
+        
+        <p>Most entities use soft deletes (a <code>deleted_at</code> timestamp column) instead of hard deletes:</p>
+        
+        <pre><code># Example in db_models.py
+class Document(BaseModel):
+    name = CharField()
+    deleted_at = DateTimeField(null=True, default=None)
+    
+# Soft delete in service
+doc.deleted_at = datetime.now()
+doc.save()
+
+# Query only active documents
+active_docs = Document.select().where(Document.deleted_at.is_null())
+</code></pre>
+        
+        <p>Benefits:</p>
+        <ul>
+            <li>Allows "undo" operations (restore deleted documents)</li>
+            <li>Maintains referential integrity (chunks still reference deleted documents)</li>
+            <li>Supports audit trails (can see when entity was "deleted")</li>
+        </ul>
+        
+        <h2>Error Handling & Constraints</h2>
+        
+        <p>Peewee raises exceptions for constraint violations. Services catch and convert to domain exceptions:</p>
+        
+        <pre><code>from peewee import IntegrityError, DoesNotExist
+
+class DocumentService:
+    def create_document(self, tenant_id, name):
+        try:
+            doc = Document.create(
+                tenant_id=tenant_id,
+                name=name,
+                created_by=current_user_id
+            )
+            return doc
+        except IntegrityError as e:
+            if "UNIQUE" in str(e):
+                raise DocumentNameExists(f"Document '{name}' already exists in tenant")
+            raise InternalError(f"DB constraint violation: {e}")
+        except Exception as e:
+            logger.exception(f"Failed to create document: {e}")
+            raise InternalError("Failed to create document")
+</code></pre>
+        
+        <h2>Key Files & Modules</h2>
+        
+        <ul>
+            <li><code>db/db_models.py</code> — All 15+ Peewee model definitions</li>
+            <li><code>db/base_model.py</code> — Base class for all models (<a href="../../common/index.html">common</a> fields, timestamps)</li>
+            <li><code>db/services/</code> — 10+ domain service classes</li>
+            <li><code>db/joint_services/</code> — Cross-domain coordination (UserAccountService, MemoryMessageService, etc.)</li>
+            <li><code>db/common_service.py</code> — CommonService base class with shared methods (pagination, tenant filtering, error handling)</li>
+            <li><code>common/exceptions.py</code> — Custom exception classes raised by services</li>
+        </ul>
+        
+        <h2>Design Decisions & Trade-offs</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Decision</th>
+                    <th>Rationale</th>
+                    <th>Trade-off</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Peewee ORM (not SQLAlchemy)</td>
+                    <td>Simpler query API, less boilerplate, better for rapid development</td>
+                    <td>Less mature than SQLAlchemy, fewer advanced features (eager loading, relationship configuration)</td>
+                </tr>
+                <tr>
+                    <td>Soft deletes instead of hard delete</td>
+                    <td>Preserves audit trail, enables undo, avoids orphaned foreign keys</td>
+                    <td>Requires WHERE clauses filtering deleted_at.is_null(); uses extra storage</td>
+                </tr>
+                <tr>
+                    <td>Custom field types (JSONField, ListField)</td>
+                    <td>Handles semi-structured data without separate tables; portable across MySQL/PostgreSQL</td>
+                    <td>Less efficient for querying (can't easily search within JSON); requires deserialization on fetch</td>
+                </tr>
+                <tr>
+                    <td>Explicit tenant_id checks in services</td>
+                    <td>Prevents data leaks; makes tenant isolation explicit and auditable</td>
+                    <td>Boilerplate in every service; easy to forget a check</td>
+                </tr>
+                <tr>
+                    <td>Connection pooling (10–20 conns)</td>
+                    <td>Prevents connection exhaustion; reuses connections for efficiency</td>
+                    <td>Pool contention at high concurrency; deadlock retry overhead</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Security Implications</h2>
+        
+        <ul>
+            <li><strong>SQL Injection:</strong> Peewee parameterizes all queries; no risk of SQL injection if using ORM (not raw SQL).</li>
+            <li><strong>Tenant Isolation:</strong> Must always check tenant_id before mutations. Missing check = data leak vulnerability.</li>
+            <li><strong>Password Storage:</strong> User.password_hash is hashed with bcrypt. Never store plaintext passwords.</li>
+            <li><strong>Credential Leaks:</strong> LLM credentials (API keys) should be encrypted in the database. Decrypt only when needed for API calls.</li>
+        </ul>
+        
+        <h2>Future Enhancements</h2>
+        
+        <ul>
+            <li><strong>Connection Pooling Tuning:</strong> Monitor pool contention and deadlock rates; adjust pool size dynamically.</li>
+            <li><strong>Caching Layer:</strong> Implement Redis caching for slowly-changing data (LLM models, KnowledgeBases) to reduce DB load.</li>
+            <li><strong>Sharding:</strong> Partition data by tenant_id (shard key) for horizontal scaling at high customer count.</li>
+            <li><strong>Read Replicas:</strong> Deploy read-only replicas for analytics and reporting queries.</li>
+            <li><strong>Query Optimization:</strong> Add indexes on commonly-filtered columns (tenant_id, created_by, deleted_at).</li>
+        </ul>
+    </main>
+    
+    <button class="back-to-top" id="back-to-top">↑ Top</button>
+    
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        
+        function loadTheme() {
+            const theme = localStorage.getItem('neutra-ip-theme') || 'light';
+            htmlEl.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        loadTheme();
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neutra-ip-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+        
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        document.querySelectorAll('pre').forEach((pre) => {
+            const code = pre.querySelector('code');
+            if (code) {
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => { btn.textContent = orig; }, 2000);
+                    });
+                });
+                pre.appendChild(btn);
+            }
+        });
+    </script>
+</body>
+</html>

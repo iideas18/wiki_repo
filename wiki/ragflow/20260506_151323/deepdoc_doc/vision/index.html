@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/deepdoc/vision/">
+<meta name="wiki-source-rev" content="e8f19aa33">
+<title>Vision Module — deepdoc Neural Recognizers</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.card ul{padding-left:1.2rem;font-size:.88rem;color:var(--text-muted)}.card ul li{margin:.25rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.intro-box{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text)}
+.intro-box strong{color:var(--accent2)}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border)}
+#backToTop{position:fixed;bottom:2rem;right:2rem;width:40px;height:40px;background:var(--surface);border:1px solid var(--border);border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);z-index:999;transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#backToTop:hover{border-color:var(--accent)}
+#backToTop.visible{display:flex}
+@media print{body{max-width:100%;padding:0;background:#fff;color:#000}.theme-toggle,#backToTop,.skip-link{display:none}.diagram-overlay{display:none}h1,h2{page-break-after:avoid}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body data-theme="dark">
+<a href="#main" class="skip-link">Skip to main content</a>
+<button id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark theme">🌙</button>
+
+<main id="main">
+<div class="breadcrumb"><a title="Why deepdoc?" href="../index.html">deepdoc</a> › vision</div>
+
+<h1>Vision Module — Neural Layout & OCR Recognition</h1>
+<p>Deep learning models for document layout analysis, table structure recognition, and optical character recognition.</p>
+
+<div class="hero">
+<p><strong>What is this?</strong> — The vision layer uses neural networks (ONNX-optimized DLA for layout, CRAFT+<a href="../parser/index.html" title="Parser Module — deepdoc" class="xref">PaddleOCR</a> for text recognition) to understand document structure and extract text from images.</p>
+</div>
+
+<div class="stat-row">
+<div class="stat-box"><div class="num">10</div><div class="label">Core Modules</div></div>
+<div class="stat-box"><div class="num">140KB+</div><div class="label">Code</div></div>
+<div class="stat-box"><div class="num">12</div><div class="label">Layout Classes</div></div>
+<div class="stat-box"><div class="num">80+</div><div class="label">OCR Languages</div></div>
+</div>
+
+<h2>Core Recognizers (ONNX-Based Inference)</h2>
+
+<div class="card-grid">
+<a title="Layout Recognition Model - Deepdoc Wiki" href="layout-recognition-model/index.html" class="card">
+<h4>Layout Recognizer</h4>
+<p><code>layout_recognizer.py</code> (18KB) — Document layout detection (12-class DLA model).</p>
+<ul>
+<li>12 semantic classes: Text, Title, Figure, Table, Caption, Header, Footer, Reference, Equation, Background</li>
+<li>ONNX inference with auto-scaling</li>
+<li>Batch processing (default 16)</li>
+<li>Remote DLA server option</li>
+<li>Post-processing: NMS, confidence filtering</li>
+<li>Focus: <a title="Layout Recognition Model - Deepdoc Wiki" href="layout-recognition-model/index.html">Layout Recognition Model</a></li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>OCR Pipeline</h4>
+<p><code>ocr.py</code> (28KB) — Two-stage text recognition.</p>
+<ul>
+<li>Stage 1: CRAFT text detection (region proposals)</li>
+<li>Stage 2: PaddleOCR character recognition</li>
+<li>Supports 80+ languages (esp. multilingual support)</li>
+<li>Spatial preservation (bbox per word)</li>
+<li>Confidence scoring per character</li>
+<li>Parallel device limiting (Semaphore)</li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>Table Structure Recognizer</h4>
+<p><code>table_structure_recognizer.py</code> (23KB) — Cell grid detection and merging.</p>
+<ul>
+<li>Line detection (Hough transform)</li>
+<li>Cell boundary extraction</li>
+<li>Merged cell detection</li>
+<li>Row/column index mapping</li>
+<li>Heuristic-based post-processing</li>
+<li>Grid reconstruction</li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>Recognizer Base Class</h4>
+<p><code>recognizer.py</code> (16KB) — ONNX inference abstraction.</p>
+<ul>
+<li>Model loading (local or HuggingFace)</li>
+<li>Batch inference orchestration</li>
+<li>Input preprocessing (resize, normalize)</li>
+<li>Output postprocessing (NMS, filtering)</li>
+<li>Multi-threaded execution</li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>Post-Processing</h4>
+<p><code>postprocess.py</code> (13KB) — NMS and result refinement.</p>
+<ul>
+<li>Non-Maximum Suppression (IoU-based)</li>
+<li>Confidence thresholding</li>
+<li>Label confidence weighting</li>
+<li>Bounding box normalization</li>
+<li>Class-specific filtering</li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>Vision Operators</h4>
+<p><code>operators.py</code> (24KB) — Image processing utilities.</p>
+<ul>
+<li>Image resizing and scaling</li>
+<li>Rotation correction (EXIF)</li>
+<li>Perspective transformation</li>
+<li>Feature extraction (text, tables)</li>
+<li>Image normalization</li>
+<li>Histogram equalization</li>
+</ul>
+</a>
+
+<a href="#" class="card">
+<h4>Specialized Recognizers</h4>
+<p><code>t_recognizer.py</code>, <code>t_ocr.py</code>, <code>seeit.py</code></p>
+<ul>
+<li><strong>t_recognizer.py</strong>: Tencent recognizer integration</li>
+<li><strong>t_ocr.py</strong>: Tencent OCR wrapper</li>
+<li><strong>seeit.py</strong>: Visualization & debugging helper</li>
+</ul>
+</a>
+</div>
+
+<h2>Architecture: Multi-Stage Recognition</h2>
+
+<div class="diagram-container">
+<svg viewBox="0 0 900 550" class="mermaid" data-source="vision pipeline architecture">
+graph TB
+    Input["Input Image"]
+    
+    Input -->|preprocess| Prep["Resize, Normalize<br/>operators.py"]
+    
+    Prep -->|layout| Layout["LayoutRecognizer<br/>12-class DLA"]
+    
+    Layout -->|bboxes + classes| Assign["Region Assignment"]
+    
+    Assign -->|text class| OCRPipe["OCR Pipeline<br/>CRAFT + PaddleOCR"]
+    Assign -->|table class| TSR["Table Structure<br/>Cell Detection"]
+    Assign -->|figure class| FigHandle["Figure <a href="../../internal_doc/handler/index.html">Handler</a><br/>Crop & Save"]
+    Assign -->|other| OtherHandle["Other Handler<br/>Header, Footer, etc."]
+    
+    OCRPipe -->|text boxes| OCROut["OCR Output<br/>text + bbox + conf"]
+    TSR -->|cell grid| TSROut["Table Grid<br/>row/col indices"]
+    FigHandle -->|image| FigOut["Figure Output<br/>path + metadata"]
+    OtherHandle -->|raw bbox| OtherOut["Bbox Output"]
+    
+    OCROut -->|postprocess| PostProc["Post-Processing<br/>NMS + filtering"]
+    TSROut -->|postprocess| PostProc
+    
+    PostProc -->|normalize| Output["Output: Semantic<br/>Regions"]
+    FigOut -->|attach| Output
+    OtherOut -->|attach| Output
+    
+    classDef inputStyle fill:#1a3a52,stroke:#58a6ff,color:#f0f6fc
+    classDef prepStyle fill:#3d3d1a,stroke:#d29922,color:#f0f6fc
+    classDef ocrStyle fill:#2d5a3d,stroke:#3fb950,color:#f0f6fc
+    classDef layoutStyle fill:#5a2d3d,stroke:#f85149,color:#f0f6fc
+    classDef outputStyle fill:#3d5a2d,stroke:#d29922,color:#f0f6fc
+    
+    class Input inputStyle
+    class Prep prepStyle
+    class Layout layoutStyle
+    class OCRPipe,OCROut ocrStyle
+    class PostProc outputStyle
+    class Output outputStyle
+</svg>
+</div>
+
+<h2>Key Algorithms</h2>
+
+<h3>Layout Recognition (DLA)</h3>
+
+<p><strong>Model:</strong> Deep Layer Aggregation (DLA) backbone, trained on document images</p>
+
+<ul>
+<li><strong>Input:</strong> Image (auto-scaled to 640×640)
+<li><strong>Processing:</strong> ResNet50 + FPN (Feature Pyramid Network) for multi-scale features
+<li><strong>Output:</strong> Bboxes {x, y, w, h, class_id, confidence}
+<li><strong>Inference:</strong> ONNX Runtime (CPU or GPU)
+<li><strong>Batch:</strong> Default 16 images at once
+<li><strong>Post-processing:</strong> NMS (threshold IoU=0.5), confidence filtering (thr=0.2)
+</ul>
+
+<h3>OCR: Two-Stage</h3>
+
+<p><strong>Stage 1: CRAFT Text Detection</strong></p>
+
+<ul>
+<li>Detects word-level regions from image
+<li>Outputs: list of {bbox, confidence}
+</ul>
+
+<p><strong>Stage 2: PaddleOCR Recognition</strong></p>
+
+<ul>
+<li>Per-region character recognition
+<li>Language model inference
+<li>Outputs: {text, confidence, bbox}
+<li>Supports 80+ languages
+</ul>
+
+<h3>Table Structure Recognition</h3>
+
+<p><strong>Algorithm:</strong></p>
+
+<ol>
+<li>Apply Hough transform to detect lines (horizontal + vertical)
+<li>Extract line intersections as potential cell corners
+<li>Cluster intersections into grid
+<li>Infer cell merging (if adjacent cells have same label)
+<li>Output: {cell_bbox, row_idx, col_idx, row_span, col_span}
+</ol>
+
+<h2>Integration <a href="../../rag_doc/flow/index.html">Flow</a></h2>
+
+<p>From pdf_parser.py perspective:</p>
+
+<ol style="margin-left:1.5rem;">
+<li>Render page image (3x zoom)
+<li>Run LayoutRecognizer → get bboxes with class labels
+<li>Assign extracted text to bboxes (spatial overlap)
+<li>For each bbox by class:
+   <ul style="margin-top:.4rem;">
+   <li><strong>Text</strong>: use assigned text or run OCR
+   <li><strong>Table</strong>: crop bbox region, run TSR, output grid
+   <li><strong>Figure</strong>: crop, save image, extract caption
+   <li><strong>Header/Footer</strong>: mark and optionally skip
+   </ul>
+<li>OCR fallback for low-confidence text
+<li>Assemble into semantic blocks
+</ol>
+
+<h2>Performance & Trade-offs</h2>
+
+<table>
+<tr><th><a href="../../agent_doc/component/index.html">Component</a></th><th>Speed</th><th>Accuracy</th><th>Notes</th></tr>
+<tr><td>LayoutRecognizer (ONNX)</td><td>~50-100 ms/page</td><td>High (95%+ for <a href="../../common/index.html">common</a> layouts)</td><td>CPU inference possible; batch for speed</td></tr>
+<tr><td>OCR (CRAFT + PaddleOCR)</td><td>~200-500 ms/page</td><td>High (95%+ digital text)</td><td>Slower; parallel device limiting</td></tr>
+<tr><td>TableStructure</td><td>~100-200 ms/table</td><td>Medium (heuristic-based)</td><td>Line detection can fail on sparse tables</td></tr>
+<tr><td>NMS Post-processing</td><td>&lt;10 ms</td><td>Removes duplicates</td><td>Configurable IoU threshold</td></tr>
+</table>
+
+<h2>Configuration & Tuning</h2>
+
+<p><strong>Environment Variables:</strong></p>
+
+<ul style="margin-left:1.5rem;">
+<li><code>LAYOUT_RECOGNIZER_TYPE</code> — "onnx" (default) or "ascend"
+<li><code>DEEPDOC_URL</code> — Remote DLA server URL (fallback)
+<li><code>TENSORRT_DLA_SVR</code> — Alternative DLA server endpoint
+<li><code>PARALLEL_DEVICES</code> — Number of parallel inference workers
+<li><code>HF_ENDPOINT</code> — HuggingFace mirror (for model downloads)
+</ul>
+
+<p><strong>Tunable Thresholds:</strong></p>
+
+<ul style="margin-left:1.5rem;">
+<li><code>layout_thr</code> — Layout confidence threshold (default 0.2)
+<li><code>ocr_thr</code> — OCR confidence threshold (default 0.5)
+<li><code>nms_iou</code> — NMS IoU threshold (default 0.5)
+<li><code>batch_size</code> — Inference batch size (default 16)
+</ul>
+
+<h2>Model Management</h2>
+
+<h3>Local Model Loading</h3>
+
+<p>Models stored in:</p>
+
+<pre><code>RAGFlow_base_dir/rag/res/deepdoc/
+├── layout.onnx (DLA model)
+├── ...</code></pre>
+
+<h3>HuggingFace Fallback</h3>
+
+<p>If local model missing, auto-download from:</p>
+
+<pre><code>https://huggingface.co/InfiniFlow/deepdoc</code></pre>
+
+<h3>Remote DLA Server</h3>
+
+<p>Optional remote TensorRT inference via DEEPDOC_URL or TENSORRT_DLA_SVR environment variable.</p>
+
+<h2>Error Handling</h2>
+
+<ul style="margin-left:1.5rem;">
+<li><strong>Model load fails (local)</strong> → Download from HuggingFace
+<li><strong>HuggingFace unavailable</strong> → Try remote DLA server
+<li><strong>Remote DLA unavailable</strong> → Fall back to empty layout (output raw text)
+<li><strong>OCR low confidence</strong> → Include text with confidence flag
+<li><strong>Table detection fails</strong> → Keep as unstructured text
+</ul>
+
+<h2>Summary</h2>
+
+<p>The vision layer combines PaddlePaddle-trained DLA (layout), CRAFT (text detection), and PaddleOCR (text recognition) into a robust multi-stage pipeline. ONNX inference ensures portability and performance. Fallback strategies and configurable thresholds make the system resilient to edge cases—scanned PDFs, low-quality images, mixed layouts, and multilingual documents.</p>
+
+<div class="footer">
+<p>Generated: 2026-05-06 | Source: /mnt/disk1/zy/rag/ragflow/deepdoc/vision/ | Revision: e8f19aa33</p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"></div>
+<button id="backToTop" aria-label="Back to top">↑</button>
+
+<script>
+function themeToggle(){const t=document.documentElement;const c=t.getAttribute('data-theme')||'dark';const n=c==='dark'?'light':'dark';t.setAttribute('data-theme',n);localStorage.setItem('neutra-ip-theme',n);document.getElementById('themeToggle').textContent=n==='dark'?'🌙':'☀️'}
+const saved=localStorage.getItem('neutra-ip-theme')||'dark';document.documentElement.setAttribute('data-theme',saved);document.getElementById('themeToggle').textContent=saved==='dark'?'🌙':'☀️';
+document.getElementById('themeToggle').addEventListener('click',themeToggle);
+mermaid.initialize({startOnLoad:false,theme:document.documentElement.getAttribute('data-theme')||'dark',securityLevel:'loose'});
+function renderAllMermaid(){const t=document.documentElement.getAttribute('data-theme')||'dark';document.querySelectorAll('.mermaid').forEach(e=>{if(e.textContent&&!e.hasAttribute('data-processed')){mermaid.render('mermaid_'+Math.random(),e.textContent,s=>{const c=document.createElement('div');c.innerHTML=s;const d=c.querySelector('svg');if(d){e.textContent='';e.appendChild(d);e.setAttribute('data-processed','true')}})}})}
+renderAllMermaid();
+document.getElementById('themeToggle').addEventListener('click',()=>{setTimeout(renderAllMermaid,100)});
+const overlay=document.getElementById('diagramOverlay');const diagrams=document.querySelectorAll('.diagram-container');
+diagrams.forEach(e=>{e.addEventListener('click',()=>{let s=e.querySelector('svg');if(!s){return}let c=s.cloneNode(true);c.style.maxWidth='100%';c.style.height='auto';overlay.innerHTML='';let d=document.createElement('div');d.className='diagram-overlay-content';d.appendChild(c);overlay.appendChild(d);overlay.classList.add('active')});});
+overlay.addEventListener('click',()=>overlay.classList.remove('active'));
+overlay.addEventListener('wheel',e=>{e.preventDefault();let s=overlay.querySelector('svg');if(!s)return;let c=parseFloat(s.style.transform?.match(/scale\(([\d.]+)\)/)?.[1]||1);c+=e.deltaY>0?.9:1.1;s.style.transform=`scale(${c})`},false);
+window.addEventListener('scroll',()=>{const t=document.getElementById('backToTop');t?window.scrollY>300?t.classList.add('visible'):t.classList.remove('visible'):null});
+const bt=document.getElementById('backToTop');if(bt)bt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+hljs.highlightAll();
+const codeBlocks=document.querySelectorAll('pre code');codeBlocks.forEach(e=>{const t=document.createElement('button');t.className='copy-btn';t.textContent='Copy';t.style.cssText='position:absolute;top:0;right:0;padding:4px 8px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.8rem;';const s=document.createElement('div');s.style.position='relative';e.parentNode.insertBefore(s,e);s.appendChild(e);s.insertBefore(t,e);t.addEventListener('click',()=>{const c=e.textContent;navigator.clipboard.writeText(c).then(()=>{const d=t.textContent;t.textContent='Copied!';setTimeout(()=>t.textContent=d,2000)})})});
+</script>
+</body>
+</html>

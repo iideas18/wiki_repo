@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2025-05-06T15:13:23Z">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/agent">
+<meta name="wiki-source-rev" content="e8f19aa33821b6a7d0d96fb48c0944702ff06c50">
+<meta name="wiki-focus-parent" content="../index.html">
+<title>RAGFlow/Agent Component System — LLM Component Deep-Dive</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.callout{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;font-size:.92rem}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0 1.5rem}
+.summary-grid .cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.summary-grid strong{display:block;color:var(--heading);margin-bottom:.35rem}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border)}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);transition:opacity .2s}
+.back-to-top.visible{display:flex}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}
+pre:hover .copy-btn{opacity:1}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328}}
+</style>
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>RAGFlow/Agent <a href="../index.html">Component</a> System — <a href="../../../rag_doc/llm/index.html">LLM</a> Component Deep-Dive</h1>
+<div class="hero">
+  <p class="subtitle">Architecting intelligent model integration</p>
+  <p>Explore the LLM component's message pipeline, structured output parsing, streaming support, and retry mechanisms. Learn how chat models are integrated with tool calling, how multi-turn conversations are maintained, and how completions are parsed for structured data extraction.</p>
+</div>
+
+<h2 id="overview">Overview: LLM Component Architecture</h2>
+<p>The LLM component is a bridge between RAGFlow workflows and large language models. It handles chat message formatting, <a href="../../../api_doc/index.html">API</a> calls, response parsing, and structured output generation. The component supports OpenAI, Claude, Gemini, and local models via a unified interface.</p>
+
+<div class="summary-grid">
+  <div class="cell">
+    <strong><a href="../../../api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Message</a> Pipeline</strong><br/>Assemble system prompt, conversation history, and tool context into API-compatible format.
+  </div>
+  <div class="cell">
+    <strong>Structured Output</strong><br/>Parse LLM responses using JSON schema, ensuring outputs conform to expected types and formats.
+  </div>
+  <div class="cell">
+    <strong>Tool Calling</strong><br/>Automatically parse LLM tool calls and invoke corresponding Tool nodes in the workflow.
+  </div>
+  <div class="cell">
+    <strong>Streaming</strong><br/>Stream tokens incrementally; buffer and parse tool calls; emit tokens to caller incrementally.
+  </div>
+  <div class="cell">
+    <strong>Retry Strategy</strong><br/>Retry on transient errors; fallback to simpler format on parse failure; track failure modes.
+  </div>
+  <div class="cell">
+    <strong><a href="../../../memory/index.html">Memory</a> Management</strong><br/>Implement sliding window history to prevent token overflow while preserving context.
+  </div>
+</div>
+
+<h2 id="message-pipeline">Message Pipeline: Building API Requests</h2>
+<p>Before sending a chat completion request to the API, the LLM component assembles a complete conversation context from multiple sources.</p>
+
+<h3>Pipeline Stages</h3>
+<ol style="line-height:1.8;">
+  <li><strong>System Prompt:</strong> Always first message. Instructs the model on role, constraints, output format. Example: "You are a helpful assistant. Output JSON responses."</li>
+  <li><strong><a href="../../../api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Conversation</a> History:</strong> Previous turns (user input, assistant response, tool results). Loaded from <a href="../../canvas/index.html">Canvas</a> history or component state.</li>
+  <li><strong>Context Window:</strong> Relevant documents, search results, or code snippets. Inserted as human message or in system prompt using <a href="../../../rag_doc/index.html">RAG</a> context.</li>
+  <li><strong>Current <a href="../../../api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">User</a> Input:</strong> The immediate query or instruction for this turn.</li>
+  <li><strong>Tool Definitions (optional):</strong> JSON schema of available <a href="../../tools/index.html">tools</a>. Included if component.tools config is set. Model uses this to decide when to call tools.</li>
+</ol>
+
+<h3>Example Pipeline Build</h3>
+<pre><code class="language-python">def build_messages(self):
+    messages = []
+    
+    # 1. System prompt (always first)
+    messages.append({
+        "role": "system",
+        "content": "You are a code review assistant. Provide detailed feedback on code quality, security, and performance."
+    })
+    
+    # 2. History from previous turns
+    for turn in self.conversation_history:
+        messages.append({"role": turn["role"], "content": turn["content"]})
+    
+    # 3. RAG context (optional)
+    if self.context:
+        messages.append({
+            "role": "system",
+            "content": f"Reference material:
+{self.context}"
+        })
+    
+    # 4. Current input
+    messages.append({
+        "role": "user",
+        "content": self.current_input
+    })
+    
+    # 5. Tools (optional)
+    tools = self._build_tool_schemas()  # JSON schema array
+    
+    return messages, tools
+</code></pre>
+
+<h2 id="tool-calling">Tool Calling: LLM-Invoked <a href="../../../web_doc/components/index.html">Components</a></h2>
+<p>When the model decides to call a tool, it returns a structured tool call response. The LLM component parses this and invokes the corresponding Tool node.</p>
+
+<h3>Tool Calling <a href="../../../rag_doc/flow/index.html">Flow</a></h3>
+<ol style="line-height:1.8;">
+  <li><strong>LLM Models Tool Need:</strong> Model sees tool definitions in system prompt or tools parameter. When appropriate, returns {"type": "tool_call", "tool_name": "...", "arguments": {...}}.</li>
+  <li><strong>Parse Response:</strong> Component extracts tool_name and arguments from response.</li>
+  <li><strong>Validate Tool:</strong> Check that tool_name exists in <a href="../../canvas/index.html" title="<a href="../index.html" title="Agent Canvas Component System — Component System" class="xref">Agent</a> Canvas Canvas &amp; Execution — Canvas &amp; Execution" class="xref">Canvas</a>._tools registry. Validate arguments against tool schema.</li>
+  <li><strong>Invoke Tool:</strong> Call Tool node's run() method. Pass arguments as kwargs.</li>
+  <li><strong>Collect Result:</strong> Tool returns output (JSON). Component appends tool result message to history.</li>
+  <li><strong>Loop Back:</strong> Continue conversation with tool result injected. Model may make more tool calls or respond to user.</li>
+</ol>
+
+<h3>Tool Call Parsing Example</h3>
+<pre><code class="language-python">def parse_tool_calls(response):
+    """Extract tool_call objects from LLM response."""
+    tool_calls = []
+    
+    if hasattr(response, 'tool_calls'):
+        # OpenAI API response object
+        for tc in response.tool_calls:
+            tool_calls.append({
+                'tool_name': tc.function.name,
+                'arguments': json.loads(tc.function.arguments)
+            })
+    elif isinstance(response, str):
+        # Raw JSON from Claude or local model
+        try:
+            data = json.loads(response)
+            if 'tool_calls' in data:
+                tool_calls = data['tool_calls']
+        except json.JSONDecodeError:
+            # Parse failure; fallback to no tools
+            pass
+    
+    return tool_calls
+
+def invoke_tool(tool_name, arguments):
+    """Call Tool node and collect result."""
+    tool_node = Canvas._tools.get(tool_name)
+    if not tool_node:
+        raise ValueError(f"Unknown tool: {tool_name}")
+    
+    result = tool_node.run(**arguments)
+    
+    # Append to conversation
+    self.messages.append({
+        "role": "tool",
+        "tool_name": tool_name,
+        "content": json.dumps(result)
+    })
+    
+    return result
+</code></pre>
+
+<h2 id="structured-output">Structured Output Parsing</h2>
+<p>To ensure LLM outputs conform to expected schemas, the component uses JSON schema validation and re-prompting on parse failure.</p>
+
+<h3>Output Parsing Pipeline</h3>
+<ol style="line-height:1.8;">
+  <li><strong>Define Schema:</strong> Specify expected output format as JSON schema (e.g., {"type": "object", "properties": {"summary": {"type": "string"}, "score": {"type": "number"}}}).</li>
+  <li><strong>Instruct Model:</strong> Prompt includes schema and example output. Increases likelihood of valid JSON.</li>
+  <li><strong>Parse Response:</strong> Attempt to parse LLM output as JSON. Validate against schema.</li>
+  <li><strong>Success Path:</strong> If valid, return structured output to caller.</li>
+  <li><strong>Failure Path:</strong> If invalid, optionally re-prompt with error message. "Your output was invalid JSON: ...
+ Please fix and retry."</li>
+</ol>
+
+<h3>Schema Validation Example</h3>
+<pre><code class="language-python">import json
+from jsonschema import validate, ValidationError
+
+def parse_structured_output(raw_response, schema):
+    """Parse and validate LLM output against schema."""
+    try:
+        # Extract JSON from response (may be wrapped in text)
+        data = json.loads(raw_response)
+        
+        # Validate against schema
+        validate(instance=data, schema=schema)
+        
+        return data
+    
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+    
+    except ValidationError as e:
+        raise ValueError(f"Schema validation failed: {e.message}")
+
+def run_with_retry(self, input_data):
+    """Execute with re-prompting on parse failure."""
+    max_retries = 3
+    for attempt in range(max_retries):
+        response = self.api_call(...)
+        
+        try:
+            output = parse_structured_output(response, self.output_schema)
+            return output
+        except ValueError as e:
+            if attempt < max_retries - 1:
+                # Re-prompt with error
+                self.messages.append({
+                    "role": "assistant",
+                    "content": response
+                })
+                self.messages.append({
+                    "role": "user",
+                    "content": f"Your output was invalid. Error: {e}
+
+Please provide valid JSON output."
+                })
+            else:
+                raise
+</code></pre>
+
+<h2 id="streaming">Streaming Support</h2>
+<p>For real-time token generation, the LLM component buffers streaming responses and incrementally parses them.</p>
+
+<h3>Streaming Pipeline</h3>
+<ol style="line-height:1.8;">
+  <li><strong>Open Stream:</strong> Call API with stream=true. Receive iterator of token chunks.</li>
+  <li><strong>Buffer Tokens:</strong> Accumulate chunks into a full response string.</li>
+  <li><strong>Emit Tokens:</strong> Yield each chunk to caller immediately (for UI update, logging).</li>
+  <li><strong>Parse Complete Response:</strong> Once stream ends, parse complete buffer (JSON schema, tool calls, etc.).</li>
+</ol>
+
+<h3>Streaming Code Example</h3>
+<pre><code class="language-python">async def stream_response(self, messages):
+    """Stream tokens from LLM API."""
+    buffer = ""
+    
+    async with self.client.chat.completions.create(
+        model=self.model_name,
+        messages=messages,
+        stream=True
+    ) as response:
+        async for chunk in response:
+            if chunk.choices[0].delta.content:
+                token = chunk.choices[0].delta.content
+                buffer += token
+                
+                # Emit token immediately for UI
+                yield {"token": token, "partial": buffer}
+    
+    # Parse complete buffer after streaming
+    output = parse_structured_output(buffer, self.output_schema)
+    yield {"complete": output}
+</code></pre>
+
+<h2 id="context-window">Context Window Management</h2>
+<p>To prevent token overflow, the LLM component implements a sliding window of conversation history.</p>
+
+<h3>Window Strategy</h3>
+<table>
+  <tr><th>Stage</th><th>Action</th></tr>
+  <tr><td>Add Message</td><td>Append message to history. Count tokens.</td></tr>
+  <tr><td>Estimate Total</td><td>Sum tokens: system prompt + history + context + input. Compare to model max_tokens.</td></tr>
+  <tr><td>Overflow Check</td><td>If total > max_tokens * 0.9, remove oldest history messages until under threshold.</td></tr>
+  <tr><td>System Preserved</td><td>System prompt is never removed. Always kept to maintain role/instructions.</td></tr>
+</table>
+
+<h3>Window Implementation</h3>
+<pre><code class="language-python">def manage_context_window(self, messages, max_tokens=4096, reserve=512):
+    """Slide conversation window to fit within token limit."""
+    # System prompt is always kept
+    system_msgs = [m for m in messages if m.get('role') == 'system']
+    history = [m for m in messages if m.get('role') != 'system']
+    
+    # Count tokens
+    system_tokens = sum(self.count_tokens(m['content']) for m in system_msgs)
+    available = max_tokens - reserve - system_tokens
+    
+    # Slide window: remove oldest messages until we fit
+    while history:
+        total = sum(self.count_tokens(m['content']) for m in history)
+        if total <= available:
+            break
+        history.pop(0)  # Remove oldest
+    
+    # Reconstruct
+    return system_msgs + history
+</code></pre>
+
+<h2 id="retry-strategy">Retry & Fallback Strategy</h2>
+<p>Transient failures (timeout, rate limit) trigger exponential backoff retries. Persistent failures fall back to simpler formats.</p>
+
+<table>
+  <tr><th>Error Type</th><th>Retries</th><th>Fallback</th></tr>
+  <tr><td>Timeout (408, 429)</td><td>5x, exponential backoff (2s, 4s, 8s, ...)</td><td>None; fail if all retries exhausted</td></tr>
+  <tr><td>API Error (500, 502)</td><td>3x, with 10s backoff</td><td>None; fail if <a href="../../../internal_doc/service/index.html">service</a> unreachable</td></tr>
+  <tr><td>Parse Failure</td><td>Re-prompt up to 3x with error message</td><td>Return raw response as string</td></tr>
+  <tr><td>Context Overflow</td><td>N/A</td><td>Slide window; drop oldest history messages</td></tr>
+</table>
+
+<h2 id="multi-turn">Multi-Turn Conversation State</h2>
+<p>The LLM component maintains conversation history across multiple workflow executions. This enables context-aware dialogues.</p>
+
+<h3>State Management</h3>
+<ul>
+  <li><strong>Local State:</strong> self.conversation_history = [] list of {"role", "content"} dicts. Preserved in memory during session.</li>
+  <li><strong>Canvas History:</strong> Canvas.history records all execution steps, including LLM inputs/outputs. Immutable audit trail.</li>
+  <li><strong>Persistence:</strong> On workflow save, serialize conversation_history to JSON. On load, deserialize and restore.</li>
+</ul>
+
+<h3>State Example</h3>
+<pre><code class="language-python">class LLM(ComponentBase):
+    def __init__(self):
+        self.conversation_history = []
+    
+    def run(self, user_input):
+        # Add user input to history
+        self.conversation_history.append({
+            "role": "user",
+            "content": user_input
+        })
+        
+        # Build messages (system + history + current input)
+        messages = self.build_messages()
+        
+        # Call API
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=messages
+        )
+        
+        # Add assistant response to history
+        self.conversation_history.append({
+            "role": "assistant",
+            "content": response.choices[0].message.content
+        })
+        
+        return {"response": response.choices[0].message.content}
+    
+    def to_dict(self):
+        """Serialize state for persistence."""
+        return {
+            "conversation_history": self.conversation_history,
+            ...
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        """Restore state from persistence."""
+        instance = cls()
+        instance.conversation_history = data.get("conversation_history", [])
+        return instance
+</code></pre>
+
+<h2 id="error-classification">Error Classification & Recovery</h2>
+<table>
+  <tr><th>Category</th><th>Examples</th><th>Recovery</th></tr>
+  <tr><td>Transient</td><td>timeout, rate limit (429)</td><td>Exponential backoff retry</td></tr>
+  <tr><td>Permanent</td><td>invalid API key, model not found</td><td>Fail immediately; escalate to user</td></tr>
+  <tr><td>Parse</td><td>invalid JSON, schema mismatch</td><td>Re-prompt or return raw output</td></tr>
+  <tr><td>Context</td><td>input too long, exceeds max tokens</td><td>Truncate/slide context window</td></tr>
+</table>
+
+<h2 id="related">Related Topics</h2>
+<ul>
+  <li><a title="Agent Canvas Component System — Component System" href="../index.html">Component System Overview</a> — Parent L2 module overview</li>
+  <li><strong>LLM Component Deep-Dive</strong> — Tool calling, structured output, streaming (this page)</li>
+  <li><strong><a href="../../index.html">Agent</a> Component</strong> — How Agent orchestrates LLM + Tool calls (Component System module)</li>
+  <li><strong>Tool Component</strong> — How tools are invoked and results cached (Tools & Integration module)</li>
+</ul>
+
+<div class="footer"><a title="Agent Canvas Component System — Component System" href="../index.html">&larr; Back to Component System</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+(function(){
+  var btn = document.getElementById('themeToggle');
+  var hljsLink = document.getElementById('hljs-theme');
+  var darkHL = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  
+  function renderMermaid(t) {
+    var nodes = document.querySelectorAll('pre.mermaid');
+    if (!nodes.length || !window.mermaid) return;
+    nodes.forEach(function(el) {
+      var src = el.getAttribute('data-source');
+      if (src) { el.removeAttribute('data-processed'); el.textContent = src; }
+    });
+    try {
+      mermaid.initialize({startOnLoad:false, theme:(t==='light')?'default':'dark', flowchart:{useMaxWidth:true, htmlLabels:true, curve:'basis'}});
+      mermaid.run();
+    } catch(e) { console.warn('mermaid re-render:', e); }
+  }
+  
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    hljsLink.href = (t === 'light') ? lightHL : darkHL;
+    btn.textContent = (t === 'light') ? '☀' : '☾';
+    localStorage.setItem('neutra-ip-theme', t);
+    renderMermaid(t);
+  }
+  
+  var saved = localStorage.getItem('neutra-ip-theme') || (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+  applyTheme(saved);
+  btn.addEventListener('click', function() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+})();
+
+document.querySelectorAll('pre code').forEach(function(block) {
+  var pre = block.parentElement;
+  if (!pre || pre.classList.contains('mermaid')) return;
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.setAttribute('aria-label', 'Copy code to clipboard');
+  btn.addEventListener('click', function() {
+    navigator.clipboard.writeText(block.textContent).then(function() {
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+  pre.appendChild(btn);
+});
+
+(function(){
+  var overlay = document.getElementById('diagramOverlay');
+  var content = document.getElementById('diagramOverlayContent');
+  var scale = 1;
+  function resetZoom() { scale = 1; content.style.transform = 'scale(1)'; }
+  function openOverlay(dc) {
+    content.innerHTML = '';
+    var svg = dc.querySelector('svg');
+    if (svg) {
+      var clone = svg.cloneNode(true);
+      clone.style.maxWidth = '90vw';
+      clone.style.maxHeight = '85vh';
+      clone.style.width = '90vw';
+      content.appendChild(clone);
+    } else {
+      content.innerHTML = dc.innerHTML;
+    }
+    resetZoom();
+    overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc) {
+    dc.addEventListener('click', function() { openOverlay(dc); });
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) { overlay.classList.remove('active'); resetZoom(); }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { overlay.classList.remove('active'); resetZoom(); }
+  });
+  content.addEventListener('wheel', function(e) {
+    if (!overlay.classList.contains('active')) return;
+    e.preventDefault();
+    var d = e.deltaY > 0 ? -0.1 : 0.1;
+    scale = Math.min(5, Math.max(0.5, scale + d));
+    content.style.transform = 'scale(' + scale + ')';
+  }, {passive:false});
+})();
+
+(function() {
+  var b = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    b.classList.toggle('visible', window.scrollY > 400);
+  });
+  b.addEventListener('click', function() {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+})();
+
+(function() {
+  var m = document.querySelector('main');
+  if (!m) return;
+  var words = m.textContent.trim().split(/\s+/).length;
+  var mins = Math.ceil(words / 200);
+  var hero = document.querySelector('.hero');
+  if (hero) {
+    var rt = document.createElement('p');
+    rt.style.cssText = 'font-size:.85rem;color:var(--text-muted);margin-top:.5rem';
+    rt.textContent = '⏱ ~' + mins + ' min read';
+    hero.appendChild(rt);
+  }
+})();
+
+hljs.highlightAll();
+</script>
+</body>
+</html>

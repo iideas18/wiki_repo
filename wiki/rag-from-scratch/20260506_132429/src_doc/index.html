@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/rag-from-scratch">
+<meta name="wiki-source-rev" content="38e1a7a">
+
+<title>src/ — rag-from-scratch</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;column-count:2;column-gap:2rem}
+.toc ol{margin-left:1.5rem}.toc ol ol{column-count:1;font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.2rem .6rem;font-size:.75rem;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.code-walk{counter-reset:cw}
+.code-walk .step{counter-increment:cw;border-left:3px solid var(--accent);padding:.5rem 0 .5rem 1rem;margin:1rem 0;position:relative}
+.code-walk .step:before{content:counter(cw);position:absolute;left:-1.2rem;top:.5rem;background:var(--accent);color:#000;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--accent3)}.callout.danger{border-color:var(--accent4)}.callout.success{border-color:var(--accent2)}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:.1rem .4rem;border-radius:8px;margin-left:.4rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{column-count:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.module-card,.card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../index.html">rag-from-scratch</a> &rsaquo; src</nav>
+
+<h1>src/ &mdash; The Library</h1>
+<div class="hero">
+  <div class="subtitle">LangChain-shaped, dependency-light, deliberately partial</div>
+  <p>Ten sub-modules forming a layered RAG library. Six are filled in (embeddings, text-splitters, loaders, llms, chat-models, utils); four are scaffolded stubs awaiting upcoming lessons.</p>
+  <p style="margin-top:.6rem">
+    <span class="badge blue">10 sub-modules</span>
+    <span class="badge green">~1,857 LOC</span>
+    <span class="badge yellow">LangChain-shaped</span>
+    <span class="badge red">Partial impl</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">10</div><div class="label">sub-modules</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="label">filled</div></div>
+  <div class="stat-box"><div class="num">4</div><div class="label">scaffolded stubs</div></div>
+  <div class="stat-box"><div class="num">40</div><div class="label">.js files</div></div>
+  <div class="stat-box"><div class="num">8</div><div class="label">npm exports</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p><code>src/</code> is the <em>library half</em> of <code>rag-from-scratch</code>. It is the code a downstream consumer would <code>npm install</code> and <code>import</code> from. It exists as a separate unit (rather than just publishing the <code>examples/</code>) so the project can train two muscles at once: (1) explain a concept end-to-end in a single self-contained <code>example.js</code>, then (2) extract the stable abstractions into a layered library that mirrors LangChain.js. Without <code>src/</code>, every example would re-implement <code>Document</code>, the splitter base, and the embedding cache &mdash; making the educational arc collapse into a flat pile of scripts.</p>
+<details>
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Imagine a cookbook author who teaches by giving you complete recipes (<code>examples/</code>) and, in a separate section at the back, the formal techniques those recipes rely on (<code>src/</code>). Each recipe is self-contained &mdash; you don't need the techniques chapter to make the dish &mdash; but if you want to build new recipes, the techniques chapter has the named primitives ("a roux", "a beurre blanc") with proper definitions. The techniques chapter is honest about what it covers: some sections are full chapters, others are placeholder pages because the author hasn't yet found the exemplary recipe to derive the technique from.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-exists">&#127919; Why This Module Exists</h2>
+<p>The <code>src/</code> tree is a deliberate exercise in <strong>API archaeology</strong> &mdash; copying LangChain.js's class shape (<code>Document</code>, <code>BaseLoader.load()</code>, <code>BaseTextSplitter.splitText()</code>, <code>Embeddings.embedQuery()</code>, <code>BaseLLM.invoke/stream</code>) but stripping every abstraction the educational arc doesn't yet need. A reader who graduates from this codebase can open LangChain's docs and recognise every primitive.</p>
+<p>The current <code>src/</code> is <strong>deliberately partial</strong>: only the layers the first six lessons depend on are filled in (<code>embeddings/</code>, <code>text-splitters/</code>, <code>loaders/</code>, <code>llms/</code>, <code>utils/</code>). The empty <code>chains/</code>, <code>retrievers/</code>, <code>vector-stores/</code>, and <code>prompts/</code> are scaffolded with named-export <code>index.js</code> files &mdash; they hold a <em>place</em> in the import graph for future lessons. Without this module, every example would duplicate ~50 lines of <code>Document</code>, splitter base, and cache plumbing; the curriculum would lose its sense of progression.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+<tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why</th></tr>
+<tr><td>Class taxonomy</td><td>LangChain.js naming verbatim</td><td>Custom names; functional API</td><td>Lower cognitive cost when learners graduate to LangChain proper.</td></tr>
+<tr><td>Async setup</td><td>Static factory <code>LlamaCpp.initialize()</code> returning the instance</td><td><code>new LlamaCpp(); await x.init();</code></td><td>Atomic init prevents "half-constructed" instances escaping; constructors can&rsquo;t <code>await</code>.</td></tr>
+<tr><td>Cache key</td><td>SHA-256 hash of the text alone</td><td>(text + modelPath); raw text key</td><td>Single-model usage assumed; fixed-length keys simplify on-disk JSON. Hash hides text in dumps unless <code>useHash:false</code>.</td></tr>
+<tr><td>Cache eviction</td><td>LRU by <code>lastAccessed</code> via linear scan</td><td>LFU; FIFO; doubly-linked-list LRU</td><td>O(n) eviction is rare on the hot path; readability wins over O(1) bookkeeping for an educational repo.</td></tr>
+<tr><td>Splitter overlap</td><td><code>mergeSplits</code> shifts the front of <code>current[]</code> while <code>length &gt; chunkOverlap</code></td><td>Re-slice from end of previous chunk</td><td>Char-accurate overlap regardless of separator; the alternative tangles with separator stripping.</td></tr>
+<tr><td>Token estimation</td><td><code>chars / 4</code> heuristic in TokenTextSplitter</td><td>Bundle tiktoken; ship a wasm tokenizer</td><td>Zero-dependency. Acceptable error band &mdash; real BPE tokens average ~4 chars in English.</td></tr>
+<tr><td>ESM throughout</td><td><code>"type":"module"</code> + relative <code>./Foo.js</code> imports</td><td>CommonJS; bundled UMD</td><td>"No black boxes" promise: <code>node example.js</code> works without any build step.</td></tr>
+</table>
+
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+classDiagram
+    class Document {
+      +pageContent: string
+      +metadata: object
+      +id?: string
+      +toJSON()
+      +fromJSON()
+    }
+    class BaseLoader {
+      &lt;&lt;abstract&gt;&gt;
+      +load() Document[]
+      +loadAndSplit(splitter)
+      +loadLazy()
+    }
+    class PDFLoader {
+      +source: string|Buffer
+      +splitPages: boolean
+      +load()
+    }
+    class BaseTextSplitter {
+      +chunkSize: number
+      +chunkOverlap: number
+      +lengthFunction(t)
+      +splitText()*
+      +splitDocuments(docs)
+      +mergeSplits(splits, sep)
+    }
+    class CharacterTextSplitter {
+      +separator: string
+    }
+    class RecursiveCharacterTextSplitter {
+      +separators: string[]
+      +splitText(text)
+    }
+    class TokenTextSplitter {
+      +encodingName: string
+    }
+    class EmbeddingModel {
+      +modelPath: string
+      +dimensions: 384
+      +cache: EmbeddingCache
+      +initialize()
+      +embedQuery(text)
+      +embedDocuments(texts)
+      +similarity(a, b)
+    }
+    class EmbeddingCache {
+      +maxSize: 10000
+      +get(text)
+      +set(text, vec)
+      +saveToDisk()
+      +_evictLRU()
+    }
+    class BaseLLM {
+      &lt;&lt;abstract&gt;&gt;
+      +invoke(prompt)*
+      +stream(prompt)*
+      +batch(prompts)
+    }
+    class LlamaCpp {
+      +static initialize(inputs)
+      +invoke(prompt, opts)
+      +stream(prompt, opts)
+      +dispose()
+    }
+    class ChatLlamaCpp {
+      +invoke(messages)
+      +_formatMessagesToPrompt(msgs)
+    }
+    BaseLoader &lt;|-- PDFLoader
+    BaseTextSplitter &lt;|-- CharacterTextSplitter
+    BaseTextSplitter &lt;|-- RecursiveCharacterTextSplitter
+    BaseTextSplitter &lt;|-- TokenTextSplitter
+    BaseLLM &lt;|-- LlamaCpp
+    LlamaCpp &lt;|-- ChatLlamaCpp
+    EmbeddingModel *-- EmbeddingCache
+    PDFLoader ..> Document : emits
+    BaseTextSplitter ..> Document : emits
+    EmbeddingModel ..> Document : reads
+</pre>
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User code
+    participant L as PDFLoader
+    participant S as RecursiveCharSplitter
+    participant E as EmbeddingModel
+    participant C as EmbeddingCache
+    participant Lc as node-llama-cpp
+    U->>L: new PDFLoader(url).load()
+    L->>L: pdf-parse + cleanText
+    L-->>U: Document[]
+    U->>S: splitDocuments(docs)
+    S->>S: choose separator from priority list
+    S->>S: mergeSplits with overlap
+    S-->>U: Document[] chunked
+    U->>E: embedDocuments(texts)
+    loop batch of 32
+        E->>C: get(text) [SHA-256 key]
+        alt hit
+            C-->>E: vector
+        else miss
+            E->>Lc: ctx.getEmbeddingFor(text)
+            Lc-->>E: Float32Array[384]
+            E->>C: set(text, vector)
+        end
+    end
+    E-->>U: number[][]
+    Note over U,Lc: User now stores vectors in their<br/>preferred vector DB. src/vector-stores/<br/>is the future home for wrappers.
+</pre>
+</div>
+
+<div class="intro-box">
+<h3>&#128694; Step-by-Step Narrated Walkthrough</h3>
+<p style="color:var(--text-muted);">Follow a single PDF page from disk to a vector ready for retrieval:</p>
+<ol style="line-height:2;">
+<li><strong>User constructs <code>new PDFLoader(url, {splitPages:true})</code></strong> &mdash; constructor stores <code>source</code> and <code>splitPages</code>; no async work yet (constructors can't <code>await</code>).</li>
+<li><strong>User calls <code>await loader.load()</code></strong> &mdash; this is where work begins. The loader instantiates <code>PDFParse({url})</code> from the <code>pdf-parse</code> package.</li>
+<li><strong>Loader fetches PDF info</strong> via <code>parser.getInfo()</code> &mdash; gives us <code>pages</code> count, <code>info.version</code>, metadata. Cheap call (~10ms remote, <1ms local).</li>
+<li><strong>Per-page extraction loop</strong> calls <code>parser.getText({partial:[i+1]})</code>. Each page text passes through <code>cleanText()</code> &mdash; collapse whitespace, cap consecutive newlines at 2.</li>
+<li><strong><code>constructDocument</code> builds the metadata bag</strong>: <code>{source, pdf:{version,info,metadata,totalPages}, page:N, loc:{pageNumber:N}}</code>. Returns a <code>Document</code>.</li>
+<li><strong>User passes Documents to splitter</strong>: <code>await new RecursiveCharacterTextSplitter({chunkSize:1000, chunkOverlap:200}).splitDocuments(docs)</code>. Splitter calls <code>createDocuments(texts, metadatas)</code> internally.</li>
+<li><strong>Splitter picks the most coarse separator</strong> that exists in the text from <code>['\n\n','\n','. ',' ','']</code>. For a typical PDF page, double-newline appears, so paragraphs are the primary split unit.</li>
+<li><strong>Each split is sized</strong> via <code>lengthFunction</code> (default <code>t =&gt; t.length</code>). Pieces &le; <code>chunkSize</code> stack into <code>temp[]</code>; oversize pieces recurse into the next finer separator.</li>
+<li><strong><code>mergeSplits</code> handles overlap</strong>: as it accumulates pieces into a chunk, when the chunk hits <code>chunkSize</code> it flushes, then shifts pieces off the front until <code>length &le; chunkOverlap</code>. The remaining pieces become the prefix of the next chunk.</li>
+<li><strong>Chunked Documents inherit metadata</strong> plus <code>chunk:j</code> and <code>totalChunks:N</code>. The PDF's page number is preserved &mdash; you can later cite the source.</li>
+<li><strong>User constructs <code>new EmbeddingModel({modelPath:'./models/bge-small.gguf'})</code></strong> &mdash; sets defaults (dim=384, batchSize=32, cache=true). Model is NOT loaded yet.</li>
+<li><strong><code>await embeddings.initialize()</code></strong> &mdash; idempotent. Calls <code>getLlama() &rarr; loadModel() &rarr; createEmbeddingContext()</code>. ~1.5s cold start, dominates the pipeline.</li>
+<li><strong><code>await embeddings.embedDocuments(texts)</code></strong> &mdash; batches into chunks of 32, runs each batch as <code>Promise.all(batch.map(per-text))</code>. Per text: cache lookup (SHA-256 hash) &mdash; if hit, return immediately; if miss, call <code>ctx.getEmbeddingFor(text)</code> and write the result back.</li>
+<li><strong>Vectors return as <code>number[][]</code></strong>. The user is now responsible for storing them &mdash; <code>src/vector-stores/</code> is empty, so this lesson explicitly delegates to <code>embedded-vector-db</code> in the calling example.</li>
+</ol>
+</div>
+
+<h2 id="components">Key Components</h2>
+<table>
+<tr><th>Component</th><th>File</th><th>Role &amp; Why It Exists</th></tr>
+<tr><td><code>Document</code></td><td><code>src/utils/Document.js</code></td><td>The universal payload &mdash; <code>{pageContent, metadata, id?}</code>. Everything that flows between modules is a Document. Stable interface; changes here ripple to ~70 files.</td></tr>
+<tr><td><code>BaseLoader</code></td><td><code>src/loaders/BaseLoader.js</code></td><td>Abstract base for every loader. Defines <code>load()</code>, <code>loadAndSplit(splitter)</code>, <code>loadLazy()</code>. Why abstract? Mirrors LangChain shape and signals "subclass me to add file-format support".</td></tr>
+<tr><td><code>PDFLoader</code></td><td><code>src/loaders/PDFLoader.js</code></td><td>Only concrete loader. Wraps <code>pdf-parse</code>. <code>splitPages</code> toggle yields one Document per page or one merged Document.</td></tr>
+<tr><td><code>BaseTextSplitter</code></td><td><code>src/text-splitters/BaseTextSplitter.js</code></td><td>Holds <code>chunkSize</code>, <code>chunkOverlap</code>, <code>lengthFunction</code>, plus <code>splitDocuments</code>, <code>createDocuments</code>, <code>mergeSplits</code>. Subclasses only override <code>splitText()</code>.</td></tr>
+<tr><td><code>RecursiveCharacterTextSplitter</code></td><td><code>src/text-splitters/RecursiveCharacterTextSplitter.js</code></td><td>The recommended splitter. Walks <code>['\n\n','\n','. ',' ','']</code> and recurses into oversize pieces with finer separators. LangChain-standard.</td></tr>
+<tr><td><code>CharacterTextSplitter</code></td><td><code>src/text-splitters/CharacterTextSplitter.js</code></td><td>Single-separator splitter. Useful when text has predictable structure (CSV, log lines).</td></tr>
+<tr><td><code>TokenTextSplitter</code></td><td><code>src/text-splitters/TokenTextSplitter.js</code></td><td>Approximates token count as <code>chars/4</code>. Why approximate? Avoids tiktoken dependency; <code>lengthFunction</code> seam lets a real tokenizer drop in later.</td></tr>
+<tr><td><code>EmbeddingModel</code></td><td><code>src/embeddings/EmbeddingModel.js</code></td><td>LangChain-shaped <code>embedQuery/embedDocuments</code>. Lazy <code>initialize()</code>. Optional injected cache. Built-in cosine <code>similarity</code> helper.</td></tr>
+<tr><td><code>EmbeddingCache</code></td><td><code>src/embeddings/EmbeddingCache.js</code></td><td>Bounded in-memory cache (LRU) plus JSON disk persistence. Stats include <code>hitRate</code>, <code>evictions</code>. Designed as a <em>side-channel</em> &mdash; never throws.</td></tr>
+<tr><td><code>BaseLLM</code></td><td><code>src/llms/BaseLLM.js</code></td><td>Abstract: <code>invoke / stream / batch / dispose / getModelType</code>. Throws on direct instantiation.</td></tr>
+<tr><td><code>LlamaCpp</code></td><td><code>src/llms/LlamaCpp.js</code></td><td>Concrete LLM via node-llama-cpp. Static factory <code>initialize</code>. Optional GBNF grammar. Streaming is currently a placeholder.</td></tr>
+<tr><td><code>ChatLlamaCpp</code></td><td><code>src/chat-models/ChatLlamaCpp.js</code></td><td>Subclass adding <code>_formatMessagesToPrompt</code> for <code>[{role,content}]</code> arrays. Minimal &mdash; proves the inheritance shape works.</td></tr>
+<tr><td><code>llama_cpp.js</code></td><td><code>src/utils/llama_cpp.js</code></td><td>Factory functions <code>createLlamaModel/Context/Session/Grammar</code>. Why split out? Lets <code>LlamaCpp.initialize</code> read like a recipe rather than embedding 5 awaits.</td></tr>
+</table>
+
+<h2 id="algorithm-spotlight">&#9889; Algorithm Spotlight</h2>
+<p>Three algorithms drive the substantive sub-modules:</p>
+<table>
+<tr><th>Algorithm</th><th>Purpose</th><th>Why This One</th><th>Complexity</th></tr>
+<tr><td><strong>Recursive separator-aware splitting</strong> (<code>RecursiveCharacterTextSplitter.splitText</code>)</td><td>Chunk text while preserving paragraph &gt; sentence &gt; word boundaries.</td><td>Hard char-window destroys boundaries; sentence tokenizers miss code/markup; NLP sentencizers add deps. Recursive separators degrade gracefully.</td><td>O(N &middot; log&#x2099; N), N=text length</td></tr>
+<tr><td><strong>LRU eviction by linear scan</strong> (<code>EmbeddingCache._evictLRU</code>)</td><td>Drop least-recently-used entry when cache hits <code>maxSize</code>.</td><td>O(n) is fine because evictions are rare on the hot path. Doubly-linked-list LRU adds 30+ lines of bookkeeping.</td><td>O(n) per eviction</td></tr>
+<tr><td><strong>Manual cosine similarity</strong> (<code>EmbeddingModel._cosineSimilarity</code>)</td><td>Score similarity between two embedding vectors.</td><td>Manual loop is textbook &mdash; reader sees <code>(a&middot;b)/(&Vert;a&Vert;&middot;&Vert;b&Vert;)</code>. SIMD via Float32Array would be faster but illegible.</td><td>O(d), d=384</td></tr>
+</table>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p style="color:var(--text-muted)">Core sub-modules extracted into dedicated pages.</p>
+<div class="card-grid">
+  <a class="card" href="embeddings/index.html"><h4>embeddings <span class="focus-badge">Mature</span></h4><p>EmbeddingModel + EmbeddingCache &mdash; SHA-256 keyed LRU, batch parallelism, cosine similarity helper.</p></a>
+  <a class="card" href="text-splitters/index.html"><h4>text-splitters <span class="focus-badge">Mature</span></h4><p>BaseTextSplitter + Character/Recursive/Token. Recursive separator algorithm walked step by step.</p></a>
+  <a class="card" href="loaders/index.html"><h4>loaders <span class="focus-badge">Partial</span></h4><p>PDFLoader (pdf-parse wrapper) plus BaseLoader abstract. <code>DirectoryLoader</code>, <code>TextLoader</code> are stubs.</p></a>
+  <a class="card" href="llms/index.html"><h4>llms <span class="focus-badge">Mature</span></h4><p>BaseLLM + LlamaCpp. Static factory pattern, GBNF support, fake-stream placeholder.</p></a>
+</div>
+
+<h2 id="failure">&#9888; What Could Go Wrong</h2>
+<table>
+<tr><th>Failure</th><th>How Detected</th><th>Recovery</th><th>Cascading Effects</th></tr>
+<tr><td>Missing GGUF model file</td><td>node-llama-cpp throws on <code>loadModel()</code></td><td>Surface to user with clear path; user follows <code>DOWNLOAD.md</code></td><td>Embedder + LLM both fail to initialize. Examples can't run end-to-end.</td></tr>
+<tr><td>Invalid <code>chunkOverlap &ge; chunkSize</code></td><td>Constructor throws synchronously</td><td>Fail fast at construction, before any work</td><td>None &mdash; never reaches splitting.</td></tr>
+<tr><td>Method called before <code>initialize()</code></td><td><code>_ensureInitialized()</code> throws</td><td>Re-call sequence: <code>new + initialize() + embed</code></td><td>Prevents NPEs deep in llama.cpp bindings.</td></tr>
+<tr><td>Cache disk corruption</td><td><code>JSON.parse</code> throws on <code>loadFromDisk</code></td><td>Caller catches; cache stays empty (cold start)</td><td>Performance hit on first batch; correctness intact.</td></tr>
+<tr><td>Cache full at <code>maxSize</code></td><td><code>_evictLRU</code> evicts oldest</td><td>Stats track <code>evictions</code> count for tuning</td><td>Slight slowdown if working-set &gt; cache size.</td></tr>
+</table>
+
+<h2 id="performance">&#128202; Performance Profile</h2>
+<p><strong>Fast paths.</strong> Cache hits in <code>EmbeddingModel.embedQuery</code> are O(1) Map lookup plus a SHA-256 (~5&micro;s for short text). Batch embedding parallelises within a batch via <code>Promise.all</code> &mdash; wall-clock is bound by the slowest item, not the sum. Splitter <code>mergeSplits</code> is a single O(N) pass over the input.</p>
+<p><strong>Slow paths.</strong> Cold model load (<code>LlamaCpp.initialize</code>) is ~1&ndash;3&thinsp;s for a 1B-parameter quantised model on a CPU laptop. Embedding fresh text routes through llama.cpp's <code>getEmbeddingFor()</code> &mdash; ~10&ndash;50&thinsp;ms per call depending on model size and CPU. Chunked PDFs of typical academic-paper length (10&ndash;30 pages) take ~5&ndash;15&thinsp;s end-to-end on the first run, sub-second on subsequent runs (cache).</p>
+<p><strong>Memory.</strong> <code>EmbeddingCache</code> is bounded by <code>maxSize</code> (default 10,000). At 384 dims &times; 4 bytes = ~1.5&thinsp;KB per entry &rarr; ~15&thinsp;MB at full capacity. Disk dumps write JSON (verbose but trivially loadable). Tradeoff: no Protobuf / no MessagePack &mdash; sticking to JSON keeps the cache human-inspectable, which is what an educational repo wants.</p>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">src/ source tree</summary>
+<pre><code>src/
+&#9500;&#9472;&#9472; index.js                              &larr; Re-exports every sub-module
+&#9500;&#9472;&#9472; embeddings/
+&#9474;   &#9500;&#9472;&#9472; EmbeddingModel.js   (320 LOC)    &larr; LangChain-shaped wrapper
+&#9474;   &#9500;&#9472;&#9472; EmbeddingCache.js   (425 LOC)    &larr; LRU + JSON persistence
+&#9474;   &#9492;&#9472;&#9472; index.js
+&#9500;&#9472;&#9472; text-splitters/
+&#9474;   &#9500;&#9472;&#9472; BaseTextSplitter.js          (99 LOC)
+&#9474;   &#9500;&#9472;&#9472; CharacterTextSplitter.js     (18 LOC)
+&#9474;   &#9500;&#9472;&#9472; RecursiveCharacterTextSplitter.js (59 LOC)
+&#9474;   &#9500;&#9472;&#9472; TokenTextSplitter.js         (23 LOC)
+&#9474;   &#9492;&#9472;&#9472; index.js
+&#9500;&#9472;&#9472; loaders/
+&#9474;   &#9500;&#9472;&#9472; BaseLoader.js                (43 LOC)
+&#9474;   &#9500;&#9472;&#9472; PDFLoader.js                (160 LOC)   &larr; only concrete loader
+&#9474;   &#9500;&#9472;&#9472; DirectoryLoader.js              (stub)
+&#9474;   &#9500;&#9472;&#9472; TextLoader.js                   (stub)
+&#9474;   &#9492;&#9472;&#9472; index.js
+&#9500;&#9472;&#9472; llms/
+&#9474;   &#9500;&#9472;&#9472; BaseLLM.js                   (43 LOC)
+&#9474;   &#9500;&#9472;&#9472; LlamaCpp.js                 (106 LOC)
+&#9474;   &#9492;&#9472;&#9472; index.js
+&#9500;&#9472;&#9472; chat-models/
+&#9474;   &#9492;&#9472;&#9472; ChatLlamaCpp.js              (32 LOC)
+&#9500;&#9472;&#9472; utils/
+&#9474;   &#9500;&#9472;&#9472; Document.js                  (55 LOC)   &larr; universal payload
+&#9474;   &#9500;&#9472;&#9472; llama_cpp.js                 (69 LOC)   &larr; factory functions
+&#9474;   &#9500;&#9472;&#9472; similarity.js                   (stub)
+&#9474;   &#9500;&#9472;&#9472; tokenizer.js                    (stub)
+&#9474;   &#9500;&#9472;&#9472; validators.js                   (stub)
+&#9474;   &#9492;&#9472;&#9472; index.js
+&#9500;&#9472;&#9472; chains/   retrievers/   vector-stores/   prompts/
+&#9474;   &#9492;&#9472;&#9472; index.js + class .js stubs           &larr; future homes
+&#9492;&#9472;&#9472; README.md
+</code></pre>
+</details>
+
+<h2 id="config">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>EmbeddingModel.modelPath</code></td><td>(required)</td><td>Path to GGUF embedding model (e.g., <code>bge-small-en-v1.5.Q8_0.gguf</code>).</td></tr>
+<tr><td><code>EmbeddingModel.dimensions</code></td><td>384</td><td>Expected embedding dimensions. Must match the model.</td></tr>
+<tr><td><code>EmbeddingModel.batchSize</code></td><td>32</td><td>Parallel embeds per batch via <code>Promise.all</code>.</td></tr>
+<tr><td><code>EmbeddingModel.cache</code></td><td><code>true</code></td><td>Toggle the cache side-channel.</td></tr>
+<tr><td><code>EmbeddingModel.logLevel</code></td><td><code>'error'</code></td><td>Passed to <code>getLlama()</code>; suppresses ggml output.</td></tr>
+<tr><td><code>EmbeddingCache.maxSize</code></td><td>10000</td><td>Eviction threshold; LRU drops oldest on insert.</td></tr>
+<tr><td><code>EmbeddingCache.useHash</code></td><td><code>true</code></td><td>SHA-256 the text key (privacy + fixed length).</td></tr>
+<tr><td><code>EmbeddingCache.hashAlgorithm</code></td><td><code>'sha256'</code></td><td>Any algo accepted by Node's <code>crypto.createHash</code>.</td></tr>
+<tr><td><code>BaseTextSplitter.chunkSize</code></td><td>1000</td><td>Max length per chunk (in <code>lengthFunction</code> units).</td></tr>
+<tr><td><code>BaseTextSplitter.chunkOverlap</code></td><td>200</td><td>Overlap chars/tokens between adjacent chunks.</td></tr>
+<tr><td><code>BaseTextSplitter.lengthFunction</code></td><td><code>t =&gt; t.length</code></td><td>Hook for token-aware splitters.</td></tr>
+<tr><td><code>RecursiveCharSplitter.separators</code></td><td><code>['\n\n','\n','. ',' ','']</code></td><td>Priority list; first-found wins, fallthrough on oversize.</td></tr>
+<tr><td><code>LlamaCpp.contextSize</code></td><td>2048</td><td>Token context window.</td></tr>
+<tr><td><code>LlamaCpp.batchSize / threads</code></td><td>512 / 4</td><td>llama.cpp inference parameters.</td></tr>
+<tr><td><code>LlamaCpp.gpuLayers</code></td><td>(unset)</td><td>Offload N layers to GPU; falls back to CPU.</td></tr>
+<tr><td><code>LlamaCpp.gbnf</code></td><td>(unset)</td><td>GBNF grammar string for constrained generation.</td></tr>
+</table>
+
+<h2 id="examples">Code Examples</h2>
+
+<h3 id="example-embed">Embed a query and a document</h3>
+<pre><code class="language-javascript">import { EmbeddingModel } from './src/embeddings/EmbeddingModel.js';
+
+const embeddings = new EmbeddingModel({
+    modelPath: './models/bge-small-en-v1.5.Q8_0.gguf',
+    cache: true,
+    batchSize: 32
+});
+await embeddings.initialize();
+
+const queryVec = await embeddings.embedQuery('What is RAG?');
+const docVecs  = await embeddings.embedDocuments([
+    'Retrieval-Augmented Generation combines retrieval with LLMs.',
+    'The capital of France is Paris.'
+]);
+
+const sim = await embeddings.similarity('RAG explained', 'Retrieval-Augmented Generation');
+console.log('similarity:', sim);  // ~0.85
+</code></pre>
+
+<h3 id="example-split">Split a PDF into overlapping chunks</h3>
+<pre><code class="language-javascript">import { PDFLoader, RecursiveCharacterTextSplitter } from './src/index.js';
+
+const loader = new PDFLoader('https://arxiv.org/pdf/2005.11401', { splitPages: true });
+const pages = await loader.load();   // Document[]; one per page
+
+const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+    separators: ['\n\n', '\n', '. ', ' ', '']
+});
+const chunks = await splitter.splitDocuments(pages);
+console.log(`${pages.length} pages -> ${chunks.length} chunks`);
+</code></pre>
+
+<h3 id="example-llm">Local LLM completion with grammar-constrained output</h3>
+<pre><code class="language-javascript">import { LlamaCpp } from './src/llms/LlamaCpp.js';
+
+const llm = await LlamaCpp.initialize({
+    modelPath: './models/Qwen3-1.7B.Q8_0.gguf',
+    contextSize: 2048,
+    temperature: 0.2,
+    maxTokens: 256,
+    // Optional: constrain output to JSON via GBNF
+    gbnf: 'root ::= "{" ws "\"answer\":" ws string ws "}"'
+});
+
+const response = await llm.invoke('What is RAG?');
+console.log(response);
+await llm.dispose();
+</code></pre>
+
+<h2 id="cards">Sub-Module Cards</h2>
+<div class="card-grid">
+  <a class="card" href="embeddings/index.html"><h4>embeddings/</h4><p>Text &rarr; vectors with caching. Why it exists: dense retrieval needs semantic vectors; the cache makes repeat queries free.</p></a>
+  <a class="card" href="text-splitters/index.html"><h4>text-splitters/</h4><p>Chunk long text. Why it exists: embeddings have a max input length; chunks are the indexable unit.</p></a>
+  <a class="card" href="loaders/index.html"><h4>loaders/</h4><p>Read sources into <code>Document[]</code>. Why it exists: every retrieval pipeline starts with parsing raw bytes.</p></a>
+  <a class="card" href="llms/index.html"><h4>llms/</h4><p>Local LLM completion. Why it exists: RAG generates with retrieved context; this is the generation layer.</p></a>
+</div>
+
+<div class="footer"><a href="../index.html">&larr; Project Hub</a> &nbsp;|&nbsp; <a href="../search.html">Search</a></div>
+
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(btn) btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  if(btn) btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){document.querySelectorAll('pre').forEach(function(pre){if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(){var c=pre.querySelector('code');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+(function(){var main=document.querySelector('main');if(!main)return;var hero=document.querySelector('.hero');if(!hero)return;var words=main.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var rt=document.createElement('p');rt.style.color='var(--text-muted)';rt.style.fontSize='.85rem';rt.style.marginTop='.5rem';rt.innerHTML='\u23F1 ~'+mins+' min read';hero.appendChild(rt);})();
+(function(){document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key==='j'||e.key==='k'){var hs=Array.from(document.querySelectorAll('h2[id]'));var sy=window.scrollY;var idx=-1;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top+sy<=sy+50)idx=i;}if(e.key==='j')idx=Math.min(hs.length-1,idx+1);else idx=Math.max(0,idx-1);if(hs[idx])hs[idx].scrollIntoView({behavior:'smooth'});}});})();
+
+document.querySelectorAll('pre code').forEach(function(b){try{hljs.highlightElement(b);}catch(e){}});
+</script>
+</body></html>

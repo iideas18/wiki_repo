@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/rag-from-scratch">
+<meta name="wiki-source-rev" content="38e1a7a">
+
+<title>06_retrieval_strategies — rag-from-scratch</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5;position:relative}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0}
+.intro-box h3{margin-top:0;color:var(--accent)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin:1.5rem 0;column-count:2;column-gap:2rem}
+.toc ol{margin-left:1.5rem}.toc ol ol{column-count:1;font-size:.9rem;color:var(--text-muted)}
+.breadcrumb{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.2rem .6rem;font-size:.75rem;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.code-walk{counter-reset:cw}
+.code-walk .step{counter-increment:cw;border-left:3px solid var(--accent);padding:.5rem 0 .5rem 1rem;margin:1rem 0;position:relative}
+.code-walk .step:before{content:counter(cw);position:absolute;left:-1.2rem;top:.5rem;background:var(--accent);color:#000;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.code-walk .step h4{margin-top:0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--accent3)}.callout.danger{border-color:var(--accent4)}.callout.success{border-color:var(--accent2)}
+.focus-label{display:inline-block;background:var(--accent4);color:#fff;padding:.2rem .6rem;border-radius:12px;font-size:.75rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em}
+.focus-badge{background:var(--accent4);color:#fff;font-size:.7rem;padding:.1rem .4rem;border-radius:8px;margin-left:.4rem}
+@media(max-width:768px){body{padding:1rem}.card-grid,.module-grid{grid-template-columns:1fr}.toc{column-count:1}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay,.copy-btn{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important}.module-card,.card,.stat-box,.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+<main id="main">
+<nav class="breadcrumb" role="navigation" aria-label="Breadcrumb"><a href="../../index.html">rag-from-scratch</a> &rsaquo; <a href="../index.html">examples</a> &rsaquo; 06_retrieval_strategies</nav>
+
+<h1>06_retrieval_strategies/</h1>
+<div class="hero">
+  <div class="subtitle">Five sub-lessons exploring retrieval beyond top-k cosine</div>
+  <p>The most algorithmically dense lesson in the project. Covers MMR re-ranking, hybrid keyword+vector retrieval with Reciprocal Rank Fusion, multi-query expansion, parent-document retrieval, and contextual compression. Each sub-lesson stands alone but the arc tells a coherent story: <em>top-k cosine is the floor, not the ceiling</em>.</p>
+  <p style="margin-top:.6rem">
+    <span class="badge blue">Lesson 06</span>
+    <span class="badge green">5 sub-lessons</span>
+    <span class="badge yellow">RRF + MMR</span>
+    <span class="badge red">Most advanced</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">5</div><div class="label">sub-lessons</div></div>
+  <div class="stat-box"><div class="num">~1500</div><div class="label">LOC</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="label">key algorithms</div></div>
+  <div class="stat-box"><div class="num">k=60</div><div class="label">RRF constant</div></div>
+</div>
+
+<div class="intro-box">
+<h3>&#128218; What is this &amp; why does it exist?</h3>
+<p>Lessons 04 and 05 use the simplest retrieval: embed the query, return the top-<em>k</em> most similar chunks. That works often enough that beginners don't see the failure modes &mdash; redundant chunks (three near-duplicates of the same paragraph), missing keyword matches (cosine likes paraphrases but misses exact-name lookups like "GPT-4"), and lost surrounding context (a chunk is just a sentence; the answer needs the paragraph). Lesson 06 introduces five techniques that, layered together, make retrieval production-grade.</p>
+<details>
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">If top-k is "give me the 5 closest restaurants", lesson 06 is "give me 5 restaurants that are close, but also represent different cuisines (MMR), considering both my walking-distance app and my Yelp ratings (hybrid + RRF), expanding my query to include related terms like 'lunch spots' (multi-query), showing me the full menu not just the dish name (parent-document), and trimming irrelevant menu sections from each (compression)". The endpoint is a result set that's diverse, comprehensive, and lean.</p>
+</details>
+</div>
+
+<nav class="toc" id="toc"></nav>
+
+<h2 id="why-component">&#127919; Why This Component</h2>
+<p>The capstone lesson. By placing retrieval-strategy refinement <em>after</em> the basic pipeline (lessons 04, 05) the curriculum follows the real-world progression: build the dumb thing first, observe its failures, then add machinery. Each technique here is a direct response to a failure mode the reader has already experienced in the simpler lessons.</p>
+
+<h2 id="rationale">&#127959;&#65039; Design Rationale</h2>
+<table>
+<tr><th>Decision</th><th>Choice</th><th>Why</th></tr>
+<tr><td>Five separate files</td><td>One technique per file, runnable independently</td><td>Reader can compare each technique's diff against the baseline. Bundling them would obscure individual contributions.</td></tr>
+<tr><td>Same corpus across lessons</td><td>RAG paper PDF</td><td>Holding data constant isolates the algorithm as the variable.</td></tr>
+<tr><td>Re-implement RRF inline</td><td>Don't import from <code>src/</code></td><td>The reader sees the formula <code>1/(k+rank)</code> with their own eyes.</td></tr>
+<tr><td>MMR before hybrid</td><td>Sub-lesson 02 before 03</td><td>MMR is conceptually simpler (greedy selection); hybrid retrieval introduces a second retriever.</td></tr>
+<tr><td>Compression last</td><td>Sub-lesson 05</td><td>Requires understanding all preceding techniques to appreciate the cost it saves.</td></tr>
+</table>
+
+<h2 id="architecture">Architecture &mdash; the five techniques</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+    Q[Query] --&gt; B[Baseline: top-k cosine]
+    B --&gt; B_out[5 chunks, possibly redundant]
+
+    Q --&gt; MMR[MMR re-rank<br/>greedy: maximise score - &lambda;&middot;max-sim-to-selected]
+    MMR --&gt; MMR_out[5 chunks, diverse]
+
+    Q --&gt; H1[Vector retriever]
+    Q --&gt; H2[BM25 / keyword retriever]
+    H1 --&gt; RRF[RRF fuse: &Sigma; 1/&#40;k+rank_i&#41;]
+    H2 --&gt; RRF
+    RRF --&gt; H_out[5 chunks, both literal+semantic]
+
+    Q --&gt; MQ[Multi-query: LLM rewrites Q into 3-5 variations]
+    MQ --&gt; MQ_run[run each variation]
+    MQ_run --&gt; MQ_dedup[union + dedup]
+    MQ_dedup --&gt; MQ_out[broader recall]
+
+    Q --&gt; PD1[Retrieve small chunks]
+    PD1 --&gt; PD2[Map back to parent document]
+    PD2 --&gt; PD_out[full surrounding context]
+
+    Q --&gt; CC1[Retrieve chunks]
+    CC1 --&gt; CC2[LLM extracts only relevant sentences]
+    CC2 --&gt; CC_out[5 lean snippets]
+</pre>
+</div>
+
+<h2 id="lifecycle">Lifecycle &mdash; RRF in action (sub-lesson 03)</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant H as Hybrid retriever
+    participant V as Vector retriever
+    participant B as BM25 retriever
+    participant RRF as RRF fuser
+    U->>H: query "RAG attention mechanism"
+    par Vector
+        H->>V: search(query, k=10)
+        V-->>H: ranked: [d3, d7, d1, d9, d2, ...]
+    and Keyword
+        H->>B: search(query, k=10)
+        B-->>H: ranked: [d1, d4, d3, d11, d7, ...]
+    end
+    H->>RRF: fuse([vector_ranks, bm25_ranks], k_const=60)
+    Note over RRF: for each doc, score = &Sigma; 1/(60+rank_i)<br/>across both lists<br/>doc d3: 1/(60+1) + 1/(60+3) = .03224<br/>doc d1: 1/(60+3) + 1/(60+1) = .03224<br/>doc d7: 1/(60+2) + 1/(60+5) = .03152
+    RRF->>RRF: sort desc by fused score
+    RRF-->>H: top-5 fused ranking
+    H-->>U: [d3, d1, d7, d4, d9]
+    Note over U: keyword-only winner d4 keeps its rank;<br/>vector-only d2 missed both top-5s
+</pre>
+</div>
+
+<h2 id="interactions">Interactions</h2>
+<table>
+<tr><th>From</th><th>To</th><th>Interface</th><th>Why this interaction exists</th></tr>
+<tr><td>Sub-lesson 01 (top-k baseline)</td><td>HNSW vector store</td><td><code>store.search(qVec, k)</code></td><td>Establishes what we're improving on.</td></tr>
+<tr><td>Sub-lesson 02 (MMR)</td><td>vector store + cosine</td><td>fetch 2k candidates, then greedy MMR</td><td>Trades extra cosine ops for diversity.</td></tr>
+<tr><td>Sub-lesson 03 (hybrid+RRF)</td><td>vector + BM25 retrievers</td><td>parallel <code>retrieve()</code> + <code>rrf()</code></td><td>Combines complementary signals.</td></tr>
+<tr><td>Sub-lesson 04 (multi-query)</td><td>ChatLlamaCpp + vector store</td><td>LLM expands &rarr; N retrievals &rarr; dedup</td><td>Improves recall on poorly-phrased queries.</td></tr>
+<tr><td>Sub-lesson 05 (parent-doc)</td><td>chunk store + parent-doc map</td><td>retrieve small &rarr; lookup parent</td><td>Embedding precision + context completeness.</td></tr>
+<tr><td>(reuse) <code>EmbeddingModel</code> + cache</td><td>all sub-lessons</td><td>standard embedding API</td><td>Same model across techniques &mdash; isolates retrieval as the variable.</td></tr>
+</table>
+
+<h2 id="annotated-walk">&#128221; Annotated Code Walkthrough &mdash; <code>RRF</code> implementation (sub-lesson 03)</h2>
+<div class="code-walk">
+<div class="step"><h4>Constant <em>k</em> = 60</h4>
+<pre><code class="language-javascript">const RRF_K = 60;</code></pre>
+<p>Standard from Cormack, Clarke, B&uuml;ttcher (2009). Smaller <em>k</em> over-rewards #1; larger <em>k</em> flattens the score &mdash; effectively making rank-1 and rank-50 indistinguishable. 60 is the published sweet spot.</p>
+</div>
+<div class="step"><h4>Index by document id</h4>
+<pre><code class="language-javascript">function rrf(rankedLists, k = RRF_K) {
+    const scores = new Map();
+    for (const list of rankedLists) {
+        list.forEach((doc, rank) =&gt; {
+            const id = doc.id || doc.metadata?.id || doc.pageContent;
+            scores.set(id, (scores.get(id) || 0) + 1 / (k + rank + 1));
+        });
+    }</code></pre>
+<p>Identity is critical &mdash; the fusion needs to recognise the same document in two lists. Falls back through id &rarr; metadata.id &rarr; raw text. The <code>+1</code> accounts for 0-based ranks (RRF formula uses 1-based).</p>
+</div>
+<div class="step"><h4>Sort by fused score</h4>
+<pre><code class="language-javascript">    const fused = [];
+    for (const [id, score] of scores) fused.push({ id, score });
+    fused.sort((a, b) =&gt; b.score - a.score);</code></pre>
+<p>Each document's score is the sum across all retrieval lists. Documents that appear high in <em>any</em> list score well; those that appear high in <em>multiple</em> lists score best.</p>
+</div>
+<div class="step"><h4>Map ids back to documents</h4>
+<pre><code class="language-javascript">    const docById = new Map();
+    for (const list of rankedLists) for (const d of list)
+        docById.set(d.id || d.metadata?.id || d.pageContent, d);
+    return fused.map(f =&gt; ({ ...docById.get(f.id), rrfScore: f.score }));
+}</code></pre>
+<p>Reattaches the document object &mdash; we lost it when we kept only ids. Tagging <code>rrfScore</code> on the result lets debug output show why each doc made the cut.</p>
+</div>
+</div>
+
+<h2 id="mmr-walk">&#128221; <code>MMR</code> implementation (sub-lesson 02)</h2>
+<div class="code-walk">
+<div class="step"><h4>Fetch a candidate pool</h4>
+<pre><code class="language-javascript">const candidates = await store.search(qVec, fetchK);  // e.g., 20</code></pre>
+<p>MMR re-ranks <em>among</em> a pre-fetched pool. <code>fetchK</code> (~4&times; the desired output) trades a few extra cosine ops for diversity headroom.</p>
+</div>
+<div class="step"><h4>Greedy selection loop</h4>
+<pre><code class="language-javascript">const selected = [];
+const remaining = [...candidates];
+while (selected.length &lt; k &amp;&amp; remaining.length) {
+    let bestIdx = -1, bestScore = -Infinity;
+    for (let i = 0; i &lt; remaining.length; i++) {
+        const c = remaining[i];
+        const relevance = cosine(qVec, c.vector);
+        const maxSimToSelected = Math.max(
+            0, ...selected.map(s =&gt; cosine(s.vector, c.vector))
+        );
+        const mmr = lambda * relevance - (1 - lambda) * maxSimToSelected;
+        if (mmr &gt; bestScore) { bestScore = mmr; bestIdx = i; }
+    }
+    selected.push(remaining.splice(bestIdx, 1)[0]);
+}</code></pre>
+<p>The <code>maxSimToSelected</code> is the diversity penalty &mdash; if a candidate is very similar to one we've already picked, its MMR score takes a hit. <code>&lambda;</code> tunes the relevance/diversity balance: 1.0 = ignore diversity (pure top-k), 0.0 = ignore relevance (pure spread).</p>
+</div>
+<div class="step"><h4>Why O(k&middot;n) is fine</h4>
+<p>For typical k=5, n=20: 100 cosine ops. Trivial. MMR's expense scales with <em>desired output size</em>, not the corpus &mdash; the corpus filtering already happened in the vector store. The greedy approach trades optimal selection (NP-hard) for tractable runtime.</p>
+</div>
+</div>
+
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<div class="card-grid">
+  <div class="card"><h4>Why RRF over weighted score blend <span class="focus-badge">Algorithm</span></h4><p>Different retrievers produce scores on incompatible scales (cosine 0&ndash;1 vs BM25 0&ndash;30). RRF uses only <em>ranks</em>, sidestepping calibration. <code>1/(k+rank)</code> is the harmonic-mean-flavoured weighting.</p></div>
+  <div class="card"><h4>MMR's &lambda; sweet spot <span class="focus-badge">Tuning</span></h4><p>0.5&ndash;0.7 in practice. Below 0.5, picks become weirdly off-topic. Above 0.8, MMR collapses to top-k. The lessons set &lambda;=0.5 to make diversity vivid.</p></div>
+  <div class="card"><h4>Multi-query LLM cost <span class="focus-badge">Tradeoff</span></h4><p>Each variation triggers a fresh embedding + retrieval. 5 variations = 5&times; cost. Justify only when recall on terse queries is the bottleneck.</p></div>
+  <div class="card"><h4>Parent-doc indexing <span class="focus-badge">Storage</span></h4><p>Maintain two stores: small chunks for embedding precision, parent docs for context completeness. Each chunk's metadata carries a <code>parent_id</code>. Adds storage but solves the "answer fragment lacks context" problem cleanly.</p></div>
+</div>
+
+<h2 id="edge-cases">&#9888; Edge Cases &amp; Boundaries</h2>
+<table>
+<tr><th>Scenario</th><th>What Actually Happens</th></tr>
+<tr><td>RRF: doc only in one list</td><td>Scored by that single rank only. Still ranks &mdash; just lower than docs that appear in both. This is the <em>feature</em>, not a bug.</td></tr>
+<tr><td>MMR: selected[] empty</td><td>First iteration: <code>maxSimToSelected = 0</code> (the <code>...</code> spread of empty + <code>Math.max(0, ...)</code> initial). Pure relevance picks the #1 candidate.</td></tr>
+<tr><td>Multi-query: LLM hallucinates new entities</td><td>Variations include made-up names. Retrieval misses or returns garbage. Mitigation: cap variations at 3, validate against known entities.</td></tr>
+<tr><td>Parent-doc: parent missing from store</td><td>Lookup returns null; lesson falls back to the chunk. No crash but context-completeness benefit is lost for that doc.</td></tr>
+<tr><td>Compression: LLM removes the answer</td><td>Aggressive compression can strip the relevant span. Validation: after compression, check if any output is shorter than 20 chars and warn.</td></tr>
+</table>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">06_retrieval_strategies/</summary>
+<pre><code>examples/06_retrieval_strategies/
+&#9500;&#9472;&#9472; 01_top_k_baseline.js          &larr; control: plain top-k cosine
+&#9500;&#9472;&#9472; 02_mmr.js                     &larr; Maximal Marginal Relevance re-rank
+&#9500;&#9472;&#9472; 03_hybrid_rrf.js              &larr; vector + keyword + RRF
+&#9500;&#9472;&#9472; 04_multi_query.js             &larr; LLM expands query, runs N retrievals
+&#9492;&#9472;&#9472; 05_parent_document.js         &larr; small-chunk index + parent-doc lookup
+</code></pre>
+</details>
+
+<h2 id="config">Configuration Reference</h2>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>RRF_K</code></td><td>60</td><td>RRF damping constant. Larger = flatter weights.</td></tr>
+<tr><td><code>MMR_LAMBDA</code></td><td>0.5</td><td>Relevance vs diversity balance.</td></tr>
+<tr><td><code>MMR_FETCH_K</code></td><td>20</td><td>Candidate pool size before greedy selection.</td></tr>
+<tr><td><code>FINAL_K</code></td><td>5</td><td>Top results returned to caller.</td></tr>
+<tr><td><code>MULTI_QUERY_VARIATIONS</code></td><td>3</td><td>LLM-generated query rewrites.</td></tr>
+<tr><td><code>HYBRID_VECTOR_K</code></td><td>10</td><td>Per-retriever fetch before RRF fusion.</td></tr>
+<tr><td><code>HYBRID_BM25_K</code></td><td>10</td><td>Per-retriever fetch before RRF fusion.</td></tr>
+<tr><td><code>PARENT_CHUNK_SIZE</code></td><td>200</td><td>Small chunk size for embedding precision.</td></tr>
+<tr><td><code>PARENT_DOC_SIZE</code></td><td>1500</td><td>Larger context returned after lookup.</td></tr>
+<tr><td><code>COMPRESSION_PROMPT</code></td><td>(template)</td><td>"Extract only the sentences relevant to the question..."</td></tr>
+</table>
+
+<h2 id="examples">Code Examples</h2>
+
+<h3 id="ex-rrf">RRF fusion (sub-lesson 03 core)</h3>
+<pre><code class="language-javascript">async function hybridRetrieve(query, vectorStore, bm25, k = 5) {
+    const qVec = await embed.embedQuery(query);
+    const [vec, bm] = await Promise.all([
+        vectorStore.search(qVec, 10),
+        bm25.search(query, 10)
+    ]);
+    const fused = rrf([vec, bm], 60);
+    return fused.slice(0, k);
+}</code></pre>
+
+<h3 id="ex-mmr">MMR re-rank</h3>
+<pre><code class="language-javascript">async function mmrRetrieve(query, store, k = 5, lambda = 0.5, fetchK = 20) {
+    const qVec = await embed.embedQuery(query);
+    const candidates = await store.search(qVec, fetchK);
+    return mmrRerank(qVec, candidates, k, lambda);
+}</code></pre>
+
+<h3 id="ex-multiquery">Multi-query expansion</h3>
+<pre><code class="language-javascript">const variations = await chat.invoke([
+    { role: 'system', content: 'Generate 3 variations of the user query, each on a new line.' },
+    { role: 'user', content: query }
+]).then(s =&gt; s.split('\n').filter(Boolean));
+
+const results = await Promise.all(variations.map(v =&gt; retrieve(v, store, 5)));
+const unique = dedupById(results.flat());
+</code></pre>
+
+<div class="footer"><a href="../index.html">&larr; examples/</a> &nbsp;|&nbsp; <a href="../../index.html">Project Hub</a> &nbsp;|&nbsp; <a href="../../search.html">Search</a></div>
+
+</main>
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){var src=el.getAttribute('data-source');if(src){el.removeAttribute('data-processed');el.textContent=src;}});
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    if(btn) btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  if(btn) btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    resetZoom();overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');if(!b)return;window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){var toc=document.getElementById('toc');if(!toc)return;var headings=document.querySelectorAll('h2[id],h3[id]');var ol=document.createElement('ol');var currentH2Li=null;headings.forEach(function(h){if(h.closest('#toc,.toc'))return;var li=document.createElement('li');var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);if(h.tagName==='H3'&&currentH2Li){var sub=currentH2Li.querySelector('ol');if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}sub.appendChild(li);}else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}});toc.appendChild(ol);})();
+(function(){document.querySelectorAll('pre').forEach(function(pre){if(pre.classList.contains('mermaid'))return;var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.addEventListener('click',function(){var c=pre.querySelector('code');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});pre.appendChild(btn);});})();
+(function(){var main=document.querySelector('main');if(!main)return;var hero=document.querySelector('.hero');if(!hero)return;var words=main.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var rt=document.createElement('p');rt.style.color='var(--text-muted)';rt.style.fontSize='.85rem';rt.style.marginTop='.5rem';rt.innerHTML='\u23F1 ~'+mins+' min read';hero.appendChild(rt);})();
+(function(){document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(e.key==='j'||e.key==='k'){var hs=Array.from(document.querySelectorAll('h2[id]'));var sy=window.scrollY;var idx=-1;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top+sy<=sy+50)idx=i;}if(e.key==='j')idx=Math.min(hs.length-1,idx+1);else idx=Math.max(0,idx-1);if(hs[idx])hs[idx].scrollIntoView({behavior:'smooth'});}});})();
+
+document.querySelectorAll('pre code').forEach(function(b){try{hljs.highlightElement(b);}catch(e){}});
+</script>
+</body></html>

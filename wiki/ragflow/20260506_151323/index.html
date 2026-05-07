@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="ragflow/">
+<meta name="wiki-source-rev" content="e8f19aa33">
+<title>RAGFlow — Open-source RAG engine with deep document understanding</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border);cursor:zoom-in}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>RAGFlow</h1>
+<div class="hero">
+  <div class="subtitle">Open-source <a href="rag_doc/index.html">RAG</a> engine with deep document understanding</div>
+  <p>RAGFlow ingests heterogeneous documents &mdash; PDFs with scanned tables, slides, code books, audio, e-mails &mdash; and turns them into citable, searchable knowledge that LLMs can reason over. It ships its <em>own</em> deep-learning OCR/layout pipeline, a <a href="agent_doc/canvas/index.html" title="<a href="agent_doc/component/index.html" title="Agent Canvas Component System — Component System" class="xref">Agent</a> Canvas Canvas &amp; Execution — Canvas &amp; Execution" class="xref">Graph</a>-RAG construction stack, an editable <a href="agent_doc/index.html">agent</a>-<a href="agent_doc/canvas/index.html">canvas</a> DSL, and a polished <a href="web_doc/index.html">web</a> UI; not just a thin wrapper around an embedding model.</p>
+  <p style="margin-top:.8rem">
+    <span class="badge blue">Python &middot; TypeScript &middot; Go &middot; C++</span>
+    <span class="badge green"><a href="deepdoc_doc/index.html">DeepDoc</a> OCR + Layout</span>
+    <span class="badge yellow"><a href="rag_doc/graphrag/index.html">GraphRAG</a> &middot; <a href="rag_doc/raptor/index.html">RAPTOR</a> &middot; Agent <a href="agent_doc/canvas/index.html" title="Agent Canvas Canvas &amp; Execution — Canvas &amp; Execution" class="xref">Canvas</a></span>
+    <span class="badge red">Apache 2.0</span>
+  </p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="num">12</div><div class="label">Top-level modules</div></div>
+  <div class="stat-box"><div class="num">~700</div><div class="label">Python files</div></div>
+  <div class="stat-box"><div class="num">1100</div><div class="label">TS/TSX files (web)</div></div>
+  <div class="stat-box"><div class="num">218</div><div class="label">Go files (<a href="internal_doc/index.html">internal</a>)</div></div>
+  <div class="stat-box"><div class="num">115</div><div class="label">C/C++ files (tokenizer)</div></div>
+  <div class="stat-box"><div class="num">14</div><div class="label"><a href="api_doc/db/index.html" title="API Database Layer - RAGFlow Wiki" class="xref">Document</a> types parsed</div></div>
+  <div class="stat-box"><div class="num">20+</div><div class="label">Agent <a href="agent_doc/component/index.html">component</a> types</div></div>
+  <div class="stat-box"><div class="num">10+</div><div class="label"><a href="rag_doc/llm/index.html">LLM</a> provider adapters</div></div>
+</div>
+
+<h2 id="philosophy">&#127919; Project Philosophy</h2>
+<p>When you first look at this codebase, the most striking thing is how much RAGFlow refuses to outsource. Most "RAG products" are 800 lines of Python that calls an embedding <a href="api_doc/index.html">API</a> and a chat API. RAGFlow ships its <em>own</em> Chinese-aware tokenizer (in C++ with a DART double-array trie), its <em>own</em> layout-detection and table-structure neural networks (PaddlePaddle/ONNX, in <code>deepdoc/vision/</code>), its <em>own</em> Graph-RAG construction stack with Leiden community detection, and its <em>own</em> agent-canvas DSL with iteration, loops, switches, and a code sandbox. Reading the source feels less like reading a "wrapper" and more like reading a small operating system for retrieval.</p>
+<p>Several design principles emerge from the code patterns:</p>
+<ul style="margin:.6rem 0 .6rem 1.5rem;line-height:2">
+  <li><strong>Pluggable everywhere it matters.</strong> Doc-stores (ES, Infinity, OpenSearch, OceanBase), object-stores (MinIO, S3, Azure, GCS, OSS, OpenDAL, encrypted), LLM providers, parsers, chunkers, agent <a href="web_doc/components/index.html">components</a> &mdash; every layer is a registry/factory. RAGFlow is built for the enterprise that already has half a stack.</li>
+  <li><strong>Workers, not threads.</strong> The Flask API never blocks on parsing. Heavy work is enqueued in Redis and consumed by <code>rag/svr/task_executor.py</code>. The API stays thin and stateless; ingest scales by adding workers.</li>
+  <li><strong>Domain-first naming.</strong> <code>ParserType.PAPER</code>, <code>ParserType.MANUAL</code>, <code>Pipeline</code>, <code>Canvas</code>. Source code reads like documentation &mdash; terms map directly to UI concepts, not CS abstractions.</li>
+  <li><strong>Agents and pipelines unified.</strong> <code>Pipeline(Graph)</code> in <code>rag/flow/pipeline.py</code> extends <code>agent.canvas.Graph</code>. The same DAG engine runs both user-built agents and system ingest pipelines &mdash; a significant bet on a single execution model.</li>
+  <li><strong>Self-contained doc understanding.</strong> The biggest differentiator is also the steepest dependency cost. RAGFlow is willing to ship its own ML pipeline because layout-aware chunking is what makes retrieval useful on real-world enterprise PDFs.</li>
+  <li><strong>Python first, Go where it matters.</strong> The Python stack owns ML, orchestration, and prompts. The parallel Go <a href="internal_doc/service/index.html">service</a> in <code>internal/</code> exists for high-throughput HTTP and to cgo-bind the C++ tokenizer. Both stacks share the schema; neither is canonical.</li>
+</ul>
+<p>The implicit value system you can read in commits and naming: correctness of retrieval &gt; raw latency, deployment optionality &gt; opinionated stack, end-to-end ownership &gt; vendor dependency. The team has clearly chosen to take on more code in exchange for fewer integration risks at runtime.</p>
+
+<h2 id="design-decisions">&#127959;&#65039; Design Decisions</h2>
+<table>
+  <tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr>
+  <tr><td>Doc parsing strategy</td><td>Ship in-house OCR + layout NN (<code>deepdoc/vision/</code>)</td><td>Outsource to Azure Form Recognizer, AWS Textract, Unstructured.io</td><td>Layout-aware chunking is the moat; vendor APIs lag on Chinese docs and don't expose bbox confidence; on-prem deploy must run airgapped</td></tr>
+  <tr><td>Backend framework</td><td>Flask + Peewee ORM + worker queue</td><td>FastAPI + SQLAlchemy + Celery; Django + DRF</td><td>Flask blueprints map cleanly to the per-domain API surface (<code>kb_app</code>, <code>dialog_app</code>, <code>document_app</code>); Peewee is lighter than SQLAlchemy and the schema is simple enough; Redis queue avoids Celery's broker complexity</td></tr>
+  <tr><td>Heavy work isolation</td><td>Out-of-process worker (<code>rag/svr/task_executor.py</code>) over Redis</td><td>Threadpool inside Flask; gevent; Celery</td><td>Parsing is CPU-/GPU-bound and unpredictable; pushing it out of the API process keeps request latency stable and lets ingest scale horizontally without touching the API tier</td></tr>
+  <tr><td>Workflow DSL</td><td>JSON DAG canvas (<code>agent.canvas.Graph</code>) reused for ingest pipelines</td><td>Python-only flows (LangChain), YAML pipelines (Haystack)</td><td>Visual graph editing in <code>web/</code>; one execution engine for both agent runs and parse pipelines (<code>Pipeline(Graph)</code>); JSON survives DB round-trip and version migration</td></tr>
+  <tr><td>Vector / doc store</td><td>Pluggable backends via <code>rag/utils/storage_factory.py</code></td><td>Tie hard to a single store (e.g. only ES, only Pinecone)</td><td>Different enterprises already run ES, Infinity, OpenSearch, or OceanBase; lock-in to one would be a deal-breaker; the abstraction cost is one interface per store</td></tr>
+  <tr><td>Tokenizer</td><td>Custom DART-trie tokenizer in C++ (<code>internal/cpp/</code>) with cgo+ctypes bindings</td><td>jieba (Python pure), HanLP, OpenSearch built-in</td><td>The DART double-array trie is O(1) per char with cache-friendly <a href="memory/index.html">memory</a> layout; needed for Chinese segmentation at indexing throughput; cgo overhead is amortised over batches</td></tr>
+  <tr><td>Knowledge graph</td><td>Both Microsoft GraphRAG and LightRAG ports (<code>rag/graphrag/general/</code> + <code>light/</code>)</td><td>Pick one; build a custom graph extractor</td><td>The two represent different cost/quality points &mdash; General is heavyweight (community reports), Light is faster; users pick per-KB rather than the team picking for them</td></tr>
+  <tr><td>Frontend stack</td><td>React + Vite + Tailwind + shadcn/ui + Zustand</td><td>Next.js full-stack; UmiJS (was used previously); Vue/Svelte</td><td>The agent-canvas page needs heavy client-side interaction (drag-drop graph, real-time SSE, complex state); Vite gives fast HMR; shadcn/ui provides accessible primitives without a runtime cost</td></tr>
+  <tr><td>Parallel Go service</td><td>Mirror <a href="internal_doc/dao/index.html">DAO</a>/handler/service layers in <code>internal/</code></td><td>Python-only; rewrite to Go entirely; gRPC sidecar</td><td>Go gives ~10x throughput for thin HTTP paths and cleaner cgo into the C++ tokenizer; full rewrite would lose ML ecosystem; sharing MySQL keeps both stacks honest</td></tr>
+</table>
+
+<h2 id="system-architecture">System Architecture</h2>
+<p>How the modules compose. Edges are labelled with the <strong>contract</strong> at each boundary &mdash; what flows between modules and why the dependency exists.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart TD
+  subgraph Frontend["Frontend Tier"]
+    WEB["web/ React SPA"]
+  end
+  subgraph API_Tier["Python API Tier"]
+    API["api/ Flask blueprints"]
+    APIDB["api/db Peewee models + services"]
+    AGENT["agent/ canvas + components"]
+  end
+  subgraph Workers["Worker Tier"]
+    EXEC["rag/svr/task_executor.py"]
+    PIPE["rag/flow/Pipeline DAG"]
+  end
+  subgraph Core["Core RAG Engine"]
+    APP["rag/app per ParserType chunkers"]
+    DEEP["deepdoc parsers + vision"]
+    NLP["rag/nlp tokenizer + search"]
+    LLM["rag/llm provider adapters"]
+    GRAPH["rag/graphrag GraphRAG + Light"]
+    RAPTOR["rag/raptor recursive index"]
+  end
+  subgraph Stores["Storage Backends"]
+    DOCSTORE["ES / Infinity / OpenSearch / OB"]
+    OBJSTORE["MinIO / S3 / Azure / GCS / OSS"]
+    REDIS["Redis queue + locks + progress"]
+    MYSQL["MySQL Tenant / KB / Doc / Task"]
+  end
+  subgraph GoTier["Parallel Go Tier"]
+    GOSVR["internal/ Gin server"]
+    CPP["internal/cpp tokenizer"]
+  end
+  subgraph Interop["Interop"]
+    SDK["sdk/ Python wrapper"]
+    MCP["mcp/ MCP server"]
+    COMMON["common/ shared utils"]
+    MEMORY["memory/ chat memory"]
+  end
+
+  WEB -->|REST + SSE| API
+  WEB -->|REST| GOSVR
+  API --> APIDB
+  API --> AGENT
+  APIDB -->|ORM| MYSQL
+  API -->|enqueue| REDIS
+  REDIS -->|consume| EXEC
+  EXEC --> APP
+  EXEC --> PIPE
+  EXEC --> RAPTOR
+  EXEC --> GRAPH
+  PIPE -->|extends Graph| AGENT
+  APP --> DEEP
+  APP --> NLP
+  APP --> LLM
+  GRAPH --> LLM
+  GRAPH --> NLP
+  EXEC -->|index chunks| DOCSTORE
+  EXEC -->|store files| OBJSTORE
+  AGENT -->|retrieval| NLP
+  AGENT -->|chat/embed| LLM
+  API -->|search| NLP
+  NLP -->|query| DOCSTORE
+  GOSVR --> MYSQL
+  GOSVR --> CPP
+  GOSVR -->|same schema| DOCSTORE
+  SDK -->|HTTP| API
+  MCP -->|via SDK| SDK
+  MEMORY -->|persists in| DOCSTORE
+  COMMON -.->|imported by| API
+  COMMON -.->|imported by| EXEC
+</pre>
+</div>
+
+<h2 id="modules">Modules</h2>
+
+<p class="section-label">Core Engine</p>
+<div class="module-grid">
+  <a title="RAG (Retrieval-Augmented Generation) — The Semantic Retrieval Engine" href="rag_doc/index.html" class="module-card">
+    <h3>rag/</h3>
+    <div class="tagline">The heart of the engine &mdash; chunkers, retrieval, GraphRAG, RAPTOR, NLP, LLM</div>
+    <p>Per-document-type chunkers (<code>rag/app/</code>), the new DAG ingest pipeline (<code>rag/flow/</code>), Chinese-aware tokenizer (<code>rag/nlp/</code>), provider-agnostic LLM adapters (<code>rag/llm/</code>), Graph-RAG construction (<code>rag/graphrag/</code>), and pluggable storage connectors (<code>rag/utils/</code>).</p>
+    <div class="stats"><span>111 .py files</span><span>RAPTOR + GraphRAG</span><span>14 ParserTypes</span></div>
+  </a>
+  <a title="Why deepdoc?" href="deepdoc_doc/index.html" class="module-card">
+    <h3>deepdoc/</h3>
+    <div class="tagline">Layout-aware document parsing + neural OCR / table-structure recognition</div>
+    <p>Per-format extractors (PDF, DOCX, XLSX, PPT, HTML, EPUB, JSON, MD), alternative engines (mineru, docling, paddleocr, tcadp), plus PaddlePaddle/ONNX models for layout detection and table structure recognition.</p>
+    <div class="stats"><span>37 .py files</span><span>14 parsers</span><span>5 vision recognizers</span></div>
+  </a>
+</div>
+
+<p class="section-label">Orchestration &amp; API</p>
+<div class="module-grid">
+  <a title="RAGFlow API Module - Documentation Hub" href="api_doc/index.html" class="module-card">
+    <h3>api/</h3>
+    <div class="tagline">Flask REST API &mdash; blueprints, Peewee ORM, layered services</div>
+    <p>Entry point <code>ragflow_server.py</code>; per-domain blueprints under <code>api/apps/</code>; database models in <code>api/db/db_models.py</code>; service layer in <code>api/db/services/</code> handles document, dialog, KB, task, canvas, LLM operations.</p>
+    <div class="stats"><span>98 .py files</span><span>Flask</span><span>15+ services</span></div>
+  </a>
+  <a title="Agent Canvas — DAG-based workflow orchestration" href="agent_doc/index.html" class="module-card">
+    <h3>agent/</h3>
+    <div class="tagline">Editable agent canvas DSL &mdash; DAG of LLM/retrieval/iteration components</div>
+    <p>The <code>Graph</code> execution engine (<code>canvas.py</code>) plus 20+ component types: LLM, agent-with-tools, categorize, switch, iteration, loop, message, invoke, data-operations. Tools include web search, code sandbox, SQL, retrieval invocation.</p>
+    <div class="stats"><span>87 .py files</span><span>20+ components</span><span>JSON DSL</span></div>
+  </a>
+  <a title="High-Performance Go Backend + C++ Tokenizer" href="internal_doc/index.html" class="module-card">
+    <h3>internal/</h3>
+    <div class="tagline">Parallel Go service &mdash; Gin handlers, GORM DAOs, cgo to C++ tokenizer</div>
+    <p>Mirrors the Python API for high-throughput deployments. Layered <code>handler &rarr; service &rarr; dao &rarr; entity</code>. Includes <code>internal/cpp/</code> with the C++ rag-analyzer (DART trie + PCRE2 + opencc + re2) bound via a C-API and cgo.</p>
+    <div class="stats"><span>218 .go files</span><span>115 cpp/h</span><span>Gin + GORM</span></div>
+  </a>
+</div>
+
+<p class="section-label">Frontend</p>
+<div class="module-grid">
+  <a title="RAGFlow Web Frontend — React + TypeScript SPA for document intelligence workflows" href="web_doc/index.html" class="module-card">
+    <h3>web/</h3>
+    <div class="tagline">React + Vite + Tailwind + shadcn/ui SPA</div>
+    <p>Knowledge-base manager, chat with streaming + citations, agent canvas editor, document viewer, file manager, settings. State via Zustand; data via React Query; routing via React Router.</p>
+    <div class="stats"><span>1100 .ts/tsx</span><span>React 18</span><span>shadcn/ui</span></div>
+  </a>
+</div>
+
+<p class="section-label">Shared / Interop</p>
+<div class="module-grid">
+  <a title="COMMON Module — Cross-cutting Python utilities &amp; infrastructure" href="common/index.html" class="module-card">
+    <h3>common/</h3>
+    <div class="tagline">Cross-cutting Python utilities &mdash; settings, constants, parsers, security</div>
+    <p>Shared <code>settings.py</code>, <code>constants.py</code> (LLMType, ParserType, TaskType enums), crypto/token/string utilities, SSRF guard, MCP tool-call connector, doc-store / data-source interfaces.</p>
+    <div class="stats"><span>91 .py files</span><span>Flat module</span></div>
+  </a>
+  <a title="MEMORY Module — Long-term chat memory subsystem" href="memory/index.html" class="module-card">
+    <h3>memory/</h3>
+    <div class="tagline">Long-term chat memory subsystem</div>
+    <p>Per-tenant persistent memory layer for multi-session chats; vector + summary storage.</p>
+    <div class="stats"><span>12 .py files</span><span>Flat module</span></div>
+  </a>
+  <a title="MCP Module — Model Context Protocol server for KB &amp; chat" href="mcp/index.html" class="module-card">
+    <h3>mcp/</h3>
+    <div class="tagline">Model Context Protocol server &mdash; exposes RAGFlow as MCP tools</div>
+    <p>Lets external LLM clients (Claude Desktop, etc.) invoke RAGFlow KB-search and chat through the standard MCP interface.</p>
+    <div class="stats"><span>3 .py files</span><span>MCP server + client</span></div>
+  </a>
+  <a title="SDK Module — Python SDK wrapping RAGFlow REST API" href="sdk/index.html" class="module-card">
+    <h3>sdk/</h3>
+    <div class="tagline">Python SDK wrapping the REST API</div>
+    <p>Programmatic client used by the MCP server, examples, and external integrations. Modules cover chat, KB, document, agent.</p>
+    <div class="stats"><span>19 .py files</span><span>HTTP wrapper</span></div>
+  </a>
+  <a title="TOOLS Module — DevOps &amp; data integration scripts" href="tools/index.html" class="module-card">
+    <h3>tools/</h3>
+    <div class="tagline">DevOps and data-loading utility scripts</div>
+    <p>Misc CLI utilities for migration, data import, model conversion.</p>
+    <div class="stats"><span>24 .py files</span><span>CLI</span></div>
+  </a>
+  <a title="ADMIN Module — Administration &amp; management tools" href="admin/index.html" class="module-card">
+    <h3>admin/</h3>
+    <div class="tagline">Server administration tooling</div>
+    <p>Tenant management, system maintenance, user administration helpers.</p>
+    <div class="stats"><span>14 .py files</span><span>Admin CLI</span></div>
+  </a>
+</div>
+
+<h2 id="navigation-guide">Navigation Guide</h2>
+<table style="max-width:780px">
+  <tr><th>Level</th><th>What You'll Find</th><th>When to Use</th></tr>
+  <tr><td><strong>0 &mdash; Project Hub</strong> (this page)</td><td>Project philosophy, design decisions, module map, end-to-end data flows</td><td>Getting started, choosing where to dive in</td></tr>
+  <tr><td><strong>1 &mdash; Module Overview</strong> (e.g., <code>rag_doc/index.html</code>)</td><td>Module purpose, sub-module cards, narrated walkthrough, algorithm spotlight, failure analysis</td><td>Understanding a module's role and design choices before reading code</td></tr>
+  <tr><td><strong>2 &mdash; Sub-Module Deep Dive</strong> (e.g., <code>rag_doc/graphrag/index.html</code>)</td><td>Annotated code walkthroughs, design rationale, edge cases, configuration knobs, real code examples</td><td>Implementing a feature, debugging, or extending a sub-module</td></tr>
+  <tr><td><strong>Focus <a href="web_doc/pages/index.html">Pages</a></strong> (e.g., <code>rag_doc/graphrag/leiden-community-detection/</code>)</td><td>Algorithm trace, alternatives comparison, complexity analysis, failure recovery</td><td>Deeply understanding a specific mechanism (why Leiden vs Louvain, how DART trie works, etc.)</td></tr>
+</table>
+
+<h2 id="data-flows">&#128279; Key Data Flows</h2>
+<p>Three flows you should understand before reading individual modules. Note the annotations explaining <strong>why</strong> each hand-off occurs and where latency lives.</p>
+
+<h3 id="flow-ingest"><a href="rag_doc/flow/index.html">Flow</a> A &mdash; Ingest a PDF into a knowledge base</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User (web/)
+    participant API as api/apps/document_app
+    participant DB as MySQL (Document, Task)
+    participant OBJ as MinIO/S3
+    participant Q as Redis Queue
+    participant W as rag/svr/task_executor
+    participant DD as deepdoc parsers + vision
+    participant CHK as rag/app chunker
+    participant LLM as rag/llm/embedding
+    participant DS as ES / Infinity
+    U->>API: POST /v1/document/upload (multipart)
+    API->>OBJ: write raw file
+    Note over API,OBJ: Heavy bytes never touch the API process beyond a stream
+    API->>DB: insert Document + Task rows
+    API->>Q: LPUSH task_id
+    API-->>U: 200 with task_id (returns fast)
+    Note over U,API: API stays unblocked; ingest is async
+    Q-->>W: BRPOP task_id
+    W->>OBJ: read file
+    W->>DD: parse layout + OCR if scanned
+    Note over W,DD: deepdoc gives bbox-aware text + tables
+    W->>CHK: chunk per ParserType (naive/paper/manual/...)
+    CHK->>LLM: embed each chunk
+    LLM-->>CHK: vectors
+    CHK->>DS: bulk index chunks + vectors
+    W->>DB: update Task progress (also pushes Redis log)
+    Note over W,DB: progress visible to web/ via SSE polling
+</pre>
+</div>
+
+<h3 id="flow-chat">Flow B &mdash; Chat query with retrieval-augmented generation</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User (web/ chat)
+    participant API as api/apps/restful_apis
+    participant DLG as DialogService
+    participant SRC as rag/nlp/search
+    participant DS as ES / Infinity
+    participant RR as rag/llm/rerank_model
+    participant CHT as rag/llm/chat_model
+    U->>API: POST /v1/conversation/completion (SSE)
+    API->>DLG: build LLMBundle + retrieve
+    DLG->>SRC: hybrid query (BM25 + dense)
+    SRC->>DS: search content_ltks + vector
+    DS-->>SRC: top-K candidates
+    SRC->>RR: rerank top-K
+    RR-->>SRC: scored top-N
+    SRC-->>DLG: chunks + citations
+    Note over DLG: Compose prompt with citations
+    DLG->>CHT: stream completion
+    CHT-->>DLG: token stream
+    DLG-->>API: SSE token frames
+    API-->>U: text/event-stream
+    Note over API,U: Citations link back to original chunks for trust
+</pre>
+</div>
+
+<h3 id="flow-agent">Flow C &mdash; Run an agent canvas (or ingest pipeline)</h3>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant U as User (web/ canvas)
+    participant API as api/apps canvas
+    participant G as agent.canvas.Graph
+    participant N1 as Node Begin
+    participant N2 as Node LLM or AgentWithTools
+    participant N3 as Node Iteration or Switch
+    participant T as agent/tools or rag/llm
+    U->>API: run canvas (DSL JSON)
+    API->>G: instantiate Graph(dsl)
+    G->>N1: execute begin
+    N1-->>G: initial variables
+    G->>N2: schedule next ready node
+    N2->>T: invoke LLM / tool / retrieval
+    T-->>N2: result
+    N2-->>G: write outputs to var scope
+    Note over G,N2: scheduler picks edges by topological order + branch conditions
+    G->>N3: evaluate switch/iteration
+    N3-->>G: select next path or sub-graph
+    Note over N3: iteration runs sub-graph per item with isolated scope
+    G-->>API: SSE per-component progress
+    API-->>U: live trace
+</pre>
+</div>
+
+<h2 id="boundary-py-go">How the Python and Go Tiers Connect</h2>
+<p>RAGFlow keeps a parallel Go service. Reading the directory layout, both stacks share the same MySQL schema and the same doc-store; neither is canonical. The Go side handles high-throughput HTTP paths and binds the C++ tokenizer through cgo for performance.</p>
+<div class="diagram-container">
+<pre class="mermaid">
+sequenceDiagram
+    participant Web as web/ SPA
+    participant Py as Python api/ (Flask)
+    participant Go as Go internal/ (Gin)
+    participant DB as MySQL (shared)
+    participant CPP as C++ rag_analyzer
+    participant DS as Doc-store (shared)
+    Web->>Py: heavy ops (upload, agent run, chat, GraphRAG build)
+    Web->>Go: thin reads (search, list, fetch)
+    Py->>DB: write tasks, docs, chats
+    Go->>DB: read same schema
+    Go->>CPP: cgo tokenize_query
+    CPP-->>Go: terms + weights
+    Go->>DS: search hybrid
+    Py->>DS: index + search
+    Note over Py,Go: They never call each other directly &mdash; coupling is via DB + doc-store
+</pre>
+</div>
+<blockquote>
+<strong>Key insight:</strong> The Python tier owns <em>state-changing</em> work (ingest, agent runs, chat sessions). The Go tier specialises in <em>read-heavy</em> paths (search, list). The boundary is shared MySQL + doc-store, not RPC. This means schema migrations must be coordinated, but neither tier becomes a bottleneck for the other.
+</blockquote>
+
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Project source tree</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>ragflow/
+├── api/                       ← Flask REST API server (entry: api/ragflow_server.py)
+│   ├── apps/                    ← Blueprints: document, llm, restful_apis, sdk, services, auth
+│   ├── db/                      ← Peewee models + services + joint_services
+│   └── common/, utils/, validation.py
+├── rag/                       ← Core RAG engine
+│   ├── app/                     ← Per-ParserType chunkers (naive, paper, manual, qa, table, ...)
+│   ├── flow/                    ← New DAG ingest pipeline (Pipeline extends agent.canvas.Graph)
+│   ├── nlp/                     ← rag_tokenizer + search/query rewriting + term-weight
+│   ├── llm/                     ← Provider adapters (chat / embedding / rerank / cv / ocr / tts)
+│   ├── graphrag/                ← Microsoft GraphRAG-General + LightRAG variants + Leiden
+│   ├── utils/                   ← Pluggable doc-store + object-store backends + Redis
+│   ├── svr/                     ← task_executor.py, cache_file_svr, sync_data_source
+│   ├── prompts/                 ← System prompt templates
+│   ├── res/                     ← Resource files (dictionaries, etc.)
+│   └── raptor.py                ← RAPTOR recursive abstraction index
+├── deepdoc/                   ← Deep document parsing
+│   ├── parser/                  ← pdf, docx, xlsx, ppt, html, md, json, epub, figure, resume, ...
+│   └── vision/                  ← OCR + layout + table-structure recognizers (PaddlePaddle/ONNX)
+├── agent/                     ← Agent canvas DSL
+│   ├── canvas.py                ← Graph execution engine
+│   ├── component/               ← 20+ node types
+│   ├── tools/                   ← External integrations (web search, code, SQL, retrieval)
+│   ├── sandbox/                 ← Code-exec sandbox
+│   ├── templates/               ← Pre-built canvas DSL JSONs
+│   └── plugin/                  ← Third-party plugin loader
+├── internal/                  ← Parallel Go service
+│   ├── server/, router/, handler/, service/, dao/, entity/
+│   ├── engine/, storage/, cache/, tokenizer/, common/, utility/
+│   └── cpp/                     ← C++ rag_analyzer (DART trie + opencc + pcre2 + re2)
+├── web/                       ← React SPA
+│   └── src/{pages, components, services, hooks, layouts, locales, theme, routes, utils, lib}
+├── common/                    ← Cross-cutting Python utilities
+├── memory/                    ← Long-term chat memory subsystem
+├── mcp/                       ← Model Context Protocol server
+├── sdk/                       ← Python SDK wrapping REST
+├── tools/                     ← DevOps / data-loading scripts
+├── admin/                     ← Admin tooling
+├── docker/                    ← Compose files + dockerfiles
+├── conf/                      ← Runtime config + model lists
+├── helm/                      ← Kubernetes Helm chart
+├── docs/                      ← User-facing markdown documentation
+├── test/                      ← Tests (pytest + playwright)
+├── pyproject.toml             ← uv-managed Python deps
+├── Dockerfile                 ← Production image
+└── README.md
+</code></pre>
+</details>
+
+<h2 id="tech-stack">Build &amp; Tech Stack</h2>
+<div class="card-grid">
+  <div class="card"><h4>Languages</h4><p>Python 3.10+ (backend), TypeScript/React (web), Go 1.22+ (internal), C++17 (tokenizer)</p></div>
+  <div class="card"><h4>Backend Framework</h4><p>Flask + Peewee ORM + Gunicorn workers; Quart support for async paths</p></div>
+  <div class="card"><h4>Frontend Stack</h4><p>React 18 + Vite + Tailwind + shadcn/ui + Zustand + React Query + React Router</p></div>
+  <div class="card"><h4>Storage</h4><p>MySQL (state); ES / Infinity / OpenSearch / OceanBase (chunks + vectors); MinIO / S3 / Azure / GCS / OSS / OpenDAL (objects); Redis (queue + locks + progress)</p></div>
+  <div class="card"><h4>ML / Inference</h4><p>PaddlePaddle + ONNX runtime (layout, OCR, TSR); embedding/rerank/chat via vendor adapters (OpenAI, Bedrock, Tongyi, Ollama, Xinference, ...)</p></div>
+  <div class="card"><h4>Build &amp; Dev</h4><p><code>uv sync --python 3.12 --all-extras</code>; Docker Compose; pre-commit; ruff; pytest; npm + Vite</p></div>
+</div>
+
+<div class="footer">
+  <p><a title="RAGFlow — Search Wiki" href="search.html">&#128270; Search</a> &nbsp;|&nbsp; <a href="../../../index.html">&#8617; Wiki Hub</a> &nbsp;|&nbsp; RAGFlow Wiki &middot; rev <code>e8f19aa33</code> &middot; generated 2026-05-06</p>
+</div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+(function(){
+  var overlay=document.getElementById('diagramOverlay');
+  if(!overlay) return;
+  var content=document.getElementById('diagramOverlayContent');
+  var scale=1;
+  function resetZoom(){scale=1;content.style.transform='scale(1)';}
+  function openOverlay(dc){
+    content.innerHTML='';
+    var svg=dc.querySelector('svg');
+    if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}
+    else{content.innerHTML=dc.innerHTML;}
+    resetZoom();
+    overlay.classList.add('active');
+  }
+  document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});
+  content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});
+})();
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+
+<!-- VERSION_SWITCHER_START -->
+<style>.version-switcher{display:inline-flex;align-items:center;gap:8px;margin-top:1rem;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:8px;padding:6px 14px}
+.version-label{color:var(--text-muted,#8b949e);font-size:.85rem}
+.version-select{background:var(--bg,#0d1117);color:var(--accent,#58a6ff);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 8px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.version-select:focus{outline:2px solid var(--accent,#58a6ff);outline-offset:1px}
+@media print{.version-switcher{display:none!important}}</style>
+<script>(function(){
+  var versions=[{"timestamp":"20260506_151323","date":"2025-05-06T15:13:23Z","rev":"e8f19aa33821b6a7d0d96fb48c0944702ff06c50","pages":47,"latest":true}];
+  if(!versions||versions.length<2)return;
+  var dirPath=location.pathname.replace(/[^/]*$/,'');
+  var tsMatch=dirPath.match(/\/(\d{8}_\d{6})\/$/);
+  var projectBase=tsMatch?dirPath.replace(/\d{8}_\d{6}\/$/,''):dirPath;
+  var curTs=tsMatch?tsMatch[1]:((versions.find(function(v){return v.latest;})||versions[0]).timestamp);
+  var wrap=document.createElement('div');
+  wrap.className='version-switcher';
+  var lbl=document.createElement('span');
+  lbl.className='version-label';
+  lbl.textContent='Version:';
+  var sel=document.createElement('select');
+  sel.className='version-select';
+  sel.setAttribute('aria-label','Switch wiki version');
+  versions.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v.timestamp;
+    var rev=v.rev?' ('+v.rev.substring(0,7)+')':'';
+    o.textContent=v.date+rev+(v.latest?' (latest)':'');
+    if(v.timestamp===curTs)o.selected=true;
+    sel.appendChild(o);
+  });
+  wrap.appendChild(lbl);
+  wrap.appendChild(sel);
+  var hero=document.querySelector('.hero');
+  if(hero)hero.appendChild(wrap);
+  sel.addEventListener('change',function(){
+    var newTs=this.value;
+    if(newTs===curTs)return;
+    location.href=projectBase+newTs+'/index.html';
+  });
+})();</script>
+<!-- VERSION_SWITCHER_END -->
+</body></html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="libs/langchain/langchain_classic">
+<meta name="wiki-source-rev" content="1519ed5afb">
+<!--
+  L0 TEMPLATE — Project Hub Page (3-level projects only)
+  Replace all  before use:
+    langchain_classic     — Project display name (e.g., "Keiko", "MyProject")
+    Legacy LangChain composition library — One-line subtitle
+    1,321-file module: chains, agents, retrievers, tools, memory     — 2-3 sentence project description
+    neutra-ip — localStorage key prefix (e.g., "keiko", "myproject")
+    python             — Primary code language class (e.g., "cpp", "python")
+
+  This is the top-level hub for multi-module projects.
+  It links to L1 module overviews and the search page.
+-->
+<title>langchain_classic — Legacy LangChain composition library</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.6rem 1rem;color:var(--text-muted);background:var(--surface);border-radius:0 6px 6px 0;font-style:italic}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3);text-decoration:none}
+.card h4{margin-top:0;color:var(--accent2)}.card p{font-size:.9rem;color:var(--text-muted)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent)}
+
+/* Module cards — L0 specific */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin:1.5rem 0}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:transform .15s,box-shadow .15s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);border-color:var(--accent);text-decoration:none}
+.module-card h3{margin:0 0 .4rem 0;color:var(--accent);font-size:1.25rem}
+.module-card .tagline{color:var(--text-muted);font-size:.9rem;margin-bottom:.6rem}
+.module-card p{color:var(--text);font-size:.88rem}
+.module-card .stats{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.module-card .stats span{background:var(--code-bg);padding:.15rem .5rem;border-radius:4px;font-size:.75rem;color:var(--text-muted)}
+.section-label{color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+
+@media(max-width:768px){body{padding:1rem}.card-grid{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .module-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.module-card,.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<main id="main">
+<h1>langchain_classic &mdash; Internal Wiki</h1>
+<div class="hero">
+<p class="subtitle">The legacy LangChain composition library — chains, agents, retrievers, tools, memory.</p>
+<p>This wiki documents <code>langchain_classic/</code>: the <strong>1,321-file</strong> module that powers pre-LCEL LangChain code. It is the bridge between the modern <code>langchain_core</code> Runnable protocol and the 2022–2023 <code>Chain</code>/<code>AgentExecutor</code> idioms that production users still rely on.</p>
+</div>
+<div class="stat-row"><div class="stat-box"><div class="num">21</div><div class="label">Documented modules</div></div><div class="stat-box"><div class="num">1,321</div><div class="label">Python files</div></div><div class="stat-box"><div class="num">28</div><div class="label">Sub-directories</div></div><div class="stat-box"><div class="num">Python 3</div><div class="label">Language</div></div></div>
+<p><span class="badge blue">Composition</span><span class="badge green">Pydantic v1</span><span class="badge yellow">Pre-LCEL legacy</span><span class="badge red">Production-critical</span></p>
+<nav class="toc" id="toc"></nav>
+<h2 id="philosophy">Project Philosophy</h2>
+<p>When LangChain split into <code>langchain_core</code> + integrations + classic, the design problem was <em>how to keep four years of public API intact while migrating to LCEL</em>. The answer was <code>langchain_classic/</code>: a library that re-implements (or thinly wraps) the historical surface — <code>Chain</code>, <code>AgentExecutor</code>, <code>BaseLLM</code>, <code>BaseRetriever</code>, <code>BaseMemory</code>, <code>BaseTool</code> — while internally bridging to the new <code>Runnable</code> protocol where possible. Every module here exists for one of three reasons: <strong>(1)</strong> a public class hierarchy users still subclass; <strong>(2)</strong> a factory function that builds an LCEL chain with the same shape as the legacy class; or <strong>(3)</strong> glue (callbacks, output parsers) where the legacy and modern stacks share infrastructure.</p><p>The unifying design choice across the codebase is <strong>Pydantic v1 BaseModel as the universal extension point</strong>. Every Chain, Tool, Retriever, Memory, and LLM is a BaseModel subclass. This gives free input validation, JSON serialisation, schema-driven UIs, and a discoverable <code>__init__</code> contract — at the cost of locking the project to Pydantic v1 long after the ecosystem moved to v2.</p>
+<h2 id="design-decisions">Project-level Design Decisions</h2>
+<table><tr><th>Decision</th><th>Choice Made</th><th>Alternatives</th><th>Why This Approach</th></tr><tr><td>Composition primitive</td><td>Class inheritance (<code>Chain</code>, <code>BaseTool</code>)</td><td>LCEL-only; functional pipes</td><td>Backwards-compat with 2022 user code; LCEL is wrapped, not replaced</td></tr><tr><td>Validation framework</td><td>Pydantic v1 BaseModel</td><td>dataclasses; attrs; Pydantic v2</td><td>v1 was the version when adoption began; migration to v2 would break thousands of subclasses</td></tr><tr><td>Sync vs async</td><td>Both, with async as opt-in override</td><td>Async-only</td><td>Many integrations were sync-only in 2022; forcing async would block adoption</td></tr><tr><td>Provider integrations</td><td>Optional imports per file</td><td>Required dependency list</td><td>100+ providers × heavy SDKs; users install only what they need</td></tr><tr><td>Observability</td><td>Callback observer pattern, fan-out per event</td><td>OpenTelemetry only; logging</td><td>Streaming requires per-token callbacks; tracing builds a tree of run_ids</td></tr><tr><td>Memory</td><td>BaseMemory plugged into Chain</td><td>External middleware</td><td>Memory needs access to inputs &amp; outputs the chain processes; built-in is simpler</td></tr><tr><td>Document model</td><td>Single Document(page_content, metadata) shape</td><td>Per-source classes</td><td>Loaders, splitters, embedders, vectorstores all need the same input</td></tr><tr><td>Tool schema</td><td>Pydantic args_schema or function signature inspection</td><td>JSON Schema strings</td><td>Type-safe; auto-generated OpenAI tool descriptors</td></tr></table>
+<h2 id="architecture">System Architecture</h2>
+<div class="diagram-container"><pre class="mermaid">
+flowchart TD
+  subgraph Orch["Orchestration"]
+    CH["chains/"]
+    AG["agents/"]
+    RN["runnables/"]
+  end
+  subgraph MIO["Models I/O"]
+    LL["llms/"]
+    CM["chat_models/"]
+    EM["embeddings/"]
+    PR["prompts/"]
+    OP["output_parsers/"]
+  end
+  subgraph RD["Retrieval & Data"]
+    RE["retrievers/"]
+    VS["vectorstores/"]
+    DL["document_loaders/"]
+    DT["document_transformers/"]
+    IX["indexes/"]
+  end
+  subgraph ST["State & Tools"]
+    TO["tools/"]
+    ME["memory/"]
+    SG["storage/"]
+  end
+  subgraph CC["Cross-cutting"]
+    CB["callbacks/"]
+    EV["evaluation/"]
+    UT["utilities/"]
+  end
+  subgraph FN["Foundations (langchain_core)"]
+    SC["schema/"]
+    AD["adapters/"]
+  end
+  CH -->|"composes"| MIO
+  AG -->|"calls"| TO
+  AG -->|"streams"| CB
+  CH -->|"emits"| CB
+  RE --> VS
+  RE --> EM
+  DL --> DT
+  DT --> VS
+  IX --> VS
+  ME --> SG
+  TO --> UT
+  Orch --> FN
+  MIO --> FN
+  RD --> FN
+</pre></div>
+<h2 id="modules">Modules</h2>
+<h3 id="orchestration">Orchestration</h3><div class="card-grid"><a class="card" href="chains_doc/index.html"><h4>chains</h4><p>Pre-LCEL composition primitive — Chain class + 28 chain families</p><ul><li>140 files</li><li>28 sub-directories</li></ul></a><a class="card" href="agents_doc/index.html"><h4>agents</h4><p>ReAct/MRKL agents, AgentExecutor, plan-and-execute</p><ul><li>146 files</li><li>17 sub-directories</li></ul></a><a class="card" href="runnables_doc/index.html"><h4>runnables</h4><p>LangChain-classic surface adapters over langchain_core Runnables</p><ul><li>8 files</li><li>0 sub-directories</li></ul></a></div>
+<h3 id="models-i-o">Models I/O</h3><div class="card-grid"><a class="card" href="llms_doc/index.html"><h4>llms</h4><p>Legacy completion-style LLM wrappers (text-in, text-out)</p><ul><li>83 files</li><li>0 sub-directories</li></ul></a><a class="card" href="chat_models_doc/index.html"><h4>chat_models</h4><p>Message-based chat model wrappers (BaseMessage in/out)</p><ul><li>35 files</li><li>0 sub-directories</li></ul></a><a class="card" href="embeddings_doc/index.html"><h4>embeddings</h4><p>Vector embedding adapters for retrieval &amp; semantic search</p><ul><li>51 files</li><li>0 sub-directories</li></ul></a><a class="card" href="prompts_doc/index.html"><h4>prompts</h4><p>PromptTemplate, ChatPromptTemplate, FewShot, example selectors</p><ul><li>12 files</li><li>0 sub-directories</li></ul></a><a class="card" href="output_parsers_doc/index.html"><h4>output_parsers</h4><p>Structured output extraction from LLM strings</p><ul><li>23 files</li><li>0 sub-directories</li></ul></a><a class="card" href="models_io_doc/index.html"><h4>models_io (legacy alias)</h4><p>Re-export façade for prompts/llms/chat_models/parsers</p><ul><li>0 files</li><li>0 sub-directories</li></ul></a></div>
+<h3 id="retrieval-data">Retrieval &amp; Data</h3><div class="card-grid"><a class="card" href="retrievers_doc/index.html"><h4>retrievers</h4><p>MultiQuery, ContextualCompression, ParentDocument, EnsembleRetriever</p><ul><li>78 files</li><li>2 sub-directories</li></ul></a><a class="card" href="vectorstores_doc/index.html"><h4>vectorstores</h4><p>Pinecone, FAISS, Chroma, Weaviate, ... uniform interface</p><ul><li>75 files</li><li>0 sub-directories</li></ul></a><a class="card" href="document_loaders_doc/index.html"><h4>document_loaders</h4><p>PDF, web, S3, Notion, ... unified Document model</p><ul><li>166 files</li><li>0 sub-directories</li></ul></a><a class="card" href="document_transformers_doc/index.html"><h4>document_transformers</h4><p>Splitters, doc compressors, EmbeddingsRedundantFilter</p><ul><li>11 files</li><li>0 sub-directories</li></ul></a><a class="card" href="indexes_doc/index.html"><h4>indexes</h4><p>Source-controlled vector store sync (delete, update, upsert)</p><ul><li>9 files</li><li>0 sub-directories</li></ul></a></div>
+<h3 id="state-tools">State &amp; Tools</h3><div class="card-grid"><a class="card" href="tools_doc/index.html"><h4>tools</h4><p>BaseTool + 64 first-party tool integrations</p><ul><li>186 files</li><li>64 sub-directories</li></ul></a><a class="card" href="memory_doc/index.html"><h4>memory</h4><p>Conversation history strategies (Buffer, Window, Summary, KG, Vector)</p><ul><li>39 files</li><li>0 sub-directories</li></ul></a><a class="card" href="storage_doc/index.html"><h4>storage (+ docstore)</h4><p>Key-value byte stores: in-memory, file, Redis, encoder layers</p><ul><li>14 files</li><li>0 sub-directories</li></ul></a></div>
+<h3 id="cross-cutting">Cross-cutting</h3><div class="card-grid"><a class="card" href="callbacks_doc/index.html"><h4>callbacks</h4><p>Observer pattern for tracing, logging, streaming, metrics</p><ul><li>45 files</li><li>0 sub-directories</li></ul></a><a class="card" href="evaluation_doc/index.html"><h4>evaluation</h4><p>QA correctness, criteria, embedding distance, agent trajectory eval</p><ul><li>32 files</li><li>10 sub-directories</li></ul></a><a class="card" href="smith_doc/index.html"><h4>smith</h4><p>LangSmith dataset evaluation runner (legacy)</p><ul><li>7 files</li><li>0 sub-directories</li></ul></a><a class="card" href="utilities_doc/index.html"><h4>utilities</h4><p>Wrappers for SerpAPI, SQL, Wikipedia, BashProcess, etc.</p><ul><li>58 files</li><li>0 sub-directories</li></ul></a></div>
+<h3 id="foundations">Foundations</h3><div class="card-grid"><a class="card" href="foundations_doc/index.html"><h4>foundations</h4><p>schema, _api, adapters, load, utils, graphs, chat_loaders</p><ul><li>90 files</li><li>7 sub-directories</li></ul></a></div>
+<h2 id="synthesis">Cross-module Synthesis</h2>
+<h3 id="end-to-end-flows">End-to-end flows</h3>
+<h4 id="flow-1-conversational-rag-with-citations">Flow 1 — Conversational RAG with citations</h4>
+<p>User asks a question in a chat UI. The system retrieves relevant docs, answers with the LLM, and stores the turn for follow-up questions.</p>
+<pre><code class="language-python">User input
+   │
+   ▼
+chat history (memory.ChatMessageHistory)
+   │
+   ├──► history-aware rephrase  (chains.history_aware_retriever)
+   │      └── prompt | LLM | StrOutputParser  ──► standalone question
+   │
+   ▼
+retriever (retrievers.MultiQueryRetriever wrapping vectorstores.Chroma)
+   │      └── LLM expands to N variants
+   │      └── each variant → similarity_search → fuse via dedupe
+   ▼
+docs (list[Document])
+   │
+   ▼
+contextual compression (retrievers.ContextualCompressionRetriever)
+   │      └── EmbeddingsFilter → LLMChainExtractor
+   ▼
+answer chain (chains.create_stuff_documents_chain)
+   │      └── prompt-with-{context} | LLM | StrOutputParser
+   ▼
+answer + cited docs
+   │
+   ├──► memory.save_context({&quot;input&quot;: q}, {&quot;output&quot;: a})  → updates ChatMessageHistory
+   │
+   ▼
+response to user</code></pre>
+<p><strong>Touched modules.</strong> <code>memory/</code>, <code>chains/</code>, <code>retrievers/</code>, <code>vectorstores/</code>, <code>document_compressors/</code> (under retrievers/), <code>output_parsers/</code>, <code>callbacks/</code> (instrumenting every step).</p>
+<p><strong>Total LLM calls.</strong> Typically 3 — rephrase, multi-query expand, answer. Plus optional compression LLM call.</p>
+<p><strong>Key insight.</strong> This entire flow is now expressible in LCEL: <code>history_aware | retriever | compress | stuff</code>. The classic <code>Chain</code>-class equivalents still exist for legacy code.</p>
+<h4 id="flow-2-tool-calling-agent-answering-what-s-the-weather-in-paris-and-convert-to-f">Flow 2 — Tool-calling agent answering "what's the weather in Paris and convert to F?"</h4>
+<pre><code class="language-python">input → AgentExecutor.invoke({&quot;input&quot;: q})
+          │
+          ▼ (loop iteration 1)
+       prompt = ChatPromptTemplate(system, MessagesPlaceholder(&quot;history&quot;),
+                                    HumanMessage(q),
+                                    MessagesPlaceholder(&quot;agent_scratchpad&quot;))
+          │
+          ▼
+       prompt | llm.bind_tools(tools) | OpenAIToolsAgentOutputParser
+          │      └── llm returns tool_calls=[get_weather(city=&quot;Paris&quot;)]
+          ▼
+       AgentAction(&quot;get_weather&quot;, {&quot;city&quot;: &quot;Paris&quot;}, log=…)
+          │
+          ▼
+       AgentExecutor calls tools[&quot;get_weather&quot;].arun({&quot;city&quot;:&quot;Paris&quot;})
+          │      └── utilities.GoogleSearchAPIWrapper or open-meteo HTTP
+          ▼
+       observation = &quot;21 °C, partly cloudy&quot;
+       intermediate_steps.append((action, observation))
+          │
+          ▼ (loop iteration 2)
+       same prompt with new scratchpad
+          │
+          ▼
+       LLM returns tool_calls=[convert_temperature(value=21, from=&quot;C&quot;, to=&quot;F&quot;)]
+          │
+          ▼ … observation = &quot;69.8 °F&quot;
+          │
+          ▼ (loop iteration 3)
+       LLM returns AgentFinish(return_values={&quot;output&quot;: &quot;Paris is 21 °C / 69.8 °F&quot;})
+          │
+          ▼
+       AgentExecutor returns {&quot;input&quot;: …, &quot;output&quot;: …, &quot;intermediate_steps&quot;: [...]}</code></pre>
+<p><strong>Touched modules.</strong> <code>agents/</code>, <code>tools/</code>, <code>chat_models/</code>, <code>prompts/</code> (MessagesPlaceholder), <code>output_parsers/</code>, <code>callbacks/</code>.</p>
+<p><strong>Key insight.</strong> All loop control lives in <code>AgentExecutor</code>. The agent itself is a stateless Runnable; the executor passes <code>intermediate_steps</code> back in on each iteration.</p>
+<h4 id="flow-3-indexing-a-documentation-site">Flow 3 — Indexing a documentation site</h4>
+<pre><code class="language-python">loader = WebBaseLoader([...])           # document_loaders
+docs = loader.lazy_load()
+splits = RecursiveCharacterTextSplitter(...).split_documents(docs)   # text_splitter
+
+embedder = CacheBackedEmbeddings.from_bytes_store(
+    OpenAIEmbeddings(), LocalFileStore(&quot;./cache&quot;), namespace=&quot;docs&quot;
+)                                                # embeddings + storage
+vs = Chroma(embedding_function=embedder, persist_directory=&quot;./db&quot;)   # vectorstores
+
+record_manager = SQLRecordManager(&quot;docs&quot;, db_url=&quot;sqlite:///rm.db&quot;)
+record_manager.create_schema()                          # indexes
+
+result = index(
+    splits, record_manager, vs, cleanup=&quot;incremental&quot;, source_id_key=&quot;source&quot;
+)                                                       # indexes
+# {&quot;num_added&quot;: 142, &quot;num_updated&quot;: 7, &quot;num_deleted&quot;: 3, &quot;num_skipped&quot;: 1820}</code></pre>
+<p><strong>Touched modules.</strong> <code>document_loaders</code>, <code>text_splitter</code>, <code>embeddings</code>, <code>storage</code>, <code>vectorstores</code>, <code>indexes</code>.</p>
+<p><strong>Key insight.</strong> The <code>record_manager + index()</code> pair is what makes this idempotent. Without it, every run would re-embed every document.</p>
+<h4 id="flow-4-evaluating-an-agent-on-a-dataset">Flow 4 — Evaluating an agent on a dataset</h4>
+<pre><code class="language-python">run_on_dataset(
+    dataset_name=&quot;my-dataset&quot;,
+    llm_or_chain_factory=lambda: AgentExecutor(...),
+    evaluation=RunEvalConfig(evaluators=[
+        RunEvalConfig.LabeledCriteria(&quot;correctness&quot;),
+        RunEvalConfig.AgentTrajectory(),
+    ]),
+)
+   │
+   ▼
+LangSmith pulls dataset rows → for each, factory() builds a fresh chain
+   │                          └── this isolation prevents memory leaks across rows
+   ▼
+chain.invoke(row.input) under tracing
+   │
+   ▼
+LangChainTracer (callbacks) streams runs to LangSmith
+   │
+   ▼
+For each evaluator: load_evaluator(...) → evaluate_strings/evaluate_run
+   │      └── criteria evaluator: LLM judge with CoT
+   │      └── trajectory evaluator: rates tool-use correctness
+   ▼
+Feedback rows stored against the run</code></pre>
+<h3 id="coupling-analysis">Coupling analysis</h3>
+<table><tr><th>Coupling pair</th><th>Mechanism</th><th>Tightness</th><th>Why</th></tr><tr><td><code>chains</code> ↔ <code>prompts</code></td><td>Chain holds a <code>BasePromptTemplate</code></td><td>Tight</td><td>Templates are core abstractions; nearly every chain has one</td></tr><tr><td><code>agents</code> ↔ <code>tools</code></td><td><code>AgentExecutor.tools: list[BaseTool]</code></td><td>Tight at the type level, loose at the runtime: tools are interchangeable behind <code>BaseTool</code></td></tr><tr><td><code>agents</code> ↔ <code>output_parsers</code></td><td>Pluggable per agent flavour</td><td>Loose</td><td>Strategy pattern; each parser implements <code>AgentOutputParser</code></td></tr><tr><td><code>chains</code> ↔ <code>memory</code></td><td><code>chain.memory</code> attribute</td><td>Loose</td><td>Optional; Chain works without memory</td></tr><tr><td><code>retrievers</code> ↔ <code>vectorstores</code></td><td>Strategy holds a <code>BaseRetriever</code>, often <code>VectorStoreRetriever</code></td><td>Loose</td><td>Retriever can wrap any retriever, not just vectorstore-backed</td></tr><tr><td>Everything ↔ <code>callbacks</code></td><td><code>BaseModel.callbacks</code> field, manager passed through</td><td>Loose</td><td>Optional; defaults work with no callbacks</td></tr><tr><td>Everything ↔ <code>langchain_core</code></td><td>Imports of Runnable/BaseMessage/Document</td><td>Tight</td><td>Core is the contract surface</td></tr><tr><td><code>langchain_classic.{llms,chat_models,…}</code> ↔ <code>langchain_community</code></td><td><code>__getattr__</code> trampoline</td><td>Loose at import time, tight at runtime</td><td>Lazy resolution</td></tr><tr><td><code>chains/graph_qa</code> ↔ <code>graphs/</code></td><td>Direct imports</td><td>Tight</td><td>Graph-specific</td></tr><tr><td><code>evaluation/criteria</code> ↔ <code>chains/</code></td><td><code>LLMChain</code> for the judge</td><td>Tight</td><td>The judge is itself an LLMChain</td></tr></table>
+<h3 id="architectural-philosophy">Architectural philosophy</h3>
+<ol><li><strong>Composition over configuration.</strong> Chains compose; agents compose with tools; retrievers wrap retrievers. Configuration flags are reserved for orthogonal concerns (verbose, callbacks, max_iterations).</li><li><strong>Pluggable strategies behind small ABCs.</strong> <code>BaseTool</code>, <code>BaseRetriever</code>, <code>BaseMemory</code>, <code>BaseOutputParser</code>, <code>AgentOutputParser</code>, <code>BaseDocumentCompressor</code>, <code>BaseChatMessageHistory</code>, <code>ByteStore</code>, <code>RecordManager</code>, <code>Embeddings</code>, <code>BaseLLM</code>, <code>BaseChatModel</code>. Every notable axis of variation is an ABC.</li><li><strong>Evidence:</strong> Pydantic-typed I/O. Dict-based I/O at the chain boundary lets callers introspect; Pydantic models inside ABCs catch wiring mistakes at construction time.</li><li><strong>Callbacks everywhere.</strong> No code is unobservable. Even tools have callbacks. This is a deliberate observability tax — you pay a tiny per-call overhead and get streaming + tracing + cost accounting for free.</li><li><strong>Backward compatibility is a feature.</strong> Re-export shims (<code>schema/</code>, <code>prompts/</code>, <code>tools/</code>), lazy trampolines (<code>llms/</code>, <code>chat_models/</code>), <code>@deprecated</code> decorators, and side-by-side legacy + factory APIs (<code>AgentType</code> enum + <code>create_*_agent</code> factories; <code>Chain</code> subclassing + <code>create_*_chain</code> LCEL factories) all reflect a project that values stability for users on old code paths.</li><li><strong>LCEL is the future, classic is the museum.</strong> Many newer constructors (<code>create_retrieval_chain</code>, <code>create_history_aware_retriever</code>, <code>create_stuff_documents_chain</code>, <code>create_*_agent</code>) return Runnables. The legacy <code>Chain</code> and <code>Agent</code> classes remain for compat but new code is encouraged toward LCEL.</li></ol>
+<h3 id="shared-state-inventory">Shared state inventory</h3>
+<ul><li>**Process-globals (<code>globals.py</code>):** <code>verbose</code>, <code>debug</code>, <code>llm_cache</code>. Set once at boot; consulted by every chain/agent. The convenience comes at the cost of test isolation — tests must reset.</li><li><strong>Inheritable callbacks:</strong> <code>RunnableConfig.callbacks</code> propagate through child runs, forming the run tree LangSmith renders.</li><li><strong>Memory:</strong> Owned by the chain; not shared between chains unless explicitly passed.</li><li><strong>Vectorstores / record managers:</strong> External, shared across processes; the indexing API treats them as ground truth.</li></ul>
+<h3 id="system-evolution">System evolution</h3>
+<ul><li><strong>Layer 1 — Core (Aug 2022):</strong> <code>Chain</code>, <code>LLM</code>, <code>PromptTemplate</code>. Single repo. Everything in one place.</li><li><strong>Layer 2 — Agents (Oct 2022):</strong> ZERO_SHOT_REACT_DESCRIPTION agent + <code>Tool</code>. The act-observe loop is invented.</li><li><strong>Layer 3 — Retrievers (early 2023):</strong> Vectorstore explosion + <code>BaseRetriever</code> ABC. RAG becomes a first-class pattern.</li><li><strong>Layer 4 — Memory (mid 2023):</strong> <code>BaseMemory</code> accumulates flavours: Buffer → Window → Summary → KG → VectorStore.</li><li><strong>Layer 5 — LCEL (late 2023):</strong> <code>Runnable</code> ABC, <code>|</code> composition, streaming as a first-class concern. Many <code>Chain</code>s become wrappers over LCEL.</li><li><strong>Layer 6 — Package split (early 2024):</strong> Core / community / classic / provider packages. <code>langchain_classic</code> becomes the home of pre-LCEL code + classic-only constructors.</li><li><strong>Layer 7 — Modern factory APIs (2024–):</strong> <code>create_*_agent</code>, <code>create_*_chain</code>, <code>init_chat_model</code>, <code>RunnableWithMessageHistory</code>. The legacy classes persist; new code is steered to factories.</li></ul>
+<p>The "core" — most stable, most depended on — is <code>langchain_core</code> (not in this repo). Inside <code>langchain_classic</code>, the most stable layer is <code>chains/base.py</code>, <code>agents/agent.py</code>, <code>BaseMemory</code>, <code>BaseRetriever</code>. The most evolutionary churn is at the surface (factory functions, agent flavours).</p>
+<h3 id="connection-diagram">Connection diagram</h3>
+<div class="diagram-container"><pre class="mermaid">
+flowchart LR
+  subgraph Core[&quot;langchain_core (external)&quot;]
+    R[Runnable]
+    BM[BaseMessage]
+    BT[BaseTool]
+    BRet[BaseRetriever]
+    BLLM[BaseLanguageModel]
+    PT[BasePromptTemplate]
+    DOC[Document]
+  end
+
+  subgraph Orch[Orchestration]
+    CH[chains/]
+    AG[agents/]
+    RUN[runnables/]
+  end
+
+  subgraph IO[Models I/O]
+    LL[llms/, chat_models/]
+    EMB[embeddings/]
+    OP[output_parsers/]
+    PR[prompts/]
+    CB[callbacks/]
+  end
+
+  subgraph Retrieve[Retrieval &amp; Storage]
+    RT[retrievers/]
+    VS[vectorstores/]
+    DL[document_loaders/]
+    DT[document_transformers/]
+    DS[docstore/]
+    ST[storage/]
+    IDX[indexes/]
+  end
+
+  subgraph Tools[Tools &amp; I/O]
+    TL[tools/]
+    UT[utilities/]
+    CL[chat_loaders/]
+    GR[graphs/]
+  end
+
+  subgraph State[State]
+    MM[memory/]
+  end
+
+  subgraph EvalSubgraph[Evaluation]
+    EV[evaluation/]
+    SM[smith/]
+  end
+
+  R --&gt; Orch
+  R --&gt; IO
+  R --&gt; Retrieve
+  R --&gt; Tools
+  BM --&gt; IO
+  BT --&gt; AG
+  BRet --&gt; RT
+  BLLM --&gt; LL
+  PT --&gt; PR
+  DOC --&gt; Retrieve
+
+  CH -.uses.-&gt; PR
+  CH -.uses.-&gt; LL
+  CH -.uses.-&gt; OP
+  CH -.uses.-&gt; MM
+  CH -.uses.-&gt; RT
+
+  AG -.uses.-&gt; TL
+  AG -.uses.-&gt; CH
+  AG -.uses.-&gt; OP
+  AG -.uses.-&gt; CB
+
+  RT -.uses.-&gt; VS
+  RT -.uses.-&gt; EMB
+  RT -.uses.-&gt; DT
+  IDX -.uses.-&gt; VS
+  IDX -.uses.-&gt; ST
+  DL -.feeds.-&gt; DT
+  DT -.feeds.-&gt; VS
+
+  TL -.uses.-&gt; UT
+  TL -.uses.-&gt; GR
+  EV -.uses.-&gt; CH
+  SM -.uses.-&gt; EV
+
+  CB -.observes.-&gt; Orch
+  CB -.observes.-&gt; IO
+  CB -.observes.-&gt; Tools
+  CB -.observes.-&gt; Retrieve
+</pre></div>
+<h2 id="survey">Phase 1A — Broad Survey</h2>
+<details><summary style="cursor:pointer;color:var(--accent);font-weight:600;">Show Phase 1A research artifact (depth detection, classification, terminology)</summary><div><p><strong>Source path:</strong> <code>/mnt/disk1/zy/LLM/agent/langchain/libs/langchain/langchain_classic</code> <strong>Source SHA:</strong> <code>1519ed5afb</code> <strong>Generated:</strong> 2026-05-06 <strong>Language:</strong> Python (1,321 source files)</p>
+<p>---</p>
+<h3 id="what-this-package-is">What this package is</h3>
+<p><code>langchain_classic</code> is the <strong>legacy, batteries-included surface</strong> of LangChain. After the 0.1 → 0.2/0.3 refactor split LangChain into <code>langchain_core</code> (abstractions: Runnable, BaseMessage, tools, prompts), <code>langchain_community</code> (3rd-party integrations), and provider-specific packages (<code>langchain_openai</code>, <code>langchain_anthropic</code>, …), <code>langchain_classic</code> was preserved as the home of:</p>
+<ol><li><strong>High-level orchestration primitives</strong> — <code>Chain</code>, <code>AgentExecutor</code>, <code>MultiQueryRetriever</code>, <code>ParentDocumentRetriever</code>, conversational memory.</li><li><strong>Compatibility shims</strong> — re-exports of types that used to live in <code>langchain.*</code> so legacy code keeps importing.</li><li><strong>Lazy integration trampolines</strong> — <code>__getattr__</code> hooks that forward <code>langchain_classic.llms.OpenAI</code> to <code>langchain_community.llms.OpenAI</code>, with deprecation warnings.</li></ol>
+<p>It is <em>the surface code</em> — the parts intentionally kept stable so user code from 2023 still runs in 2026.</p>
+<h3 id="depth-detection">Depth detection</h3>
+<pre><code class="language-python">langchain_classic/                 ← 28 functional sub-modules, 1321 .py files
+├── chains/         (28 sub-dirs, 140 files)   ← L1+L2 candidate
+├── agents/         (17 sub-dirs, 146 files)   ← L1+L2 candidate
+├── tools/          (64 sub-dirs, 186 files)   ← L1, sub-dirs are integrations
+├── document_loaders/ (2 sub-dirs, 166 files)  ← L1 flat (mostly re-exports)
+├── llms/           (1 sub-dir,  83 files)
+├── retrievers/     (2 sub-dirs, 78 files)
+├── vectorstores/   (2 sub-dirs, 75 files)
+├── utilities/      (0 sub-dirs, 58 files)
+├── embeddings/     (0 sub-dirs, 51 files)
+├── callbacks/      (2 sub-dirs, 45 files)
+├── memory/         (1 sub-dir,  39 files)
+├── chat_models/    (0 sub-dirs, 35 files)
+├── evaluation/     (10 sub-dirs, 32 files)
+├── output_parsers/ (0 sub-dirs, 23 files)
+├── utils/          (0 sub-dirs, 15 files)
+├── graphs/         (0 sub-dirs, 13 files)
+├── prompts/        (1 sub-dir,  12 files)
+├── document_transformers/ (1 sub-dir, 11 files)
+├── chat_loaders/   (0 sub-dirs, 10 files)
+├── indexes/        (1 sub-dir,   9 files)
+├── storage/        (0 sub-dirs,  8 files)
+├── smith/          (1 sub-dir,   7 files)
+├── docstore/       (0 sub-dirs,  6 files)
+├── _api/           (0 sub-dirs,  5 files)
+├── load/           (0 sub-dirs,  4 files)
+├── runnables/      (0 sub-dirs,  3 files)
+├── adapters/       (0 sub-dirs,  2 files)
+└── (single-file modules) cache.py · globals.py · hub.py · sql_database.py ·
+                          requests.py · python.py · serpapi.py · text_splitter.py
+                          · base_language.py · base_memory.py · model_laboratory.py</code></pre>
+<p><strong>Decision:</strong> <strong>3-level wiki</strong> (L0 hub + L1 module overviews). L2 deep-dives are produced selectively for the most algorithmically interesting modules: <code>chains</code>, <code>agents</code>, <code>retrievers</code>, <code>memory</code>. The remaining modules are documented as <strong>L1-flat</strong> pages (single comprehensive page each), since their sub-dirs are either single-file integrations (<code>tools/gmail/</code>, <code>tools/jira/</code>) or single-purpose helpers.</p>
+<h3 id="module-classification-table">Module classification table</h3>
+<table><tr><th>Module</th><th>Role</th><th>Doc style</th><th>Why this style</th></tr><tr><td><code>chains</code></td><td>Composition primitive (the original LangChain idea)</td><td>L1 + 5 deep-dive focus pages</td><td>Heavily structured, multi-pattern (LCEL bridge, retrieval, router, summarize)</td></tr><tr><td><code>agents</code></td><td>Tool-using LLM loop</td><td>L1 + 5 deep-dive focus pages</td><td>Algorithmic (act-observe loop), multiple agent flavours</td></tr><tr><td><code>tools</code></td><td>BaseTool + 60+ integrations</td><td>L1 flat</td><td>Integrations are roll-ups; one <code>BaseTool</code> algorithm</td></tr><tr><td><code>retrievers</code></td><td>Strategies that wrap vectorstores</td><td>L1 + focus pages on MultiQuery / ParentDocument / Ensemble / Self-Query</td><td>Each retriever is its own algorithm</td></tr><tr><td><code>memory</code></td><td>Conversation state</td><td>L1 + focus pages on Summary / KG / Token-Buffer</td><td>Each is a distinct compaction algorithm</td></tr><tr><td><code>vectorstores</code></td><td>Re-export shim around community vectorstores</td><td>L1 flat</td><td>Almost no logic owned here</td></tr><tr><td><code>document_loaders</code></td><td>Re-export shim, 166 file/web/cloud loaders</td><td>L1 flat</td><td>Pure delegation</td></tr><tr><td><code>document_transformers</code></td><td>Splitters + redundancy filters</td><td>L1</td><td>Small, but <code>text_splitter.py</code> is a real algorithm</td></tr><tr><td><code>llms</code> / <code>chat_models</code> / <code>embeddings</code></td><td>Lazy trampolines</td><td>L1 flat each</td><td>Provider-agnostic façades</td></tr><tr><td><code>output_parsers</code></td><td>Parse → structured value</td><td>L1 (focus on retry, fix, pydantic)</td><td>Self-contained</td></tr><tr><td><code>prompts</code></td><td>Re-export of <code>langchain_core.prompts</code></td><td>L1 flat</td><td>Pure shim</td></tr><tr><td><code>callbacks</code></td><td>Observer pattern, manager fan-out</td><td>L1 flat</td><td>One mechanism, many subscribers</td></tr><tr><td><code>evaluation</code></td><td>Scoring + criteria + comparison</td><td>L1 (focus on criteria CoT)</td><td>10 sub-dirs, each a metric family</td></tr><tr><td><code>smith</code></td><td>LangSmith runner</td><td>L1</td><td>Bridge to external service</td></tr><tr><td><code>utilities</code></td><td>API wrappers (search, sql, requests)</td><td>L1 flat</td><td>Each is small</td></tr><tr><td><code>runnables</code></td><td>OpenAI Assistants + utility</td><td>L1 flat</td><td>Tiny</td></tr><tr><td><code>indexes</code></td><td>Record manager + <code>index()</code> algorithm</td><td>L1 (focus on record manager hash)</td><td>One non-trivial algorithm</td></tr><tr><td><code>storage</code></td><td>KV abstractions</td><td>L1 flat</td><td>Small</td></tr><tr><td><code>docstore</code></td><td>In-memory doc lookup</td><td>L1 flat</td><td>Tiny legacy module</td></tr><tr><td><code>graphs</code></td><td>Graph DB query wrappers</td><td>L1 flat</td><td>One thin pattern</td></tr><tr><td><code>chat_loaders</code></td><td>Chat history → BaseMessage</td><td>L1 flat</td><td>Each loader is small</td></tr><tr><td><code>load</code></td><td>Serialization (<code>Serializable</code>)</td><td>L1 flat</td><td>One pattern</td></tr><tr><td><code>_api</code></td><td>Deprecation machinery</td><td>L1 flat</td><td>Cross-cutting infrastructure</td></tr><tr><td><code>adapters</code> / <code>schema</code> / <code>utils</code> / <code>runnables</code></td><td>Misc shims</td><td>Combined into "Foundations" L1</td><td>Tiny each</td></tr></table>
+<h3 id="cross-module-dependency-map-high-level">Cross-module dependency map (high-level)</h3>
+<pre><code class="language-python">                         langchain_core
+                       (Runnable, BaseMessage, BaseTool, BaseRetriever,
+                        BasePromptTemplate, Document, BaseLanguageModel)
+                              ▲           ▲          ▲           ▲
+                              │           │          │           │
+   ┌──────────────────────────┘           │          │           └────────────┐
+   │                          ┌───────────┘          │                        │
+   │                          │                      │                        │
+chains/  ◄─── prompts/   ◄── llms/, chat_models/   tools/   ◄── output_parsers/
+   ▲          ▲              embeddings/             ▲
+   │          │              callbacks/              │
+   │          └──────────────────┐                   │
+   │                             │                   │
+agents/  ─────────────────►  memory/  ◄── retrievers/  ◄── vectorstores/
+   │                                                       ▲
+   └─► utilities/  ─────► tools/integrations/              │
+                                                  document_loaders/  ──► document_transformers/
+                                                                              │
+                                                                              ▼
+                                                                          indexes/, storage/
+   evaluation/  ─────► chains/  + criteria
+   smith/       ─────► evaluation/  + LangSmith API
+
+   graphs/      ─────► graph DB drivers (neo4j, networkx, kuzu)
+   load/        ◄── used by every Serializable subclass
+   _api/        ◄── used by every deprecated symbol</code></pre>
+<h3 id="architectural-patterns-observed-across-the-codebase">Architectural patterns observed across the codebase</h3>
+<ol><li><strong>Template Method</strong> — <code>Chain._call</code> / <code>_acall</code> and <code>BaseRetriever._get_relevant_documents</code> define the skeleton; subclasses override one method. Lets the base class own logging/callback orchestration.</li><li><strong>Observer (callbacks)</strong> — <code>CallbackManager</code> fans <code>on_*_start/end/error</code> to N handlers. Decouples instrumentation from logic.</li><li><strong>Strategy</strong> — agent output parsers (ReAct, JSON, OpenAI tools, XML) are interchangeable strategies behind <code>AgentOutputParser</code>. Same for memory (Buffer, Summary, KG, TokenBuffer).</li><li><strong>Composite (LCEL)</strong> — Runnables compose with <code>|</code>; the new world. <code>langchain_classic</code> uses LCEL internally for <code>create_retrieval_chain</code>, <code>create_history_aware_retriever</code>.</li><li><strong>Lazy trampoline</strong> — module-level <code>__getattr__</code> looks up integration classes from <code>langchain_community</code> on first access, emitting a deprecation warning. See <code>llms/__init__.py</code>, <code>chat_models/__init__.py</code>, <code>tools/__init__.py</code>.</li><li><strong>Decorator (deprecation)</strong> — <code>@deprecated</code> from <code>_api.deprecation</code> wraps classes/functions with a runtime warning. Centralised migration path.</li><li><strong>Adapter</strong> — <code>runnables/openai_functions.py</code>, <code>adapters/openai.py</code> translate provider-specific shapes to LangChain abstractions.</li><li><strong>Iterator (agent loop)</strong> — <code>AgentExecutorIterator</code> exposes per-step yields so a UI can stream reasoning steps.</li></ol>
+<h3 id="domain-terminology-cross-module-glossary">Domain terminology (cross-module glossary)</h3>
+<table><tr><th>Term</th><th>Meaning</th></tr><tr><td><strong>Runnable</strong></td><td>Core abstraction with <code>.invoke / .ainvoke / .batch / .stream</code>. Replaces Chain.</td></tr><tr><td><strong>Chain</strong></td><td>Pre-Runnable composition primitive; subclass <code>Chain</code>, override <code>_call</code>.</td></tr><tr><td><strong>Agent</strong></td><td>Returns either an <code>AgentAction</code> (call this tool) or <code>AgentFinish</code> (we're done).</td></tr><tr><td><strong>AgentExecutor</strong></td><td>The loop that runs agents until <code>AgentFinish</code> or limits reached.</td></tr><tr><td><strong>Tool</strong></td><td>A callable with a Pydantic input schema, name, description; <code>BaseTool</code> ABC.</td></tr><tr><td><strong>Toolkit</strong></td><td>A collection of related Tools (e.g., <code>SQLDatabaseToolkit</code>).</td></tr><tr><td><strong>Retriever</strong></td><td><code>Runnable[str, list[Document]]</code>, abstracts vectorstore + strategy.</td></tr><tr><td><strong>VectorStore</strong></td><td>Embedding-indexed document storage with <code>similarity_search</code>.</td></tr><tr><td><strong>Document</strong></td><td><code>{page_content, metadata}</code> pair.</td></tr><tr><td><strong>Memory</strong></td><td>Read/write buffer for conversation context (<code>load_memory_variables</code>, <code>save_context</code>).</td></tr><tr><td><strong>Callback</strong></td><td>Hook invoked at lifecycle events (<code>on_llm_start</code>, <code>on_chain_end</code>, …).</td></tr><tr><td><strong>CallbackManager</strong></td><td>Fan-out object that wraps a list of handlers.</td></tr><tr><td><strong>Prompt template</strong></td><td>A string with <code>{placeholders}</code>, optionally with partials and example selectors.</td></tr><tr><td><strong>OutputParser</strong></td><td><code>Runnable[str, T]</code> that turns LLM text into structured output.</td></tr><tr><td><strong>Serializable</strong></td><td>Mixin that records <code>__module__</code> / <code>__class_name__</code> so a Chain can be JSON-dumped.</td></tr><tr><td><strong>LCEL</strong></td><td>"LangChain Expression Language" — the `R1 \</td><td>R2 \</td><td>R3` composition style.</td></tr><tr><td><strong>Record manager</strong></td><td><code>indexes/</code>-owned table that tracks doc hashes &amp; timestamps for incremental upsert.</td></tr><tr><td><strong>MMR</strong></td><td>Maximum Marginal Relevance — diversity-aware re-ranking used in vectorstores/retrievers.</td></tr><tr><td><strong>RRF</strong></td><td>Reciprocal Rank Fusion — combines rankings in <code>EnsembleRetriever</code>.</td></tr><tr><td><strong>Trajectory</strong></td><td>The list of <code>(action, observation)</code> tuples produced by an agent run.</td></tr><tr><td><strong>Intermediate steps</strong></td><td>Synonym for trajectory; appears in <code>AgentExecutor</code> outputs.</td></tr><tr><td><strong>Scratchpad</strong></td><td>The agent's running notebook — the textual rendering of intermediate steps fed back into the next prompt.</td></tr><tr><td><strong>AgentAction / AgentFinish</strong></td><td>Output union returned by <code>BaseSingleActionAgent.plan()</code>.</td></tr><tr><td><strong>AgentType</strong></td><td>Legacy enum (<code>ZERO_SHOT_REACT_DESCRIPTION</code>, <code>OPENAI_FUNCTIONS</code>, …).</td></tr><tr><td><strong>Deprecation warning</strong></td><td>Surfaced by <code>@deprecated</code> and <code>_warn_on_import</code>; suppressed in interactive envs.</td></tr></table>
+<h3 id="per-module-headline-metrics">Per-module headline metrics</h3>
+<table><tr><th>Module</th><th>Files</th><th>Key public symbols</th><th>Sub-modules</th></tr><tr><td>chains</td><td>140</td><td><code>Chain</code>, <code>LLMChain</code>, <code>SequentialChain</code>, <code>RouterChain</code>, <code>RetrievalQA</code>, <code>ConversationalRetrievalChain</code>, <code>MapReduceDocumentsChain</code>, <code>StuffDocumentsChain</code></td><td>28</td></tr><tr><td>agents</td><td>146</td><td><code>AgentExecutor</code>, <code>BaseSingleActionAgent</code>, <code>Tool</code>, <code>initialize_agent</code>, <code>create_react_agent</code>, <code>create_openai_tools_agent</code>, <code>create_structured_chat_agent</code></td><td>17</td></tr><tr><td>tools</td><td>186</td><td><code>BaseTool</code>, <code>Tool</code>, <code>StructuredTool</code>, <code>tool</code> (decorator), <code>render_text_description</code>, <code>convert_to_openai_function</code></td><td>64</td></tr><tr><td>retrievers</td><td>78</td><td><code>MultiQueryRetriever</code>, <code>ParentDocumentRetriever</code>, <code>EnsembleRetriever</code>, <code>ContextualCompressionRetriever</code>, <code>SelfQueryRetriever</code>, <code>TimeWeightedVectorStoreRetriever</code></td><td>2</td></tr><tr><td>vectorstores</td><td>75</td><td><code>VectorStore</code>, <code>VectorStoreRetriever</code> (re-exports)</td><td>2</td></tr><tr><td>document_loaders</td><td>166</td><td><code>BaseLoader</code> (re-export), 160+ integrations</td><td>2</td></tr><tr><td>document_transformers</td><td>11</td><td><code>EmbeddingsRedundantFilter</code>, <code>LongContextReorder</code>, <code>BeautifulSoupTransformer</code></td><td>1</td></tr><tr><td>llms</td><td>83</td><td>Trampolines for OpenAI, Anthropic, HuggingFace, …</td><td>1</td></tr><tr><td>chat_models</td><td>35</td><td>Trampolines</td><td>0</td></tr><tr><td>embeddings</td><td>51</td><td>Trampolines + <code>CacheBackedEmbeddings</code></td><td>0</td></tr><tr><td>memory</td><td>39</td><td><code>ConversationBufferMemory</code>, <code>ConversationSummaryMemory</code>, <code>ConversationKGMemory</code>, <code>EntityMemory</code>, <code>VectorStoreRetrieverMemory</code>, <code>ConversationTokenBufferMemory</code></td><td>1</td></tr><tr><td>callbacks</td><td>45</td><td><code>CallbackManager</code>, <code>BaseCallbackHandler</code>, <code>StdOutCallbackHandler</code>, <code>StreamingStdOutCallbackHandler</code>, <code>FileCallbackHandler</code>, <code>LangChainTracer</code></td><td>2</td></tr><tr><td>prompts</td><td>12</td><td>Re-exports <code>PromptTemplate</code>, <code>ChatPromptTemplate</code>, <code>FewShotPromptTemplate</code>, <code>MessagesPlaceholder</code></td><td>1</td></tr><tr><td>output_parsers</td><td>23</td><td><code>RetryOutputParser</code>, <code>OutputFixingParser</code>, <code>PydanticOutputParser</code>, <code>StructuredOutputParser</code>, <code>RegexParser</code>, <code>EnumOutputParser</code></td><td>0</td></tr><tr><td>evaluation</td><td>32</td><td><code>load_evaluator</code>, <code>LabeledCriteriaEvalChain</code>, <code>QAEvalChain</code>, <code>EmbeddingDistanceEvalChain</code>, <code>StringDistanceEvalChain</code>, <code>TrajectoryEvalChain</code></td><td>10</td></tr><tr><td>smith</td><td>7</td><td><code>run_on_dataset</code>, <code>arun_on_dataset</code></td><td>1</td></tr><tr><td>utilities</td><td>58</td><td><code>SerpAPIWrapper</code>, <code>GoogleSearchAPIWrapper</code>, <code>WikipediaAPIWrapper</code>, <code>SQLDatabase</code>, <code>RequestsWrapper</code>, <code>PythonREPL</code></td><td>0</td></tr><tr><td>docstore</td><td>6</td><td><code>InMemoryDocstore</code>, <code>Wikipedia</code></td><td>0</td></tr><tr><td>storage</td><td>8</td><td><code>LocalFileStore</code>, <code>InMemoryByteStore</code>, <code>EncoderBackedStore</code>, <code>create_lc_store</code></td><td>0</td></tr><tr><td>indexes</td><td>9</td><td><code>index()</code>, <code>aindex()</code>, <code>SQLRecordManager</code></td><td>1</td></tr><tr><td>graphs</td><td>13</td><td><code>Neo4jGraph</code>, <code>NetworkxEntityGraph</code>, <code>KuzuGraph</code>, <code>NebulaGraph</code></td><td>0</td></tr><tr><td>chat_loaders</td><td>10</td><td><code>BaseChatLoader</code>, <code>merge_chat_runs</code>, <code>map_ai_messages</code></td><td>0</td></tr><tr><td>schema</td><td>43</td><td>Re-exports <code>langchain_core.runnables</code>, <code>messages</code>, <code>outputs</code>, <code>agent</code>, <code>documents</code></td><td>2</td></tr><tr><td>_api</td><td>5</td><td><code>@deprecated</code>, <code>surface_langchain_deprecation_warnings</code></td><td>0</td></tr><tr><td>load</td><td>4</td><td><code>Serializable</code>, <code>dumps</code>, <code>loads</code></td><td>0</td></tr><tr><td>adapters</td><td>2</td><td><code>openai.py</code> — message/tool-call shape adapter</td><td>0</td></tr><tr><td>runnables</td><td>3</td><td><code>OpenAIAssistantRunnable</code>, <code>create_openai_fn_runnable</code></td><td>0</td></tr><tr><td>utils</td><td>15</td><td><code>get_from_dict_or_env</code>, <code>mock_now</code>, <code>interactive_env</code>, <code>aiter</code>, <code>formatting</code></td><td>0</td></tr></table>
+<h3 id="top-level-single-file-modules">Top-level single-file modules</h3>
+<ul><li><code>cache.py</code> — <code>BaseCache</code> interfaces (re-export), <code>InMemoryCache</code>, SQLite cache.</li><li><code>globals.py</code> — <code>get_verbose / set_verbose</code>, <code>get_debug / set_debug</code>, <code>get_llm_cache / set_llm_cache</code>. Process-global toggles.</li><li><code>hub.py</code> — <code>pull(repo_id)</code> / <code>push(repo_id, object)</code> against the LangChain Hub.</li><li><code>model_laboratory.py</code> — runs the same prompt across multiple models for side-by-side comparison.</li><li><code>text_splitter.py</code> — re-exports <code>langchain_text_splitters</code> (<code>RecursiveCharacterTextSplitter</code>, …).</li><li><code>sql_database.py</code> — re-export of <code>langchain_community.utilities.SQLDatabase</code>.</li><li><code>requests.py</code> / <code>python.py</code> / <code>serpapi.py</code> — single-class re-exports.</li><li><code>formatting.py</code> — string templating helper used by prompts.</li><li><code>base_language.py</code> / <code>base_memory.py</code> — re-exports of core abstractions.</li><li><code>env.py</code> — environment lookup helpers.</li><li><code>example_generator.py</code> / <code>input.py</code> — small helpers for prompt examples.</li></ul>
+<h3 id="source-tree-top-level">Source tree (top-level)</h3>
+<pre><code class="language-python">langchain_classic/
+├── _api/                  ← deprecation infrastructure
+├── adapters/              ← provider adapters (currently openai.py)
+├── agents/                ← Agent loop, AgentExecutor, agent flavours
+├── cache.py               ← LLM response cache
+├── callbacks/             ← Observer pattern fan-out
+├── chains/                ← Chain abstraction + 28 chain families
+├── chat_loaders/          ← chat history → BaseMessage
+├── chat_models/           ← lazy trampolines to community
+├── docstore/              ← legacy in-memory document store
+├── document_loaders/      ← 160+ file/web/cloud loaders
+├── document_transformers/ ← splitters &amp; filters
+├── embeddings/            ← lazy trampolines + CacheBackedEmbeddings
+├── env.py
+├── evaluation/            ← QA, criteria, distance, comparison evals
+├── example_generator.py
+├── formatting.py
+├── globals.py             ← process-wide toggles
+├── graphs/                ← graph DB query wrappers
+├── hub.py                 ← LangChain Hub pull/push
+├── indexes/               ← record manager + index() upsert algorithm
+├── input.py
+├── llms/                  ← lazy trampolines to community
+├── load/                  ← Serializable mixin
+├── memory/                ← conversation state strategies
+├── model_laboratory.py
+├── output_parsers/        ← retry, fix, pydantic, structured parsers
+├── prompts/               ← re-exports of langchain_core.prompts
+├── python.py
+├── requests.py
+├── retrievers/            ← MultiQuery, ParentDoc, Ensemble, SelfQuery
+├── runnables/             ← OpenAIAssistantRunnable + helpers
+├── schema/                ← legacy type re-exports
+├── serpapi.py
+├── smith/                 ← LangSmith runner
+├── sql_database.py
+├── storage/               ← KV abstractions
+├── text_splitter.py
+├── tools/                 ← BaseTool + 60+ integration sub-dirs
+├── utilities/             ← API wrappers
+└── utils/                 ← misc helpers</code></pre></div></details>
+<h2 id="directory-map">Directory Map</h2>
+<details open><summary style="cursor:pointer;color:var(--accent);font-weight:600;">Top-level source tree</summary><pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>/
+├── __init__.py
+├── _api/
+├── adapters/
+├── agents/
+├── base_language.py
+├── base_memory.py
+├── cache.py
+├── callbacks/
+├── chains/
+├── chat_loaders/
+├── chat_models/
+├── docstore/
+├── document_loaders/
+├── document_transformers/
+├── embeddings/
+├── env.py
+├── evaluation/
+├── example_generator.py
+├── formatting.py
+├── globals.py
+├── graphs/
+├── hub.py
+├── indexes/
+├── input.py
+├── llms/
+├── load/
+├── memory/
+├── model_laboratory.py
+├── output_parsers/
+├── prompts/
+├── py.typed
+├── python.py
+├── requests.py
+├── retrievers/
+├── runnables/
+├── schema/
+├── serpapi.py
+├── smith/
+├── sql_database.py
+├── storage/
+├── text_splitter.py
+├── tools/
+├── utilities/
+├── utils/
+└── vectorstores/
+</code></pre></details>
+<div class="footer"><p>langchain_classic Wiki &mdash; Generated 2026-05-06 from <code>libs/langchain/langchain_classic</code> @ <code>1519ed5afb</code></p><p><a href="search.html">Search this wiki</a></p></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
+</body></html>

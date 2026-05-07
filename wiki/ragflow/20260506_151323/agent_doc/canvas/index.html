@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="wiki-generated" content="2026-05-06">
+<meta name="wiki-source" content="/mnt/disk1/zy/rag/ragflow/agent/">
+<meta name="wiki-source-rev" content="e8f19aa33821b6a7d0d96fb48c0944702ff06c50">
+<!--
+  L2 TEMPLATE — Sub-Module Deep-Dive Page
+  Replace all {{PLACEHOLDERS}} before use:
+    Agent Canvas      — Parent module display name (e.g., "Coho")
+    Canvas &amp; Execution      — Sub-module display name (e.g., "fe")
+    Canvas &amp; Execution     — Brief title (e.g., "Front-End Pipeline")
+    Core execution engine for DAG-based workflows   — One-line purpose
+    Graph base class and Canvas subclass; JSON DSL parsing; backward compatibility via dsl_migration.py; topological sorting O(V+E); lazy variable resolution via attribute paths; output caching; immutable history tracking for audit trails.      — 2-3 sentence description
+    The Canvas class loads a DSL JSON definition, instantiates components, schedules them topologically, and executes them with variable resolution and history tracking. Without Canvas, workflows would be raw imperative code—impossible to serialize, introspect, version, or audit.  — Plain-English intro (2-4 sentences, no jargon)
+    Like a Python interpreter: canvas.py = bytecode loader + VM runtime; DSL JSON = bytecode; components = function objects; variables = stack frames; execution history = execution trace for debugging.   — Real-world analogy (3-5 sentences)
+    RAGFlow     — Parent project name for breadcrumb (3-level only, optional)
+    neutra-ip-theme — localStorage key prefix, same as L1 (e.g., "coho")
+    python             — Code language class (e.g., "cpp", "python", "typescript")
+-->
+<title>Agent Canvas Canvas &amp; Execution — Canvas &amp; Execution</title>
+<style>
+/* === Dark theme (default) === */
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128;--table-even:#161b22;--table-odd:#0d1117}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+h1{color:var(--heading);font-size:2.4rem;margin:1rem 0;border-bottom:2px solid var(--accent);padding-bottom:.6rem}
+h2{color:var(--accent);font-size:1.7rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{color:var(--heading);font-size:1.3rem;margin:1.8rem 0 .6rem}
+h4{color:var(--accent2);font-size:1.1rem;margin:1.2rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:12px;margin-right:6px;color:#000}
+.badge.blue{background:var(--accent)}.badge.green{background:var(--accent2)}.badge.yellow{background:var(--accent3)}.badge.red{background:var(--accent4)}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#0d1117 100%);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:1.5rem 0 2rem;text-align:center}
+.hero p{color:var(--text-muted);font-size:1.1rem}.hero .subtitle{color:var(--accent);font-size:1.3rem;margin-bottom:.5rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 14px;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:var(--table-even)}tr:nth-child(odd) td{background:var(--table-odd)}
+code{background:var(--code-bg);color:var(--accent2);padding:2px 6px;border-radius:4px;font-size:.88rem;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.diagram-container{background:var(--bg);border-radius:10px;padding:1.5rem;margin:1.2rem 0;overflow-x:auto;border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card h4{margin-top:0}.card p{font-size:.9rem;color:var(--text-muted)}
+.focus-badge{display:inline-block;background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;margin-left:.5rem;vertical-align:middle}
+.hub-note{background:var(--surface);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:1rem 0;color:var(--text-muted)}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.8rem;margin:1.5rem 0;columns:2;column-gap:2rem}
+.toc ol{padding-left:1.2rem}.toc li{margin:.35rem 0;break-inside:avoid}
+.toc a{color:var(--text)}.toc a:hover{color:var(--accent)}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.stat-box{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.stat-box .num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-box .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.breadcrumb{font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;padding:.4rem 0}
+.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.footer{text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+@media(max-width:768px){body{padding:1rem}.toc{columns:1}.card-grid{grid-template-columns:1fr}}
+
+/* === Light theme === */
+[data-theme="light"]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa;--table-even:#f6f8fa;--table-odd:#ffffff}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 100%)}
+[data-theme="light"] .badge{color:#fff}
+[data-theme="light"] .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* === Theme toggle button === */
+.theme-toggle{position:fixed;top:1rem;right:1rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text);transition:background .2s,border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+/* === Skip-link (accessibility) === */
+.skip-link{position:absolute;top:-100%;left:1rem;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:0 0 6px 6px;z-index:2000;font-size:.9rem;text-decoration:none;transition:top .2s}
+.skip-link:focus{top:0}
+
+/* === Diagram fullscreen overlay === */
+.diagram-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:3000;align-items:center;justify-content:center;cursor:zoom-out}
+.diagram-overlay.active{display:flex}
+.diagram-overlay .diagram-overlay-content{max-width:95vw;max-height:90vh;overflow:auto;background:var(--bg);border-radius:12px;padding:2rem;border:1px solid var(--border);transform-origin:center center}
+.diagram-container{cursor:zoom-in}
+#diagramOverlay.active svg,#diagramOverlayContent svg{max-width:90vw!important;max-height:85vh!important;width:90vw!important}
+
+/* === Back-to-top button === */
+.back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.3rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.15);transition:opacity .2s,border-color .2s}
+.back-to-top.visible{display:flex}
+.back-to-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* === Code copy button === */
+pre{position:relative}
+pre .copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:3px 8px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === Print === */
+@media print{.theme-toggle,.skip-link,.copy-btn,.back-to-top,.diagram-overlay{display:none!important}body{max-width:100%;padding:1rem;color:#1f2328;background:#fff}:root{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}.hero{background:#f0f4f8!important;border-color:#d0d7de}.card,.stat-box{break-inside:avoid}.diagram-container{break-inside:avoid}pre{white-space:pre-wrap;word-wrap:break-word}table{font-size:.8rem}a{color:#0969da}a[href]:after{content:" (" attr(href) ")"}.footer a[href]:after{content:none}}
+</style>
+
+<!-- Mermaid.js (diagrams) — startOnLoad:false so footer JS controls theme -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"default",flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"}});</script>
+
+<!-- Highlight.js (syntax highlighting) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">&#9790;</button>
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">&#8679;</button>
+
+<!--
+  Breadcrumb:
+  - 2-level projects: Module › SubModule
+  - 3-level projects: Project › Module › SubModule
+-->
+<!-- For 2-level: -->
+
+<!-- For 3-level (replace above with this):
+
+-->
+
+<main id="main">
+<h1><a href="../index.html">Agent</a> Canvas/Canvas &amp; Execution/ &mdash; Canvas &amp; Execution</h1>
+<div class="hero">
+  <p class="subtitle">Core execution engine for DAG-based workflows</p>
+  <p>Graph base class and Canvas subclass; JSON DSL parsing; backward compatibility via dsl_migration.py; topological sorting O(V+E); lazy variable resolution via attribute paths; output caching; immutable history tracking for audit trails.</p>
+</div>
+
+<!-- STAT ROW — customize metrics -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">N</div><div class="label">Classes</div></div>
+  <div class="stat-box"><div class="num">N</div><div class="label">Files</div></div>
+  <div class="stat-box"><div class="num">~N k</div><div class="label">Lines</div></div>
+  <div class="stat-box"><div class="num">N</div><div class="label">Key Metric</div></div>
+</div>
+
+<!-- WHAT & WHY INTRO BOX — customize per sub-module -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#128218; What is this &amp; why does it exist?</h3>
+<p>The Canvas class loads a DSL JSON definition, instantiates <a href="../../web_doc/components/index.html">components</a>, schedules them topologically, and executes them with variable resolution and history tracking. Without Canvas, workflows would be raw imperative code—impossible to serialize, introspect, version, or audit. — Replace with 2-4 plain-English sentences explaining what this sub-module does and why it exists. No jargon. Target audience: someone who hasn't read the code.</p>
+<details style="margin-top:.8rem;">
+<summary style="cursor:pointer;color:var(--accent2);font-weight:600;">&#128161; Real-world analogy</summary>
+<p style="margin-top:.5rem;padding-left:1rem;border-left:3px solid var(--accent3);color:var(--text-muted);">Like a Python interpreter: canvas.py = bytecode loader + VM runtime; DSL JSON = bytecode; components = function objects; variables = stack frames; execution history = execution trace for debugging. — Replace with a vivid, concrete metaphor mapping this sub-module's core concept to everyday life (restaurant, airport, library, highway, etc.). 3-5 sentences.</p>
+</details>
+</div>
+
+<!-- DESIGN RATIONALE — why this component is designed this way -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h3 style="margin-top:0;color:var(--accent);">&#129300; Why Is It Designed This Way?</h3>
+<p>Canvas uses lazy variable resolution (resolve at runtime, not parse-time) for flexibility with non-deterministic <a href="../../rag_doc/llm/index.html">LLM</a> outputs. Single-threaded execution avoids races. Iteration nodes re-run sub-DAGs with updated scopes, preserving semantics. Immutable history enables perfect audit trails for debugging and compliance. — 150+ words explaining the design choices: what pattern does this follow and why? What constraints shaped the implementation? What trade-offs were made and what was sacrificed?</p>
+<table>
+  <tr><th>Design Choice</th><th>What Was Chosen</th><th>What Was Rejected</th><th>Why</th></tr>
+<tr><td>Variable resolution timing</td><td>Lazy (at runtime)</td><td>Eager (at load-time)</td><td>Lazy enables maximum flexibility for non-deterministic LLM outputs; eager would require re-compilation on every variable change</td></tr>
+  <tr><td>Execution model</td><td>Single-threaded greedy traversal</td><td>Multi-threaded or async parallel execution</td><td>Single-threaded avoids race conditions and data corruption; simplicity is worth the latency cost for I/O-bound workflows</td></tr>
+  <tr><td>Iteration scope isolation</td><td>Dynamic variable rebinding per iteration</td><td>Explicit scope stack with formal isolation</td><td>Dynamic rebinding is simpler but fragile; formal scope stack would add complexity. Current impl works but needs testing.</td></tr>
+  <tr><td>History persistence</td><td>Immutable list appended during execution</td><td>On-demand query of execution state</td><td>Immutable history is perfect for audit trails and debugging; on-demand would lose information and add query latency</td></tr>
+  <!-- Add 2-4 rows -->
+</table>
+</div>
+
+<!-- TABLE OF CONTENTS (auto-generated from H2/H3 headings by footer JS) -->
+<h2>Contents</h2>
+<nav class="toc" id="toc"></nav>
+
+<!-- ARCHITECTURE DIAGRAM — no hardcoded style lines! -->
+<h2 id="architecture">Architecture</h2>
+<div class="diagram-container">
+<pre class="mermaid">
+graph TB
+    JSON["JSON DSL<br/>Input"] --> MIGRATE["dsl_migration<br/>Schema Normalize"]
+    MIGRATE --> GRAPH["Graph<br/>Base Class"]
+    GRAPH --> CANVAS["Canvas<br/>DSL Loader"]
+    CANVAS --> LOAD["load()<br/>Parse & Instantiate"]
+    LOAD --> VALIDATE["Validate<br/>DAG Integrity"]
+    VALIDATE --> SCHEDULE["Topological<br/>Sort"]
+    SCHEDULE --> EXEC["execute()<br/>Greedy Run"]
+    EXEC --> RESOLVE["Variable<br/>Resolution"]
+    RESOLVE --> CACHE["Output<br/>Cache"]
+    CACHE --> HISTORY["History<br/>Tracking"]
+</pre>
+<!-- DATA FLOW DIAGRAM -->
+<h3 style="margin-top:2rem;">Data <a href="../../rag_doc/flow/index.html">Flow</a></h3>
+<div class="diagram-container">
+<pre class="mermaid">
+flowchart LR
+    DSL["DSL JSON<br/>Input"] -->|load| Components["Components<br/>Instantiated"]
+    Components -->|execute| Sort["Topological<br/>Sort"]
+    Sort -->|greedy| Exec["Execute<br/>Ready Nodes"]
+    Exec -->|resolve| Vars["Variables<br/>Resolved"]
+    Vars -->|cache| Outputs["Outputs<br/>Cached"]
+    Outputs -->|history| History["History<br/>Recorded"]
+    style DSL fill:#e8f5e9
+    style Outputs fill:#fff3e0
+    style History fill:#e8f5e9
+</pre>
+</div>
+</div>
+
+<!-- KEY CLASSES TABLE -->
+<h2 id="key-classes">Key Classes</h2>
+<table>
+  <tr><th>Class / Function</th><th>File</th><th>Purpose</th></tr>
+<tr><td><code>Graph</code></td><td>canvas.py (lines 43–284)</td><td>Base class defining nodes, edges, and abstract execute() method; foundation for Canvas subclass</td></tr>
+  <tr><td><code>Canvas</code></td><td>canvas.py (lines 285–350+)</td><td>Extends Graph; implements DSL loading, topological scheduling, variable resolution, history tracking</td></tr>
+  <tr><td><code>load(dsl_json)</code></td><td>canvas.py</td><td>Parses JSON, normalizes via dsl_migration, instantiates components, validates DAG</td></tr>
+  <tr><td><code>execute(inputs)</code></td><td>canvas.py</td><td>Topologically sorts nodes, greedily executes ready components, resolves variables, records history</td></tr>
+  <tr><td><code>get_variable_value(path)</code></td><td>canvas.py</td><td>Lazy variable resolution; traverses attribute path (e.g., llm_1@output.choices[0].text); returns value or None</td></tr>
+  <!-- Add rows -->
+</table>
+
+<!-- DATA STRUCTURES -->
+<h2 id="data-structures">Data Structures</h2>
+<table>
+  <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+<tr><td>dict</td><td>DSL</td><td>JSON-serializable DAG: {nodes: [{id, type, config}], edges: [{from, to}]}</td></tr>
+  <tr><td>dict</td><td>_components</td><td>Map of <a href="../component/index.html">component</a> ID to <a href="../component/index.html" title="<a href="../component/index.html" title="Agent Canvas Component System — Component System" class="xref">Agent</a> Canvas Component System — Component System" class="xref">ComponentBase</a> instance; populated during load()</td></tr>
+  <tr><td>dict</td><td>_outputs</td><td>Map of component ID to output dict; populated as components execute</td></tr>
+  <tr><td>list</td><td>history</td><td>Immutable sequence of execution steps: [{step_id, node_id, inputs, outputs, error, timestamp}]</td></tr>
+  <tr><td>dict</td><td>_variables</td><td>Global variable namespace; updated during execution; used for variable resolution</td></tr>
+  <!-- Add rows -->
+</table>
+
+<!-- INTERACTIONS -->
+<h2 id="interactions">Interactions</h2>
+<table>
+  <tr><th>Direction</th><th>Partner</th><th>Interface</th><th>Description</th></tr>
+<tr><td>→</td><td>Component System</td><td><code>registry.get_component(type)</code></td><td>Canvas looks up components by type name during load(); instantiates via factory</td></tr>
+  <tr><td>→</td><td>Tool System</td><td><code>registry.get_tool(name)</code></td><td>Agent component calls <a href="../tools/index.html">tools</a> by name during execution; tool registry is separate from component registry</td></tr>
+  <tr><td>→</td><td>dsl_migration</td><td><code>migrate(old_dsl)</code></td><td>Canvas calls migration function to normalize legacy schemas to current format before parsing</td></tr>
+  <tr><td>←</td><td>Caller</td><td><code>Canvas.execute(inputs) → (outputs, history)</code></td><td>Caller passes inputs, Canvas returns final outputs and audit trail for inspection/logging</td></tr>
+  <!-- Add rows -->
+</table>
+
+<!-- CONFIGURATION -->
+<h2 id="configuration">Configuration</h2>
+<table>
+  <tr><th>Knob / Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>max_iterations</code></td><td>100</td><td>Maximum times an Iteration node re-executes; prevents infinite loops</td></tr>
+  <tr><td><code>variable_max_depth</code></td><td>10</td><td>Maximum attribute path depth (e.g., a.b.c.d...); prevents stack overflow in resolution</td></tr>
+  <tr><td><code>history_enabled</code></td><td>true</td><td>If false, skips history recording (saves <a href="../../memory/index.html">memory</a> but loses audit trail)</td></tr>
+  <tr><td><code>dsl_version</code></td><td>"2.0"</td><td>Current DSL schema version; dsl_migration uses this to detect legacy formats</td></tr>
+  <!-- Add rows -->
+</table>
+
+<!-- DIRECTORY MAP — sub-module source files -->
+<h2 id="directory-map">Directory Map</h2>
+<details open>
+<summary style="cursor:pointer;color:var(--accent);font-weight:600;">Source tree for Canvas &amp; Execution</summary>
+<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.5rem;font-size:.85rem;line-height:1.6;overflow-x:auto;"><code>submod_name/
+├── file_a.ext                 ← Role: brief annotation
+├── file_b.ext                 ← Role: brief annotation
+├── file_c.ext                 ← Role: brief annotation
+└── index.ext                  ← Role: entry point
+</code></pre>
+</details>
+
+<!-- ANNOTATED CODE WALKTHROUGH — line-by-line explanation of the most important code -->
+<h2 id="code-walkthrough">&#128209; Annotated Code Walkthrough</h2>
+<p>The most important code in this sub-module, annotated with WHY each piece exists:</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin:1.5rem 0;">
+<h4 style="margin-top:0;">load() — Parse DSL and instantiate components</h4>
+<pre><code class="language-python">// Replace with actual code from the source
+void key_function() {
+    // ← WHY: Explain the purpose of this line
+    // ← WHY: What constraint or requirement drives this?
+}</code></pre>
+<div style="margin-top:1rem;">
+<p><strong>Line-by-line:</strong></p>
+<ul>
+  <li><strong>dsl_migration.migrate():</strong> Handles legacy DSL versions (e.g., v1.0 → v2.0); users don't need to manually upgrade old workflows.</li>
+  <li><strong>component_registry.get():</strong> Looks up factory function by component type name; if not found, raises error early at load-time, not execution-time.</li>
+  <li><strong>self._validate_dag():</strong> Checks for cycles using DFS; ensures all tool references exist in tool registry; validates parameter types against component schema.</li>
+  <li><strong>nodes[id].config → factory():</strong> Component factory receives config dict; factory is responsible for validating and storing parameters; separation of concerns.</li>
+  <li><strong>self._edges storage:</strong> Edges are indexed by destination node; enables fast dependency lookup during execution (O(E) to build, O(1) per lookup).</li><!-- Add annotations for 5-10 key lines -->
+</ul>
+</div>
+</div>
+
+<!-- EDGE CASES & BOUNDARIES — what the code handles (and doesn't) -->
+<h2 id="edge-cases">&#9888;&#65039; Edge Cases &amp; Boundaries</h2>
+<table>
+  <tr><th>Edge Case</th><th>What Happens</th><th>Where in Code</th><th>Risk Level</th></tr>
+<tr><td>Empty graph (no nodes)</td><td>execute() returns empty outputs, empty history</td><td>Canvas.execute()</td><td>&#128994; Low — not an error, just a no-op</td></tr>
+  <tr><td>Cyclic dependencies</td><td>topological_sort() fails; canvas.load() raises ValidationError</td><td>Canvas.load()</td><td>&#128308; High — prevents any execution</td></tr>
+  <tr><td>Variable not found (e.g., undefined_node@output)</td><td>get_variable_value() returns None; component behavior depends on parameter nullable config</td><td>Canvas.execute()</td><td>&#128308; High — may cause downstream component failure</td></tr>
+  <tr><td>Tool not registered</td><td>Agent.run() calls registry.get_tool(name); KeyError raised; caught and handled via retry/fallback</td><td>Component.run()</td><td>&#128308; High — workflow branch fails unless exception_goto or exception_default_value configured</td></tr>
+  <tr><td>Iteration with 0 items</td><td>Iteration.run() loop doesn't execute sub-DAG; returns empty results list</td><td>Iteration.run()</td><td>&#128994; Low — valid behavior; batch size can be 0</td></tr>
+  <tr><td>LLM timeout during chat</td><td>Exception caught in LLM.run(); retry logic kicks in (exponential backoff); if all retries fail, exception_default_value used</td><td>LLM.run()</td><td>&#128308; High — affects workflow success; requires fallback strategy</td></tr>
+  <tr><td>Concurrent access</td><td>How it's handled</td><td>function_name:line</td><td>&#128308; High</td></tr>
+  <!-- Add 3-6 rows covering known edge cases -->
+</table>
+
+<!-- DEEP-DIVE HUB — focus sub-pages are created during initial build (Phase 5).
+     Replace summaries and links below with actual deep-dive topics from research. -->
+<h2 id="deep-dives">Deep-Dive Highlights</h2>
+<p class="hub-note">Core mechanisms from this sub-module have been extracted into dedicated focus <a href="../../web_doc/pages/index.html">pages</a> for in-depth exploration. Each page covers one algorithm, protocol, or subsystem with diagrams, code walks, and configuration details.</p>
+<h4>Deep-Dive Pages</h4>
+<div class="card-grid deep-dive-grid">
+  <a title="How workflows are scheduled, executed, and traced" href="dag-execution-model/index.html" class="card">
+    <h5>DAG Execution Model</h5>
+    <p>Topological scheduling using Kahn's algorithm (O(V+E)), lazy variable resolution, scoped iteration execution, and complete execution trace recording.</p>
+  </a>
+</div>
+
+<!-- CODE EXAMPLES -->
+<h2 id="code-examples">Code Examples</h2>
+<h3>Example: Typical Usage</h3>
+<pre><code class="language-python">// Replace with actual code example
+void example() {
+    // ...
+}
+</code></pre>
+
+
+
+<!-- EXECUTION ALGORITHM DEEP-DIVE -->
+<h2 id="execution-algorithm">Execution Algorithm Details</h2>
+<p>The Canvas.execute() method follows a specific algorithm to schedule and run components. Understanding this is critical for debugging complex workflows.</p>
+
+<h3>Topological Scheduling Algorithm</h3>
+<p>The topological sort ensures that components with dependencies execute only after their dependencies complete. This is implemented using Kahn's algorithm (iterative BFS-based):</p>
+<ol style="line-height:1.8;">
+  <li><strong>Compute in-degrees:</strong> For each node, count how many edges point to it (incoming dependencies).</li>
+  <li><strong>Initialize queue:</strong> Add all nodes with in-degree 0 to a queue. These have no dependencies and can run immediately.</li>
+  <li><strong>Process queue:</strong> While queue is not empty:
+    <ul style="margin-top:.5rem;margin-bottom:.5rem;">
+      <li>Dequeue node N</li>
+      <li>Add N to sorted order</li>
+      <li>For each outgoing edge from N: decrement destination node's in-degree. If in-degree becomes 0, enqueue destination.</li>
+    </ul>
+  </li>
+  <li><strong>Detect cycles:</strong> If sorted order length < graph size, a cycle exists. Raise ValidationError.</li>
+  <li><strong>Time complexity:</strong> O(V + E) where V = components, E = edges. Linear in graph size; very fast even for large workflows.</li>
+</ol>
+
+<h3>Greedy Execution Model</h3>
+<p>After topological sort, Canvas uses a greedy single-threaded execution model:</p>
+<ul style="line-height:1.8;">
+  <li>Nodes are processed in topological order</li>
+  <li>For each node: check if all dependencies have completed (in_degree == 0)</li>
+  <li>If yes, call component.run(); store result in _outputs[node_id]</li>
+  <li>If no, skip (will retry in next pass)</li>
+  <li>Record execution step in history: {node_id, inputs, outputs, error, timestamp, duration_ms}</li>
+  <li>On error: apply retry logic (exponential backoff, max 5 attempts), then exception_default_value or exception_goto</li>
+  <li>Continue until all nodes executed or error unrecoverable</li>
+</ul>
+
+<h3>Variable Resolution Trace Example</h3>
+<p>When a component parameter contains a variable reference (e.g., "search_query": "{{llm_1@output.text}}"), Canvas resolves it at runtime:</p>
+<pre><code style="display:block;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;">1. Parameter value: "llm_1@output.text"
+2. Split on @: component_id="llm_1", path="output.text"
+3. Look up llm_1 in _outputs: {output: {text: "Hello", choices: [...]}}
+4. Traverse path "output.text": _outputs["llm_1"]["output"]["text"]
+5. Result: "Hello" → pass to component parameter
+6. Component receives concrete value, not template</code></pre>
+
+<p>This lazy evaluation allows workflows to handle non-deterministic LLM outputs without requiring re-compilation or DAG reconstruction.</p>
+
+<!-- PERFORMANCE ANALYSIS -->
+<h2 id="performance">Performance Characteristics</h2>
+<p>The Canvas execution engine is optimized for real-world workflows with variable-length DAGs. Key performance considerations:</p>
+
+<table>
+  <tr><th>Aspect</th><th>Characteristics</th><th>Notes</th></tr>
+  <tr><td><strong>Topological Sort</strong></td><td>O(V + E) where V = components, E = edges</td><td>Single pass; reused across multiple runs if DAG unchanged</td></tr>
+  <tr><td><strong>Variable Resolution</strong></td><td>O(D × S) where D = path depth, S = scope stack depth</td><td>Lazy evaluation on first access; results cached in component outputs</td></tr>
+  <tr><td><strong>Node Execution</strong></td><td>Sequential; greedy when dependencies ready</td><td>No multi-threading; bottleneck is slowest component in critical path</td></tr>
+  <tr><td><strong>History Storage</strong></td><td>O(N) memory where N = total executed nodes</td><td>Stored in _history list; enable only if needed for debugging/audit</td></tr>
+  <tr><td><strong>Iteration Scaling</strong></td><td>Sub-DAG cloning: O(T × |DAG|) where T = list item count</td><td>Each iteration wraps sub-DAG in local scope; components re-instantiated</td></tr>
+  <tr><td><strong>Error Recovery</strong></td><td>Propagation is O(V) worst case; retry backoff exponential</td><td>Retry overhead: ~100ms base, then 2x per attempt. Max 5 retries standard.</td></tr>
+</table>
+
+<h3>Hot Paths & Optimization</h3>
+<ul style="line-height:1.8;">
+  <li><strong>Execute Phase (60-80%):</strong> Component run() methods dominate. If slow, profile component logic (LLM timeouts, <a href="../../api_doc/index.html">API</a> latency, loop iterations).</li>
+  <li><strong>Variable Resolution (10-20%):</strong> Deep scopes (iterations inside loops) are costlier. Cache variable references if accessed repeatedly.</li>
+  <li><strong>Topological Sort (1-5%):</strong> Only on load(); negligible for re-execution. Use cached DAG for production workflows.</li>
+  <li><strong>Retry Logic:</strong> Exponential backoff can add seconds per failure. For flaky tools, raise timeouts or add circuit breaker logic.</li>
+</ul>
+
+<!-- FOOTER -->
+<div class="footer"><a title="Agent Canvas — DAG-based workflow orchestration" href="../index.html">&larr; Back to Agent Canvas Overview</a></div>
+</main>
+
+<div class="diagram-overlay" id="diagramOverlay"><div class="diagram-overlay-content" id="diagramOverlayContent"></div></div>
+
+<script>
+// Auto-generate TOC from H2/H3 headings
+(function(){
+  var toc=document.getElementById('toc');if(!toc)return;
+  var headings=document.querySelectorAll('h2[id],h3[id]');
+  var ol=document.createElement('ol');
+  var currentH2Li=null;
+  headings.forEach(function(h){
+    if(h.closest('#toc,.toc'))return;// skip TOC's own heading
+    var li=document.createElement('li');
+    var a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;
+    li.appendChild(a);
+    if(h.tagName==='H3'&&currentH2Li){
+      var sub=currentH2Li.querySelector('ol');
+      if(!sub){sub=document.createElement('ol');currentH2Li.appendChild(sub);}
+      sub.appendChild(li);
+    }else{ol.appendChild(li);if(h.tagName==='H2')currentH2Li=li;}
+  });
+  toc.appendChild(ol);
+})();
+// Reading time estimate
+(function(){var m=document.querySelector('main');if(!m)return;var words=m.textContent.trim().split(/\s+/).length;var mins=Math.ceil(words/200);var hero=document.querySelector('.hero');if(hero){var rt=document.createElement('p');rt.style.cssText='font-size:.85rem;color:var(--text-muted);margin-top:.5rem';rt.textContent='\u23F1 ~'+mins+' min read';hero.appendChild(rt);}})();
+// Collapsible long tables (8+ rows)
+(function(){document.querySelectorAll('table').forEach(function(t){var rows=t.querySelectorAll('tr');if(rows.length<9)return;var wrapper=document.createElement('details');wrapper.className='collapsible-table';var summary=document.createElement('summary');summary.style.cssText='cursor:pointer;color:var(--accent);font-weight:600;margin:.5rem 0';summary.textContent='Table ('+rows.length+' rows) \u2014 click to expand';t.parentNode.insertBefore(wrapper,t);wrapper.appendChild(summary);wrapper.appendChild(t);});})();
+// Save original mermaid source before any rendering
+document.querySelectorAll('pre.mermaid').forEach(function(el){
+  if(!el.getAttribute('data-source')) el.setAttribute('data-source',el.textContent);
+});
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeToggle');
+  var hljsLink=document.getElementById('hljs-theme');
+  var darkHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css';
+  var lightHL='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+  function renderMermaid(t){
+    var nodes=document.querySelectorAll('pre.mermaid');
+    if(!nodes.length||!window.mermaid) return;
+    nodes.forEach(function(el){
+      var src=el.getAttribute('data-source');
+      if(src){ el.removeAttribute('data-processed'); el.textContent=src; }
+    });
+    try{mermaid.initialize({startOnLoad:false,theme:(t==='light')?'default':'dark',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'}});mermaid.run();}catch(e){console.warn('mermaid re-render:',e);}
+  }
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    hljsLink.href=(t==='light')?lightHL:darkHL;
+    btn.textContent=(t==='light')?'\u2600':'\u263E';
+    localStorage.setItem('neutra-ip-theme-theme',t);
+    renderMermaid(t);
+  }
+  var saved=localStorage.getItem('neutra-ip-theme-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  applyTheme(saved);
+  btn.addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');});
+})();
+// Code copy buttons
+document.querySelectorAll('pre code').forEach(function(block){
+  var pre=block.parentElement;if(!pre||pre.classList.contains('mermaid'))return;
+  var btn=document.createElement('button');btn.className='copy-btn';btn.textContent='Copy';btn.setAttribute('aria-label','Copy code to clipboard');
+  btn.addEventListener('click',function(){navigator.clipboard.writeText(block.textContent).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy';},1500);});});
+  pre.appendChild(btn);
+});
+// Diagram zoom with scroll-wheel support
+(function(){var overlay=document.getElementById('diagramOverlay');var content=document.getElementById('diagramOverlayContent');var scale=1;function resetZoom(){scale=1;content.style.transform='scale(1)';}function openOverlay(dc){content.innerHTML='';var svg=dc.querySelector('svg');if(svg){var clone=svg.cloneNode(true);clone.style.maxWidth='90vw';clone.style.maxHeight='85vh';clone.style.width='90vw';content.appendChild(clone);}else{content.innerHTML=dc.innerHTML;}resetZoom();overlay.classList.add('active');}document.querySelectorAll('.diagram-container').forEach(function(dc){dc.addEventListener('click',function(){openOverlay(dc);});});overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');resetZoom();}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');resetZoom();}});content.addEventListener('wheel',function(e){if(!overlay.classList.contains('active'))return;e.preventDefault();var d=e.deltaY>0?-0.1:0.1;scale=Math.min(5,Math.max(0.5,scale+d));content.style.transform='scale('+scale+')';},{passive:false});})();
+// Back to top
+(function(){var b=document.getElementById('backToTop');window.addEventListener('scroll',function(){b.classList.toggle('visible',window.scrollY>400);});b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+// Keyboard navigation: j/k scroll H2, / focuses search
+(function(){var h2s=Array.from(document.querySelectorAll('h2[id]'));function currentIdx(){var scrollY=window.scrollY;for(var i=h2s.length-1;i>=0;i--){if(h2s[i].offsetTop<=scrollY+80)return i;}return -1;}document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;if(e.key==='j'){var ci=currentIdx();if(ci<h2s.length-1)h2s[ci+1].scrollIntoView({behavior:'smooth'});e.preventDefault();}else if(e.key==='k'){var ci2=currentIdx();if(ci2>0)h2s[ci2-1].scrollIntoView({behavior:'smooth'});e.preventDefault();}});})();
+hljs.highlightAll();
+</script>
+</body>
+</html>

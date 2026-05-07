@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wiki Coverage Dashboard</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f85149;--heading:#f0f6fc;--code-bg:#1c2128}
+[data-theme="light"]{--bg:#fff;--surface:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#656d76;--accent:#0969da;--accent2:#1a7f37;--accent3:#9a6700;--accent4:#cf222e;--heading:#1f2328;--code-bg:#f6f8fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);max-width:1100px;margin:0 auto;padding:2rem;line-height:1.6}
+h1{color:var(--accent);margin-bottom:.5rem}h2{color:var(--heading);margin:2rem 0 1rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.subtitle{color:var(--text-muted);margin-bottom:2rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:1.5rem 0}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center}
+.kpi .num{font-size:2.2rem;font-weight:700;color:var(--accent)}
+.kpi .label{font-size:.85rem;color:var(--text-muted)}
+.kpi.warn .num{color:var(--accent4)}
+table{width:100%;border-collapse:collapse;margin:.8rem 0}th,td{padding:.45rem .7rem;border:1px solid var(--border);text-align:left;font-size:.9rem}
+th{background:var(--surface);font-weight:600}tr:nth-child(even){background:var(--surface)}
+.bar{height:14px;background:var(--accent2);border-radius:3px;min-width:2px}
+.toggle{position:fixed;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text);z-index:1000}
+.ok{color:var(--accent2)}.bad{color:var(--accent4)}
+.empty{color:var(--text-muted);font-style:italic;padding:1rem}
+@media print{.toggle{display:none}body{color:#1f2328;background:#fff}}
+</style>
+</head>
+<body>
+<button class="toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle light/dark theme" onclick="var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);this.textContent=t==='light'?'☀':'☾'">☾</button>
+
+<h1>📊 Wiki Coverage Dashboard</h1>
+<p class="subtitle">Generated 2026-05-06 17:00 &mdash; wiki/ragflow/20260506_151323/docs</p>
+
+<div class="kpis">
+<div class="kpi"><div class="num">50</div><div class="label">Total Pages</div></div>
+<div class="kpi"><div class="num">24,332</div><div class="label">Total Lines</div></div>
+<div class="kpi"><div class="num">79,605</div><div class="label">Total Words</div></div>
+<div class="kpi"><div class="num">67</div><div class="label">Diagrams</div></div>
+<div class="kpi"><div class="num">9</div><div class="label">Focus Pages</div></div>
+<div class="kpi warn"><div class="num">10</div><div class="label">Stale Pages</div></div>
+<div class="kpi "><div class="num">0</div><div class="label">Thin Pages</div></div>
+</div>
+
+<h2>Level Distribution</h2>
+<table>
+<tr><th>Level</th><th>Count</th></tr>
+<tr><td>L0</td><td>1</td></tr><tr><td>L1</td><td>12</td></tr><tr><td>L2</td><td>23</td></tr><tr><td>focus</td><td>13</td></tr><tr><td>search</td><td>1</td></tr>
+</table>
+
+<h2>Per-Module Breakdown</h2>
+<table>
+<tr><th>Module</th><th>Pages</th><th>Avg Lines</th><th>Diagrams</th><th>Focus</th><th>Words</th><th>Content (relative)</th></tr>
+<tr><td>admin</td><td>1</td><td>394</td><td>2</td><td>0</td><td>1,317</td><td><div class="bar" style="width:8%"></div></td></tr><tr><td>agent</td><td>6</td><td>471</td><td>10</td><td>2</td><td>10,978</td><td><div class="bar" style="width:58%"></div></td></tr><tr><td>api</td><td>6</td><td>622</td><td>1</td><td>0</td><td>12,145</td><td><div class="bar" style="width:76%"></div></td></tr><tr><td>common</td><td>1</td><td>393</td><td>2</td><td>0</td><td>1,525</td><td><div class="bar" style="width:8%"></div></td></tr><tr><td>deepdoc</td><td>5</td><td>564</td><td>6</td><td>2</td><td>10,813</td><td><div class="bar" style="width:58%"></div></td></tr><tr><td>index.html</td><td>1</td><td>536</td><td>5</td><td>0</td><td>3,061</td><td><div class="bar" style="width:11%"></div></td></tr><tr><td>internal</td><td>7</td><td>475</td><td>0</td><td>0</td><td>10,030</td><td><div class="bar" style="width:68%"></div></td></tr><tr><td>mcp</td><td>1</td><td>373</td><td>2</td><td>0</td><td>1,357</td><td><div class="bar" style="width:7%"></div></td></tr><tr><td>memory</td><td>1</td><td>378</td><td>2</td><td>0</td><td>1,399</td><td><div class="bar" style="width:7%"></div></td></tr><tr><td>rag</td><td>12</td><td>404</td><td>26</td><td>3</td><td>13,761</td><td><div class="bar" style="width:100%"></div></td></tr><tr><td>sdk</td><td>1</td><td>401</td><td>2</td><td>0</td><td>1,421</td><td><div class="bar" style="width:8%"></div></td></tr><tr><td>tools</td><td>1</td><td>392</td><td>2</td><td>0</td><td>1,332</td><td><div class="bar" style="width:8%"></div></td></tr><tr><td>web</td><td>6</td><td>622</td><td>7</td><td>2</td><td>10,167</td><td><div class="bar" style="width:76%"></div></td></tr>
+</table>
+
+<h2>⚠️ Stale Pages (&gt;30 days)</h2>
+<table><tr><th>Page</th><th>Age</th></tr><tr><td>agent_doc/canvas/dag-execution-model/index.html</td><td>365d</td></tr>
+<tr><td>agent_doc/component/llm-component-deep-dive/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/apps/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/db/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/db/peewee-schema/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/services/document-task-lifecycle/index.html</td><td>365d</td></tr>
+<tr><td>api_doc/services/index.html</td><td>365d</td></tr>
+<tr><td>deepdoc_doc/parser/pdf-parsing-pipeline/index.html</td><td>365d</td></tr>
+<tr><td>deepdoc_doc/vision/layout-recognition-model/index.html</td><td>365d</td></tr></table>
+
+<h2>⚠️ Thin Pages (&lt;218 lines)</h2>
+<p class="empty">None — all pages meet minimum line count.</p>
+
+<h2>⚠️ Missing Intro Boxes</h2>
+<table><tr><th>Page</th></tr><tr><td>admin/index.html</td></tr>
+<tr><td>agent_doc/index.html</td></tr>
+<tr><td>api_doc/apps/index.html</td></tr>
+<tr><td>api_doc/db/index.html</td></tr>
+<tr><td>api_doc/index.html</td></tr>
+<tr><td>api_doc/services/index.html</td></tr>
+<tr><td>common/index.html</td></tr>
+<tr><td>internal_doc/cpp/index.html</td></tr>
+<tr><td>internal_doc/dao/index.html</td></tr>
+<tr><td>internal_doc/handler/index.html</td></tr>
+<tr><td>internal_doc/index.html</td></tr>
+<tr><td>internal_doc/service/index.html</td></tr>
+<tr><td>mcp/index.html</td></tr>
+<tr><td>memory/index.html</td></tr>
+<tr><td>rag_doc/index.html</td></tr>
+<tr><td>sdk/index.html</td></tr>
+<tr><td>tools/index.html</td></tr>
+<tr><td>web_doc/index.html</td></tr></table>
+
+</body>
+</html>
